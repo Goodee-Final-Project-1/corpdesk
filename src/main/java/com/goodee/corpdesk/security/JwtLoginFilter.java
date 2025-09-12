@@ -25,7 +25,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		this.jwtTokenManager = jwtTokenManager;
 		
 		// 로그인 URL
-		this.setFilterProcessesUrl("/member/login");
+		this.setFilterProcessesUrl("/employee/loginTry");
 	}
 
 	@Override
@@ -50,8 +50,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		Cookie cookie = new Cookie("accessToken", accessToken);
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
-		int validTime = (int) (jwtTokenManager.getAccessValidTime() / 1000);
-		cookie.setMaxAge(validTime);
+		cookie.setMaxAge(jwtTokenManager.getAccessValidTime());
 		cookie.setHttpOnly(true);
 		
 		response.addCookie(cookie);

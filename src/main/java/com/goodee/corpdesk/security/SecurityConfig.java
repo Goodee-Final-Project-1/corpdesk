@@ -26,18 +26,21 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
-			.authorizeHttpRequests(auth -> auth 
+			.cors(cors -> cors.disable())
+			.csrf(csrf -> csrf.disable())
+			.authorizeHttpRequests(auth -> auth
+					.requestMatchers("/employee/detail").authenticated()
 					.anyRequest().permitAll()
 					)
 			.formLogin(form -> form.disable())
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.logout(logout -> logout
-					.logoutUrl("/member/logout")	// 로그 아웃 URL
+					.logoutUrl("/employee/logout")	// 로그 아웃 URL
 					.invalidateHttpSession(true)
 					.deleteCookies("accessToken")	// 토큰 삭제
 					.logoutSuccessUrl("/"))
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.addFilter(new JwtLoginFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
 			.addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
-			.addFilter(new JwtLoginFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager));
 			;
 			
 		return httpSecurity.build();
