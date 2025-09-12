@@ -18,7 +18,9 @@
 		<c:import url="/WEB-INF/views/include/header.jsp"/>
 	
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
-	
+			<!-- 내용 시작 -->
+			<p>여기에 내용 추가</p>
+			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	
 	<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
