@@ -18,6 +18,7 @@ import com.goodee.corpdesk.security.token.RefreshToken;
 import com.goodee.corpdesk.security.token.RefreshTokenRepository;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -97,23 +98,14 @@ public class JwtTokenManager {
 		return authentication;
 	}
 	
-	public String getUsername(String accessToken) throws Exception {
-		Claims claims = Jwts
-				.parser()
-				.verifyWith(key)
-				.build()
-				.parseSignedClaims(accessToken)
-				.getPayload()
-				;
-		return claims.getSubject();
-	}
-	
-	public RefreshToken getRefreshToken(String username) {
+	public RefreshToken getRefreshToken(ExpiredJwtException expired) throws Exception {
+		String username = expired.getClaims().getSubject();
+		
 		return refreshTokenRepository.findTopByUsernameOrderByTokenIdDesc(username).get();
 	}
 
-	public int getAccessValidTime() {
+	public int getRefreshValidTime() {
 //		return (int) (accessValidTime / 1000);
-		return (int) (accessValidTime / 10);
+		return (int) (refreshValidTime / 10);
 	}
 }

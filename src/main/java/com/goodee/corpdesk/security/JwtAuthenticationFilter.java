@@ -13,7 +13,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
 	private JwtTokenManager jwtTokenManager;
@@ -28,9 +30,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		
-		System.out.println("================== authentication filter ");
-		
 		Cookie[] cookies = request.getCookies();
 		String accessToken = null;
 		if (cookies != null) {
@@ -44,29 +43,34 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 				try {
 					Authentication authentication = jwtTokenManager.getAuthentication(accessToken);
 					SecurityContextHolder.getContext().setAuthentication(authentication);
+				} catch (ExpiredJwtException expired) {
+					// FIXME: 리프레시 토큰으로 엑세스 토큰 생성
+					log.info("========================== 리프레시 가져오기");
+					// FIXME: 액세스 토큰으로 유저네임 뽑아오기
+					String refreshToken = "";
+					try {
+						refreshToken = jwtTokenManager.getRefreshToken(expired).getBody();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					log.info("===================== 리프레시 {}", refreshToken);
+					
+					try {
+						Authentication authentication = jwtTokenManager.getAuthentication(refreshToken);
+						SecurityContextHolder.getContext().setAuthentication(authentication);
+						accessToken = jwtTokenManager.makeAccessToken(authentication);
+						
+						Cookie cookie = new Cookie("accessToken", accessToken);
+						cookie.setPath("/");
+						cookie.setMaxAge(jwtTokenManager.getRefreshValidTime());
+						cookie.setHttpOnly(true);
+						
+						response.addCookie(cookie);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					
-					if (e instanceof ExpiredJwtException) {
-						// FIXME: 리프레시 토큰으로 엑세스 토큰 생성
-						
-						String refreshToken = jwtTokenManager.getRefreshToken(accessToken).getBody();
-						System.out.println("===============" + refreshToken);
-						try {
-							Authentication authentication = jwtTokenManager.getAuthentication(refreshToken);
-							SecurityContextHolder.getContext().setAuthentication(authentication);
-							accessToken = jwtTokenManager.makeAccessToken(authentication);
-							
-							Cookie cookie = new Cookie("accessToken", accessToken);
-							cookie.setPath("/");
-							cookie.setMaxAge(jwtTokenManager.getAccessValidTime());
-							cookie.setHttpOnly(true);
-							
-							response.addCookie(cookie);
-						} catch (Exception e1) {
-							e1.printStackTrace();
-						}
-					}
 				}
 			}
 		}

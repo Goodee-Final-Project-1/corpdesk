@@ -16,6 +16,11 @@ public class EmployeeController {
 	@Autowired
 	EmployeeService employeeService;
 	
+	@GetMapping
+	public String link() {
+		return "employee/link";
+	}
+	
 	@GetMapping("login")
 	public void login() {
 	}
