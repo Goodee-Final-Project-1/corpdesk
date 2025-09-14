@@ -1,14 +1,10 @@
-<body class="navbar-fixed sidebar-fixed" id="body">
- <script>
-   NProgress.configure({ showSpinner: false });
-   NProgress.start();
- </script>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
 
- 
- <div id="toaster"></div>
+<body class="navbar-fixed sidebar-fixed" id="body">
  
 
  <!-- ====================================
- ——— WRAPPER
+ âââ WRAPPER
  ===================================== -->
  <div class="wrapper">

@@ -1,3 +1,6 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+
 	</div>
 	
 	<!-- Card Offcanvas -->
@@ -147,12 +150,12 @@
 	
 	
 	
-	<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+ 	<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
 	
 	
-	
-	<script src="plugins/toaster/toastr.min.js"></script>
-	
+ 	<script src="plugins/toaster/toastr.min.js"></script>
+
 	
 	
 	<script src="js/mono.js"></script>
