@@ -1,10 +1,14 @@
 package com.goodee.corpdesk.security;
 
-import java.util.Base64;
-import java.util.Date;
-
-import javax.crypto.SecretKey;
-
+import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeRepository;
+import com.goodee.corpdesk.security.token.RefreshToken;
+import com.goodee.corpdesk.security.token.RefreshTokenRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,16 +16,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import com.goodee.corpdesk.employee.Employee;
-import com.goodee.corpdesk.employee.EmployeeRepository;
-import com.goodee.corpdesk.security.token.RefreshToken;
-import com.goodee.corpdesk.security.token.RefreshTokenRepository;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
+import javax.crypto.SecretKey;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class JwtTokenManager {
@@ -69,9 +67,13 @@ public class JwtTokenManager {
 	
 	// 토큰 발급
 	public String makeToken(Authentication authentication, Long validTime) {
+        Optional<Employee> optional = employeeRepository.findByUsername(authentication.getName());
+        Employee employee = optional.get();
+
 		return Jwts
 				.builder()
 				.subject(authentication.getName())
+                .claim("pk", employee.getEmployeeId())
 				.claim("roles", authentication.getAuthorities().toString())
 				.issuedAt(new Date())
 				.expiration(new Date(System.currentTimeMillis() + validTime))

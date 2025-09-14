@@ -10,9 +10,9 @@
 	
 	<div>
 		<form method="post">
-			<input type="text" name="username">
-			<input type="password" name="password">
-			<input type="text" name="name">
+			<input type="text" name="username" placeholder="아이디">
+			<input type="password" name="password" placeholder="비밀번호">
+			<input type="text" name="name" placeholder="이름">
 			<button>등록</button>
 		</form>
 	</div>
