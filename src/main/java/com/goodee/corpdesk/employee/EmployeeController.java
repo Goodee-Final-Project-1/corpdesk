@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.employee;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/employee/**")
+@Slf4j
 public class EmployeeController {
 
 	@Autowired
@@ -18,7 +20,7 @@ public class EmployeeController {
 	
 	@GetMapping
 	public String link() {
-		return "employee/link";
+        return "employee/link";
 	}
 	
 	@GetMapping("login")
@@ -32,12 +34,23 @@ public class EmployeeController {
 	@PostMapping("join")
 	public String join(Employee employee) {
 		employeeService.join(employee);
-		return "index";
+		return "employee/link";
 	}
 	
 	@GetMapping("detail")
 	@ResponseBody
 	public Employee detail(Authentication authentication) {
-		return employeeService.detail(authentication.getName());
+        return employeeService.detail(authentication.getName());
 	}
+
+    @GetMapping("update")
+    public void update() {
+    }
+
+    @PostMapping("update")
+    public String update(Authentication authentication, Employee employee) {
+//        employee.setUsername(authentication.getName());
+        employeeService.update(employee);
+        return "employee/link";
+    }
 }

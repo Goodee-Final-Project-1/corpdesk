@@ -11,6 +11,7 @@
 	<a href="/employee/join">회원 가입</a>
 	<a href="/employee/login">로그인</a>
 	<a href="/employee/detail">내 정보</a>
+    <a href="/employee/update">내 정보 수정</a>
 	<a href="/employee/logout">로그아웃</a>
 </body>
 </html>
