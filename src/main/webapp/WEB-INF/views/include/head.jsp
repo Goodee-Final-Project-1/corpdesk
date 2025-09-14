@@ -6,24 +6,24 @@
 
 <!-- GOOGLE FONTS -->
 <link href="https://fonts.googleapis.com/css?family=Karla:400,700|Roboto" rel="stylesheet">
-<link href="plugins/material/css/materialdesignicons.min.css" rel="stylesheet" />
-<link href="plugins/simplebar/simplebar.css" rel="stylesheet" />
+<link href="/plugins/material/css/materialdesignicons.min.css" rel="stylesheet" />
+<link href="/plugins/simplebar/simplebar.css" rel="stylesheet" />
 
 <!-- PLUGINS CSS STYLE -->
-<link href="plugins/nprogress/nprogress.css" rel="stylesheet" />
+<link href="/plugins/nprogress/nprogress.css" rel="stylesheet" />
 
 
 
 
-<link href="plugins/DataTables/DataTables-1.10.18/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="/plugins/DataTables/DataTables-1.10.18/css/jquery.dataTables.min.css" rel="stylesheet" />
 
 
 
-<link href="plugins/jvectormap/jquery-jvectormap-2.0.3.css" rel="stylesheet" />
+<link href="/plugins/jvectormap/jquery-jvectormap-2.0.3.css" rel="stylesheet" />
 
 
 
-<link href="plugins/daterangepicker/daterangepicker.css" rel="stylesheet" />
+<link href="/plugins/daterangepicker/daterangepicker.css" rel="stylesheet" />
 
 
 
@@ -31,7 +31,7 @@
 
 
 
-<link href="plugins/toaster/toastr.min.css" rel="stylesheet" />
+<link href="/plugins/toaster/toastr.min.css" rel="stylesheet" />
 
 
 <!-- MONO CSS -->
