@@ -30,7 +30,7 @@
 							<form action="/index.html"> <!-- TODO 추후 사용시 form태그 속성 수정 -->
 								<div class="row">
 									<div class="form-group col-md-12 mb-4">
-										<input type="id" class="form-control input-lg" id="id"
+										<input type="text" class="form-control input-lg" id="username"
 											placeholder="Id">
 									</div>
 									<div class="form-group col-md-12 ">
