@@ -18,21 +18,19 @@
 						<div class="card-header pb-0">
 							<div
 								class="app-brand w-100 d-flex justify-content-center border-bottom-0">
-								<a class="w-auto pl-0" href="/index.html"> <img
-									src="images/logo.png" alt="Mono"> <span
-									class="brand-name text-dark">MONO</span>
+								<a class="w-auto pl-0" href="javascript:void(0)" style="pointer-events: none;">
+									<img src="/images/logo.png" alt="Mono">
+									<span class="brand-name text-dark">Corpdesk</span>
 								</a>
 							</div>
 						</div>
 						<div class="card-body px-5 pb-5 pt-0">
 
-							<h4 class="text-dark mb-6 text-center">Sign in for free</h4>
-
-							<form action="/index.html">
+							<form action="/index.html"> <!-- TODO 추후 사용시 form태그 속성 수정 -->
 								<div class="row">
 									<div class="form-group col-md-12 mb-4">
-										<input type="email" class="form-control input-lg" id="email"
-											aria-describedby="emailHelp" placeholder="email">
+										<input type="id" class="form-control input-lg" id="id"
+											placeholder="Id">
 									</div>
 									<div class="form-group col-md-12 ">
 										<input type="password" class="form-control input-lg"
@@ -45,21 +43,17 @@
 											<div class="custom-control custom-checkbox mr-3 mb-3">
 												<input type="checkbox" class="custom-control-input"
 													id="customCheck2"> <label
-													class="custom-control-label" for="customCheck2">Remember
-													me</label>
+													class="custom-control-label" for="customCheck2">계정
+													기억하기</label>
 											</div>
 
-											<a class="text-color" href="#"> Forgot password? </a>
+											<a class="text-color" href="#"> 비밀번호를 잊어버리셨나요? </a> <!-- TODO 추후 사용시 a태그의 href속성 수정 -->
 
 										</div>
 
-										<button type="submit" class="btn btn-primary btn-pill mb-4">Sign
-											In</button>
-
-										<p>
-											Don't have an account yet ? <a class="text-blue"
-												href="sign-up.html">Sign Up</a>
-										</p>
+										<div class="d-flex justify-content-center">
+											<button type="submit" class="btn btn-primary btn-pill mb-4">로그인</button>
+										</div>
 									</div>
 								</div>
 							</form>
