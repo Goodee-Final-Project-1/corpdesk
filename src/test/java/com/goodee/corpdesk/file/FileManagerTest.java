@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -14,13 +15,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @SpringBootTest
 class FileManagerTest {
+	@Value("${app.upload}")
+	private String path;
+	
 	@Autowired
 	private FileManager fileManager;
 	
 	@Test
 	void testSaveFile() throws Exception {
 	    
-		String filePath = "D:/test/";
+		String filePath = path + "approval";
 		MockMultipartFile file1 = new MockMultipartFile(
 	            "file", "test1.png", "image/png", new byte[10]);
 		
@@ -34,7 +38,7 @@ class FileManagerTest {
 	@Test
 	void testDeleteFile() throws Exception {
 		
-		String filePath = "D:/test/";
+		String filePath = path + "approval";
 		FileDTO fileDTO = new FileDTO();
 		fileDTO.setSaveName("5295adb590c846e9a4828d256e2c25d3");
 		fileDTO.setExtension("png");
