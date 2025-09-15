@@ -4,10 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 
 @Controller
@@ -15,52 +15,75 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Slf4j
 public class EmployeeController {
 
-	@Autowired
-	EmployeeService employeeService;
-	
-	@GetMapping
-	public String link() {
+    @Autowired
+    EmployeeService employeeService;
+
+    @GetMapping
+    public String link() {
         return "employee/link";
-	}
-
-    @GetMapping("sample_page")
-    public void sample() {}
-	
-	@GetMapping("login")
-	public void login() {
-	}
-	
-	@GetMapping("join")
-	public void join() {
-	}
-	
-	@PostMapping("join")
-	public String join(Employee employee) {
-		employeeService.join(employee);
-		return "employee/link";
-	}
-	
-	@GetMapping("detail")
-	@ResponseBody
-	public Employee detail(Authentication authentication) {
-        return employeeService.detail(authentication.getName());
-	}
-
-    @GetMapping("update")
-    public void update() {
     }
 
-    @PostMapping("update/password")
-    public String updatePassword(Authentication authentication, Employee param) {
-        param.setUsername(authentication.getName());
-        employeeService.updatePassword(param);
-        return "redirect:/employee/logout";
+    @GetMapping("sample_page")
+    public void sample() {
+    }
+
+    @GetMapping("login")
+    public void login() {
+    }
+
+    @GetMapping("join")
+    public void join() {
+    }
+
+    @PostMapping("join")
+    public String join(Employee employee) {
+        employeeService.join(employee);
+        return "employee/link";
+    }
+
+    @GetMapping("detail")
+    public void detail(Authentication authentication, Model model) {
+        Employee employee = employeeService.detail(authentication.getName());
+        model.addAttribute("employee", employee);
     }
 
     @PostMapping("update/email")
-    public String updateEmail(Authentication authentication, Employee param) {
-        param.setUsername(authentication.getName());
-        employeeService.updateEmail(param);
-        return "employee/link";
+    public String updateEmail(Authentication authentication,
+                              @Validated(UpdateEmail.class) Employee employee, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "employee/detail";
+        }
+
+        employee.setUsername(authentication.getName());
+        Employee result = employeeService.updateEmail(employee);
+
+        if (result == null) {
+            return "employee/detail";
+        }
+
+        return "redirect:/employee/link";
+    }
+
+    @GetMapping("update")
+    public void update(Authentication authentication, Model model) {
+        Employee employee = employeeService.detail(authentication.getName());
+        model.addAttribute("employee", employee);
+    }
+
+    @PostMapping("update/password")
+    public String updatePassword(Authentication authentication,
+            @Validated(UpdatePassword.class) Employee employee, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "employee/update";
+        }
+
+        employee.setUsername(authentication.getName());
+        Employee result = employeeService.updatePassword(employee);
+
+        if (result == null) {
+            return "employee/update";
+        }
+
+        return "redirect:/employee/logout";
     }
 }

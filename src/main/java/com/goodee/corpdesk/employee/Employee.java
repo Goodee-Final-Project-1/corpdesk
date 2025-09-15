@@ -2,6 +2,8 @@ package com.goodee.corpdesk.employee;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,9 +47,19 @@ public class Employee implements UserDetails {
 	private String name;
     @Id
 	private String username;
+    @Column(nullable = false)
+    @NotNull
 	private String password;
-	
+    @Transient
+    @NotBlank(groups = UpdatePassword.class)
+    private String passwordNew;
+    @Transient
+    @NotBlank(groups = UpdatePassword.class)
+    private String passwordCheck;
+
+    @NotBlank(groups = UpdateEmail.class)
 	private String externalEmail;
+    @NotBlank(groups = UpdateEmail.class)
 	private String externalEmailPassword;
 	
 //	private String employeeType;

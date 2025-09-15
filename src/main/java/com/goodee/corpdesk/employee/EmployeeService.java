@@ -1,12 +1,14 @@
 package com.goodee.corpdesk.employee;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -36,21 +38,31 @@ public class EmployeeService implements UserDetailsService {
 		return optional.get();
 	}
 
-    public void updatePassword(Employee param) {
-        Optional<Employee> optional = employeeRepository.findById(param.getUsername());
-        Employee  employee = optional.get();
-        String encoded = passwordEncoder.encode(param.getPassword());
-        employee.setPassword(encoded);
+    public Employee updatePassword(Employee employee) {
+        Optional<Employee> optional = employeeRepository.findById(employee.getUsername());
+        Employee origin = optional.get();
 
-        employeeRepository.save(employee);
+        if (passwordEncoder.matches(origin.getPassword(), employee.getPasswordNew())) {
+            throw new BadCredentialsException("비밀번호가 다릅니다.");
+        }
+
+        if (!Objects.equals(employee.getPasswordNew(), employee.getPasswordCheck())) {
+            throw new RuntimeException("비밀번호 확인이 다릅니다.");
+        }
+
+        String encoded = passwordEncoder.encode(employee.getPasswordNew());
+
+        origin.setPassword(encoded);
+        return employeeRepository.save(origin);
     }
 
-    public void updateEmail(Employee param) {
-        Optional<Employee> optional = employeeRepository.findById(param.getUsername());
-        Employee  employee = optional.get();
+    public Employee updateEmail(Employee employee) {
+        Optional<Employee> optional = employeeRepository.findById(employee.getUsername());
+        Employee origin = optional.get();
 
-        employee.setExternalEmail(param.getExternalEmail());
+        origin.setExternalEmail(employee.getExternalEmail());
+        origin.setExternalEmailPassword(employee.getExternalEmailPassword());
 
-        employeeRepository.save(employee);
+        return employeeRepository.save(origin);
     }
 }
