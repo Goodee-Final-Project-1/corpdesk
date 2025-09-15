@@ -1,5 +1,27 @@
 package com.goodee.corpdesk.Chat;
 
-public class ChatParticipant {
+import java.time.LocalDateTime;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table
+public class ChatParticipant {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long participantId;
+	int employeeId;
+	Long chatRoomId;
+	Long messageId;
+	Long lastCheckMessageId;
+	
+	LocalDateTime updated_at;
+	LocalDateTime creates_at;
+	String modifed_by;
+	boolean use_yn;
+	
 }
