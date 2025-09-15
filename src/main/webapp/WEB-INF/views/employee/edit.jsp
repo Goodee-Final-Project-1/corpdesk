@@ -4,11 +4,11 @@
 <html>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<h2>사원 등록</h2>
-<form:form method="post" modelAttribute="employee">
+<h2>사원 상세 정보</h2>
+<form:form method="post" modelAttribute="employee" action="/employee/edit">
+    <form:hidden path="employeeId" />
+    
     이름: <form:input path="name" /><br/>
-    아이디(로그인용): <form:input path="username" /><br/>
-    비밀번호: <form:password path="password" /><br/>
     이메일: <form:input path="externalEmail" /><br/>
     입사일: <form:input path="hireDate" type="date"/><br/>
     성별: <form:select path="gender">
@@ -28,7 +28,29 @@
                 <form:option value="true" label="활성"/>
                 <form:option value="false" label="비활성"/>
               </form:select><br/>
-    <input type="submit" value="등록"/>
+    퇴사일자: <form:input path="lastWorkingDay" type="date"/><br/>
+    <input type="submit" value="수정"/>
+    <button type="button" onclick="deleteEmployee()">삭제</button>
     <a href="<c:url value='/employee/list'/>">목록으로</a>
 </form:form>
+<script>
+    function deleteEmployee() {
+        const lastWorkingDay = document.querySelector('[name="lastWorkingDay"]').value;
+        const employeeId = document.querySelector('[name="employeeId"]').value;
+    
+        if (!lastWorkingDay) {
+            alert("퇴사일자를 먼저 입력하세요.");
+            return;
+        }
+    
+        if (confirm("정말 삭제하시겠습니까?")) {
+            // 숨겨진 form을 만들어서 POST 요청
+            const form = document.createElement("form");
+            form.method = "post";
+            form.action = "/employee/delete/" + employeeId;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    </script>
 </html>

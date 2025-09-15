@@ -6,6 +6,7 @@
 
 <h2>사원 목록</h2>
 
+
 <form method="get">
     <select name="condition">
         <option value="all">전체</option>
@@ -19,17 +20,22 @@
 <table border="1">
     <tr>
         <th>사번</th><th>사원명</th><th>ID</th><th>부서</th>
-        <th>직위</th><th>휴대전화</th><th>입사일</th><th>상태</th><th>계정상태</th>
+        <th>직위</th><th>휴대전화</th><th>입사일</th><th>퇴사일</th><th>현재상태</th><th>계정상태</th><th>수정</th>
     </tr>
     <c:forEach var="emp" items="${employees}">
         <tr>
-            <td>${emp.id}</td>
+            <td>${emp.employeeId}</td>
             <td>${emp.name}</td>
-            <td>${emp.account}</td>
-            <td>${emp.department}</td>
-            <td>${emp.position}</td>
-            <td>${emp.phone}</td>
+            <td>${emp.username}</td>
+            <td>${emp.department.departmentName}</td>
+            <td>${emp.position.positionName}</td>
+            <td>${emp.mobilePhone}</td>
             <td>${emp.hireDate}</td>
+            <td>
+                <c:if test="${emp.lastWorkingDay == null}"><span>-</span></c:if>
+                <c:if test="${emp.lastWorkingDay != null}"><span>${emp.lastWorkingDay}</span></c:if>
+                
+            </td>
             <td>
                 <c:choose>
                     <c:when test="${emp.status == '출근'}"><span style="color:green">출근</span></c:when>
@@ -38,7 +44,13 @@
                     <c:otherwise><span style="color:orange">출근전</span></c:otherwise>
                 </c:choose>
             </td>
-            <td>${emp.accountStatus}</td>
+            <td>
+                <c:choose>
+                    <c:when test="${emp.enabled}"><span style="color:green">정상</span></c:when>
+                    <c:otherwise><span style="color:red">비정상</span></c:otherwise>
+                </c:choose>
+            </td>
+            <td><a href="<c:url value='/employee/edit/${emp.employeeId}'/>">수정</a></td>
         </tr>
     </c:forEach>
 </table>
