@@ -89,7 +89,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		}
 		
 		message = URLEncoder.encode(message, "UTF-8");
-		response.sendRedirect("./login?failMessage=" + message);
+		response.sendRedirect("/?failMessage=" + message);
 	}
 	
 	
