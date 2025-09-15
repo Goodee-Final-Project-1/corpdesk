@@ -1,6 +1,7 @@
 package com.goodee.corpdesk.attendance;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,21 +14,22 @@ public class AttendanceService {
 	@Autowired
 	private AttendanceRepository attendanceRepository;
 	
-	public List<CalendarEventDTO> getEvents(LocalDateTime start, LocalDateTime end, Integer employeeId) {
-
-        // 조회 분기
-        List<Attendance> rows = (employeeId == null)
-            ? attendanceRepository.findByCheckInDateTimeBetween(start, end)
-            : attendanceRepository.findByEmployeeIdAndCheckInDateTimeBetween(employeeId, start, end);
-
-        // 엔티티 -> FullCalendar DTO 매핑
-        return rows.stream().map(a -> {
-            String title = "출근 (" + a.getWorkStatus() + ")";
-            String color = "NORMAL".equalsIgnoreCase(a.getWorkStatus()) ? "#2E86DE" : "#E67E22";
-            String s = a.getCheckInDateTime() == null ? null : a.getCheckInDateTime().toString();
-            String e = a.getCheckOutDateTime() == null ? null : a.getCheckOutDateTime().toString();
-            return new CalendarEventDTO(title, s, e, false, color);
-        }).collect(Collectors.toList());
-    }
+//	// 문자열을 LocalDateTime으로 파싱하기 위한 포맷 (예: "2025-09-10T09:00")
+//	private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+//	
+//    // 기간 전체 조회(직원 미지정) → 풀캘린더 DTO 변환
+//	public List<CalendarEventDTO> getEvents(String startIso, String endIso) {
+//		// 문자열 → LocalDateTime
+//		LocalDateTime start = LocalDateTime.parse(startIso, ISO);
+//		LocalDateTime end = LocalDateTime.parse(endIso, ISO);
+//		
+//		List<Attendance> list = attendanceRepository
+//								.findAllByCheckInDatetimeBetween(start, end);
+//		
+//        // 엔티티 → 풀캘린더 DTO로 변환
+//		return list.stream()
+//			    .map(this::toCalendarEvent)
+//				.collect(Collectors.toList());
+//	}
 
 }
