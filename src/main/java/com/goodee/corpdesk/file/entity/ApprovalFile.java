@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.file.entity;
 
+import org.hibernate.annotations.DynamicInsert;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -11,6 +13,7 @@ import lombok.ToString;
 @Getter
 @ToString(callSuper = true)
 @Entity @Table(name = "approval_file")
+@DynamicInsert
 public class ApprovalFile extends FileBase {
 	@Column(nullable = false)
 	private Long approvalId;

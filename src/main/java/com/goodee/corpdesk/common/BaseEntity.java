@@ -2,6 +2,7 @@ package com.goodee.corpdesk.common;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -23,6 +24,7 @@ public abstract class BaseEntity {
 	@Column(nullable = false)
 	private Integer modifiedBy;
 	
-	@Column(nullable = false, columnDefinition = "true")
+	@Column(nullable = false)
+	@ColumnDefault("true")
 	private Boolean useYn;
 }

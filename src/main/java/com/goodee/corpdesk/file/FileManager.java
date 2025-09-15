@@ -7,17 +7,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.goodee.corpdesk.file.dto.FileDTO;
+
 @Component
-public class FileManager<T extends FileEntity> {
+public class FileManager {
 	/**
 	 * 지정된 경로에 파일을 저장하고 파일 정보를 반환
 	 *
 	 * @param filePath
 	 * @param fileData
-	 * @return fileVO
+	 * @return fileDTO
 	 * @throws Exception
 	 */
-	public T saveFile(String filePath, MultipartFile fileData) throws Exception {
+	public FileDTO saveFile(String filePath, MultipartFile fileData) throws Exception {
 		
 		// 1. 디렉토리 생성
 		File file = new File(filePath);
@@ -33,19 +35,19 @@ public class FileManager<T extends FileEntity> {
 		String oriFileName = fileData.getOriginalFilename();
 		String extension = this.getExtension(oriFileName);
 		
-		String fileName = savedName + extension;
+		String fileName = savedName + "." + extension;
 		
 		// 3. HDD에 저장
 		file = new File(filePath, fileName);
 		FileCopyUtils.copy(fileData.getBytes(), file);
 		
-		// 4. 반환할 정보를 FileVO에 바인딩
-		FileVO fileVO = new FileVO();
-		fileVO.setExtension(extension);
-		fileVO.setOriName(this.getOriName(oriFileName));
-		fileVO.setSavedName(savedName);
+		// 4. 반환할 정보를 FileDTO에 바인딩
+		FileDTO fileDTO = new FileDTO();
+		fileDTO.setExtension(extension);
+		fileDTO.setOriName(this.getOriName(oriFileName));
+		fileDTO.setSaveName(savedName);
 		
-		return fileVO;
+		return fileDTO;
 	}
 	
 	/**
@@ -71,10 +73,14 @@ public class FileManager<T extends FileEntity> {
 	}
 	
 	/**
-	 * 
+	 * 지정된 경로에 있는 파일을 삭제하고 파일 삭제 여부를 반환
+	 * @param filePath
+	 * @param fileVO
+	 * @return file.delete()
+	 * @throws Exception
 	 */
-	public boolean deleteFile(String filePath, T fileVO) throws Exception {
-		File file = new File(filePath, fileVO.getSavedName() + "." + fileVO.getExtension());
+	public boolean deleteFile(String filePath, FileDTO fileDTO) throws Exception {
+		File file = new File(filePath, fileDTO.getSaveName() + "." + fileDTO.getExtension());
 		return file.delete();
 	}
 }
