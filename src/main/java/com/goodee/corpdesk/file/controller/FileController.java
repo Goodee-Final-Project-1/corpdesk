@@ -25,7 +25,7 @@ public class FileController {
 	
 	@GetMapping("{fileType}/{fileId}")
 	public void downloadFile(@PathVariable("fileType") String fileType, @PathVariable("fileId") Long fileId, HttpServletResponse response) throws Exception {
-		FileDTO fileDTO = fileService.getFileDTO(fileType, fileId);
+		FileDTO fileDTO = fileService.getDownloadFile(fileType, fileId);
 		
 		// 응답시 필요한 값을 response에 바인딩
 		response.setContentLengthLong(fileDTO.getFile().length()); // 총 파일의 크기 -> 파일 다운로드시 시간이 얼마나 남았는지 알려주려면 이게 필요함

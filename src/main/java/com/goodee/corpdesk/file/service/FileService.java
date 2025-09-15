@@ -29,7 +29,7 @@ public class FileService {
 	private MessageFileRepository messageFileRepository;
 	
 	// 도메인 타입에 따라 filepath를 달리 함
-	public FileDTO getFileDTO(String fileType, Long fileId) throws Exception {
+	public FileDTO getDownloadFile(String fileType, Long fileId) throws Exception {
 		
 		// 1. 파일id로 파일의 메타데이터를 받아옴
 		Optional<? extends FileBase> result = null;
