@@ -27,7 +27,7 @@
 			
 			<sec:authentication property="principal.username" var="user"/>
 			<script type="text/javascript">
-				const user= "${user}"
+				const user= "${user}";
 			</script>
 			<input type="text" id="messageInput">
 			<button id ="sendBtn">전송</button>

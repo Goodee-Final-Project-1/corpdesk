@@ -26,6 +26,7 @@ public class ChatMessage {
 	int employeeId;
 	Long chatRoomId;
 	String messageContent;
+	String messageType;
 	
 	@CreationTimestamp
 	LocalDateTime sent_at;
