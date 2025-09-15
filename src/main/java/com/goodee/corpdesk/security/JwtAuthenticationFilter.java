@@ -1,8 +1,10 @@
 package com.goodee.corpdesk.security;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -43,13 +45,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 				try {
 					Authentication authentication = jwtTokenManager.getAuthentication(accessToken);
 					SecurityContextHolder.getContext().setAuthentication(authentication);
-				} catch (ExpiredJwtException expired) {
+				} catch (ExpiredJwtException expiredAccess) {
 					// FIXME: 리프레시 토큰으로 엑세스 토큰 생성
 					log.info("========================== 리프레시 가져오기");
 					// FIXME: 액세스 토큰으로 유저네임 뽑아오기
 					String refreshToken = "";
 					try {
-						refreshToken = jwtTokenManager.getRefreshToken(expired).getBody();
+						refreshToken = jwtTokenManager.getRefreshToken(expiredAccess).getBody();
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -66,8 +68,17 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 						cookie.setHttpOnly(true);
 						
 						response.addCookie(cookie);
-					} catch (Exception e1) {
-						e1.printStackTrace();
+					} catch (ExpiredJwtException expiredRefresh) {
+                        Cookie cookie = new Cookie("accessToken", accessToken);
+                        cookie.setPath("/");
+                        cookie.setMaxAge(0);
+                        cookie.setHttpOnly(true);
+
+                        response.addCookie(cookie);
+                        response.sendRedirect("/employee/login");
+                        return;
+					} catch (Exception e2) {
+						e2.printStackTrace();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

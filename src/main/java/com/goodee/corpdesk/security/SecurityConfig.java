@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,6 +33,8 @@ public class SecurityConfig {
 					.requestMatchers("/employee/detail", "/employee/update/**").authenticated()
 					.anyRequest().permitAll()
 					)
+            .exceptionHandling(e -> e
+                    .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/employee/login")))
 			.formLogin(form -> form.disable())
 			.logout(logout -> logout
 					.logoutUrl("/employee/logout")	// 로그 아웃 URL
