@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.file.dto;
 
+import java.io.File;
 import java.time.LocalDateTime;
 
 import lombok.Getter;
@@ -16,8 +17,5 @@ public class FileDTO {
 	private String saveName;
 	private String extension;
 	
-	private LocalDateTime updatedAt;
-	private LocalDateTime createdAt;
-	private Integer modifiedBy;
-	private Boolean useYn;
+	private File file;
 }
