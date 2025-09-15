@@ -22,6 +22,9 @@ public class EmployeeController {
 	public String link() {
         return "employee/link";
 	}
+
+    @GetMapping("sample_page")
+    public void sample() {}
 	
 	@GetMapping("login")
 	public void login() {
