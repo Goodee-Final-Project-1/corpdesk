@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.employee;
 
+import com.goodee.corpdesk.employee.validation.UpdateEmail;
+import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -25,6 +27,16 @@ public class EmployeeController {
 
     @GetMapping("sample_page")
     public void sample() {
+    }
+
+    @GetMapping("sign_in")
+    public String signIn() {
+        return "sample/sign_in";
+    }
+
+    @GetMapping("reset")
+    public String reset() {
+        return "sample/reset_password";
     }
 
     @GetMapping("login")
@@ -72,7 +84,7 @@ public class EmployeeController {
 
     @PostMapping("update/password")
     public String updatePassword(Authentication authentication,
-            @Validated(UpdatePassword.class) Employee employee, BindingResult bindingResult) {
+                                 @Validated(UpdatePassword.class) Employee employee, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "employee/update";
         }

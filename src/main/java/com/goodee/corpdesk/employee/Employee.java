@@ -1,6 +1,7 @@
 package com.goodee.corpdesk.employee;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.goodee.corpdesk.employee.validation.UpdateEmail;
+import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,7 +34,8 @@ public class Employee implements UserDetails {
 
 //	private Integer positionId;
 //	private Integer departmentId;
-//	private Integer roleId;
+    @ColumnDefault("2")
+	private Integer roleId;
 	
 	@ColumnDefault("1")
 	private Boolean accountNonExpired;
@@ -48,7 +50,7 @@ public class Employee implements UserDetails {
     @Id
 	private String username;
     @Column(nullable = false)
-    @NotNull
+    @NotBlank(groups = UpdatePassword.class)
 	private String password;
     @Transient
     @NotBlank(groups = UpdatePassword.class)
@@ -75,20 +77,16 @@ public class Employee implements UserDetails {
 //	private LocalDate birthDate;
 //	private String address;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    List<EmployeeRole> employeeRoles = new ArrayList<>();
-	
+    @Transient
+    private Role role;
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();
-
-        for (EmployeeRole er : employeeRoles) {
-            authorities.add(new SimpleGrantedAuthority(er.getRole().getRoleName()));
+        if (role != null) {
+            authorities.add(new SimpleGrantedAuthority(this.role.getRoleName()));
         }
 
 		return authorities;
 	}
-	
-	
 }

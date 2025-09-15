@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.employee;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,14 +17,21 @@ public class EmployeeService implements UserDetailsService {
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 	@Autowired
 	PasswordEncoder passwordEncoder;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Optional<Employee> optional = employeeRepository.findById(username);
+		Optional<Employee> employeeOp = employeeRepository.findById(username);
+        Employee employee = employeeOp.get();
+        Optional<Role> roleOp = roleRepository.findById(employee.getRoleId());
+        Role role = roleOp.get();
+        employee.setRole(role);
+        System.out.println("========================= " + employee.getRole().getRoleName());
 		
-		return optional.get();
+		return employee;
 	}
 	
 	public void join(Employee employee) {
