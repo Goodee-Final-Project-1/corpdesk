@@ -19,7 +19,7 @@ public class EmployeeService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Optional<Employee> optional = employeeRepository.findByUsername(username);
+		Optional<Employee> optional = employeeRepository.findById(username);
 		
 		return optional.get();
 	}
@@ -32,14 +32,24 @@ public class EmployeeService implements UserDetailsService {
 	}
 
 	public Employee detail(String username) {
-		Optional<Employee> optional = employeeRepository.findByUsername(username);
+		Optional<Employee> optional = employeeRepository.findById(username);
 		return optional.get();
 	}
 
-    public void update(Employee employee) {
-        String encoded = passwordEncoder.encode(employee.getPassword());
+    public void updatePassword(Employee param) {
+        Optional<Employee> optional = employeeRepository.findById(param.getUsername());
+        Employee  employee = optional.get();
+        String encoded = passwordEncoder.encode(param.getPassword());
         employee.setPassword(encoded);
-        employee.setEmployeeId(1);  // FIXME: save()로 업데이트 하려면 pk가 필요함
+
+        employeeRepository.save(employee);
+    }
+
+    public void updateEmail(Employee param) {
+        Optional<Employee> optional = employeeRepository.findById(param.getUsername());
+        Employee  employee = optional.get();
+
+        employee.setExternalEmail(param.getExternalEmail());
 
         employeeRepository.save(employee);
     }

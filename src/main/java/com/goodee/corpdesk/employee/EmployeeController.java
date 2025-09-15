@@ -47,10 +47,17 @@ public class EmployeeController {
     public void update() {
     }
 
-    @PostMapping("update")
-    public String update(Authentication authentication, Employee employee) {
-//        employee.setUsername(authentication.getName());
-        employeeService.update(employee);
+    @PostMapping("update/password")
+    public String updatePassword(Authentication authentication, Employee param) {
+        param.setUsername(authentication.getName());
+        employeeService.updatePassword(param);
+        return "redirect:/employee/logout";
+    }
+
+    @PostMapping("update/email")
+    public String updateEmail(Authentication authentication, Employee param) {
+        param.setUsername(authentication.getName());
+        employeeService.updateEmail(param);
         return "employee/link";
     }
 }

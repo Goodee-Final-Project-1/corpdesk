@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,10 +23,11 @@ import java.util.List;
 @ToString
 @Entity @Table
 @DynamicInsert
+@DynamicUpdate
 public class Employee implements UserDetails {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer employeeId;
+//	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+//	private Integer employeeId;
 
 //	private Integer positionId;
 //	private Integer departmentId;
@@ -41,7 +43,7 @@ public class Employee implements UserDetails {
 	private Boolean enabled;
 	
 	private String name;
-    @Column(unique = true)
+    @Id
 	private String username;
 	private String password;
 	

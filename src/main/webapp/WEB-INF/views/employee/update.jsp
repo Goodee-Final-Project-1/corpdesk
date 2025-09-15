@@ -9,11 +9,14 @@
 <body>
 	
 	<div>
-		<form method="post">
+		<form method="post" action="/employee/update/email">
             <input type="text" name="externalEmail" placeholder="이메일">
-            <input type="password" name="password" placeholder="비밀번호">
-			<button>등록</button>
+			<button>이메일 변경</button>
 		</form>
+        <form method="post" action="/employee/update/password">
+            <input type="password" name="password" placeholder="비밀번호">
+            <button>비밀번호 변경</button>
+        </form>
 	</div>
 	
 </body>

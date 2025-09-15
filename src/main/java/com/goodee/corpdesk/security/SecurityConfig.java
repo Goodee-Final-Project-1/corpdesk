@@ -29,7 +29,7 @@ public class SecurityConfig {
 //			.cors(cors -> cors.disable())
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/employee/detail").authenticated()
+					.requestMatchers("/employee/detail", "/employee/update/**").authenticated()
 					.anyRequest().permitAll()
 					)
 			.formLogin(form -> form.disable())

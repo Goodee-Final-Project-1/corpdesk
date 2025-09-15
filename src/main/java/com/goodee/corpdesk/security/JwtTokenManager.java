@@ -67,13 +67,13 @@ public class JwtTokenManager {
 	
 	// 토큰 발급
 	public String makeToken(Authentication authentication, Long validTime) {
-        Optional<Employee> optional = employeeRepository.findByUsername(authentication.getName());
+        Optional<Employee> optional = employeeRepository.findById(authentication.getName());
         Employee employee = optional.get();
 
 		return Jwts
 				.builder()
 				.subject(authentication.getName())
-                .claim("pk", employee.getEmployeeId())
+//                .claim("pk", employee.getEmployeeId())
 				.claim("roles", authentication.getAuthorities().toString())
 				.issuedAt(new Date())
 				.expiration(new Date(System.currentTimeMillis() + validTime))
@@ -94,7 +94,7 @@ public class JwtTokenManager {
 		// FIXME: 유저 DTO를 가져와야 됨
 		Employee employee = new Employee();
 		employee.setUsername(claims.getSubject());
-		UserDetails userDetails = employeeRepository.findByUsername(claims.getSubject()).get();
+		UserDetails userDetails = employeeRepository.findById(claims.getSubject()).get();
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		
 		return authentication;
