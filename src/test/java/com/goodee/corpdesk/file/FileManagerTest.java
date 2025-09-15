@@ -40,7 +40,7 @@ class FileManagerTest {
 		
 		String filePath = path + "approval";
 		FileDTO fileDTO = new FileDTO();
-		fileDTO.setSaveName("5295adb590c846e9a4828d256e2c25d3");
+		fileDTO.setSaveName("13f62604036e4bc6a3b83c9c01bad13f");
 		fileDTO.setExtension("png");
 		
 		boolean result = fileManager.deleteFile(filePath, fileDTO);

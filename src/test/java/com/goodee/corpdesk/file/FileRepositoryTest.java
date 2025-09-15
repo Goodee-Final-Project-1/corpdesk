@@ -32,7 +32,7 @@ class FileRepositoryTest {
 		ApprovalFile af = new ApprovalFile();
 		af.setApprovalId(1L);
 		af.setOriName("test1");
-		af.setSaveName("a986f88fc23d496b9a0167ec7db72670");
+		af.setSaveName("671c284fa67e49fa82ce483c643d1cfc");
 		af.setExtension("png");
 		af.setModifiedBy(1);
 		

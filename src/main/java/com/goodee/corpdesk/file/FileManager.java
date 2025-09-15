@@ -1,6 +1,9 @@
 package com.goodee.corpdesk.file;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -83,4 +86,5 @@ public class FileManager {
 		File file = new File(filePath, fileDTO.getSaveName() + "." + fileDTO.getExtension());
 		return file.delete();
 	}
+
 }
