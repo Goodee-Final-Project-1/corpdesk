@@ -10,7 +10,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table
-
 public class ChatRoom {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

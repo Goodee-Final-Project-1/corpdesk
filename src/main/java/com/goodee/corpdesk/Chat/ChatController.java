@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 
 //http요청에 대한 url 매핑
-@RequestMapping("chat/")
+@RequestMapping("/chat/**")
 public class ChatController {
 
 	@Autowired
