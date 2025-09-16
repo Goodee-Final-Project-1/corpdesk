@@ -25,10 +25,13 @@
 			<!-- 내용 시작 -->
 			
 			<h2>그룹 채팅</h2>
+			
+	<p>채팅 상대입력</p><input type="text" id="otherPerson">
 
     <button onclick="connect()">채팅 연결</button>
     <input type="text" id="messageInput">
     <button onclick="sendMessage()">메시지 전송</button>
+    <table></table>
 
     <div id="messages"></div>
 

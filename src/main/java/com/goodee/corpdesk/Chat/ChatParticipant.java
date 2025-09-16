@@ -16,9 +16,7 @@ public class ChatParticipant {
 	Long participantId;
 	String employeeUsername;
 	Long chatRoomId;
-	Long messageId;
 	Long lastCheckMessageId;
-	
 	LocalDateTime updated_at;
 	LocalDateTime creates_at;
 	String modifed_by;

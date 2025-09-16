@@ -14,8 +14,7 @@ public class ChatRoom {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long chatRoomId;
-	String chatRoomTiTle;
-
+	String chatRoomTitle;
 	
 	
 	LocalDateTime updated_at;
