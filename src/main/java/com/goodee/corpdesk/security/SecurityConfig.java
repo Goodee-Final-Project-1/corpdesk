@@ -30,17 +30,18 @@ public class SecurityConfig {
 //              .cors(cors -> cors.disable())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/employee/detail", "/employee/update/**").authenticated()
-                        .anyRequest().permitAll()
+//                        .requestMatchers("/employee/detail", "/employee/update/**").authenticated()
+                                .requestMatchers("/employee/**").authenticated()    // 접근 제한
+                                .anyRequest().permitAll()
                 )
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/employee/login")))
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/")))
                 .formLogin(form -> form.disable())
                 .logout(logout -> logout
                         .logoutUrl("/employee/logout")    // 로그 아웃 URL
                         .invalidateHttpSession(true)
                         .deleteCookies("accessToken")    // 토큰 삭제
-                        .logoutSuccessUrl("/employee/login"))
+                        .logoutSuccessUrl("/"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(new JwtLoginFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
                 .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
