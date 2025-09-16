@@ -36,7 +36,7 @@
 						<table>
 							<c:forEach var="msg" items="${messageList}">
 								<tr>
-									<td>${msg.replyTo}</td>	<!-- 보낸 사람 -->
+									<td>${msg.from}</td>	<!-- 보낸 사람 -->
 									<td>${msg.subject}</td>	<!-- 내용 -->
 									<td>${msg.sentDate}</td>	<!-- 날짜 -->
 								</tr>
