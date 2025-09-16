@@ -27,8 +27,8 @@
             <td>${emp.employeeId}</td>
             <td>${emp.name}</td>
             <td>${emp.username}</td>
-            <td>${emp.department.departmentName}</td>
-            <td>${emp.position.positionName}</td>
+            <td>${emp.departmentName}</td>
+            <td>${emp.positionName}</td>
             <td>${emp.mobilePhone}</td>
             <td>${emp.hireDate}</td>
             <td>
@@ -55,6 +55,7 @@
     </c:forEach>
 </table>
 <a href="<c:url value='/employee/add'/>">사원 등록</a>
+
 <!-- 페이징 -->
 <div>
     <c:if test="${page.totalPages > 0}">

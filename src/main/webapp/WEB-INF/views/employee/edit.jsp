@@ -16,11 +16,11 @@
             <form:option value="F" label="여"/>
          </form:select><br/>
     휴대전화: <form:input path="mobilePhone" /><br/>
-    부서: <form:select path="department.departmentId">
+    부서: <form:select path="departmentId">
             <form:option value="" label="부서를 선택하세요"/>
             <form:options items="${departments}" itemValue="departmentId" itemLabel="departmentName"/>
           </form:select><br/>
-    직위: <form:select path="position.positionId">
+    직위: <form:select path="positionId">
             <form:option value="" label="직위를 선택하세요"/>
             <form:options items="${positions}" itemValue="positionId" itemLabel="positionName"/>
           </form:select><br/>

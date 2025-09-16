@@ -67,13 +67,15 @@ public class InitService implements CommandLineRunner {
         
         Employee emp = new Employee();
         emp.setName("고두현");
-        emp.setUsername("asz723");
+        emp.setUsername("rhengus");
         emp.setMobilePhone("010-6666-6666");
-        emp.setPassword("1234");
+        emp.setPassword("rhengus1234");
         emp.setHireDate(LocalDate.parse("2025-09-08"));
         emp.setStatus("휴가");
-        emp.setDepartment(savedDept);
-        emp.setPosition(savedPos);
+        emp.setDepartmentId(savedDept.getDepartmentId());
+        emp.setPositionId(savedPos.getPositionId());
+        emp.setUseYn(true);    // 활성화
+        emp.setEnabled(true);  // 계정활성화
         Employee savedEmp = employeeRepository.save(emp);
         System.out.println("사원 저장 완료: " + savedEmp.getEmployeeId());
         
