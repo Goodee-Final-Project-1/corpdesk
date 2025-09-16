@@ -26,7 +26,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		this.jwtTokenManager = jwtTokenManager;
 		
 		// 로그인 URL
-		this.setFilterProcessesUrl("/employee/loginTry");
+		this.setFilterProcessesUrl("/login");
 	}
 
 	@Override
@@ -45,7 +45,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		String accessToken = jwtTokenManager.makeAccessToken(authResult);
-		// FIXME: 리프레시 토큰 저장 방법 미정
 		String refreshToken = jwtTokenManager.makeRefreshToken(authResult);
 		
 		Cookie cookie = new Cookie("accessToken", accessToken);
@@ -56,7 +55,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		
 		response.addCookie(cookie);
 		
-		response.sendRedirect("/employee");
+		response.sendRedirect("/employee"); // 로그인 성공 시 리다이렉트
 	}
 
 	@Override
@@ -89,7 +88,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		}
 		
 		message = URLEncoder.encode(message, "UTF-8");
-		response.sendRedirect("/?failMessage=" + message);
+		response.sendRedirect("/" + message);
 	}
 	
 	

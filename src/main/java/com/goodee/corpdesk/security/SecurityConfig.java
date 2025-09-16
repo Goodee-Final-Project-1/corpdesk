@@ -35,13 +35,13 @@ public class SecurityConfig {
                                 .anyRequest().permitAll()
                 )
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/")))
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/")))   // 접근 제한 리다이렉트
                 .formLogin(form -> form.disable())
-                .logout(logout -> logout
-                        .logoutUrl("/employee/logout")    // 로그 아웃 URL
+                .logout(logout -> logout    // 로그아웃 설정
+                        .logoutUrl("/logout")
                         .invalidateHttpSession(true)
-                        .deleteCookies("accessToken")    // 토큰 삭제
-                        .logoutSuccessUrl("/"))
+                        .deleteCookies("accessToken")    // 액세스 토큰 삭제
+                        .logoutSuccessUrl("/")) 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(new JwtLoginFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
                 .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
