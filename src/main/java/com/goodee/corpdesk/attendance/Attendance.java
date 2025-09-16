@@ -29,10 +29,10 @@ public class Attendance {
     private Integer employeeId;
     
     // 출근 일시
-    private LocalDateTime checkInDatetime;
+    private LocalDateTime checkInDateTime;
     
     // 퇴근 일시
-    private LocalDateTime checkOutDatetime;
+    private LocalDateTime checkOutDateTime;
     
     // 휴일 여부
     private boolean isHoliday;
