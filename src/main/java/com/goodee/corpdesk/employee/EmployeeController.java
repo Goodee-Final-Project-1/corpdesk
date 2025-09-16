@@ -69,7 +69,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Integer id, Model model) {
+    public String showEditForm(@PathVariable("id") Integer id, Model model) {
         Optional<Employee> employee = employeeRepository.findById(id);
         if (employee.isPresent()) {
             model.addAttribute("employee", employee.get());
@@ -114,7 +114,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteEmployee(@PathVariable Integer id) {
+    public String deleteEmployee(@PathVariable("id") Integer id) {
     Employee employee = employeeRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
 
