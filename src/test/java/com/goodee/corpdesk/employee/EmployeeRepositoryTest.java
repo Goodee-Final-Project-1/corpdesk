@@ -14,7 +14,7 @@ class EmployeeRepositoryTest {
 	
 	@Test
 	void test() {
-		Optional<Employee> optional = employeeRepository.findByUsername("user01");
+		Optional<Employee> optional = employeeRepository.findById("user01");
 		Employee employee = optional.get();
 		System.out.println(employee);
 	}

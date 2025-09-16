@@ -39,10 +39,6 @@ public class EmployeeController {
         return "sample/reset_password";
     }
 
-    @GetMapping("login")
-    public void login() {
-    }
-
     @GetMapping("join")
     public void join() {
     }
@@ -61,7 +57,7 @@ public class EmployeeController {
 
     @PostMapping("update/email")
     public String updateEmail(Authentication authentication,
-                              @Validated(UpdateEmail.class) Employee employee, BindingResult bindingResult) {
+            @Validated(UpdateEmail.class) Employee employee, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "employee/detail";
         }
@@ -84,7 +80,7 @@ public class EmployeeController {
 
     @PostMapping("update/password")
     public String updatePassword(Authentication authentication,
-                                 @Validated(UpdatePassword.class) Employee employee, BindingResult bindingResult) {
+            @Validated(UpdatePassword.class) Employee employee, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "employee/update";
         }
@@ -96,6 +92,6 @@ public class EmployeeController {
             return "employee/update";
         }
 
-        return "redirect:/employee/logout";
+        return "redirect:/logout";
     }
 }

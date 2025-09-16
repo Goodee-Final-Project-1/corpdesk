@@ -91,7 +91,6 @@ public class JwtTokenManager {
 				.parseSignedClaims(token)
 				.getPayload()
 				;
-		// FIXME: 유저 DTO를 가져와야 됨
 		Employee employee = new Employee();
 		employee.setUsername(claims.getSubject());
 		UserDetails userDetails = employeeRepository.findById(claims.getSubject()).get();
@@ -100,6 +99,7 @@ public class JwtTokenManager {
 		return authentication;
 	}
 	
+    // 만료된 액세스 토큰에서 username을 꺼내와서 DB에 있는 리프레시 토큰을 조회함
 	public RefreshToken getRefreshToken(ExpiredJwtException expired) throws Exception {
 		String username = expired.getClaims().getSubject();
 		
@@ -107,7 +107,6 @@ public class JwtTokenManager {
 	}
 
 	public int getRefreshValidTime() {
-//		return (int) (accessValidTime / 1000);
-		return (int) (refreshValidTime / 10);
+		return (int) (refreshValidTime / 1000);
 	}
 }
