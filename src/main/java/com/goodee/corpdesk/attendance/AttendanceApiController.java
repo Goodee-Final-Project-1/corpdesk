@@ -17,7 +17,7 @@ public class AttendanceApiController {
 	
 	private final AttendanceService attendanceService;
 	
-	@GetMapping("attendances")
+	@GetMapping("/api/attendances")
 	public List<CalendarEventDTO> list(
 	    @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
 	    @RequestParam("end")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,

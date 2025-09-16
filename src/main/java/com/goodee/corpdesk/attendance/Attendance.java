@@ -22,39 +22,43 @@ public class Attendance {
 	// PK
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "attendance_id")
     private Long attendanceId;
     
     // 직원 ID
-    @Column(nullable = false)
+    @Column(name = "employee_id", nullable = false)
     private Integer employeeId;
     
     // 출근 일시
+    @Column(name = "check_in_datetime")
     private LocalDateTime checkInDateTime;
     
     // 퇴근 일시
+    @Column(name = "check_out_datetime")
     private LocalDateTime checkOutDateTime;
     
     // 휴일 여부
+    @Column(name = "is_holiday")
     private boolean isHoliday;
     
     // 근무 상태
-    @Column(nullable = false, length = 255)
+    @Column(name = "work_status", nullable = false, length = 255)
     private String workStatus;
         
     // 생성 일시
-	@Column(nullable = false)
+	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
 
     // 수정 일시
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
     
     // 수정한 사람
-    @Column(nullable = false, length = 255)
+    @Column(name = "modified_by", nullable = false, length = 255)
     private String modifiedBy;
     
     // 사용 여부
-    @Column(nullable = false)
+    @Column(name = "use_yn", nullable = false)
     private Boolean useYn;
     
 }

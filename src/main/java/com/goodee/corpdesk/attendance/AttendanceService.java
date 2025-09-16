@@ -1,17 +1,19 @@
 package com.goodee.corpdesk.attendance;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class AttendanceService {
 	
-	@Autowired
-	private AttendanceRepository attendanceRepository;
+	private final AttendanceRepository attendanceRepository;
 	
 	public List<CalendarEventDTO> getEvents(LocalDateTime start, LocalDateTime end, Integer employeeId) {
 
