@@ -7,5 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.goodee.corpdesk.approval.entity.Approver;
 
 public interface ApproverRepository extends JpaRepository<Approver, Long> {
-	public List<Approver> findAllByApprovalId(Long approvalId);
+	
+	List<Approver> findAllByApprovalId(Long approvalId);
+	Approver findByApprovalIdAndApproverId(Long approvalId, Long approverId);
+	Approver findByApprovalIdAndApprovalOrder(Long approvalId, Integer approvalOrder);
+	
 }

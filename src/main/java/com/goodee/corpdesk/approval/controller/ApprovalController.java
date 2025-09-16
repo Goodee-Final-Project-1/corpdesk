@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Slf4j
-@Controller
+//@Controller
 @RestController // TODO postman을 사용하여 controller를 테스트하기 위해 임시로 붙임. 추후 @Controller로 수정
 @RequestMapping(value = "/approvals/**")
 public class ApprovalController {
@@ -30,7 +31,7 @@ public class ApprovalController {
 	
 	// 결재 요청 
 	@PostMapping("")
-	public String submit(ApprovalDTO approvalDTO, ArrayList<ApproverDTO> approverDTOList) throws Exception {
+	public String submit(@RequestBody ApprovalDTO approvalDTO, @RequestBody ArrayList<ApproverDTO> approverDTOList) throws Exception {
 		
 		System.err.println("submit()");
 		
@@ -57,12 +58,16 @@ public class ApprovalController {
 	}
 	
 	// 결재 승인/반려
-	@PutMapping("")
-	public void process() {
+	@PutMapping("{approvalId}")
+	public String process(@PathVariable("approvalId") Long approvalId, Long approverId, String approveYn) throws Exception {
 		
 		System.err.println("process()");
-		// TODO
 		
+		// TODO
+		Boolean result = approvalService.processApproval(approvalId, approverId, approveYn);
+		log.info("{}", result);
+		
+		return result.toString();
 	}
 	
 }
