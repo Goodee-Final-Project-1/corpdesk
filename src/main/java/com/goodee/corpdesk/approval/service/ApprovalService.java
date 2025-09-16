@@ -1,0 +1,90 @@
+package com.goodee.corpdesk.approval.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.goodee.corpdesk.approval.dto.ApprovalDTO;
+import com.goodee.corpdesk.approval.dto.ApproverDTO;
+import com.goodee.corpdesk.approval.entity.Approval;
+import com.goodee.corpdesk.approval.entity.Approver;
+import com.goodee.corpdesk.approval.repository.ApprovalRepository;
+import com.goodee.corpdesk.approval.repository.ApproverRepository;
+
+import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
+
+@Service
+@Transactional
+public class ApprovalService {
+	
+	@Autowired
+	private ApprovalRepository approvalRepository;
+	@Autowired
+	private ApproverRepository approverRepository;
+	
+	// approval과 approver insert에 성공하면 insert한 Approval의 정보가 담기 ApprovalDTO 반환, 
+	// 아니면 exception을 터뜨려서 rollback
+	public ApprovalDTO createApproval(ApprovalDTO approvalDTO, List<ApproverDTO> approverDTOList, String modifiedBy) throws Exception {
+		
+		// 1. 결재 내용에 insert
+		Approval approval = approvalDTO.toEntity();
+		approval.setModifiedBy(modifiedBy);
+		approval = approvalRepository.save(approval);
+		
+		// 2. 결재자에 insert
+		// approval이 null이 아닐 때만 진행, null이면 롤백 (결재 요청 결과의 무결성을 지킴 & NPE 방지)
+		if(approval == null) throw new NoResultException("Approval insert 실패"); // 예외가 터지면서 롤백됨
+		
+		for (ApproverDTO approverDTO : approverDTOList) {
+			Approver approver = approverDTO.toEntity();
+			approver.setApprovalId(approval.getApprovalId());
+			
+			// 만약 승인 순서가 1이 아니면 use_yn값을 false로 하여 insert
+			if(approver.getApprovalOrder() != 1) approver.setUseYn(false);
+			
+			approver = approverRepository.save(approver);
+			
+			// approver이 null이 아닐 때만 다음 반복 진행, null이면 롤백 (결재 요청 결과의 무결성을 지킴)
+			if(approver == null) throw new NoResultException("Approver insert 실패"); // 예외가 터지면서 롤백됨
+		}
+		
+		// 3. insert 결과로 얻어진 approvalId를 DTO에 담아 반환
+		approvalDTO.setApprovalId(approval.getApprovalId());
+		
+		return approvalDTO;
+		
+	}
+	 
+	// approvalId에 해당하는 Approval이 없다면 exception을 터뜨리고,
+	// 있다면 approval과 approver 수정
+	public boolean deleteApproval(Long approvalId) throws Exception {
+		
+		// 1. 결재 use_yn false로 update
+		// TODO dirty check로 변경
+		
+//		Approval approval = new Approval();
+//		approval.setApprovalId(approvalId);
+//		approval.setUseYn(false);
+//		
+//		approval = approvalRepository.save(approval);
+//		
+//		if (approval == null) return false; // 결재를 수정하지 못했으면 결재자를 수정할 필요 없으므로 바로 return
+		
+		// 2. 결재자들 use_yn false로 update
+		List<Approver> approverList = approverRepository.findAllByApprovalId(approvalId);
+		for (Approver approver : approverList) {
+			approver.setUseYn(false);
+			
+			approver = approverRepository.save(approver);
+			// 결재자를 수정하지 못했으면 결재 수정 결과의 무결성을 위해 다음 결재자를 수정하지 않고 rollback
+			if (approver == null) throw new NoResultException("Approver delete 실패"); // 예외가 터지면서 롤백됨
+		}
+		
+		return true;
+	}
+	
+	
+}
