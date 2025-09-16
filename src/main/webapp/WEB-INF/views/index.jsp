@@ -27,7 +27,7 @@
 						</div>
 						<div class="card-body px-5 pb-5 pt-0">
 
-                            <form method="post" action="/login"> <!-- TODO 추후 사용시 form태그 속성 수정 -->
+                            <form method="post" action="/login-process"> <!-- TODO 추후 사용시 form태그 속성 수정 -->
                                 <div class="row">
                                     <div class="form-group col-md-12 mb-4">
                                         <input type="text" class="form-control input-lg" id="username" name="username"
