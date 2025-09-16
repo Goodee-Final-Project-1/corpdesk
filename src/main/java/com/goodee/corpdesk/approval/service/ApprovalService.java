@@ -58,33 +58,34 @@ public class ApprovalService {
 		
 	}
 	 
-	// approvalId에 해당하는 Approval이 없다면 exception을 터뜨리고,
-	// 있다면 approval과 approver 수정
+	// approvalId에 해당하는 Approval이 없다면 false 반환,
+	// 있다면 approval과 approver 수정한 후 true 반환
 	public boolean deleteApproval(Long approvalId) throws Exception {
 		
 		// 1. 결재 use_yn false로 update
-		// TODO dirty check로 변경
+		// id로 결재 정보를 조회해 옴
+		Optional<Approval> result = approvalRepository.findById(approvalId);
 		
-//		Approval approval = new Approval();
-//		approval.setApprovalId(approvalId);
-//		approval.setUseYn(false);
-//		
-//		approval = approvalRepository.save(approval);
-//		
-//		if (approval == null) return false; // 결재를 수정하지 못했으면 결재자를 수정할 필요 없으므로 바로 return
+		// 삭제할 결재 정보가 없으면 이후의 삭제 로직을 수행할 필요 없으므로 바로 return
+		if (result == null) return false; 
+		
+		// 삭제할 결재 정보가 있으면 삭제처리
+		Approval approval = result.get();
+		approval.setUseYn(false);
 		
 		// 2. 결재자들 use_yn false로 update
 		List<Approver> approverList = approverRepository.findAllByApprovalId(approvalId);
 		for (Approver approver : approverList) {
 			approver.setUseYn(false);
-			
-			approver = approverRepository.save(approver);
-			// 결재자를 수정하지 못했으면 결재 수정 결과의 무결성을 위해 다음 결재자를 수정하지 않고 rollback
-			if (approver == null) throw new NoResultException("Approver delete 실패"); // 예외가 터지면서 롤백됨
 		}
 		
 		return true;
 	}
 	
+	public boolean processApproval(Long approvalId, Long approverId, String approveYn) throws Exception {
+		
+		
+		return false;
+	}
 	
 }
