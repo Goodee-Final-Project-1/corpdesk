@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -23,11 +24,19 @@ public class EmailService {
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
+	@Autowired
+	private AesBytesEncryptor aesBytesEncryptor;
 
 	// 메일 가져오기
 	public List<ReceivedDTO> mailBox(String username, Pageable pageable) {
 		Optional<Employee> optional = employeeRepository.findById(username);
 		Employee employee = optional.get();
+
+		if (employee.getEncodedEmailPassword() != null) {
+			byte[] decoded = aesBytesEncryptor.decrypt(employee.getEncodedEmailPassword());
+			employee.setExternalEmailPassword(new String(decoded));
+		}
+
 		String myEmail = employee.getExternalEmail();
 		String host = "imap." + myEmail.split("@")[1];
 		String password = employee.getExternalEmailPassword();
@@ -92,6 +101,11 @@ public class EmailService {
 	public void sendSimpleMail(SendDTO sendDTO) {
 		Optional<Employee> optional = employeeRepository.findById(sendDTO.getReplyTo());
 		Employee employee = optional.get();
+
+		if (employee.getEncodedEmailPassword() != null) {
+			byte[] decoded = aesBytesEncryptor.decrypt(employee.getEncodedEmailPassword());
+			employee.setExternalEmailPassword(new String(decoded));
+		}
 
 		JavaMailSender mailSender = this.javaMailSender(employee);
 

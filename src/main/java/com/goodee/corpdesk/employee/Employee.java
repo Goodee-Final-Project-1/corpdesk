@@ -4,7 +4,6 @@ import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,7 +23,8 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-@Entity @Table
+@Entity
+@Table
 @DynamicInsert
 @DynamicUpdate
 public class Employee implements UserDetails {
@@ -32,11 +32,11 @@ public class Employee implements UserDetails {
 //	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 //	private Integer employeeId;
 
-//	private Integer positionId;
+	//	private Integer positionId;
 //	private Integer departmentId;
-    @ColumnDefault("2")
+	@ColumnDefault("2")
 	private Integer roleId;
-	
+
 	@ColumnDefault("1")
 	private Boolean accountNonExpired;
 	@ColumnDefault("1")
@@ -45,25 +45,27 @@ public class Employee implements UserDetails {
 	private Boolean credentialsNonExpired;
 	@ColumnDefault("1")
 	private Boolean enabled;
-	
-	private String name;
-    @Id
-	private String username;
-    @Column(nullable = false)
-    @NotBlank(groups = UpdatePassword.class)
-	private String password;
-    @Transient
-    @NotBlank(groups = UpdatePassword.class)
-    private String passwordNew;
-    @Transient
-    @NotBlank(groups = UpdatePassword.class)
-    private String passwordCheck;
 
-    @NotBlank(groups = UpdateEmail.class)
+	private String name;
+	@Id
+	private String username;
+	@Column(nullable = false)
+	@NotBlank(groups = UpdatePassword.class)
+	private String password;
+	@Transient
+	@NotBlank(groups = UpdatePassword.class)
+	private String passwordNew;
+	@Transient
+	@NotBlank(groups = UpdatePassword.class)
+	private String passwordCheck;
+
+	@NotBlank(groups = UpdateEmail.class)
 	private String externalEmail;
-    @NotBlank(groups = UpdateEmail.class)
+	@Transient
+	@NotBlank(groups = UpdateEmail.class)
 	private String externalEmailPassword;
-	
+	private byte[] encodedEmailPassword;
+
 //	private String employeeType;
 //	private LocalDate hireDate;
 //	private String responsibility;
@@ -77,15 +79,15 @@ public class Employee implements UserDetails {
 //	private LocalDate birthDate;
 //	private String address;
 
-    @Transient
-    private Role role;
+	@Transient
+	private Role role;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();
-        if (role != null) {
-            authorities.add(new SimpleGrantedAuthority(this.role.getRoleName()));
-        }
+		if (role != null) {
+			authorities.add(new SimpleGrantedAuthority(this.role.getRoleName()));
+		}
 
 		return authorities;
 	}
