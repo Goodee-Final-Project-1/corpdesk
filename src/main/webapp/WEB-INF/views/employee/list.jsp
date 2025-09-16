@@ -19,12 +19,11 @@
 
 <table border="1">
     <tr>
-        <th>사번</th><th>사원명</th><th>ID</th><th>부서</th>
+        <th>사원명</th><th>ID</th><th>부서</th>
         <th>직위</th><th>휴대전화</th><th>입사일</th><th>퇴사일</th><th>현재상태</th><th>계정상태</th><th>수정</th>
     </tr>
     <c:forEach var="emp" items="${employees}">
         <tr>
-            <td>${emp.employeeId}</td>
             <td>${emp.name}</td>
             <td>${emp.username}</td>
             <td>${emp.departmentName}</td>
@@ -50,7 +49,7 @@
                     <c:otherwise><span style="color:red">비정상</span></c:otherwise>
                 </c:choose>
             </td>
-            <td><a href="<c:url value='/employee/edit/${emp.employeeId}'/>">수정</a></td>
+            <td><a href="<c:url value='/employee/edit/${emp.username}'/>">수정</a></td> <!-- TODO employeeId를 username으로 변경 -->
         </tr>
     </c:forEach>
 </table>

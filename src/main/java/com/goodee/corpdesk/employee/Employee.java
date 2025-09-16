@@ -34,9 +34,9 @@ public class Employee {
 	public interface CreateGroup {} // 등록 시 검증
 	public interface UpdateGroup {} // 수정 시 검증 (비밀번호 제외)
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer employeeId;
+//	@Id
+//	@GeneratedValue(strategy = GenerationType.IDENTITY)
+//	private Integer employeeId;
 	
 	@Column(name = "position_id")
 	private Integer positionId;
@@ -68,6 +68,7 @@ public class Employee {
 	@Column(name = "username", unique = true, nullable = false)
     @NotBlank(message = "아이디는 필수입니다.")
     @Size(min = 5, max = 20, message = "아이디는 5~20자여야 합니다.")
+	@Id
 	private String username;
 	
 	@Column(nullable = false)

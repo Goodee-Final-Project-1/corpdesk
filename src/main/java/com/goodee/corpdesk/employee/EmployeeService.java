@@ -47,14 +47,14 @@ public class EmployeeService {
     }
 
     // 단일 조회
-    public Optional<Employee> getEmployee(Integer id) {
+    public Optional<Employee> getEmployee(String id) {
         return employeeRepository.findById(id);
     }
 
     // 수정
     public Employee updateEmployee(Employee employee) {
-        Employee persisted = employeeRepository.findById(employee.getEmployeeId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + employee.getEmployeeId()));
+        Employee persisted = employeeRepository.findById(employee.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + employee.getUsername()));
 
         persisted.setName(employee.getName());
         persisted.setPassword(employee.getPassword());
@@ -72,7 +72,7 @@ public class EmployeeService {
     }
 
     // 삭제(비활성화)
-    public void deactivateEmployee(Integer id) {
+    public void deactivateEmployee(String id) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
         if (employee.getLastWorkingDay() == null) {

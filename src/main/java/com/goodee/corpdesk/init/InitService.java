@@ -77,12 +77,12 @@ public class InitService implements CommandLineRunner {
         emp.setUseYn(true);    // 활성화
         emp.setEnabled(true);  // 계정활성화
         Employee savedEmp = employeeRepository.save(emp);
-        System.out.println("사원 저장 완료: " + savedEmp.getEmployeeId());
+        System.out.println("사원 저장 완료: " + savedEmp.getUsername());
         
         System.out.println("초기 데이터 생성 완료:");
         System.out.println("- 부서: " + savedDept.getDepartmentName() + " (ID: " + savedDept.getDepartmentId() + ")");
         System.out.println("- 직위: " + savedPos.getPositionName() + " (ID: " + savedPos.getPositionId() + ")");
-        System.out.println("- 사원: " + savedEmp.getName() + " (ID: " + savedEmp.getEmployeeId() + ")");
+        System.out.println("- 사원: " + savedEmp.getName() + " (ID: " + savedEmp.getUsername() + ")");
     }
 
     private void ensureDefaultPositions() {

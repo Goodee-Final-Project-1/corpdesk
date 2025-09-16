@@ -6,7 +6,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <h2>사원 상세 정보</h2>
 <form:form method="post" modelAttribute="employee" action="/employee/edit">
-    <form:hidden path="employeeId" />
+    <form:hidden path="username" /> <!-- TODO username으로 변경 -->
     
     이름: <form:input path="name" /><br/>
     이메일: <form:input path="externalEmail" /><br/>
@@ -36,7 +36,7 @@
 <script>
     function deleteEmployee() {
         const lastWorkingDay = document.querySelector('[name="lastWorkingDay"]').value;
-        const employeeId = document.querySelector('[name="employeeId"]').value;
+        const employeeId = document.querySelector('[name="employeeId"]').value; // TODO username으로 변경
     
         if (!lastWorkingDay) {
             alert("퇴사일자를 먼저 입력하세요.");
@@ -47,7 +47,7 @@
             // 숨겨진 form을 만들어서 POST 요청
             const form = document.createElement("form");
             form.method = "post";
-            form.action = "/employee/delete/" + employeeId;
+            form.action = "/employee/delete/" + employeeId; // TODO username으로 변경
             document.body.appendChild(form);
             form.submit();
         }

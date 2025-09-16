@@ -69,7 +69,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable("id") Integer id, Model model) {
+    public String showEditForm(@PathVariable("id") String id, Model model) {
         Employee employee = employeeService.getEmployee(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
         model.addAttribute("employee", employee);
@@ -92,7 +92,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteEmployee(@PathVariable("id") Integer id) {
+    public String deleteEmployee(@PathVariable("id") String id) {
         employeeService.deactivateEmployee(id);
         return "redirect:/employee/list";
     }
