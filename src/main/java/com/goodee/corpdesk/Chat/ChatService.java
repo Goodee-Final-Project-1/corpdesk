@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 public class ChatService {
 
 	
-	public ChatRoom getChatRoom() {
+	public  void getChatRoom() {
 		
 	}
 }

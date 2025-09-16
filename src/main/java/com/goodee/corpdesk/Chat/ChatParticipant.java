@@ -14,7 +14,7 @@ public class ChatParticipant {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long participantId;
-	int employeeId;
+	String employeeUsername;
 	Long chatRoomId;
 	Long messageId;
 	Long lastCheckMessageId;

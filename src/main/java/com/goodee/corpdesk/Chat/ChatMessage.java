@@ -23,7 +23,7 @@ public class ChatMessage {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long messageId;
 	
-	int employeeId;
+	String employeeUsername;
 	Long chatRoomId;
 	String messageContent;
 	String messageType;

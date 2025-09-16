@@ -24,7 +24,8 @@ public void configureMessageBroker(MessageBrokerRegistry registry) {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry
 				.addEndpoint("/ws")
-				.setAllowedOrigins("*")
+				.addInterceptors(new AuthHandshakeInterceptor()) // 쿠키를 읽어오기 위함
+				.setAllowedOriginPatterns("*")
 				.withSockJS();
 	}
 	@Override

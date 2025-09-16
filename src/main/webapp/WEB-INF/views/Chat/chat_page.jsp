@@ -24,18 +24,48 @@
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
 			
-			
-			<sec:authentication property="principal.username" var="user"/>
-			<script type="text/javascript">
-				const user= "${user}";
-			</script>
-			<input type="text" id="messageInput">
-			<button id ="sendBtn">전송</button>
-			<br>
-			
-			<div id= "reciveMsg">
-			
-			</div>
+			<h2>그룹 채팅</h2>
+
+    <button onclick="connect()">채팅 연결</button>
+    <input type="text" id="messageInput">
+    <button onclick="sendMessage()">메시지 전송</button>
+
+    <div id="messages"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+    <script>
+        let stompClient = null;
+
+        function connect(){
+            // 쿠키는 자동으로 포함됨
+            // 소켓이라는 통로를 이용하는 Stomp 객체 
+            const socket = new SockJS("/ws");
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, frame => {
+                console.log("연결됨: " + frame);
+
+                // 예시: 채팅방 1번 구독
+                stompClient.subscribe("/sub/chat/room/1", msg => {
+                    const message = JSON.parse(msg.body);
+                    document.getElementById("messages").innerHTML += "<p>" + message.sender + ": " + message.messageContent + "</p>";
+                });
+            });
+        }
+
+        function sendMessage(){
+            const content = document.getElementById("messageInput").value;
+            stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                chatRoomId: 1,
+                messageContent: content
+            }));
+        }
+        stompClient.subscribe("/sub/chat/room/1", msg => {
+            const body = JSON.parse(msg.body);
+            console.log("받은 메시지:", body);
+        });
+    </script>
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	
