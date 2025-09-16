@@ -28,13 +28,13 @@
                                 <form:label path="externalEmail">이메일: </form:label>
                                 <form:input path="externalEmail" placeholder="이메일"/>
                                 <form:errors path="externalEmail"/>
-                                <form:button>이메일 변경</form:button>
                             </li>
                             <li>
                                 <form:label path="externalEmailPassword">이메일 비밀번호: </form:label>
                                 <form:input path="externalEmailPassword" placeholder="이메일 비밀번호"/>
                                 <form:errors path="externalEmailPassword"/>
                             </li>
+                            <form:button class="btn btn-primary">이메일 변경</form:button>
                         </form:form>
                 </ul>
             </div>
