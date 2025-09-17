@@ -5,6 +5,8 @@ import java.util.List;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.Approval;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.goodee.corpdesk.approval.dto.ApprovalDTO;
@@ -14,10 +16,18 @@ import com.goodee.corpdesk.approval.service.ApprovalService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-//@Controller
-@RestController // TODO postman을 사용하여 controller를 테스트하기 위해 임시로 붙임. 추후 @Controller로 수정
-@RequestMapping(value = "/approvals/**")
+@Controller
+//@RestController // TODO postman을 사용하여 controller를 테스트하기 위해 임시로 붙임. 추후 @Controller로 수정
+@RequestMapping(value = "/approval/**")
 public class ApprovalController {
+	
+	@Value("${cat.approval}")
+	private String cat;
+	
+	@ModelAttribute("cat")
+	public String getCat() {
+		return cat;
+	}
 	
 	@Autowired
 	private ApprovalService approvalService;
@@ -79,27 +89,29 @@ public class ApprovalController {
 
     // 모든 결재 목록 조회
     @GetMapping("list/{username}")
-    public List<ResApprovalDTO> getApprovalList(@PathVariable("username") String username) throws Exception {
+    public String getApprovalList(@PathVariable("username") String username) throws Exception {
+//    public List<ResApprovalDTO> getApprovalList(@PathVariable("username") String username) throws Exception {
 
         System.err.println("list()");
 
         List<ResApprovalDTO> result = approvalService.getApprovalList("", username); // list 혹은 null 반환
         log.info("{}", result);
 
-        return result;
+        return "approval/list";
 
     }
 
     // 결재 상세 조회
     @GetMapping("{approvalId}")
-    public ResApprovalDTO getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
+    public String getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
+//    public ResApprovalDTO getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
 
         System.err.println("getApproval()");
 
         ResApprovalDTO result = approvalService.getApproval(approvalId);
         log.info("{}", result);
 
-        return result;
+        return "approval/detail";
 
     }
 	
