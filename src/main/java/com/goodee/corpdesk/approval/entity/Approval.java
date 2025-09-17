@@ -1,9 +1,7 @@
 package com.goodee.corpdesk.approval.entity;
 
-import java.time.LocalDate;
-
-import com.goodee.corpdesk.approval.dto.ApproverDTO;
-import com.goodee.corpdesk.approval.dto.ResponseApprovalDTO;
+import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -16,7 +14,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -69,8 +66,8 @@ public class Approval extends BaseEntity {
                         .build();
     }
 
-    public ResponseApprovalDTO toResponseApprovalDTO() {
-        return ResponseApprovalDTO.builder()
+    public ResApprovalDTO toResApprovalDTO() {
+        return ResApprovalDTO.builder()
                                 .approvalId(approvalId)
                                 .username(username)
                                 .departmentId(departmentId)
@@ -78,6 +75,17 @@ public class Approval extends BaseEntity {
                                 .formContent(formContent)
                                 .status(status)
                                 .build();
+    }
+
+    public ReqApprovalDTO toReqApprovalDTO() {
+        return ReqApprovalDTO.builder()
+                .approvalId(approvalId)
+                .username(username)
+                .departmentId(departmentId)
+                .formType(formType)
+                .formContent(formContent)
+                .status(status)
+                .build();
     }
 	
 }

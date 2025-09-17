@@ -1,18 +1,16 @@
 package com.goodee.corpdesk.approval.dto;
 
-import com.goodee.corpdesk.approval.entity.Approval;
-import lombok.*;
-
 import java.util.ArrayList;
-import java.util.List;
+
+import com.goodee.corpdesk.approval.entity.Approval;
+
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ResponseApprovalDTO {
+@Builder @NoArgsConstructor @AllArgsConstructor
+public class ReqApprovalDTO {
 
 	private Long approvalId;
 	private String username;
@@ -21,7 +19,7 @@ public class ResponseApprovalDTO {
 	private String formContent;
 	private Character status;
 	
-	List<ApproverDTO> approverDTOList;
+	ArrayList<ApproverDTO> approverDTOList;
 	
 	public Approval toApprovalEntity() {
 		return Approval.builder()
