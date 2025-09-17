@@ -154,20 +154,22 @@ public class ApprovalService {
 		return "PROCESSED";
 	}
     
-    // TODO 엔티티 리스트를 반환하는 것에서 DTO 리스트를 반환하는 것으로 변경
-    public List<Approval> getApprovalList(String listType, String username) throws Exception {
+    public List<ResApprovalDTO> getApprovalList(String listType, String username) throws Exception {
 
-        List<Approval> result = null;
+        List<Approval> approvalList = null;
+        List<ResApprovalDTO> result = null;
         switch (listType) {
-            case "request" -> result = approvalRepository.findAllByUseYnAndUsername(true, username);
-            case "wait" -> result = approvalRepository.findAllByUseYnAndApproverUsername(true, username);
+            case "request" -> approvalList = approvalRepository.findAllByUseYnAndUsername(true, username);
+            case "wait" -> approvalList = approvalRepository.findAllByUseYnAndApproverUsername(true, username);
             default -> {
-                result = new ArrayList<>();
-                result.addAll(approvalRepository.findAllByUseYnAndUsername(true, username));
-                result.addAll(approvalRepository.findAllByUseYnAndApproverUsername(true, username));
-                log.warn("{}", result);
+                approvalList = new ArrayList<>();
+                approvalList.addAll(approvalRepository.findAllByUseYnAndUsername(true, username));
+                approvalList.addAll(approvalRepository.findAllByUseYnAndApproverUsername(true, username));
+                log.warn("{}", approvalList);
             }
         }
+
+        result = approvalList.stream().map(Approval::toResApprovalDTO).toList();
 
         return result;
 

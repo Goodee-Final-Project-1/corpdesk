@@ -64,28 +64,26 @@ public class ApprovalController {
 		return result;
 	}
 
-    // TODO 엔티티 리스트를 반환하는 것에서 DTO 리스트를 반환하는 것으로 변경
 	// 특정 결재 목록 조회
     @GetMapping("list/{listType}/{username}")
-    public List<Approval> getApprovalList(@PathVariable("listType") String listType, @PathVariable("username") String username) throws Exception {
+    public List<ResApprovalDTO> getApprovalList(@PathVariable("listType") String listType, @PathVariable("username") String username) throws Exception {
 
         System.err.println("list()");
 
-        List<Approval> result = approvalService.getApprovalList(listType, username); // list 혹은 null 반환
+        List<ResApprovalDTO> result = approvalService.getApprovalList(listType, username); // list 혹은 null 반환
         log.info("{}", result);
 
         return result;
 
     }
 
-    // TODO 엔티티 리스트를 반환하는 것에서 DTO 리스트를 반환하는 것으로 변경
     // 모든 결재 목록 조회
     @GetMapping("list/{username}")
-    public List<Approval> getApprovalList(@PathVariable("username") String username) throws Exception {
+    public List<ResApprovalDTO> getApprovalList(@PathVariable("username") String username) throws Exception {
 
         System.err.println("list()");
 
-        List<Approval> result = approvalService.getApprovalList("", username); // list 혹은 null 반환
+        List<ResApprovalDTO> result = approvalService.getApprovalList("", username); // list 혹은 null 반환
         log.info("{}", result);
 
         return result;
