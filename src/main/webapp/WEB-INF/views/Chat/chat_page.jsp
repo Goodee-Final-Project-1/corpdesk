@@ -11,7 +11,16 @@
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 	<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+	<style>
+	.messageContainer{
+	height:400px;
+	width:90%;
+	overflow-y:scroll; 
+	}
+	
+	</style>
 </head>
+
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
 
@@ -24,51 +33,140 @@
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
 			
-			<h2>그룹 채팅</h2>
+		<sec:authentication property="principal.username" var="user"/>
+<script>
+    const user = "${user}";   // 현재 로그인한 사용자
+</script>
 			
-	<p>채팅 상대입력</p><input type="text" id="otherPerson">
-
-    <button onclick="connect()">채팅 연결</button>
+			<h2>${roomId}방</h2>
+	<div class = "messageContainer">
+		<div id="chat-list">
+			
+			
+		</div>
+	</div>
+	
+	
+			
     <input type="text" id="messageInput">
-    <button onclick="sendMessage()">메시지 전송</button>
-    <table></table>
-
-    <div id="messages"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+    <button type= "button" id="sendBtn">메시지 전송</button>
+	
+    
+	
+	<!-- 메시지 연결 송수신-->
     <script>
-        let stompClient = null;
-
-        function connect(){
-            // 쿠키는 자동으로 포함됨
-            // 소켓이라는 통로를 이용하는 Stomp 객체 
-            const socket = new SockJS("/ws");
-            stompClient = Stomp.over(socket);
-
-            stompClient.connect({}, frame => {
-                console.log("연결됨: " + frame);
-
-                // 예시: 채팅방 1번 구독
-                stompClient.subscribe("/sub/chat/room/1", msg => {
-                    const message = JSON.parse(msg.body);
-                    document.getElementById("messages").innerHTML += "<p>" + message.sender + ": " + message.messageContent + "</p>";
-                });
-            });
-        }
-
-        function sendMessage(){
-            const content = document.getElementById("messageInput").value;
-            stompClient.send("/pub/chat/message", {}, JSON.stringify({
-                chatRoomId: 1,
-                messageContent: content
-            }));
-        }
-        stompClient.subscribe("/sub/chat/room/1", msg => {
-            const body = JSON.parse(msg.body);
-            console.log("받은 메시지:", body);
-        });
+    // 메세지 수신 박스
+	const messageContainer = document.querySelector(".messageContainer")
+	const listChat= document.getElementById('chat-list');
+    
+    
+    	const roomId = ${roomId}
+        const socket = new SockJS("/ws");
+    	const stompClient = Stomp.over(socket);
+    	const sendBtn = document.getElementById("sendBtn");
+    	// 에러메세지가 두번 호출되는걸 막음 
+    	let errorHandled=false;
+    	// 메세지 수신
+    	stompClient.connect({},function(frame){
+    		stompClient.subscribe("/sub/chat/room/"+${roomId},(message)=>{
+    			console.log(JSON.parse(message.body).messageContent)
+    			 const p = document.createElement("p");
+        	     p.innerText = JSON.parse(message.body).messageContent;
+        		 listChat.appendChild(p);
+        		 messageContainer.scrollTop = messageContainer.scrollHeight;
+        	})
+        
+    	},function(error){
+    		if(errorHandled)return;
+    		errorHandled=true;
+    		
+			alert("참여되지 않은 사용자입니다.");
+			location.href="/chat/room/list";
+    	}
+    	)
+    	
+    	//메세지 전송
+    	sendBtn.addEventListener("click",()=>{
+    		const inputText = document.getElementById("messageInput");
+    		const msg = {
+    				chatRoomId: roomId,
+    				employeeUsername : user ,
+    				messageContent : inputText.value
+    		};
+    		stompClient.send("/pub/chat/message",{},JSON.stringify(msg));
+    		inputText.value="";
+    
+    	});
+    	
     </script>
+	
+	
+	<!-- 메세지 스크롤 이벤트 처리 -->
+	<script>
+	// 이전 기록을 가져오기전에 스크롤을 상단으로 올릴 경우 채팅내역 로딩을 기다리게함 
+		let isScrolled = false;
+		let lastMessageId = null;
+		let isEnd= false;
+	
+		
+		fetchList();
+		
+		//스크롤 이벤트 발생 시 호출 
+		messageContainer.addEventListener("scroll", ()=>{
+			if(messageContainer.scrollTop<1 && isScrolled===false){
+				isScrolled=true;
+				fetchList();
+			}
+		});
+		
+	//서버에서 이전 메시지 가져오기
+	    function fetchList(){
+		console.log("111");
+		//처음 데이터까지 다 가져온 경우면 db접근안하고 리턴
+		if(isEnd == true){
+			return;
+		}
+		//채팅 리스트를 가져올 시작 번호
+		const firstLi = document.querySelector("#chat-list li");
+		const endNo = firstLi ? Number(firstLi.getAttribute("data-no")) : 0;
+		
+		//채팅 리스트 가져오기
+		fetch("/chat/message/list/"+roomId+"/"+endNo+"/"+20,{
+			method:"GET"
+		}).then(res=>res.json())
+		  .then(res=>{
+			const messages = res.messages;
+			const size = res.size;
+			
+			if(size<20){
+				isEnd=true;
+			}
+			// 리스트를 가져오기전 스크롤 높이를 저장
+			const oldScrollHeight = messageContainer.scrollHeight;
+			//메세지를 화면에 뿌려줌
+			messages.forEach(msg=>{
+				console.log("확인")
+				console.log(msg)
+				const li = document.createElement('li');
+				li.setAttribute('data-no',msg.messageId);
+				li.textContent = "["+msg.employeeUsername+"]"+msg.messageContent;
+				listChat.insertBefore(li,listChat.firstChild);
+				
+				
+			});
+			// 스크롤 위치 보정
+		      const newScrollHeight = messageContainer.scrollHeight;
+		      messageContainer.scrollTop = newScrollHeight - oldScrollHeight;
+			
+			
+		  })
+		  .finally(()=>{
+			  isScrolled=false;
+		  });
+	}
+	
+	</script>
+	
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	

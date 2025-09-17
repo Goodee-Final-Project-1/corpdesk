@@ -1,8 +1,6 @@
-package com.goodee.corpdesk.Chat;
+package com.goodee.corpdesk.chat.entity;
 
 import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,27 +11,21 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+@Entity
+@Table
 @Getter
 @Setter
 @ToString
-@Entity
-@Table
-public class ChatMessage {
+public class ChatRoom {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Long messageId;
-	
-	String employeeUsername;
-	Long chatRoomId;
-	String messageContent;
-	String messageType;
-	
-	@CreationTimestamp
-	LocalDateTime sent_at;
+	private Long chatRoomId;
+	private String chatRoomTitle;
 	
 	
-	LocalDateTime updated_at;
-	LocalDateTime creates_at;
-	String modifed_by;
+	private LocalDateTime updated_at;
+	private LocalDateTime creates_at;
+	private String modifed_by;
 	boolean use_yn;
+	
 }

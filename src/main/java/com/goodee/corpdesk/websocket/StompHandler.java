@@ -1,24 +1,38 @@
 package com.goodee.corpdesk.websocket;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.goodee.corpdesk.chat.entity.ChatParticipant;
+import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
+import com.goodee.corpdesk.chat.service.ChatParticipantService;
 import com.goodee.corpdesk.security.JwtTokenManager;
 
 @Component
 public class StompHandler implements ChannelInterceptor{
 
+    private final ChatParticipantRepository chatParticipantRepository;
+
 	@Autowired
 	private JwtTokenManager jwtTokenManager;
+	@Autowired
+	private ChatParticipantService chatParticipantService;
+
+    StompHandler(ChatParticipantRepository chatParticipantRepository) {
+        this.chatParticipantRepository = chatParticipantRepository;
+    }
 	
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
+		
 		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 		
 		//stomp로 요청이 connect인 경우 
@@ -35,7 +49,26 @@ public class StompHandler implements ChannelInterceptor{
 			
 		
 		}
+		if(StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+			//stomp 헤더에서 principal을 꺼냄
+			Authentication auth = (Authentication)accessor.getUser();
+			String username = auth.getName();
+			System.out.println("##########################################");
+			System.out.println(username);
+			//목적지 url을 가져와서 방번호를 추출함
+			Long chatRoomId = Long.parseLong(accessor.getDestination().substring(accessor.getDestination().lastIndexOf("/")+1)); 
+	        System.out.println(chatRoomId);
+			ChatParticipant chatParticipant = new  ChatParticipant();
+			chatParticipant.setChatRoomId(chatRoomId);
+			chatParticipant.setEmployeeUsername(username);
+			
+			if(!chatParticipantService.isRoomParticipant(chatParticipant)) {
+				System.out.println("예외발생");
+	        	throw new AccessDeniedException("");
+	        }
+		}
 		return message;
 	}
+	
 	
 }
