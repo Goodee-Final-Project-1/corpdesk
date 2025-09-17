@@ -2,6 +2,8 @@ package com.goodee.corpdesk.approval.entity;
 
 import java.time.LocalDate;
 
+import com.goodee.corpdesk.approval.dto.ApproverDTO;
+import com.goodee.corpdesk.approval.dto.ResponseApprovalDTO;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -55,5 +57,27 @@ public class Approval extends BaseEntity {
 	@Column(nullable = false)
 	@ColumnDefault("'w'") // 기본값은 w(결재대기)
 	private Character status;
+
+    public ApprovalDTO toDTO() {
+        return ApprovalDTO.builder()
+                        .approvalId(approvalId)
+                        .username(username)
+                        .departmentId(departmentId)
+                        .formType(formType)
+                        .formContent(formContent)
+                        .status(status)
+                        .build();
+    }
+
+    public ResponseApprovalDTO toResponseApprovalDTO() {
+        return ResponseApprovalDTO.builder()
+                                .approvalId(approvalId)
+                                .username(username)
+                                .departmentId(departmentId)
+                                .formType(formType)
+                                .formContent(formContent)
+                                .status(status)
+                                .build();
+    }
 	
 }

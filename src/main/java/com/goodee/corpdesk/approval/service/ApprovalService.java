@@ -3,7 +3,9 @@ package com.goodee.corpdesk.approval.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.goodee.corpdesk.approval.dto.ResponseApprovalDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -209,6 +211,27 @@ public class ApprovalService {
 
         return result;
 
+    }
+
+    public ResponseApprovalDTO getApproval(Long approvalId) throws Exception {
+        // 1. 결재 조회
+        Optional<Approval> result = approvalRepository.findById(approvalId);
+
+        if(result.isEmpty())  return null;
+
+        Approval approval = result.get();
+        ResponseApprovalDTO responseApprovalDTO = approval.toResponseApprovalDTO();
+        
+        // 2. 결재자 조회
+        List<Approver> result2 = approverRepository.findAllByApprovalId(approvalId);
+
+        if(result2.isEmpty())  return responseApprovalDTO; // 결재자가 없으면? approval만 DTO에 담아서 return
+
+        // 3. 결재와 결재자를 DTO에 담아 반환
+        List<ApproverDTO> approverDTOList = result2.stream().map(Approver::toDTO).toList();
+        responseApprovalDTO.setApproverDTOList(approverDTOList);
+
+        return responseApprovalDTO;
     }
 
 }

@@ -2,13 +2,14 @@ package com.goodee.corpdesk.approval.dto;
 
 import com.goodee.corpdesk.approval.entity.Approver;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ApproverDTO {
 	
 	private Long approverId;

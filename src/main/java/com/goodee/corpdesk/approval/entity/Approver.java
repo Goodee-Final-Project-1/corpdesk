@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.approval.entity;
 
+import com.goodee.corpdesk.approval.dto.ApproverDTO;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -45,5 +46,14 @@ public class Approver extends BaseEntity {
 	@Column(nullable = false)
 	@ColumnDefault("'w'") // 기본값은 w(결재대기)
 	private Character approveYn;
-	
+
+    public ApproverDTO toDTO() {
+        return ApproverDTO.builder()
+                          .approverId(approverId)
+                          .approvalId(approvalId)
+                          .username(username)
+                          .approvalOrder(approvalOrder)
+                          .approveYn(approveYn)
+                          .build();
+    }
 }
