@@ -1,0 +1,55 @@
+package com.goodee.corpdesk.Chat;
+
+import java.util.*;
+import java.security.Principal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+
+//http요청에 대한 url 매핑
+@RequestMapping("/chat/**")
+public class ChatController {
+	
+	@Autowired
+	private ChatService chatService;
+
+	@Autowired
+	// Spring에서 서버가 클라이언트(STOMP 구독자)에게 메시지를 푸시하기 위해 제공하는 템플릿 객체
+	private SimpMessagingTemplate messagingTemplate;
+
+	// websocket 요청에 대한 매핑 위의 requestMapping과 관련없고 websocket config에서 지정해준 prefix 사용
+	@MessageMapping("/chat/message")
+	public void chatMessage(ChatMessage msg, Principal principal) {
+		String username = principal.getName();
+		
+		
+		ChatRoom chatRoom = new ChatRoom();
+		msg.setEmployeeUsername(username);
+		messagingTemplate.convertAndSend("/sub/chat/room/" + msg.getChatRoomId(), msg);
+		System.out.println("방번호"+msg.getChatRoomId());
+		System.out.println("방번호"+msg.getMessageContent());
+
+	}
+
+	@GetMapping("room/{roomId}")
+	public String chatForm(@PathVariable Long roomId) {
+		return "Chat/chat_page";
+	}
+	@GetMapping("list")
+	public String chatList(Principal principal ,Model model) {
+			String username= principal.getName();
+			List<ChatRoom> roomList= chatService.getChatRoomList(username);
+			model.addAttribute("roomList", roomList);
+		
+		return "Chat/chat_list";
+	}
+
+}
