@@ -1,7 +1,7 @@
 package com.goodee.corpdesk.approval.entity;
 
-import java.time.LocalDate;
-
+import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -14,7 +14,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,7 +37,7 @@ public class Approval extends BaseEntity {
 	private Long approvalId;
 	
 	@Column(nullable = false)
-	private Integer employeeId;
+	private String username;
 	
 	@Column(nullable = false)
 	private Integer departmentId;
@@ -55,5 +54,38 @@ public class Approval extends BaseEntity {
 	@Column(nullable = false)
 	@ColumnDefault("'w'") // 기본값은 w(결재대기)
 	private Character status;
+
+    public ApprovalDTO toDTO() {
+        return ApprovalDTO.builder()
+                        .approvalId(approvalId)
+                        .username(username)
+                        .departmentId(departmentId)
+                        .formType(formType)
+                        .formContent(formContent)
+                        .status(status)
+                        .build();
+    }
+
+    public ResApprovalDTO toResApprovalDTO() {
+        return ResApprovalDTO.builder()
+                                .approvalId(approvalId)
+                                .username(username)
+                                .departmentId(departmentId)
+                                .formType(formType)
+                                .formContent(formContent)
+                                .status(status)
+                                .build();
+    }
+
+    public ReqApprovalDTO toReqApprovalDTO() {
+        return ReqApprovalDTO.builder()
+                .approvalId(approvalId)
+                .username(username)
+                .departmentId(departmentId)
+                .formType(formType)
+                .formContent(formContent)
+                .status(status)
+                .build();
+    }
 	
 }

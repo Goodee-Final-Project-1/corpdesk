@@ -4,17 +4,16 @@ import java.util.ArrayList;
 
 import com.goodee.corpdesk.approval.entity.Approval;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
-public class RequestApprovalDTO {
+@Builder @NoArgsConstructor @AllArgsConstructor
+public class ReqApprovalDTO {
 
 	private Long approvalId;
-	private Integer employeeId;
+	private String username;
 	private Integer departmentId;
 	private String formType;
 	private String formContent;
@@ -25,7 +24,7 @@ public class RequestApprovalDTO {
 	public Approval toApprovalEntity() {
 		return Approval.builder()
 					.approvalId(approvalId)
-					.employeeId(employeeId)
+					.username(username)
 					.departmentId(departmentId)
 					.formType(formType)
 					.formContent(formContent)
