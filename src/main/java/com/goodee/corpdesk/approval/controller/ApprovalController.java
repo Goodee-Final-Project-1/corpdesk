@@ -7,6 +7,7 @@ import com.goodee.corpdesk.approval.entity.Approval;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.goodee.corpdesk.approval.dto.ApprovalDTO;
@@ -74,6 +75,7 @@ public class ApprovalController {
 		return result;
 	}
 
+	// TODO username을 pathvalriable로 받는건 아닌 것 같음... 나중에 인증정보에서 꺼내오는 것으로 수정
 	// 특정 결재 목록 조회
     @GetMapping("list/{listType}/{username}")
     public List<ResApprovalDTO> getApprovalList(@PathVariable("listType") String listType, @PathVariable("username") String username) throws Exception {
@@ -86,16 +88,25 @@ public class ApprovalController {
         return result;
 
     }
-
+    
+    // TODO username을 pathvalriable로 받는건 아닌 것 같음... 나중에 인증정보에서 꺼내오는 것으로 수정
+    // TODO 첨부파일 유무&갯수 정보도 끌고와서 화면에 뿌려주면 유용할듯
+    // TODO DTO에 부서 이름도 담아서 화면에 뿌리도록 수정
+    // TODO 기안일 내림차순으로 정렬해서 상위 10개씩만 화면에 뿌리도록 수정
     // 모든 결재 목록 조회
     @GetMapping("list/{username}")
-    public String getApprovalList(@PathVariable("username") String username) throws Exception {
+    public String getApprovalList(@PathVariable("username") String username, Model model) throws Exception {
 //    public List<ResApprovalDTO> getApprovalList(@PathVariable("username") String username) throws Exception {
 
         System.err.println("list()");
 
-        List<ResApprovalDTO> result = approvalService.getApprovalList("", username); // list 혹은 null 반환
-        log.info("{}", result);
+        List<ResApprovalDTO> reqList = approvalService.getApprovalList("request", username); // list 혹은 null 반환
+        log.info("{}", reqList);
+        model.addAttribute("reqList", reqList);
+        
+        List<ResApprovalDTO> waitList = approvalService.getApprovalList("wait", username); // list 혹은 null 반환
+        log.info("{}", waitList);
+        model.addAttribute("waitList", waitList);
 
         return "approval/list";
 

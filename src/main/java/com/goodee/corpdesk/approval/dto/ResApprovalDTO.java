@@ -1,8 +1,10 @@
 package com.goodee.corpdesk.approval.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.goodee.corpdesk.approval.entity.Approval;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -20,6 +22,8 @@ public class ResApprovalDTO {
 	private String formContent;
 	private Character status;
 	
+	private LocalDateTime createdAt;
+	
 	List<ApproverDTO> approverDTOList;
 	
 	public Approval toApprovalEntity() {
@@ -30,6 +34,7 @@ public class ResApprovalDTO {
 					.formType(formType)
 					.formContent(formContent)
 					.status(status)
+					.createdAt(createdAt)
 					.build();
 	}
 	

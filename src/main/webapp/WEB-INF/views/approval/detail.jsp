@@ -25,7 +25,7 @@
 				
 				<div class="col-lg-4 col-xl-3 col-xxl-2">
 					<div class="email-left-column email-options p-4 p-xl-5">
-						<a href="email-compose.html" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">Compose</a>
+						<a href="email-compose.html" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">새 결재 진행</a>
 						
 						<ul class="pb-2">
 						  <li class="d-block active mb-4">

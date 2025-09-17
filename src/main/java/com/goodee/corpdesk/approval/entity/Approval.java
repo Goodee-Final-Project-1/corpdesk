@@ -21,12 +21,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Setter
 @Getter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Builder
 @Entity @Table(name = "approval")
 @DynamicInsert
@@ -74,6 +76,7 @@ public class Approval extends BaseEntity {
                                 .formType(formType)
                                 .formContent(formContent)
                                 .status(status)
+                                .createdAt(super.getCreatedAt())
                                 .build();
     }
 
