@@ -22,7 +22,7 @@ public abstract class BaseEntity {
 	private LocalDateTime createdAt;
 	
 	@Column(nullable = false)
-	private Integer modifiedBy;
+	private String modifiedBy;
 	
 	@Column(nullable = false)
 	@ColumnDefault("true")
