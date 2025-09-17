@@ -73,7 +73,7 @@
 								  
 								  <tbody>
 								  	<c:forEach items="${reqList }" var="el">
-									    <tr>
+									    <tr style="cursor: pointer;">
 									      <td>${fn:substring(el.createdAt, 0, 10) }</td>
 									      <td>${el.formType }</td>
 									      <td>${el.departmentId }</td>
@@ -126,7 +126,7 @@
 								  
 								  <tbody>
 								  	<c:forEach items="${waitList }" var="el">
-									    <tr>
+									    <tr style="cursor: pointer;">
 									      <td>${fn:substring(el.createdAt, 0, 10) }</td>
 									      <td>${el.formType }</td>
 									      <td>${el.departmentId }</td>
