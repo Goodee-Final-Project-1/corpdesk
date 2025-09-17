@@ -56,7 +56,7 @@
     label.required::after {
         content: "*";
         color: red;
-        margin-left: 2px;
+        margin-left: 5px;
     }
 </style>
 
