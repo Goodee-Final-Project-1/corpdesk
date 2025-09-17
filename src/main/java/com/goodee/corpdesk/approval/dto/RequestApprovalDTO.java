@@ -14,7 +14,7 @@ import lombok.ToString;
 public class RequestApprovalDTO {
 
 	private Long approvalId;
-	private Integer employeeId;
+	private String username;
 	private Integer departmentId;
 	private String formType;
 	private String formContent;
@@ -25,7 +25,7 @@ public class RequestApprovalDTO {
 	public Approval toApprovalEntity() {
 		return Approval.builder()
 					.approvalId(approvalId)
-					.employeeId(employeeId)
+					.username(username)
 					.departmentId(departmentId)
 					.formType(formType)
 					.formContent(formContent)

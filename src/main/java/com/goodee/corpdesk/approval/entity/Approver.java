@@ -37,7 +37,7 @@ public class Approver extends BaseEntity {
 	private Long approvalId;
 	
 	@Column(nullable = false)
-	private Integer employeeId;
+	private String username;
 	
 	@Column(nullable = false)
 	private Integer approvalOrder;

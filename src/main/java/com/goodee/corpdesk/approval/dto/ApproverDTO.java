@@ -13,7 +13,7 @@ public class ApproverDTO {
 	
 	private Long approverId;
 	private Long approvalId;
-	private Integer employeeId;
+	private String username;
 	private Integer approvalOrder;
 	private Character approveYn;
 	
@@ -22,7 +22,7 @@ public class ApproverDTO {
 		return Approver.builder()
 					.approverId(approverId)
 					.approvalId(approvalId)
-					.employeeId(employeeId)
+					.username(username)
 					.approvalOrder(approvalOrder)
 					.approveYn(approveYn)
 					.build();
