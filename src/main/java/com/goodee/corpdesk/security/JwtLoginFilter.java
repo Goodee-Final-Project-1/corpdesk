@@ -1,20 +1,21 @@
 package com.goodee.corpdesk.security;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
 
+@Slf4j
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 	private AuthenticationManager authenticationManager;
@@ -25,7 +26,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		this.jwtTokenManager = jwtTokenManager;
 		
 		// 로그인 URL
-		this.setFilterProcessesUrl("/member/login");
+		this.setFilterProcessesUrl("/login-process");
 	}
 
 	@Override
@@ -44,19 +45,17 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		String accessToken = jwtTokenManager.makeAccessToken(authResult);
-		// FIXME: 리프레시 토큰 저장 방법 미정
 		String refreshToken = jwtTokenManager.makeRefreshToken(authResult);
 		
 		Cookie cookie = new Cookie("accessToken", accessToken);
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
-		int validTime = (int) (jwtTokenManager.getAccessValidTime() / 1000);
-		cookie.setMaxAge(validTime);
+		cookie.setMaxAge(jwtTokenManager.getRefreshValidTime());
 		cookie.setHttpOnly(true);
 		
 		response.addCookie(cookie);
 		
-		response.sendRedirect("/");
+		response.sendRedirect("/employee"); // 로그인 성공 시 리다이렉트
 	}
 
 	@Override
@@ -89,7 +88,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		}
 		
 		message = URLEncoder.encode(message, "UTF-8");
-		response.sendRedirect("./login?failMessage=" + message);
+		response.sendRedirect("/login/" + message);
 	}
 	
 	
