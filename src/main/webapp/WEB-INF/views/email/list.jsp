@@ -1,0 +1,76 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+				 pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Insert title here</title>
+	<c:import url="/WEB-INF/views/include/head.jsp"/>
+</head>
+
+<c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/>
+
+<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
+
+<c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
+
+<c:import url="/WEB-INF/views/include/header.jsp"/>
+
+<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
+<!-- 내용 시작 -->
+<div class="email-wrapper rounded border bg-white">
+	<div class="row no-gutters justify-content-center">
+		<jsp:include page="aside.jsp"/>
+		<%--	<%@ include file="aside.jsp"%>--%>
+		<main class="col-lg-8 col-xl-9 col-xxl-10">
+			<div class="email-right-column p-4 p-xl-5">
+				<div class="justify-content-center mb-5">
+					<%-- 페이징 --%>
+					<!-- Flat Rounded Pagination -->
+					<div class="card card-default align-items-center border-0">
+						<div class="card-body">
+							<nav aria-label="Page navigation example">
+								<ul class="pagination pagination-flat pagination-flat-rounded">
+									<li class="page-item">
+										<a class="page-link" href="#" aria-label="Previous">
+											<span aria-hidden="true" class="mdi mdi-chevron-left"></span>
+											<span class="sr-only">Previous</span>
+										</a>
+									</li>
+									<li class="page-item active">
+										<a class="page-link" href="#">1</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">2</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">3</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#" aria-label="Next">
+											<span aria-hidden="true" class="mdi mdi-chevron-right"></span>
+											<span class="sr-only">Next</span>
+										</a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+				<div class="border border-top-0 rounded table-responsive email-list">
+					<table id="table" class="table mb-0 table-email">
+					</table>
+				</div>
+			</div>
+		</main>
+	</div>
+</div>
+<script src="/js/email/list.js"></script>
+<!-- 내용 끝 -->
+<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
+
+<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
+
+<c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
+</html>

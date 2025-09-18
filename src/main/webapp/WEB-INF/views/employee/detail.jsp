@@ -23,28 +23,25 @@
 <div>
 	<ul>
 		<li>이름: ${employee.name}</li>
-		<form:form action="/employee/update/email" method="post" modelAttribute="employee">
-			<li>
-				<form:label path="externalEmail">이메일: </form:label>
-				<form:input path="externalEmail" placeholder="이메일"/>
-				<form:errors path="externalEmail"/>
-			</li>
-			<li>
-				<form:label path="externalEmailPassword">이메일 비밀번호: </form:label>
-				<form:input path="externalEmailPassword" placeholder="이메일 비밀번호"/>
-				<form:errors path="externalEmailPassword"/>
-			</li>
-			<form:button class="btn btn-primary">이메일 변경</form:button>
-		</form:form>
-	</ul>
-	<p>이메일 비밀번호 설정 방법</p>
-	<ul>
-		<li>
-			<a href="https://help.naver.com/service/5640/contents/8584" target="_blank">네이버 예시</a>
-		</li>
-		<li>
-			<a href="https://support.google.com/accounts/answer/185833" target="_blank">구글 예시</a>
-		</li>
+		<li>이메일: ${employee.externalEmail}</li>
+		<li>부서:</li>
+		<li>직책:</li>
+		<li>직위:</li>
+		<li>휴대전화:</li>
+		<li>직통전화:</li>
+		<li>입사일자:</li>
+
+		<li>주민(외국인)번호:</li>
+		<li>국적:</li>
+		<li>체류 자격:</li>
+		<li>영문 이름:</li>
+
+		<li>성별:</li>
+		<li>생년월일:</li>
+		<li>주소:</li>
+		<li>현재 기본급:</li>
+		<li>급여 은행:</li>
+		<li>급여 계좌:</li>
 	</ul>
 
 </div>

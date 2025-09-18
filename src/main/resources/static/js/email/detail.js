@@ -5,9 +5,9 @@ const recipients = document.getElementById('recipients');
 const sentDate = document.getElementById('sentDate');
 const content = document.getElementById('content');
 const pathArr = location.pathname.split('/');
-const no = parseInt(pathArr[pathArr.length - 1]);
+const emailNo = parseInt(pathArr[pathArr.length - 1]);
 
-console.log(no);
+// console.log(emailNo);
 
 async function getDetail() {
 	try {
@@ -17,13 +17,13 @@ async function getDetail() {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				'no': no
+				'emailNo': emailNo
 			})
 		});
 		if (!response.ok) throw new Error('수신 오류');
 		const data = await response.json();
 
-		console.log(data);
+		// console.log(data);
 
 		subject.append(data.subject);
 		from.append(data.from);

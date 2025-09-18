@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class EmailDTO {
 
-	private Integer no;
+	private Integer emailNo;
 	private String subject;
 	private String text;
 //	private Object content;

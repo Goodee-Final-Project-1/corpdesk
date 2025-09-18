@@ -19,30 +19,37 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
-<div>
-	<main>
-		<div>
-			<h1 id="subject"></h1>
-		</div>
-		<div>
-			<div>
-				<ul>
-					<li>
-						<h2 id="from"></h2>
-					</li>
-					<li>
-						<h3 id="recipients"></h3>
-					</li>
-					<li>
-						<p id="sentDate"></p>
-					</li>
-				</ul>
+<div class="email-wrapper rounded border bg-white">
+	<div class="row no-gutters justify-content-center">
+		<jsp:include page="aside.jsp"/>
+		<main class="col-lg-8 col-xl-9 col-xxl-10">
+			<div class="email-right-column p-4 p-xl-5">
+				<div class="border rounded email-details">
+					<div class="email-details-header">
+						<h4 id="subject" class="text-dark"></h4>
+					</div>
+					<div class="email-details-content">
+						<div class="email-details-content-header">
+							<ul>
+								<li>
+									<h6 id="from" class="mt-0 text-dark font-weight-bold"></h6>
+								</li>
+								<li>
+									<span id="recipients"></span>
+								</li>
+								<li>
+									<time id="sentDate" class="p-1 p-xl-2"></time>
+								</li>
+							</ul>
+						</div>
+						<div>
+							<p id="content"></p>
+						</div>
+					</div>
+				</div>
 			</div>
-			<div>
-				<p id="content"></p>
-			</div>
-		</div>
-	</main>
+		</main>
+	</div>
 </div>
 
 <!-- 내용 끝 -->

@@ -3,6 +3,7 @@ package com.goodee.corpdesk.email;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import jakarta.mail.*;
+import jakarta.mail.internet.MimeUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -25,26 +26,26 @@ public class EmailService {
 	private AesBytesEncryptor aesBytesEncryptor;
 
 	// 메일 상세
-	public EmailDTO receivedDetail(String username, Integer no) {
+	public EmailDTO receivedDetail(String username, Integer emailNo) {
 		Employee employee = getEmployee(username);
-		return mailDetail(employee, no, "INBOX");
+		return mailDetail(employee, emailNo, "INBOX");
 	}
 
-	public EmailDTO sentDetail(String username, Integer no) {
+	public EmailDTO sentDetail(String username, Integer emailNo) {
 		Employee employee = getEmployee(username);
 
 		EmailDTO emailDTO = null;
 
 		if (employee.getExternalEmail().contains("gmail")) {
-			emailDTO = this.mailDetail(employee, no, "[Gmail]/Sent Mail");
+			emailDTO = this.mailDetail(employee, emailNo, "[Gmail]/Sent Mail");
 		} else {
-			emailDTO = this.mailDetail(employee, no, "Sent Messages");
+			emailDTO = this.mailDetail(employee, emailNo, "Sent Messages");
 		}
 
 		return emailDTO;
 	}
 
-	public EmailDTO mailDetail(Employee employee, Integer no, String folderName) {
+	public EmailDTO mailDetail(Employee employee, Integer emailNo, String folderName) {
 		String myEmail = employee.getExternalEmail();
 		String host = "imap." + myEmail.split("@")[1];
 		String password = employee.getExternalEmailPassword();
@@ -70,13 +71,19 @@ public class EmailService {
 			// 받아온 메일 목록
 			Message[] messages = folder.getMessages();
 
-			Message message = messages[no];
+			Message message = messages[emailNo];
 
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-			emailDTO.setFrom(Arrays.toString(message.getFrom()));
+			String from = Arrays.toString(message.getFrom());
+			if (from.toUpperCase().contains("=?UTF-8?B?")) {
+				from = '[' + MimeUtility.decodeText(from.substring(from.indexOf("=?"), from.lastIndexOf("?=") + 2))
+						+ from.substring(from.lastIndexOf("?=") + 2);
+			}
+
+			emailDTO.setFrom(from);
 			emailDTO.setSubject(message.getSubject());
-			emailDTO.setNo(message.getMessageNumber());
+			emailDTO.setEmailNo(message.getMessageNumber());
 			emailDTO.setReceivedDate(format.format(message.getReceivedDate()));
 			emailDTO.setSentDate(format.format(message.getSentDate()));
 			emailDTO.setRecipients(Arrays.toString(message.getAllRecipients()));
@@ -125,7 +132,7 @@ public class EmailService {
 
 		List<EmailDTO> messageList = new ArrayList<>();
 		// FIXME:
-		int start = pageable.getPageNumber() * pageable.getPageSize();
+//		int start = pageable.getPageNumber() * pageable.getPageSize();
 
 		try {
 			store = session.getStore("imap");
@@ -134,11 +141,15 @@ public class EmailService {
 			folder = store.getFolder(folderName);
 			folder.open(Folder.READ_ONLY);
 
-			// 받아온 메일 목록
-			Message[] messages = folder.getMessages();
+			int total = folder.getMessageCount();
+			int start = total;
 
-			for (int i = messages.length - 1; i >= messages.length - 5; i--) {
-				Message message = messages[i];
+			// 받아온 메일 목록
+			Message[] messages = folder.getMessages(start - 5, start);
+
+			for (Message message : messages) {
+//			for (int i = messages.length - 1; i >= 0; i--) {
+//				Message message = messages[i];
 
 //				log.info("From: {}", message.getFrom());
 //				log.info("Sub: {}", message.getSubject());
@@ -151,9 +162,14 @@ public class EmailService {
 				EmailDTO emailDTO = new EmailDTO();
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-				emailDTO.setFrom(Arrays.toString(message.getFrom()));
+				String from = Arrays.toString(message.getFrom());
+				if (from.toUpperCase().contains("=?UTF-8?B?")) {
+					from = '[' + MimeUtility.decodeText(from.substring(from.indexOf("=?"), from.lastIndexOf("?=") + 2))
+							+ from.substring(from.lastIndexOf("?=") + 2);
+				}
+				emailDTO.setFrom(from);
 				emailDTO.setSubject(message.getSubject());
-				emailDTO.setNo(message.getMessageNumber());
+				emailDTO.setEmailNo(message.getMessageNumber());
 				emailDTO.setReceivedDate(format.format(message.getReceivedDate()));
 				emailDTO.setSentDate(format.format(message.getSentDate()));
 				emailDTO.setRecipients(Arrays.toString(message.getAllRecipients()));

@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.email;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,10 +15,11 @@ public class EmailController {
 //	EmailService emailService;
 
 	@GetMapping("received")
-	public void received() {
+	public String received() {
+		return "email/list";
 	}
 
-	@GetMapping("received/{no}")
+	@GetMapping("received/detail/{no}")
 	public String received(@PathVariable Integer no) {
 		return "email/detail";
 	}
@@ -26,10 +29,11 @@ public class EmailController {
 	}
 
 	@GetMapping("sent")
-	public void sent() {
+	public String sent() {
+		return "email/list";
 	}
 
-	@GetMapping("sent/{no}")
+	@GetMapping("sent/detail/{no}")
 	public String sent(@PathVariable Integer no) {
 		return "email/detail";
 	}
