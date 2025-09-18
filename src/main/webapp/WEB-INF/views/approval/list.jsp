@@ -56,7 +56,7 @@
 							
 							<div class="d-flex justify-content-between align-items-center">
 								<h4 class="text-dark">결재 요청 문서 목록</h4>
-								<button type="button" class="btn btn-outline-primary pl-3 pr-3"><i class="mdi mdi-plus"></i></button>
+								<button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
 							</div>
 							
 							<div class="email-details-content pl-0 pr-0">
@@ -79,13 +79,13 @@
 									      <td>${el.departmentId }</td>
 									      <td>
 									      	<c:choose>
-									      		<c:when test="${el.status } == 'Y'">
+									      		<c:when test="${el.status eq 89}">
 									      			<span class="badge badge-info">승인</span>
 									      		</c:when>
-									      		<c:when test="${el.status } == 'N'">
+									      		<c:when test="${el.status eq 78}">
 									      			<span class="badge badge-danger">반려</span>
 									      		</c:when>
-									      		<c:when test="${el.status } == 'W'">
+									      		<c:when test="${el.status eq 87}">
 									      			<span class="badge badge-light">대기</span>
 									      		</c:when>
 									      		<c:otherwise>
@@ -108,7 +108,7 @@
 							
 							<div class="d-flex justify-content-between align-items-center">
 								<h4 class="text-dark">결재 대기 문서 목록</h4>
-								<button type="button" class="btn btn-outline-primary pl-3 pr-3"><i class="mdi mdi-plus"></i></button>
+								<button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
 							</div>
 							
 							<div class="email-details-content pl-0 pr-0">
@@ -133,13 +133,13 @@
 									      <td>${el.username }</td>
 									      <td>
 									      	<c:choose>
-									      		<c:when test="${el.status } == 'Y'">
+									      		<c:when test="${el.status eq 89}">
 									      			<span class="badge badge-info">승인</span>
 									      		</c:when>
-									      		<c:when test="${el.status } == 'N'">
+									      		<c:when test="${el.status eq 78}">
 									      			<span class="badge badge-danger">반려</span>
 									      		</c:when>
-									      		<c:when test="${el.status } == 'W'">
+									      		<c:when test="${el.status eq 87}">
 									      			<span class="badge badge-light">대기</span>
 									      		</c:when>
 									      		<c:otherwise>
