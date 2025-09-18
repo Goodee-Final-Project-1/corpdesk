@@ -1,27 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<%@ taglib prefix="d" uri="http://java.sun.com/jsp/jstl/core" %>
-<head>
-	<meta charset="UTF-8">
-	<title>Insert title here</title>
-	<c:import url="/WEB-INF/views/include/head.jsp"/>
-</head>
-
-<c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
-
-	<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
-
-	<c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
-
-		<c:import url="/WEB-INF/views/include/header.jsp"/>
-	
-		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
-			<!-- 내용 시작 -->
-			<h2>사원 등록</h2>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<h2>사원 등록</h2>
 <p>*항목은 필수 입력 항목입니다</p>
 <form:form id="addEmployeeForm" method="post" modelAttribute="employee">
     <label class="required">이름</label>: 
@@ -63,12 +46,6 @@
     <input type="submit" value="등록"/>
     <a href="<c:url value='/employee/list'/>">목록으로</a>
 </form:form>
-			<!-- 내용 끝 -->
-		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
-	
-	<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
-	
-<c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 
 <style>
     .error {
@@ -82,5 +59,6 @@
         margin-left: 5px;
     }
 </style>
+
 
 </html>

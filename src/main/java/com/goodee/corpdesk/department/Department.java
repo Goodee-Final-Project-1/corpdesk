@@ -25,10 +25,19 @@ public class Department {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer departmentId;
 	private Integer departmentHigh;
-	private String departmentName;
+	private String departmentName = "인피니티오토";
 	private LocalDateTime updatedAt;
 	private LocalDateTime createdAt;
 	private String modifiedBy;
 	private Boolean useYn;
+	
+	
+	// departmentName만 받는 생성자 추가
+    public Department(String departmentName) {
+        this.departmentName = departmentName;
+        this.useYn = true;  // 기본값 예시
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 	
 }

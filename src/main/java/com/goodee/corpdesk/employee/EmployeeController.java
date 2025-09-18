@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.employee;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,6 +13,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.goodee.corpdesk.attendance.AttendanceRepository;
 import com.goodee.corpdesk.department.DepartmentRepository;
@@ -40,6 +45,14 @@ public class EmployeeController {
 	@Autowired
 	private PositionRepository positionRepository;
  
+	// ⭐⭐ File 관련 의존성 주입은 이제 Service로 이동합니다.
+	// @Autowired
+    // private EmployeeFileRepository employeeFileRepository;
+    // @Autowired
+    // private FileManager fileManager;
+    // @Value("${app.upload}")
+    // private String uploadPath;
+	
 	@GetMapping("/add")
 	public String showAddForm(Model model) {
 		model.addAttribute("employee", new Employee());
@@ -80,29 +93,54 @@ public class EmployeeController {
 
 	@GetMapping("/edit/{id}")
 	public String showEditForm(@PathVariable("id") String id, Model model) {
-		Employee employee = employeeService.getEmployee(id)
-				.orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
-		model.addAttribute("employee", employee);
-		model.addAttribute("departments", departmentRepository.findAll());
-		model.addAttribute("positions", positionRepository.findAll());
-		return "employee/edit";
+	    
+	    Employee employee = employeeService.getEmployee(id)
+	            .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
+	    model.addAttribute("employee", employee);
+	    model.addAttribute("departments", departmentRepository.findAll());
+	    model.addAttribute("positions", positionRepository.findAll());
+	    
+	    // EmployeeFileRepository를 사용하여 프로필 사진 정보를 조회하고 모델에 담기
+	    Optional<EmployeeFile> employeeFileOptional = employeeService.getEmployeeFileByUsername(employee.getUsername());
+	    employeeFileOptional.ifPresent(employeeFile -> model.addAttribute("employeeFile", employeeFile));
+	    
+	    // ✅ 출퇴근 내역 조회 후 모델에 담기
+	    model.addAttribute("attendances",
+	            attendanceRepository.findByUsername(employee.getUsername()));
+	            
+	    return "employee/edit";
 	}
 	
-	
-
 	@PostMapping("/edit")
-	public String editEmployee(@Validated(UpdateGroup.class) @ModelAttribute Employee employee,
-			BindingResult bindingResult, Model model) {
-		if (bindingResult.hasErrors()) {
-			model.addAttribute("departments", departmentRepository.findAll());
-			model.addAttribute("positions", positionRepository.findAll());
-			return "employee/edit";
-		}
+	public String editEmployee(@Validated(UpdateGroup.class) @ModelAttribute Employee employeeFromForm,
+	        BindingResult bindingResult, Model model,
+	        @RequestParam(value = "profileImageFile", required = false) MultipartFile profileImageFile) {
 
-		employeeService.updateEmployee(employee);
-		return "redirect:/employee/list";
+	    if (bindingResult.hasErrors()) {
+	        model.addAttribute("departments", departmentRepository.findAll());
+	        model.addAttribute("positions", positionRepository.findAll());
+	        return "employee/edit";
+	    }
+	    
+	    // ⭐⭐ 파일과 직원 정보를 Service로 넘겨서 한 번에 처리합니다.
+	    employeeService.updateEmployee(employeeFromForm, profileImageFile);
+
+	    return "redirect:/employee/list";
 	}
-
+	
+	@PostMapping("/deleteProfileImage")
+	@ResponseBody
+	public String deleteProfileImage(@RequestParam("username") String username) {
+	    try {
+            // ⭐⭐ 삭제 로직을 Service로 위임합니다.
+	        employeeService.deleteProfileImage(username);
+	        return "success";
+	    } catch (Exception e) {
+	        log.error("직원 {}의 프로필 이미지 삭제 실패: {}", username, e);
+	        return "fail";
+	    }
+	}
+	
 	@PostMapping("/delete/{id}")
 	public String deleteEmployee(@PathVariable("id") String id) {
 		employeeService.deactivateEmployee(id);

@@ -54,6 +54,17 @@ public class Employee implements UserDetails {
 //	@GeneratedValue(strategy = GenerationType.IDENTITY)
 //	private Integer employeeId;
 
+	//파일
+	@Column(name = "profile_image_save_name")
+	private String profileImageSaveName;
+	@Column(name = "profile_image_extension")
+    private String profileImageOriName;
+	@Column(name = "profile_image_ori_name")
+    private String profileImageExtension;
+	
+	
+	
+	
 	@Column(name = "position_id")
 	private Integer positionId;
 

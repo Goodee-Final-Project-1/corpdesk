@@ -1,10 +1,12 @@
 package com.goodee.corpdesk.employee;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value; // ⭐ 추가
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,9 +14,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile; // ⭐ 추가
 
 import com.goodee.corpdesk.department.Department;
 import com.goodee.corpdesk.department.DepartmentRepository;
+import com.goodee.corpdesk.file.FileManager; // ⭐ 추가
+import com.goodee.corpdesk.file.dto.FileDTO; // ⭐ 추가
 import com.goodee.corpdesk.position.Position;
 import com.goodee.corpdesk.position.PositionRepository;
 
@@ -33,6 +38,14 @@ public class EmployeeService implements UserDetailsService {
 	private DepartmentRepository departmentRepository;
 	@Autowired
 	private PositionRepository positionRepository;
+
+    // ⭐⭐ 파일 처리를 위해 추가된 의존성 주입
+    @Autowired
+    private EmployeeFileRepository employeeFileRepository;
+    @Autowired
+    private FileManager fileManager;
+    @Value("${app.upload}")
+    private String uploadPath;
 
 	// 등록
 	public Employee addEmployee(Employee employee) {
@@ -65,11 +78,20 @@ public class EmployeeService implements UserDetailsService {
 		return employeeRepository.findById(id);
 	}
 
-	// 수정
+    // ⭐⭐ 프로필 파일 정보 조회 메서드 추가
+    public Optional<EmployeeFile> getEmployeeFileByUsername(String username) {
+        return employeeFileRepository.findByUsername(username);
+    }
+    
+	// ⭐️ 기존 수정 메서드는 그대로 유지
 	public Employee updateEmployee(Employee employee) {
 		Employee persisted = employeeRepository.findById(employee.getUsername())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + employee.getUsername()));
-
+		
+		persisted.setProfileImageSaveName(employee.getProfileImageSaveName());
+	    persisted.setProfileImageExtension(employee.getProfileImageExtension());
+	    persisted.setProfileImageOriName(employee.getProfileImageOriName());
+		
 		persisted.setStatus(employee.getStatus());
 		persisted.setAddress(employee.getAddress());
 		persisted.setBirthDate(employee.getBirthDate());
@@ -85,13 +107,66 @@ public class EmployeeService implements UserDetailsService {
 		persisted.setEmployeeType(employee.getEmployeeType());
 		persisted.setMobilePhone(employee.getMobilePhone());
 		persisted.setEnabled(employee.getEnabled());
-		persisted.setStatus(employee.getStatus());
 		persisted.setLastWorkingDay(employee.getLastWorkingDay());
 		persisted.setDepartmentId(employee.getDepartmentId());
 		persisted.setPositionId(employee.getPositionId());
 
 		return employeeRepository.save(persisted);
 	}
+
+    // ⭐⭐ 새로 추가된 updateEmployee 메서드 (파일 처리 로직 포함)
+    @Transactional
+    public void updateEmployee(Employee employeeFromForm, MultipartFile profileImageFile) {
+        // 기존 직원 정보 가져오기
+        Employee persisted = employeeRepository.findById(employeeFromForm.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + employeeFromForm.getUsername()));
+
+        // Employee 엔티티 필드 업데이트 (기존 updateEmployee 로직과 동일)
+        persisted.setName(employeeFromForm.getName());
+        persisted.setEmployeeType(employeeFromForm.getEmployeeType());
+        persisted.setExternalEmail(employeeFromForm.getExternalEmail());
+        persisted.setMobilePhone(employeeFromForm.getMobilePhone());
+        persisted.setDepartmentId(employeeFromForm.getDepartmentId());
+        persisted.setPositionId(employeeFromForm.getPositionId());
+        persisted.setHireDate(employeeFromForm.getHireDate());
+        persisted.setAddress(employeeFromForm.getAddress());
+        persisted.setStatus(employeeFromForm.getStatus());
+        persisted.setBirthDate(employeeFromForm.getBirthDate());
+        persisted.setEnglishName(employeeFromForm.getEnglishName());
+        persisted.setVisaStatus(employeeFromForm.getVisaStatus());
+        persisted.setResidentNumber(employeeFromForm.getResidentNumber());
+        persisted.setNationality(employeeFromForm.getNationality());
+        persisted.setPassword(employeeFromForm.getPassword());
+        persisted.setGender(employeeFromForm.getGender());
+        persisted.setEnabled(employeeFromForm.getEnabled());
+        persisted.setLastWorkingDay(employeeFromForm.getLastWorkingDay());
+
+        employeeRepository.save(persisted);
+        
+        // ⭐⭐ 파일 처리 로직 ⭐⭐
+        if (profileImageFile != null && !profileImageFile.isEmpty()) {
+            // 1. 기존 파일 삭제
+            Optional<EmployeeFile> oldFileOptional = employeeFileRepository.findByUsername(persisted.getUsername());
+            
+            if (oldFileOptional.isPresent()) {
+                EmployeeFile oldFile = oldFileOptional.get();
+                FileDTO oldFileDTO = new FileDTO(oldFile.getSaveName(), oldFile.getExtension());
+                fileManager.deleteFile(uploadPath + "profile" + File.separator, oldFileDTO);
+                employeeFileRepository.delete(oldFile);
+            }
+            
+            // 2. 새 파일 저장
+            String profileImagePath = uploadPath + "profile" + File.separator;
+            FileDTO fileDTO = fileManager.saveFile(profileImagePath, profileImageFile);
+            
+            EmployeeFile newFile = new EmployeeFile();
+            newFile.setUsername(persisted.getUsername());
+            newFile.setOriName(fileDTO.getOriName());
+            newFile.setSaveName(fileDTO.getSaveName());
+            newFile.setExtension(fileDTO.getExtension());
+            employeeFileRepository.save(newFile);
+        }
+    }
 
 	// 삭제(비활성화)
 	public void deactivateEmployee(String id) {
@@ -103,6 +178,21 @@ public class EmployeeService implements UserDetailsService {
 		employee.setUseYn(false);
 		employeeRepository.save(employee);
 	}
+    
+    // ⭐⭐ 프로필 이미지 삭제 메서드 추가
+    @Transactional
+    public void deleteProfileImage(String username) {
+        Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(username);
+        
+        if (fileOptional.isPresent()) {
+            EmployeeFile employeeFile = fileOptional.get();
+            FileDTO fileDTO = new FileDTO(employeeFile.getSaveName(), employeeFile.getExtension());
+            String profileImagePath = uploadPath + "profile" + File.separator;
+            fileManager.deleteFile(profileImagePath, fileDTO);
+            employeeFileRepository.delete(employeeFile);
+        }
+    }
+
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -112,14 +202,12 @@ public class EmployeeService implements UserDetailsService {
 		Role role = roleOp.get();
 		employee.setRole(role);
 		System.out.println("========================= " + employee.getRole().getRoleName());
-
 		return employee;
 	}
 
 	public void join(Employee employee) {
 		String encoded = passwordEncoder.encode(employee.getPassword());
 		employee.setPassword(encoded);
-
 		employeeRepository.save(employee);
 	}
 
@@ -141,7 +229,6 @@ public class EmployeeService implements UserDetailsService {
 		}
 
 		String encoded = passwordEncoder.encode(employee.getPasswordNew());
-
 		origin.setPassword(encoded);
 		return employeeRepository.save(origin); 
 	}

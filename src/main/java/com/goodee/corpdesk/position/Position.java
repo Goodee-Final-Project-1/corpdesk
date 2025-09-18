@@ -1,6 +1,5 @@
 package com.goodee.corpdesk.position;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
@@ -29,4 +28,11 @@ public class Position {
 	private LocalDateTime createdAt;
 	private String modifiedBy;
 	private Boolean useYn;
+	
+	public Position(String positionName) {
+        this.positionName = positionName;
+        this.useYn = true;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 }
