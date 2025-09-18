@@ -2,10 +2,7 @@ package com.goodee.corpdesk.email;
 
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
-import jakarta.mail.Folder;
-import jakarta.mail.Message;
-import jakarta.mail.Session;
-import jakarta.mail.Store;
+import jakarta.mail.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -27,16 +24,27 @@ public class EmailService {
 	@Autowired
 	private AesBytesEncryptor aesBytesEncryptor;
 
-	// 메일 가져오기
-	public List<ReceivedDTO> mailBox(String username, Pageable pageable) {
-		Optional<Employee> optional = employeeRepository.findById(username);
-		Employee employee = optional.get();
+	// 메일 상세
+	public EmailDTO receivedDetail(String username, Integer no) {
+		Employee employee = getEmployee(username);
+		return mailDetail(employee, no, "INBOX");
+	}
 
-		if (employee.getEncodedEmailPassword() != null) {
-			byte[] decoded = aesBytesEncryptor.decrypt(employee.getEncodedEmailPassword());
-			employee.setExternalEmailPassword(new String(decoded));
+	public EmailDTO sentDetail(String username, Integer no) {
+		Employee employee = getEmployee(username);
+
+		EmailDTO emailDTO = null;
+
+		if (employee.getExternalEmail().contains("gmail")) {
+			emailDTO = this.mailDetail(employee, no, "[Gmail]/Sent Mail");
+		} else {
+			emailDTO = this.mailDetail(employee, no, "Sent Messages");
 		}
 
+		return emailDTO;
+	}
+
+	public EmailDTO mailDetail(Employee employee, Integer no, String folderName) {
 		String myEmail = employee.getExternalEmail();
 		String host = "imap." + myEmail.split("@")[1];
 		String password = employee.getExternalEmailPassword();
@@ -49,42 +57,44 @@ public class EmailService {
 
 		Session session = Session.getInstance(props);
 		Store store = null;
-		Folder inbox = null;
+		Folder folder = null;
 
-		List<ReceivedDTO> messageList = new ArrayList<>();
-		int start = pageable.getPageNumber() * pageable.getPageSize();
-
+		EmailDTO emailDTO = new EmailDTO();
 		try {
 			store = session.getStore("imap");
 			store.connect(host, myEmail.split("@")[0], password);
 
-			inbox = store.getFolder("INBOX");
-			inbox.open(Folder.READ_ONLY);
+			folder = store.getFolder(folderName);
+			folder.open(Folder.READ_ONLY);
 
 			// 받아온 메일 목록
-			Message[] messages = inbox.getMessages();
+			Message[] messages = folder.getMessages();
 
-			for (int i = messages.length - 1; i >= messages.length - 5; i--) {
-				Message message = messages[i];
+			Message message = messages[no];
 
-				ReceivedDTO email = new ReceivedDTO();
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-				email.setFrom(Arrays.toString(message.getFrom()));
-				email.setSentDate(format.format(message.getSentDate()));
-				email.setReceivedDate(format.format(message.getReceivedDate()));
-				email.setMessageNumber(message.getMessageNumber());
-				email.setSubject(message.getSubject());
-				email.setReplyTo(Arrays.toString(message.getReplyTo()));
+			emailDTO.setFrom(Arrays.toString(message.getFrom()));
+			emailDTO.setSubject(message.getSubject());
+			emailDTO.setNo(message.getMessageNumber());
+			emailDTO.setReceivedDate(format.format(message.getReceivedDate()));
+			emailDTO.setSentDate(format.format(message.getSentDate()));
+			emailDTO.setRecipients(Arrays.toString(message.getAllRecipients()));
 
-				messageList.add(email);
+			Object content = message.getContent();
+
+			if (content instanceof String) {
+				emailDTO.setText(content.toString());
+			} else if (content instanceof Multipart) {
+				emailDTO.setText(getTextFromMultipart((Multipart) content));
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (inbox != null && inbox.isOpen()) {
-					inbox.close(false);
+				if (folder != null && folder.isOpen()) {
+					folder.close(false);
 				}
 				if (store != null && store.isConnected()) {
 					store.close();
@@ -92,6 +102,141 @@ public class EmailService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+
+		return emailDTO;
+	}
+
+	// 메일 가져오기
+	private List<EmailDTO> mailBox(Employee employee, Pageable pageable, String folderName) {
+		String myEmail = employee.getExternalEmail();
+		String host = "imap." + myEmail.split("@")[1];
+		String password = employee.getExternalEmailPassword();
+
+		Properties props = new Properties();
+		props.put("mail.store.protocol", "imap");
+		props.put("mail.imap.host", host);
+		props.put("mail.imap.port", "993");
+		props.put("mail.imap.ssl.enable", "true");
+
+		Session session = Session.getInstance(props);
+		Store store = null;
+		Folder folder = null;
+
+		List<EmailDTO> messageList = new ArrayList<>();
+		// FIXME:
+		int start = pageable.getPageNumber() * pageable.getPageSize();
+
+		try {
+			store = session.getStore("imap");
+			store.connect(host, myEmail.split("@")[0], password);
+
+			folder = store.getFolder(folderName);
+			folder.open(Folder.READ_ONLY);
+
+			// 받아온 메일 목록
+			Message[] messages = folder.getMessages();
+
+			for (int i = messages.length - 1; i >= messages.length - 5; i--) {
+				Message message = messages[i];
+
+//				log.info("From: {}", message.getFrom());
+//				log.info("Sub: {}", message.getSubject());
+//				log.info("No: {}", message.getMessageNumber());
+//				log.info("Received: {}", message.getReceivedDate());
+//				log.info("Recipients: {}", message.getRecipients(Message.RecipientType.TO));
+//				log.info("Sent: {}", message.getSentDate());
+//				log.info("Content: {}", message.getContent());
+
+				EmailDTO emailDTO = new EmailDTO();
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+				emailDTO.setFrom(Arrays.toString(message.getFrom()));
+				emailDTO.setSubject(message.getSubject());
+				emailDTO.setNo(message.getMessageNumber());
+				emailDTO.setReceivedDate(format.format(message.getReceivedDate()));
+				emailDTO.setSentDate(format.format(message.getSentDate()));
+				emailDTO.setRecipients(Arrays.toString(message.getAllRecipients()));
+//				emailDTO.setRecipients(Arrays.toString(message.getRecipients(Message.RecipientType.TO)));
+
+				Object content = message.getContent();
+
+				if (content instanceof String) {
+					emailDTO.setText(content.toString());
+				} else if (content instanceof Multipart) {
+					emailDTO.setText(getTextFromMultipart((Multipart) content));
+				}
+
+				messageList.add(emailDTO);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (folder != null && folder.isOpen()) {
+					folder.close(false);
+				}
+				if (store != null && store.isConnected()) {
+					store.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return messageList;
+	}
+
+	// FIXME: content에서 text 정보만 가져오기
+	private String getTextFromMultipart(Multipart multipart) throws Exception {
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < multipart.getCount(); i++) {
+			BodyPart bodyPart = multipart.getBodyPart(i);
+
+			if (bodyPart.isMimeType("text/plain")) {
+				sb.append(bodyPart.getContent());
+			}
+//			else if (bodyPart.isMimeType("text/html")) {
+//				sb.append(bodyPart.getContent());
+//			}
+		}
+
+		return sb.toString();
+	}
+
+	// 유저 정보를 가져오면서, 이메일 비밀번호를 디코딩
+	private Employee getEmployee(String username) {
+		Optional<Employee> optional = employeeRepository.findById(username);
+		Employee employee = optional.get();
+
+		if (employee.getEncodedEmailPassword() == null) {
+			throw new RuntimeException("비밀번호가 입력되지 않았습니다.");
+		}
+
+		byte[] decoded = aesBytesEncryptor.decrypt(employee.getEncodedEmailPassword());
+		employee.setExternalEmailPassword(new String(decoded));
+
+		return employee;
+	}
+
+	// 받은 메일함
+	public List<EmailDTO> receivedBox(String username, Pageable pageable) {
+		Employee employee = getEmployee(username);
+
+		return this.mailBox(employee, pageable, "INBOX");
+	}
+
+	// 보낸 메일함
+	public List<EmailDTO> sentBox(String username, Pageable pageable) {
+		Employee employee = getEmployee(username);
+
+		List<EmailDTO> messageList = null;
+
+		if (employee.getExternalEmail().contains("gmail")) {
+			messageList = this.mailBox(employee, pageable, "[Gmail]/Sent Mail");
+		} else {
+			messageList = this.mailBox(employee, pageable, "Sent Messages");
 		}
 
 		return messageList;

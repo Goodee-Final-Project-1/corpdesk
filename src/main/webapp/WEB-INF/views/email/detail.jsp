@@ -19,42 +19,37 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
-<div class="d-flex">
-	<aside class="col-md-3 col-lg-3 col-xl-2 col-xxl-1">
-		<button>메일 쓰기</button>
-		<ul>
-			<li>받은 메일</li>
-			<li>보낸 메일</li>
-		</ul>
-	</aside>
-	<main class="col-md-9 col-lg-9 col-xl-10 col-xxl-11">
+<div>
+	<main>
 		<div>
-			<%-- 페이징 --%>
+			<h1 id="subject"></h1>
 		</div>
 		<div>
-			<table id="table">
-				<%--<c:forEach var="msg" items="${messageList}">
-									<tr>
-										<td>${msg.from}</td>  <!-- 보낸 사람 -->
-										<td>${msg.subject}</td>  <!-- 내용 -->
-										<td>${msg.sentDate}</td>  <!-- 날짜 -->
-									</tr>
-								</c:forEach>--%>
-				<%--<tr>
-					<td>보낸 사람</td>  <!-- 보낸 사람 -->
-					<td>내용</td>  <!-- 내용 -->
-					<td>날짜</td>  <!-- 날짜 -->
-				</tr>--%>
-			</table>
+			<div>
+				<ul>
+					<li>
+						<h2 id="from"></h2>
+					</li>
+					<li>
+						<h3 id="recipients"></h3>
+					</li>
+					<li>
+						<p id="sentDate"></p>
+					</li>
+				</ul>
+			</div>
+			<div>
+				<p id="content"></p>
+			</div>
 		</div>
-
 	</main>
 </div>
-<script src="/js/email/received.js"></script>
+
 <!-- 내용 끝 -->
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
+<script src="/js/email/detail.js"></script>
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>

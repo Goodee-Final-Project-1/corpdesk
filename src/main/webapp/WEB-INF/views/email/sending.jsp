@@ -22,7 +22,7 @@
 			<!-- 내용 시작 -->
 				<div>
 					<main>
-						<form method="post">
+						<form action="/api/email/sending" method="post">
 							<div>
 								<input type="text" name="to" id="to">
 							</div>

@@ -16,6 +16,7 @@
 <div>
 	<a href="/email/send">메일 보내기</a>
 	<a href="/email/received">받은 메일</a>
+	<a href="/email/sent">보낸 메일</a>
 </div>
 </body>
 </html>

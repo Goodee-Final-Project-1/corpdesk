@@ -50,7 +50,7 @@
 
 	</main>
 </div>
-<script src="/js/email/received.js"></script>
+<script src="/js/email/sent.js"></script>
 <!-- 내용 끝 -->
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 
