@@ -2,12 +2,10 @@ package com.goodee.corpdesk.email;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -20,29 +18,50 @@ public class EmailApiController {
 	@Autowired
 	EmailService emailService;
 
-	@PostMapping("received")
-	public List<EmailDTO> received(Authentication authentication, Pageable pageable) {
+	/**
+	 * @param authentication
+	 * @param page 현재 페이지 번호
+	 * @return 수신 메일 목록
+	 */
+	@PostMapping("received/{page}")
+	public List<EmailDTO> received(Authentication authentication, @PathVariable Integer page) {
 		String username = authentication.getName();
+		Pageable pageable = PageRequest.of(page - 1, 10);
+
 		return emailService.receivedBox(username, pageable);
 	}
 
+	/**
+	 * @param authentication
+	 * @param map JSON 객체, 메일 번호를 받아옴
+	 * @return 해당 메일의 정보를 가지고 있는 객체
+	 */
 	@PostMapping("received/detail")
 	public EmailDTO receivedDetail(Authentication authentication, @RequestBody Map<String, Integer> map) {
 		String username = authentication.getName();
 		return emailService.receivedDetail(username, map.get("emailNo") - 1);
 	}
 
+	/**
+	 * @param authentication
+	 * @param sendDTO 보낼 메일의 정보를 가지고 있는 객체
+	 * @return 성공시 success 문자열을 반환
+	 * @throws Exception 
+	 * UnsupportedEncodingException 보내는 사람 이름 인코딩 실패
+	 * MailException 메일 전송 실패
+	 */
 	@PostMapping("sending")
-	public void send(Authentication authentication, SendDTO sendDTO) {
-		// FIXME: from으로 바꾸기
-		sendDTO.setReplyTo(authentication.getName());
+	public String send(Authentication authentication, SendDTO sendDTO) throws Exception {
+		sendDTO.setUser(authentication.getName());
 		emailService.sendSimpleMail(sendDTO);
-		// FIXME: 성공/실패시 리다이렉트 할 url을 보내줘야 됨
+		return "success";
 	}
 
-	@PostMapping("sent")
-	public List<EmailDTO> sentList(Authentication authentication, Pageable pageable) {
+	@PostMapping("sent/{page}")
+	public List<EmailDTO> sentList(Authentication authentication, @PathVariable Integer page) {
 		String username = authentication.getName();
+		Pageable pageable = PageRequest.of(page - 1, 10);
+
 		return emailService.sentBox(username, pageable);
 	}
 

@@ -2,7 +2,7 @@
 
 <aside class="col-lg-4 col-xl-3 col-xxl-2">
 	<div class="email-left-column email-options p-4 p-xl-5">
-		<a href="./sending" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">메일 쓰기</a>
+		<a href="/email/sending" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">메일 쓰기</a>
 		<ul class="pb-2">
 			<li id="received" class="d-block mb-4"><a href="/email/received">
 				<i class="mdi mdi-download mr-2"></i>

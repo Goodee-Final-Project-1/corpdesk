@@ -143,9 +143,11 @@ public class EmailService {
 
 			int total = folder.getMessageCount();
 			int start = total;
+			int page = pageable.getPageNumber();
+			int size = pageable.getPageSize();
 
 			// 받아온 메일 목록
-			Message[] messages = folder.getMessages(start - 5, start);
+			Message[] messages = folder.getMessages(start - size - page, start - page);
 
 			for (Message message : messages) {
 //			for (int i = messages.length - 1; i >= 0; i--) {
@@ -259,8 +261,8 @@ public class EmailService {
 	}
 
 	// 메일 보내기
-	public void sendSimpleMail(SendDTO sendDTO) {
-		Optional<Employee> optional = employeeRepository.findById(sendDTO.getReplyTo());
+	public void sendSimpleMail(SendDTO sendDTO) throws Exception {
+		Optional<Employee> optional = employeeRepository.findById(sendDTO.getUser());
 		Employee employee = optional.get();
 
 		if (employee.getEncodedEmailPassword() != null) {
@@ -272,7 +274,9 @@ public class EmailService {
 
 		SimpleMailMessage message = new SimpleMailMessage();
 //		message.setFrom(sendDTO.getFrom());
-		message.setFrom(employee.getExternalEmail());
+		String encoded = MimeUtility.encodeText(employee.getName());
+		String from = encoded + " <" + employee.getExternalEmail() + '>';
+		message.setFrom(from);
 		message.setTo(sendDTO.getTo());
 		message.setSubject(sendDTO.getSubject());
 		String text = sendDTO.getText().replaceAll("<br\\s*/?>", " ")

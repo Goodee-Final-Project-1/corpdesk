@@ -13,5 +13,5 @@ public class SendDTO {
 	private String from;
 	private String subject;
 	private String text;
-	private String replyTo;
+	private String user;
 }

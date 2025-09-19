@@ -24,7 +24,7 @@ async function getMail() {
 		});
 
 	} catch (e) {
-		console.log(error);
+		console.log(e);
 	}
 }
 
