@@ -24,8 +24,6 @@ public class ApprovalDTO {
 					.approvalId(approvalId)
 					.username(username)
 					.departmentId(departmentId)
-					.formType(formType)
-					.formContent(formContent)
 					.status(status)
 					.build();
 	}

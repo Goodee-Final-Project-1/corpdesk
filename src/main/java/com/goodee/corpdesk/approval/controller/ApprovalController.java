@@ -126,4 +126,16 @@ public class ApprovalController {
 
     }
 	
+    // TODO 결재 요청 폼 주는 메서드 추가
+    @GetMapping("{formTitle}/{departmentId}")
+    public String getApproval(@PathVariable("formTitle") Long formTitle,  @PathVariable("departmentId") Long departmentId, Model model) throws Exception {
+
+        System.err.println("getApproval()");
+
+
+
+        return "approval/detail";
+
+    }
+    
 }

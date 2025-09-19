@@ -31,10 +31,7 @@ public class ResApprovalDTO {
 					.approvalId(approvalId)
 					.username(username)
 					.departmentId(departmentId)
-					.formType(formType)
-					.formContent(formContent)
 					.status(status)
-					.createdAt(createdAt)
 					.build();
 	}
 	
