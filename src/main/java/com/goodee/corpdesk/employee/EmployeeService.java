@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile; // ⭐ 추가
 
+import com.goodee.corpdesk.attendance.Attendance;
+import com.goodee.corpdesk.attendance.AttendanceService;
 import com.goodee.corpdesk.department.Department;
 import com.goodee.corpdesk.department.DepartmentRepository;
 import com.goodee.corpdesk.file.FileManager; // ⭐ 추가
@@ -35,6 +37,9 @@ public class EmployeeService implements UserDetailsService {
 	PasswordEncoder passwordEncoder;
 
 	@Autowired
+    private AttendanceService attendanceService;
+	
+	@Autowired
 	private DepartmentRepository departmentRepository;
 	@Autowired
 	private PositionRepository positionRepository;
@@ -47,6 +52,19 @@ public class EmployeeService implements UserDetailsService {
     @Value("${app.upload}")
     private String uploadPath;
 
+    // username으로 Employee 조회 (없으면 예외)
+    public Employee getEmployeeOrThrow(String username) {
+        return employeeRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("직원을 찾을 수 없습니다: " + username));
+    }
+
+    // 직원 출퇴근 내역 가져오기
+    public List<Attendance> getAttendanceByUsername(String username) {
+        return attendanceService.getAttendanceByUsername(username);
+    }
+    
+    
+    
 	// 등록
 	public Employee addEmployee(Employee employee) {
 		employee.setUseYn(true); // 기본값
@@ -92,6 +110,7 @@ public class EmployeeService implements UserDetailsService {
 	    persisted.setProfileImageExtension(employee.getProfileImageExtension());
 	    persisted.setProfileImageOriName(employee.getProfileImageOriName());
 		
+	    persisted.setDirectPhone(employee.getDirectPhone());
 		persisted.setStatus(employee.getStatus());
 		persisted.setAddress(employee.getAddress());
 		persisted.setBirthDate(employee.getBirthDate());
@@ -140,7 +159,9 @@ public class EmployeeService implements UserDetailsService {
         persisted.setGender(employeeFromForm.getGender());
         persisted.setEnabled(employeeFromForm.getEnabled());
         persisted.setLastWorkingDay(employeeFromForm.getLastWorkingDay());
-
+        persisted.setDirectPhone(employeeFromForm.getDirectPhone());
+        persisted.setExternalEmail(employeeFromForm.getExternalEmail());
+        
         employeeRepository.save(persisted);
         
         // ⭐⭐ 파일 처리 로직 ⭐⭐

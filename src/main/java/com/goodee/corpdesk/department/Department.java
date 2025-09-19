@@ -25,7 +25,7 @@ public class Department {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer departmentId;
 	private Integer departmentHigh;
-	private String departmentName = "인피니티오토";
+	private String departmentName;
 	private LocalDateTime updatedAt;
 	private LocalDateTime createdAt;
 	private String modifiedBy;

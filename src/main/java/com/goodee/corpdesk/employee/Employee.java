@@ -105,6 +105,7 @@ public class Employee implements UserDetails {
 	private String passwordCheck;
 
 	@NotBlank(groups = UpdateEmail.class)
+	@Column(name = "external_email", length = 255, nullable = false)
 	private String externalEmail;
 	@NotBlank(groups = UpdateEmail.class)
 	private String externalEmailPassword;

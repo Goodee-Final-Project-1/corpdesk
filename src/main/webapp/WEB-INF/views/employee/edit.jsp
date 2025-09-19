@@ -119,9 +119,10 @@
 			          </form:select><br/>
 			 </div>
 			 <div>
-			    이메일: <form:input path="externalEmail"/>
 			    입사일: <form:input path="hireDate" type="date"/>
-		    	휴대전화: <form:input path="mobilePhone" /><br/>
+		    	휴대전화: <form:input path="mobilePhone" />
+			    직통번호: <form:input path="directPhone" /><br>
+			    외부이메일: <form:input path="externalEmail"/>
 		    	직위: &nbsp;&nbsp;&nbsp;&nbsp;<form:select path="positionId">
 		            <form:option value="" label="직위를 선택하세요"/>
 		            <form:options items="${positions}" itemValue="positionId" itemLabel="positionName"/>
@@ -167,10 +168,55 @@
 			    </div>
 	    	</div>
     	</div>
-    	<div class="tab-content" id="attendance">
-	      <span class="badge badge-dark">출퇴근 현황</span>
-	      <p>출퇴근 데이터가 여기에 표시됩니다.</p>
-	    </div>
+    	<div class="tab-content d-flex" id="attendance">
+	      <div>
+	      	<div>
+	      		<p>여기에 기간 조회</p>
+	      	</div>
+	      	
+	      	<div>
+	      		<p>여기에 기록 추가</p>
+	      	</div>
+	      </div>
+	      
+	      <div style="flex:1;">
+		    <form id="attendanceForm" method="post" action="/employee/${employee.username}/attendance/delete">
+		      <input type="hidden" name="username" value="${employee.username}"/>
+		
+		      <table class="table table-light">
+		        <thead class="thead-light">
+		          <tr>
+		            <th><input type="checkbox" id="checkAll"/></th>
+		            <th>구분</th>
+		            <th>일시</th>
+		            <th>수정</th>
+		          </tr>
+		        </thead>
+		        <tbody>
+		          <c:forEach var="att" items="${attendanceList}" varStatus="status">
+		            <tr>
+		              <td><input type="checkbox" name="attendanceIds" value="${att.attendanceId}"/></td>
+		              <td><c:out value="${att.workStatus}"/></td>
+		              <td>
+                        <c:out value="${att.workStatus == '출근' ? att.checkInDateTime : (att.checkOutDateTime != null ? att.checkOutDateTime : '-')}" />
+                      </td>
+		              <td>
+		                <a href="/employee/${employee.username}/attendance/edit/${att.attendanceId}" class="btn btn-sm btn-warning">수정</a>
+		              </td>
+		            </tr>
+		          </c:forEach>
+		          <c:if test="${empty attendanceList}">
+		            <tr>
+		              <td colspan="5">출퇴근 기록이 없습니다.</td>
+		            </tr>
+		          </c:if>
+		        </tbody>
+		      </table>
+		
+		      <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+		    </form>
+  		   </div>
+		</div>
 	    	
     	
     	
@@ -244,6 +290,12 @@ function deleteProfileImage() {
         alert('사진 삭제 중 오류가 발생했습니다.');
     });
 }
+
+// 체크박스 전체 선택 기능
+document.getElementById("checkAll").addEventListener("click", function() {
+  const checked = this.checked;
+  document.querySelectorAll("input[name='attendanceIds']").forEach(cb => cb.checked = checked);
+});
 
 
 

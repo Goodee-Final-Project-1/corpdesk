@@ -12,6 +12,5 @@ public class AttendanceController {
     public AttendanceController(AttendanceService attendanceService) {
         this.attendanceService = attendanceService;
     }
-
     
 }

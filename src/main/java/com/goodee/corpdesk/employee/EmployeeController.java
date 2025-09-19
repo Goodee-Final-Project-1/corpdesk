@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.employee;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.goodee.corpdesk.attendance.Attendance;
 import com.goodee.corpdesk.attendance.AttendanceRepository;
+import com.goodee.corpdesk.attendance.AttendanceService;
 import com.goodee.corpdesk.department.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee.CreateGroup;
 import com.goodee.corpdesk.employee.Employee.UpdateGroup;
@@ -25,8 +28,12 @@ import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import com.goodee.corpdesk.position.PositionRepository;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+@Getter
+@Setter
 @Controller
 @RequestMapping("/employee/**")
 @Slf4j
@@ -34,6 +41,7 @@ public class EmployeeController {
 
 	@Autowired
 	private EmployeeService employeeService;
+	private  AttendanceService attendanceService;
 	
 	@Autowired
 	private AttendanceRepository attendanceRepository;
@@ -90,26 +98,32 @@ public class EmployeeController {
 		model.addAttribute("employees", employeeService.getActiveEmployees());
 		return "employee/list";
 	}
-
-	@GetMapping("/edit/{id}")
-	public String showEditForm(@PathVariable("id") String id, Model model) {
-	    
-	    Employee employee = employeeService.getEmployee(id)
-	            .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
+	
+	@GetMapping("/edit/{username}")
+	public String editEmployeePage(@PathVariable("username") String username, Model model) {
+	    // 직원 정보 가져오기
+	    Employee employee = employeeService.getEmployeeOrThrow(username);
 	    model.addAttribute("employee", employee);
+
+	    // 프로필 파일 조회 (옵션)
+	    Optional<EmployeeFile> employeeFileOpt = employeeService.getEmployeeFileByUsername(username);
+	    employeeFileOpt.ifPresent(file -> model.addAttribute("employeeFile", file));
+
+	    // 출퇴근 내역 가져오기
+	    List<Attendance> attendanceList = employeeService.getAttendanceByUsername(username);
+	    model.addAttribute("attendanceList", attendanceList);
+
+	    // 부서, 직급 목록
 	    model.addAttribute("departments", departmentRepository.findAll());
 	    model.addAttribute("positions", positionRepository.findAll());
-	    
-	    // EmployeeFileRepository를 사용하여 프로필 사진 정보를 조회하고 모델에 담기
-	    Optional<EmployeeFile> employeeFileOptional = employeeService.getEmployeeFileByUsername(employee.getUsername());
-	    employeeFileOptional.ifPresent(employeeFile -> model.addAttribute("employeeFile", employeeFile));
-	    
-	    // ✅ 출퇴근 내역 조회 후 모델에 담기
-	    model.addAttribute("attendances",
-	            attendanceRepository.findByUsername(employee.getUsername()));
-	            
-	    return "employee/edit";
+
+	    return "employee/edit"; // JSP
 	}
+	
+	
+	
+
+	
 	
 	@PostMapping("/edit")
 	public String editEmployee(@Validated(UpdateGroup.class) @ModelAttribute Employee employeeFromForm,
