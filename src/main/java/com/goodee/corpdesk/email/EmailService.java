@@ -180,7 +180,7 @@ public class EmailService {
 				if (content instanceof String) {
 					emailDTO.setText(content.toString());
 				} else if (content instanceof Multipart) {
-					emailDTO.setText(getTextFromMultipart((Multipart) content));
+					emailDTO.setText(this.getTextFromMultipart((Multipart) content));
 				}
 
 				messageList.add(emailDTO);
@@ -275,7 +275,9 @@ public class EmailService {
 		message.setFrom(employee.getExternalEmail());
 		message.setTo(sendDTO.getTo());
 		message.setSubject(sendDTO.getSubject());
-		message.setText(sendDTO.getText());
+		String text = sendDTO.getText().replaceAll("<br\\s*/?>", " ")
+				.replaceAll("</p>", "\n").replaceAll("<[^>]*>", "");
+		message.setText(text);
 
 		mailSender.send(message);
 	}
