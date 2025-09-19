@@ -5,7 +5,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Insert title here</title>
+	<title>출퇴근 현황</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 
