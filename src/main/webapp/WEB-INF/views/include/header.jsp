@@ -11,7 +11,7 @@
 
     <span class="page-title">
     	<!-- TODO 여기에 카테고리명 입력 -->
-    	<span>여기에 카테고리명 입력</span>
+    	<span>${cat }</span>
     </span>
 
     <div class="navbar-right ">
