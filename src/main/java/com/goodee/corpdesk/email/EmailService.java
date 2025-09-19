@@ -37,7 +37,7 @@ public class EmailService {
 		EmailDTO emailDTO = null;
 
 		if (employee.getExternalEmail().contains("gmail")) {
-			emailDTO = this.mailDetail(employee, emailNo, "[Gmail]/Sent Mail");
+			emailDTO = this.mailDetail(employee, emailNo, "[Gmail]/보낸편지함");
 		} else {
 			emailDTO = this.mailDetail(employee, emailNo, "Sent Messages");
 		}
@@ -45,7 +45,7 @@ public class EmailService {
 		return emailDTO;
 	}
 
-	public EmailDTO mailDetail(Employee employee, Integer emailNo, String folderName) {
+	private EmailDTO mailDetail(Employee employee, Integer emailNo, String folderName) {
 		String myEmail = employee.getExternalEmail();
 		String host = "imap." + myEmail.split("@")[1];
 		String password = employee.getExternalEmailPassword();
@@ -252,7 +252,7 @@ public class EmailService {
 		List<EmailDTO> messageList = null;
 
 		if (employee.getExternalEmail().contains("gmail")) {
-			messageList = this.mailBox(employee, pageable, "[Gmail]/Sent Mail");
+			messageList = this.mailBox(employee, pageable, "[Gmail]/보낸편지함");
 		} else {
 			messageList = this.mailBox(employee, pageable, "Sent Messages");
 		}
