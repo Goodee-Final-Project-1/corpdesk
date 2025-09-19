@@ -1,5 +1,13 @@
 package com.goodee.corpdesk.employee;
 
+import com.goodee.corpdesk.employee.validation.UpdateEmail;
+import com.goodee.corpdesk.employee.validation.UpdatePassword;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +50,7 @@ public class Employee implements UserDetails {
 //	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 //	private Integer employeeId;
 
-//	private Integer positionId;
+	//	private Integer positionId;
 //	private Integer departmentId;
 	public interface CreateGroup {
 	} // 등록 시 검증
@@ -95,8 +103,9 @@ public class Employee implements UserDetails {
 	@Size(min = 5, max = 20, message = "아이디는 5~20자여야 합니다.")
 	@Id
 	private String username;
-	private String password; 
-
+	@Column(nullable = false)
+	@NotBlank(groups = UpdatePassword.class)
+	private String password;
 	@Transient
 	@NotBlank(groups = UpdatePassword.class)
 	private String passwordNew;
@@ -105,10 +114,24 @@ public class Employee implements UserDetails {
 	private String passwordCheck;
 
 	@NotBlank(groups = UpdateEmail.class)
-	@Column(name = "external_email", length = 255, nullable = false)
 	private String externalEmail;
+	@Transient
 	@NotBlank(groups = UpdateEmail.class)
 	private String externalEmailPassword;
+	private byte[] encodedEmailPassword;
+
+//	private String employeeType;
+//	private LocalDate hireDate;
+//	private String responsibility;
+//	private String resident_number;
+//	private String directPhone;
+//	private String mobilePhone;
+//	private String nationality;
+//	private String visaStatus;
+//	private String englishName;
+//	private Character gender;
+//	private LocalDate birthDate;
+//	private String address;
 
 	private String employeeType;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")

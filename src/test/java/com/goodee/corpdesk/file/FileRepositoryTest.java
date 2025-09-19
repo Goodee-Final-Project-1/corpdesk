@@ -34,7 +34,7 @@ class FileRepositoryTest {
 		af.setOriName("test1");
 		af.setSaveName("671c284fa67e49fa82ce483c643d1cfc");
 		af.setExtension("png");
-		af.setModifiedBy(1);
+//		af.setModifiedBy(1);
 		
 		af = ar.save(af);
 		log.warn("{}", af);
@@ -48,7 +48,7 @@ class FileRepositoryTest {
 		af.setOriName("test1");
 		af.setSaveName("5ff0a87779ae41e19305016ecd8b1ffe");
 		af.setExtension("png");
-		af.setModifiedBy(1);
+//		af.setModifiedBy(1);
 		
 		af = br.save(af);
 		log.warn("{}", af);
@@ -62,7 +62,7 @@ class FileRepositoryTest {
 		af.setOriName("test1");
 		af.setSaveName("5ff0a87779ae41e19305016ecd8b1ffe");
 		af.setExtension("png");
-		af.setModifiedBy(1);
+	//	af.setModifiedBy(1);
 		
 		af = mr.save(af);
 		log.warn("{}", af);

@@ -190,10 +190,17 @@ public class EmployeeController {
 		return "employee/link";
 	}
 
-	@GetMapping("detail")
-	public void detail(Authentication authentication, Model model) {
+    @GetMapping("detail")
+    public void detail(Authentication authentication, Model model) {
+        Employee employee = employeeService.detail(authentication.getName());
+        model.addAttribute("employee", employee);
+    }
+
+	@GetMapping("update/email")
+	public String updateEmail(Authentication authentication, Model model) {
 		Employee employee = employeeService.detail(authentication.getName());
 		model.addAttribute("employee", employee);
+		return "employee/update_email";
 	}
 
 	@PostMapping("update/email")
@@ -213,11 +220,12 @@ public class EmployeeController {
 		return "redirect:/employee/link";
 	}
 
-	@GetMapping("update")
-	public void update(Authentication authentication, Model model) {
-		Employee employee = employeeService.detail(authentication.getName());
-		model.addAttribute("employee", employee);
-	}
+    @GetMapping("update/password")
+    public String updatePassword(Authentication authentication, Model model) {
+        Employee employee = employeeService.detail(authentication.getName());
+        model.addAttribute("employee", employee);
+		return "employee/update_password";
+    }
 
 	@PostMapping("update/password")
 	public String updatePassword(Authentication authentication, @Validated(UpdatePassword.class) Employee employee,

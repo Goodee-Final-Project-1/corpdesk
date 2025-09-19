@@ -11,6 +11,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,9 @@ public class EmployeeService implements UserDetailsService {
 	@Autowired
 	private RoleRepository roleRepository;
 	@Autowired
-	PasswordEncoder passwordEncoder;
+	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private AesBytesEncryptor aesBytesEncryptor;
 
 	@Autowired
     private AttendanceService attendanceService;
@@ -73,7 +76,7 @@ public class EmployeeService implements UserDetailsService {
 
 	// 목록 조회
 	public List<Employee> getActiveEmployees() {
-		List<Employee> employees = employeeRepository.findByUseYnTrue();
+		List<Employee> employees = employeeRepository.findAllByUseYnTrue();
 
 		// 부서명, 직위명 매핑
 		for (Employee emp : employees) {
@@ -222,19 +225,27 @@ public class EmployeeService implements UserDetailsService {
 		Optional<Role> roleOp = roleRepository.findById(employee.getRoleId());
 		Role role = roleOp.get();
 		employee.setRole(role);
-		System.out.println("========================= " + employee.getRole().getRoleName());
+
 		return employee;
 	}
 
 	public void join(Employee employee) {
 		String encoded = passwordEncoder.encode(employee.getPassword());
 		employee.setPassword(encoded);
+
 		employeeRepository.save(employee);
 	}
 
 	public Employee detail(String username) {
 		Optional<Employee> optional = employeeRepository.findById(username);
-		return optional.get();
+		Employee employee = optional.get();
+
+		if (employee.getEncodedEmailPassword() != null) {
+			byte[] decoded = aesBytesEncryptor.decrypt(employee.getEncodedEmailPassword());
+			employee.setExternalEmailPassword(new String(decoded));
+		}
+
+		return employee;
 	}
 
 	public Employee updatePassword(Employee employee) {
@@ -250,16 +261,19 @@ public class EmployeeService implements UserDetailsService {
 		}
 
 		String encoded = passwordEncoder.encode(employee.getPasswordNew());
+
 		origin.setPassword(encoded);
-		return employeeRepository.save(origin); 
+		return employeeRepository.save(origin);
 	}
 
 	public Employee updateEmail(Employee employee) {
 		Optional<Employee> optional = employeeRepository.findById(employee.getUsername());
 		Employee origin = optional.get();
 
+		byte[] encoded = aesBytesEncryptor.encrypt(employee.getExternalEmailPassword().getBytes());
+
 		origin.setExternalEmail(employee.getExternalEmail());
-		origin.setExternalEmailPassword(employee.getExternalEmailPassword());
+		origin.setEncodedEmailPassword(encoded);
 
 		return employeeRepository.save(origin);
 	}
