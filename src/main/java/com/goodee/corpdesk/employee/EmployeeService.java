@@ -1,12 +1,15 @@
 package com.goodee.corpdesk.employee;
 
-import java.io.File;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
+import com.goodee.corpdesk.attendance.Attendance;
+import com.goodee.corpdesk.attendance.AttendanceService;
+import com.goodee.corpdesk.department.Department;
+import com.goodee.corpdesk.department.DepartmentRepository;
+import com.goodee.corpdesk.file.FileManager;
+import com.goodee.corpdesk.file.dto.FileDTO;
+import com.goodee.corpdesk.position.Position;
+import com.goodee.corpdesk.position.PositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value; // ⭐ 추가
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,16 +18,10 @@ import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile; // ⭐ 추가
+import org.springframework.web.multipart.MultipartFile;
 
-import com.goodee.corpdesk.attendance.Attendance;
-import com.goodee.corpdesk.attendance.AttendanceService;
-import com.goodee.corpdesk.department.Department;
-import com.goodee.corpdesk.department.DepartmentRepository;
-import com.goodee.corpdesk.file.FileManager; // ⭐ 추가
-import com.goodee.corpdesk.file.dto.FileDTO; // ⭐ 추가
-import com.goodee.corpdesk.position.Position;
-import com.goodee.corpdesk.position.PositionRepository;
+import java.io.File;
+import java.util.*;
 
 @Service
 @Transactional
@@ -236,16 +233,17 @@ public class EmployeeService implements UserDetailsService {
 		employeeRepository.save(employee);
 	}
 
-	public Employee detail(String username) {
-		Optional<Employee> optional = employeeRepository.findById(username);
-		Employee employee = optional.get();
+	public Map<String, Object> detail(String username) {
+		Employee employee = employeeRepository.findById(username).get();
+		Department department = departmentRepository.findById(employee.getDepartmentId()).get();
+		Position position = positionRepository.findById(employee.getPositionId()).get();
 
-		if (employee.getEncodedEmailPassword() != null) {
-			byte[] decoded = aesBytesEncryptor.decrypt(employee.getEncodedEmailPassword());
-			employee.setExternalEmailPassword(new String(decoded));
-		}
+		Map<String, Object> map = new HashMap<>();
+		map.put("employee", employee);
+		map.put("department", department);
+		map.put("position", position);
 
-		return employee;
+		return map;
 	}
 
 	public Employee updatePassword(Employee employee) {
@@ -264,6 +262,18 @@ public class EmployeeService implements UserDetailsService {
 
 		origin.setPassword(encoded);
 		return employeeRepository.save(origin);
+	}
+
+	public Employee detailSecret(String username) {
+		Optional<Employee> optional = employeeRepository.findById(username);
+		Employee employee = optional.get();
+
+		if (employee.getEncodedEmailPassword() != null) {
+			byte[] decoded = aesBytesEncryptor.decrypt(employee.getEncodedEmailPassword());
+			employee.setExternalEmailPassword(new String(decoded));
+		}
+
+		return employee;
 	}
 
 	public Employee updateEmail(Employee employee) {

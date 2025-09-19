@@ -24,24 +24,24 @@
 	<ul>
 		<li>이름: ${employee.name}</li>
 		<li>이메일: ${employee.externalEmail}</li>
-		<li>부서:</li>
-		<li>직책:</li>
-		<li>직위:</li>
-		<li>휴대전화:</li>
-		<li>직통전화:</li>
-		<li>입사일자:</li>
+		<li>부서: ${department.departmentName}</li>
+<%--		<li>직책: ${employee.}</li>--%>
+		<li>직위: ${position.positionName}</li>
+		<li>휴대전화: ${employee.mobilePhone}</li>
+		<li>직통전화: ${employee.directPhone}</li>
+		<li>입사일자: ${employee.hireDate}</li>
 
-		<li>주민(외국인)번호:</li>
-		<li>국적:</li>
-		<li>체류 자격:</li>
-		<li>영문 이름:</li>
+		<li>주민(외국인)번호: ${employee.residentNumber}</li>
+		<li>국적: ${employee.nationality}</li>
+		<li>체류 자격: ${employee.visaStatus}</li>
+		<li>영문 이름: ${employee.englishName}</li>
 
-		<li>성별:</li>
-		<li>생년월일:</li>
-		<li>주소:</li>
-		<li>현재 기본급:</li>
-		<li>급여 은행:</li>
-		<li>급여 계좌:</li>
+		<li>성별: ${employee.gender}</li>
+		<li>생년월일: ${employee.birthDate}</li>
+		<li>주소: ${employee.address}</li>
+<%--		<li>현재 기본급: ${employee.}</li>--%>
+<%--		<li>급여 은행: ${employee.}</li>--%>
+<%--		<li>급여 계좌: ${employee.}</li>--%>
 	</ul>
 
 </div>
