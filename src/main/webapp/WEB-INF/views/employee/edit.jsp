@@ -168,7 +168,10 @@
 			    </div>
 	    	</div>
     	</div>
-    	<div class="tab-content d-flex" id="attendance">
+    </div>
+	</form:form>
+	
+	<div class="tab-content" id="attendance">
 	      <div>
 	      	<div>
 	      		<p>여기에 기간 조회</p>
@@ -181,6 +184,7 @@
 	      
 	      <div style="flex:1;">
 		    <form id="attendanceForm" method="post" action="/employee/${employee.username}/attendance/delete">
+		    <button type="submit" class="btn btn-danger btn-sm">삭제</button>
 		      <input type="hidden" name="username" value="${employee.username}"/>
 		
 		      <table class="table table-light">
@@ -194,15 +198,27 @@
 		        </thead>
 		        <tbody>
 		          <c:forEach var="att" items="${attendanceList}" varStatus="status">
-		            <tr>
+		            <tr data-attendance-id="${att.attendanceId}">
 		              <td><input type="checkbox" name="attendanceIds" value="${att.attendanceId}"/></td>
-		              <td><c:out value="${att.workStatus}"/></td>
-		              <td>
+		              <td class="workStatusCell">
+			            <c:choose>
+						  <c:when test="${att.workStatus eq '출근'}">
+						    <span class="badge badge-success"><c:out value="${att.workStatus}"/></span>
+						  </c:when>
+						  <c:when test="${att.workStatus eq '퇴근'}">
+						    <span class="badge badge-primary"><c:out value="${att.workStatus}"/></span>
+						  </c:when>
+						  <c:otherwise>
+						    <span class="badge badge-secondary"><c:out value="${att.workStatus}"/></span>
+						  </c:otherwise>
+						</c:choose>
+		              </td>
+		              <td class="dateTimeCell">
                         <c:out value="${att.workStatus == '출근' ? att.checkInDateTime : (att.checkOutDateTime != null ? att.checkOutDateTime : '-')}" />
                       </td>
 		              <td>
-		                <a href="/employee/${employee.username}/attendance/edit/${att.attendanceId}" class="btn btn-sm btn-warning">수정</a>
-		              </td>
+				        <button type="button" class="btn btn-sm btn-warning editBtn">수정</button>
+				      </td>
 		            </tr>
 		          </c:forEach>
 		          <c:if test="${empty attendanceList}">
@@ -213,22 +229,12 @@
 		        </tbody>
 		      </table>
 		
-		      <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+		      
 		    </form>
   		   </div>
 		</div>
-	    	
-    	
-    	
-			    
-			    
-			    
-			    
-			    
-			    <a href="<d:url value='/employee/list'/>" class="btn btn-info">목록으로</a>
-
-    </div>
-	</form:form>
+		
+		<a href="<d:url value='/employee/list'/>" class="btn btn-info">목록으로</a>
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	
@@ -297,7 +303,63 @@ document.getElementById("checkAll").addEventListener("click", function() {
   document.querySelectorAll("input[name='attendanceIds']").forEach(cb => cb.checked = checked);
 });
 
+// 출퇴근 현황 수정 탭
+document.querySelectorAll(".editBtn").forEach(button => {
+    button.addEventListener("click", function() {
+        const row = this.closest("tr");
+        const workStatusCell = row.querySelector(".workStatusCell");
+        const dateTimeCell = row.querySelector(".dateTimeCell");
 
+        // 현재 값 가져오기
+        const currentStatus = workStatusCell.textContent.trim();
+        const currentDateTime = dateTimeCell.textContent.trim();
+        const dateTimeValue = (currentDateTime && currentDateTime !== '-') ? currentDateTime.replace(' ', 'T') : '';
+
+        // 편집 폼으로 바꾸기 (순수 JS)
+        workStatusCell.innerHTML = `
+            <select class="form-control workStatusInput">
+                <option value="출근" ${currentStatus == '출근' ? 'selected' : ''}>출근</option>
+                <option value="퇴근" ${currentStatus == '퇴근' ? 'selected' : ''}>퇴근</option>
+            </select>`;
+        dateTimeCell.innerHTML = `<input type="datetime-local" class="form-control dateTimeInput" value="${dateTimeValue}"/>`;
+
+        // 버튼을 완료 버튼으로 바꾸기
+        this.textContent = "완료";
+        this.classList.remove("btn-warning");
+        this.classList.add("btn-success");
+
+        const username = document.getElementById('username').value; // username 변수
+
+        // 완료 버튼 클릭 시 AJAX
+        this.onclick = function() {
+            const attendanceId = row.getAttribute("data-attendance-id");
+            const newStatus = row.querySelector(".workStatusInput").value;
+            const newDateTime = row.querySelector(".dateTimeInput").value;
+
+            fetch(`/employee/${username}/attendance/edit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    attendanceId: attendanceId,
+                    workStatus: newStatus,
+                    dateTime: newDateTime
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    workStatusCell.innerHTML = `<span class="badge ${newStatus == '출근' ? 'badge-success' : 'badge-primary'}">${newStatus}</span>`;
+                    dateTimeCell.textContent = newDateTime.replace('T', ' ');
+                    button.textContent = "수정";
+                    button.classList.remove("btn-success");
+                    button.classList.add("btn-warning");
+                } else {
+                    alert("수정 실패");
+                }
+            });
+        };
+    });
+});
 
 </script>
 </html>

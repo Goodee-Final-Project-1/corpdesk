@@ -55,6 +55,6 @@ public class Attendance {
     
     // 사용 여부
     @Column(nullable = false)
-    private Boolean useYn;
+    private Boolean useYn = true;
     
 }

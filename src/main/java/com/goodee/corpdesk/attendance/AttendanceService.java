@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.attendance;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +35,24 @@ public class AttendanceService {
 	
 	
 	
-	
-	 public List<Attendance> getAttendanceByUsername(String username) {
-	        return attendanceRepository.findByUsername(username);
-	    }
+	// useYn = true 인 데이터만 조회
+	public List<Attendance> getAttendanceByUsername(String username) {
+	    return attendanceRepository.findByUsernameAndUseYn(username, true);
+	}
 
-	    public void deleteAttendances(List<Long> ids) {
-	        attendanceRepository.deleteAllById(ids);
-	    }
+	 // 소프트 삭제
+    public void deleteAttendances(String username, List<Long> attendanceIds) {
+    	List<Attendance> records = attendanceRepository.findAllById(attendanceIds);
+
+        for (Attendance att : records) {
+            if (!att.getUsername().equals(username)) {
+                throw new IllegalArgumentException("다른 직원의 출퇴근 기록은 삭제할 수 없습니다. ID=" + att.getAttendanceId());
+            }
+            att.setUseYn(false); // soft delete
+        }
+
+        attendanceRepository.saveAll(records);
+    }
 
 	    public Attendance getAttendance(Long id) {
 	        return attendanceRepository.findById(id).orElse(null);
@@ -51,5 +62,15 @@ public class AttendanceService {
 	        return attendanceRepository.save(attendance);
 	    }
 	
-	
+	    public void updateAttendanceInline(Long attendanceId, String workStatus, String dateTime) {
+	        Attendance attendance = attendanceRepository.findById(attendanceId)
+	                .orElseThrow(() -> new RuntimeException("출퇴근 기록이 없습니다."));
+	        attendance.setWorkStatus(workStatus);
+	        if(workStatus.equals("출근")) {
+	            attendance.setCheckInDateTime(LocalDateTime.parse(dateTime));
+	        } else {
+	            attendance.setCheckOutDateTime(LocalDateTime.parse(dateTime));
+	        }
+	        attendanceRepository.save(attendance);
+	    }
 }
