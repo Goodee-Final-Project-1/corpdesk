@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.approval.entity.ApprovalForm;
+import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,8 @@ public class ApprovalService {
 	private ApprovalRepository approvalRepository;
 	@Autowired
 	private ApproverRepository approverRepository;
+    @Autowired
+    private ApprovalFormRepository approvalFormRepository;
 	
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
@@ -156,20 +160,16 @@ public class ApprovalService {
     
     public List<ResApprovalDTO> getApprovalList(String listType, String username) throws Exception {
 
-        List<Approval> approvalList = null;
-        List<ResApprovalDTO> result = null;
+        List<ResApprovalDTO> result = new ArrayList<>();
         switch (listType) {
-            case "request" -> approvalList = approvalRepository.findAllByUseYnAndUsername(true, username);
-            case "wait" -> approvalList = approvalRepository.findAllByUseYnAndApproverUsername(true, username);
+            case "request" -> result = approvalRepository.findApprovalSummary(true, username);
+            case "wait" -> result = approvalRepository.findApprovalSummaryByApprover(true, username);
             default -> {
-                approvalList = new ArrayList<>();
-                approvalList.addAll(approvalRepository.findAllByUseYnAndUsername(true, username));
-                approvalList.addAll(approvalRepository.findAllByUseYnAndApproverUsername(true, username));
-                log.warn("{}", approvalList);
+                result.addAll(approvalRepository.findApprovalSummary(true, username));
+                result.addAll(approvalRepository.findApprovalSummaryByApprover(true, username));
+                log.warn("{}", result);
             }
         }
-
-        result = approvalList.stream().map(Approval::toResApprovalDTO).toList();
 
         return result;
 

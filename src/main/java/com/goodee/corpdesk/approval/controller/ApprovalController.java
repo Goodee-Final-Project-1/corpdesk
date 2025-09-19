@@ -75,38 +75,29 @@ public class ApprovalController {
 		return result;
 	}
 
-	// TODO username을 pathvalriable로 받는건 아닌 것 같음... 나중에 인증정보에서 꺼내오는 것으로 수정
-	// 특정 결재 목록 조회
-    @GetMapping("list/{listType}/{username}")
-    public List<ResApprovalDTO> getApprovalList(@PathVariable("listType") String listType, @PathVariable("username") String username) throws Exception {
-
-        System.err.println("list()");
-
-        List<ResApprovalDTO> result = approvalService.getApprovalList(listType, username); // list 혹은 null 반환
-        log.info("{}", result);
-
-        return result;
-
-    }
-    
-    // TODO username을 pathvalriable로 받는건 아닌 것 같음... 나중에 인증정보에서 꺼내오는 것으로 수정
+	// TODO username은 나중에 인증정보에서 꺼내오는 것으로 수정
     // TODO 첨부파일 유무&갯수 정보도 끌고와서 화면에 뿌려주면 유용할듯
     // TODO DTO에 부서 이름도 담아서 화면에 뿌리도록 수정
     // TODO 기안일 내림차순으로 정렬해서 상위 10개씩만 화면에 뿌리도록 수정
-    // 모든 결재 목록 조회
-    @GetMapping("list/{username}")
-    public String getApprovalList(@PathVariable("username") String username, Model model) throws Exception {
-//    public List<ResApprovalDTO> getApprovalList(@PathVariable("username") String username) throws Exception {
+	// 특정 결재 목록 조회
+    @GetMapping("list")
+    public String getApprovalList(@RequestParam("listType") String listType, @RequestParam("username") String username, Model model) throws Exception {
 
         System.err.println("list()");
 
-        List<ResApprovalDTO> reqList = approvalService.getApprovalList("request", username); // list 혹은 null 반환
-        log.info("{}", reqList);
-        model.addAttribute("reqList", reqList);
-        
-        List<ResApprovalDTO> waitList = approvalService.getApprovalList("wait", username); // list 혹은 null 반환
-        log.info("{}", waitList);
-        model.addAttribute("waitList", waitList);
+        if (listType == null || listType.equals("")) {
+            List<ResApprovalDTO> reqList = approvalService.getApprovalList("request", username); // list 혹은 null 반환
+            log.info("{}", reqList);
+            model.addAttribute("reqList", reqList);
+
+            List<ResApprovalDTO> waitList = approvalService.getApprovalList("wait", username); // list 혹은 null 반환
+            log.info("{}", waitList);
+            model.addAttribute("waitList", waitList);
+        } else {
+            List<ResApprovalDTO> result = approvalService.getApprovalList(listType, username); // list 혹은 null 반환
+            log.info("{}", result);
+            model.addAttribute("list", result);
+        }
 
         return "approval/list";
 
@@ -121,18 +112,6 @@ public class ApprovalController {
 
         ResApprovalDTO result = approvalService.getApproval(approvalId);
         log.info("{}", result);
-
-        return "approval/detail";
-
-    }
-	
-    // TODO 결재 요청 폼 주는 메서드 추가
-    @GetMapping("{formTitle}/{departmentId}")
-    public String getApproval(@PathVariable("formTitle") Long formTitle,  @PathVariable("departmentId") Long departmentId, Model model) throws Exception {
-
-        System.err.println("getApproval()");
-
-
 
         return "approval/detail";
 

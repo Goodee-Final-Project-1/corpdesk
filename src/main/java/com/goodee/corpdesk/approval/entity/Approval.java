@@ -23,6 +23,8 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+import java.sql.Timestamp;
+
 @Setter
 @Getter
 @ToString
@@ -43,7 +45,7 @@ public class Approval extends BaseEntity {
 	private Integer departmentId;
 
     @Column(nullable = false)
-    private String approvalFormId;
+    private Long approvalFormId;
 	
 	@Column(nullable = false)
 	@ColumnDefault("'w'") // 기본값은 w(결재대기)
@@ -64,7 +66,7 @@ public class Approval extends BaseEntity {
                                 .username(username)
                                 .departmentId(departmentId)
                                 .status(status)
-                                .createdAt(super.getCreatedAt())
+                                .createdAt(getCreatedAt())
                                 .build();
     }
 

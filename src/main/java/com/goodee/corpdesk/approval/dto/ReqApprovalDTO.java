@@ -15,8 +15,7 @@ public class ReqApprovalDTO {
 	private Long approvalId;
 	private String username;
 	private Integer departmentId;
-	private String formType;
-	private String formContent;
+    private Long approvalFormId;
 	private Character status;
 	
 	ArrayList<ApproverDTO> approverDTOList;
@@ -26,6 +25,7 @@ public class ReqApprovalDTO {
 					.approvalId(approvalId)
 					.username(username)
 					.departmentId(departmentId)
+                    .approvalFormId(approvalFormId)
 					.status(status)
 					.build();
 	}

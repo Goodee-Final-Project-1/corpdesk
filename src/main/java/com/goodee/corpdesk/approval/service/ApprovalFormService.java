@@ -1,0 +1,39 @@
+package com.goodee.corpdesk.approval.service;
+
+import com.goodee.corpdesk.approval.dto.ApproverDTO;
+import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.approval.entity.Approval;
+import com.goodee.corpdesk.approval.entity.ApprovalForm;
+import com.goodee.corpdesk.approval.entity.Approver;
+import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
+import com.goodee.corpdesk.approval.repository.ApprovalRepository;
+import com.goodee.corpdesk.approval.repository.ApproverRepository;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Slf4j
+@Service
+@Transactional
+public class ApprovalFormService {
+
+    @Autowired
+	private ApprovalFormRepository approvalFormRepository;
+
+    public ResApprovalDTO getApprovalForm(Long approvalId) throws Exception {
+        Optional<ApprovalForm> result = approvalFormRepository.findById(approvalId);
+
+        if(result.isEmpty())  return null;
+
+        ApprovalForm approvalForm = result.get();
+
+        return approvalForm.toResApprovalDTO();
+    }
+
+}

@@ -155,7 +155,7 @@
 								  	<c:forEach items="${reqList }" var="el">
 									    <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
 									      <td>${fn:substring(el.createdAt, 0, 10) }</td>
-									      <td>${el.formType }</td>
+									      <td>${el.formTitle }</td>
 									      <td>${el.departmentId }</td>
 									      <td>
 									      	<c:choose>
@@ -208,7 +208,7 @@
 								  	<c:forEach items="${waitList }" var="el">
 									    <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
 									      <td>${fn:substring(el.createdAt, 0, 10) }</td>
-									      <td>${el.formType }</td>
+									      <td>${el.formTitle }</td>
 									      <td>${el.departmentId }</td>
 									      <td>${el.username }</td>
 									      <td>
