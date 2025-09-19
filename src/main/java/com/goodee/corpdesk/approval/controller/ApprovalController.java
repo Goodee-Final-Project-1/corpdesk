@@ -5,6 +5,9 @@ import java.util.List;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.Approval;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.goodee.corpdesk.approval.dto.ApprovalDTO;
@@ -14,10 +17,18 @@ import com.goodee.corpdesk.approval.service.ApprovalService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-//@Controller
-@RestController // TODO postman을 사용하여 controller를 테스트하기 위해 임시로 붙임. 추후 @Controller로 수정
-@RequestMapping(value = "/approvals/**")
+@Controller
+//@RestController // TODO postman을 사용하여 controller를 테스트하기 위해 임시로 붙임. 추후 @Controller로 수정
+@RequestMapping(value = "/approval/**")
 public class ApprovalController {
+	
+	@Value("${cat.approval}")
+	private String cat;
+	
+	@ModelAttribute("cat")
+	public String getCat() {
+		return cat;
+	}
 	
 	@Autowired
 	private ApprovalService approvalService;
@@ -64,6 +75,7 @@ public class ApprovalController {
 		return result;
 	}
 
+	// TODO username을 pathvalriable로 받는건 아닌 것 같음... 나중에 인증정보에서 꺼내오는 것으로 수정
 	// 특정 결재 목록 조회
     @GetMapping("list/{listType}/{username}")
     public List<ResApprovalDTO> getApprovalList(@PathVariable("listType") String listType, @PathVariable("username") String username) throws Exception {
@@ -76,30 +88,41 @@ public class ApprovalController {
         return result;
 
     }
-
+    
+    // TODO username을 pathvalriable로 받는건 아닌 것 같음... 나중에 인증정보에서 꺼내오는 것으로 수정
+    // TODO 첨부파일 유무&갯수 정보도 끌고와서 화면에 뿌려주면 유용할듯
+    // TODO DTO에 부서 이름도 담아서 화면에 뿌리도록 수정
+    // TODO 기안일 내림차순으로 정렬해서 상위 10개씩만 화면에 뿌리도록 수정
     // 모든 결재 목록 조회
     @GetMapping("list/{username}")
-    public List<ResApprovalDTO> getApprovalList(@PathVariable("username") String username) throws Exception {
+    public String getApprovalList(@PathVariable("username") String username, Model model) throws Exception {
+//    public List<ResApprovalDTO> getApprovalList(@PathVariable("username") String username) throws Exception {
 
         System.err.println("list()");
 
-        List<ResApprovalDTO> result = approvalService.getApprovalList("", username); // list 혹은 null 반환
-        log.info("{}", result);
+        List<ResApprovalDTO> reqList = approvalService.getApprovalList("request", username); // list 혹은 null 반환
+        log.info("{}", reqList);
+        model.addAttribute("reqList", reqList);
+        
+        List<ResApprovalDTO> waitList = approvalService.getApprovalList("wait", username); // list 혹은 null 반환
+        log.info("{}", waitList);
+        model.addAttribute("waitList", waitList);
 
-        return result;
+        return "approval/list";
 
     }
 
     // 결재 상세 조회
     @GetMapping("{approvalId}")
-    public ResApprovalDTO getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
+    public String getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
+//    public ResApprovalDTO getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
 
         System.err.println("getApproval()");
 
         ResApprovalDTO result = approvalService.getApproval(approvalId);
         log.info("{}", result);
 
-        return result;
+        return "approval/detail";
 
     }
 	

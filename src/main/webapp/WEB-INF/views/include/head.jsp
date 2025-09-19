@@ -55,3 +55,20 @@
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 <script src="/plugins/nprogress/nprogress.js"></script>
+
+<style>
+    /* 모달이 열렸을 때 사이드바가 모달 뒤로 가도록 */
+    .modal-open .email-left-column,
+    .modal-open .sidebar,
+    .modal-open .side-nav {
+        z-index: 1040 !important; /* Bootstrap 모달 backdrop보다 낮게 */
+    }
+    
+    /* 또는 모달 자체의 z-index를 더 높게 설정 */
+    .modal {
+        z-index: 1060 !important;
+    }
+    .modal-backdrop {
+        z-index: 1055 !important;
+    }
+</style>
