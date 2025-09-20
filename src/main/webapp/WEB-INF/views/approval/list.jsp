@@ -32,7 +32,6 @@
 	          
 					<div class="card-body p-4">
 						<ul class="list-unstyled">
-                            <%-- TODO 아래 li들의 1, 2, 3은 예시이고, 최종적으로는 서버에서 값을 뿌려 줘야 함 --%>
 							<c:forEach items="${formList }" var="el">
                                 <li class="text-start">
                                     <a data-approval-form-id="${el.approvalFormId }" class="approval-form-name btn px-0 mr-3 text-dark">${el.formTitle }</a>
@@ -44,7 +43,6 @@
 	        </div>
         	
         	<!-- right col -->
-              <%-- TODO 모달을 맨 처음 열었을 때는 맨첫번째 항목에 대한 상세정보 표출 --%>
 		      <div class="card mb-4 p-0 ml-2 w-100">
 	          
 	          <h5 class="card-title pt-4 px-4">상세정보</h5>
@@ -113,10 +111,10 @@
                                 <a href="/approval/list?listType=wait&username=team_leader">대기 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
                             </li>
                             <li class="d-block mb-4">
-                                <a href="/approval/list?listType=storage&username=team_leader">완료 목록</a>
+                                <a href="/approval/list?listType=storage&username=team_leader">완료 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
                             </li>
                             <li class="d-block mb-4">
-                                <a href="/approval/list?listType=temp&username=team_leader">임시보관함</a>
+                                <a href="/approval/list?listType=temp&username=team_leader">임시보관함</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
                             </li>
 						</ul>
 					</div>
