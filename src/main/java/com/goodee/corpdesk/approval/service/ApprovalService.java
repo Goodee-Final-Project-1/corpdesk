@@ -158,17 +158,36 @@ public class ApprovalService {
 		return "PROCESSED";
 	}
     
+    public List<ResApprovalDTO> getAllApprovalList(String listType, String username) throws Exception {
+
+        List<ResApprovalDTO> result = new ArrayList<>();
+        switch (listType) {
+            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("T")); // 내 결재 임시 보관함
+            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("W", "N", "Y")); // 내 결재 요청 목록
+            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("W"), List.of("W")); // 결재 대기 목록
+            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("Y", "N"), List.of("W", "Y", "N")); // 내가 결재한 목록
+        }
+
+        return result;
+
+    }
+
     public List<ResApprovalDTO> getApprovalList(String listType, String username) throws Exception {
 
         List<ResApprovalDTO> result = new ArrayList<>();
         switch (listType) {
-            case "request" -> result = approvalRepository.findApprovalSummary(true, username);
-            case "wait" -> result = approvalRepository.findApprovalSummaryByApprover(true, username);
-            default -> {
-                result.addAll(approvalRepository.findApprovalSummary(true, username));
-                result.addAll(approvalRepository.findApprovalSummaryByApprover(true, username));
-                log.warn("{}", result);
-            }
+            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(
+                                                    true, username, List.of("T"), 10L
+                                                        ); // 내 결재 임시 보관함
+            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(
+                                                    true, username, List.of("W", "N", "Y"), 10L
+                                                        ); // 내 결재 요청 목록
+            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(
+                                                    true, username, List.of("W"), List.of("W"), 10L
+                                                        ); // 결재 대기 목록
+            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(
+                                                    true, username, List.of("Y", "N"), List.of("W", "Y", "N"), 10L
+                                                        ); // 내가 결재한 목록
         }
 
         return result;

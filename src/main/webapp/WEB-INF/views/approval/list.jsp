@@ -94,147 +94,407 @@
 	
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
-			
+
 			<div class="email-wrapper rounded border bg-white">
 				<div class="row no-gutters justify-content-center">
-				
+
 				<div class="col-lg-4 col-xl-3 col-xxl-2">
 					<div class="email-left-column email-options p-4 p-xl-5">
 						<a data-bs-toggle="modal" data-bs-target="#newApprovalModal" id="newApproval" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">새 결재 진행</a>
-						
+
 						<ul class="pb-2">
-						  <li class="d-block active mb-4">
-						    <a href="email-inbox.html">결재 대기 목록</a>
-						  </li>
-						  <li class="d-block mb-4">
-						    <a href="#">결재 예정 목록</a>
-						  </li>
-						  <li class="d-block mb-4">
-						    <a href="#">결재 요청 목록</a>
-						  </li>
-						  <li class="d-block mb-4">
-						    <a href="#">결재 문서함</a>
-						  </li>
-						  <li class="d-block mb-4">
-						    <a href="#">임시 저장 목록</a>
-						  </li>
+                            <li class="d-block mb-4">
+                                <a href="/approval/list?username=team_leader">전체</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
+                            </li>
+                            <li class="d-block mb-4">
+						        <a href="/approval/list?listType=request&username=team_leader">요청 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
+                            </li>
+                            <li class="d-block mb-4">
+                                <a href="/approval/list?listType=wait&username=team_leader">대기 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
+                            </li>
+                            <li class="d-block mb-4">
+                                <a href="/approval/list?listType=storage&username=team_leader">완료 목록</a>
+                            </li>
+                            <li class="d-block mb-4">
+                                <a href="/approval/list?listType=temp&username=team_leader">임시보관함</a>
+                            </li>
 						</ul>
 					</div>
 				</div>
 				
 				<div class="col-lg-8 col-xl-9 col-xxl-10">
 					<div class="email-right-column p-4 p-xl-5">
-						
-						<!-- section1 - 결재 요청 문서 목록 -->
-						<section class="email-details pl-4 pr-4 pt-4">
-							
-							<div class="d-flex justify-content-between align-items-center">
-								<h4 class="text-dark">결재 요청 문서 목록</h4>
-								<button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
-							</div>
-							
-							<div class="email-details-content pl-0 pr-0">
-								<table class="table">
-								  
-								  <thead>
-								    <tr>
-								      <th class="col-2">기안일</th>
-								      <th class="col-6">제목</th>
-								      <th class="col-1">파일</th>
-								      <th class="col-2">부서</th>
-								      <th class="col-1">상태</th>
-								    </tr>
-								  </thead>
-								  
-								  <tbody>
-								  	<c:forEach items="${reqList }" var="el">
-									    <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
-									      <td>${fn:substring(el.createdAt, 0, 10) }</td>
-									      <td>${el.formTitle }</td>
-									      <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
-									      <td>${el.departmentName }</td>
-									      <td>
-									      	<c:choose>
-									      		<c:when test="${el.status eq 89}">
-									      			<span class="badge badge-info">승인</span>
-									      		</c:when>
-									      		<c:when test="${el.status eq 78}">
-									      			<span class="badge badge-danger">반려</span>
-									      		</c:when>
-									      		<c:when test="${el.status eq 87}">
-									      			<span class="badge badge-light">대기</span>
-									      		</c:when>
-									      		<c:otherwise>
-									      			<span class="badge badge-outline-info">임시저장</span>
-									      		</c:otherwise>
-									      	</c:choose>
-										    </td>
-									    </tr>
-								  	</c:forEach>
-								  </tbody>
-								  
-								</table>
-							</div>
-							
-						</section>
-						<!--  -->
-						
-						<!-- section2 - 결재 대기 문서 목록 -->
-						<section class="email-details pl-4 pr-4 pt-4">
-							
-							<div class="d-flex justify-content-between align-items-center">
-								<h4 class="text-dark">결재 대기 문서 목록</h4>
-								<button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
-							</div>
-							
-							<div class="email-details-content pl-0 pr-0">
-								<table class="table">
-								  
-								  <thead>
-								    <tr>
-								      <th class="col-2">기안일</th>
-								      <th class="col-4">제목</th>
-								      <th class="col-1">파일</th>
-								      <th class="col-2">기안부서</th>
-								      <th class="col-2">기안자</th>
-								      <th class="col-1">상태</th>
-								    </tr>
-								  </thead>
-								  
-								  <tbody>
-								  	<c:forEach items="${waitList }" var="el">
-									    <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
-									      <td>${fn:substring(el.createdAt, 0, 10) }</td>
-									      <td>${el.formTitle }</td>
-									      <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
-									      <td>${el.departmentName }</td>
-									      <td>${el.username }</td>
-									      <td>
-									      	<c:choose>
-									      		<c:when test="${el.status eq 89}">
-									      			<span class="badge badge-info">승인</span>
-									      		</c:when>
-									      		<c:when test="${el.status eq 78}">
-									      			<span class="badge badge-danger">반려</span>
-									      		</c:when>
-									      		<c:when test="${el.status eq 87}">
-									      			<span class="badge badge-light">대기</span>
-									      		</c:when>
-									      		<c:otherwise>
-									      			<span class="badge badge-outline-info">임시저장</span>
-									      		</c:otherwise>
-									      	</c:choose>
-										    </td>
-									    </tr>
-								  	</c:forEach>
-								  </tbody>
-								  
-								</table>
-							</div>
-							
-						</section>
-						<!--  -->
-					
+
+                        <c:choose>
+
+                            <c:when test="${reqList ne null and waitList ne null }">
+                                <!-- section1 - 결재 요청 목록 -->
+                                <section class="email-details pl-4 pr-4 pt-4">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="text-dark">결재 요청 목록</h4>
+                                        <button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
+                                    </div>
+
+                                    <div class="email-details-content pl-0 pr-0">
+                                        <table class="table">
+
+                                          <thead>
+                                            <tr>
+                                              <th class="col-2">기안일</th>
+                                              <th class="col-6">제목</th>
+                                              <th class="col-1">파일</th>
+                                              <th class="col-2">부서</th>
+                                              <th class="col-1">상태</th>
+                                            </tr>
+                                          </thead>
+
+                                          <tbody>
+                                            <c:forEach items="${reqList }" var="el">
+                                                <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
+                                                  <td>${fn:substring(el.createdAt, 0, 10) }</td>
+                                                  <td>${el.formTitle }</td>
+                                                  <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
+                                                  <td>${el.departmentName }</td>
+                                                  <td>
+                                                    <c:choose>
+                                                        <c:when test="${(el.status eq 'Y'.charAt(0)) or (el.status eq 'y'.charAt(0)) }">
+                                                            <span class="badge badge-info">승인</span>
+                                                        </c:when>
+                                                        <c:when test="${(el.status eq 'N'.charAt(0)) or (el.status eq 'n'.charAt(0)) }">
+                                                            <span class="badge badge-danger">반려</span>
+                                                        </c:when>
+                                                        <c:when test="${(el.status eq 'W'.charAt(0)) or (el.status eq 'w'.charAt(0)) }">
+                                                            <span class="badge badge-light">대기</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge badge-outline-info">임시저장</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                          </tbody>
+
+                                        </table>
+                                    </div>
+
+                                </section>
+                                <!--  -->
+
+                                <!-- section2 - 결재 대기 목록 -->
+                                <section class="email-details pl-4 pr-4 pt-4">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="text-dark">결재 대기 목록</h4>
+                                        <button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
+                                    </div>
+
+                                    <div class="email-details-content pl-0 pr-0">
+                                        <table class="table">
+
+                                          <thead>
+                                            <tr>
+                                              <th class="col-2">기안일</th>
+                                              <th class="col-4">제목</th>
+                                              <th class="col-1">파일</th>
+                                              <th class="col-2">기안부서</th>
+                                              <th class="col-2">기안자</th>
+                                              <th class="col-1">상태</th>
+                                            </tr>
+                                          </thead>
+
+                                          <tbody>
+                                            <c:forEach items="${waitList }" var="el">
+                                                <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
+                                                  <td>${fn:substring(el.createdAt, 0, 10) }</td>
+                                                  <td>${el.formTitle }</td>
+                                                  <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
+                                                  <td>${el.departmentName }</td>
+                                                  <td>${el.username }</td>
+                                                  <td>
+                                                    <c:choose>
+                                                        <c:when test="${(el.status eq 'Y'.charAt(0)) or (el.status eq 'y'.charAt(0)) }">
+                                                            <span class="badge badge-info">승인</span>
+                                                        </c:when>
+                                                        <c:when test="${(el.status eq 'N'.charAt(0)) or (el.status eq 'n'.charAt(0)) }">
+                                                            <span class="badge badge-danger">반려</span>
+                                                        </c:when>
+                                                        <c:when test="${(el.status eq 'W'.charAt(0)) or (el.status eq 'w'.charAt(0)) }">
+                                                            <span class="badge badge-light">대기</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge badge-outline-info">임시저장</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                          </tbody>
+
+                                        </table>
+                                    </div>
+
+                                </section>
+                                <!--  -->
+
+                                <!-- section3 - 결재 완료 목록 -->
+                                <section class="email-details pl-4 pr-4 pt-4">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="text-dark">결재 완료 목록</h4>
+                                        <button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
+                                    </div>
+
+                                    <div class="email-details-content pl-0 pr-0">
+                                        <table class="table">
+
+                                            <thead>
+                                            <tr>
+                                                <th class="col-2">기안일</th>
+                                                <th class="col-4">제목</th>
+                                                <th class="col-1">파일</th>
+                                                <th class="col-2">기안부서</th>
+                                                <th class="col-2">기안자</th>
+                                                <th class="col-1">상태</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody>
+                                            <c:forEach items="${storList }" var="el">
+                                                <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
+                                                    <td>${fn:substring(el.createdAt, 0, 10) }</td>
+                                                    <td>${el.formTitle }</td>
+                                                    <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
+                                                    <td>${el.departmentName }</td>
+                                                    <td>${el.username }</td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${(el.status eq 'Y'.charAt(0)) or (el.status eq 'y'.charAt(0)) }">
+                                                                <span class="badge badge-info">승인</span>
+                                                            </c:when>
+                                                            <c:when test="${(el.status eq 'N'.charAt(0)) or (el.status eq 'n'.charAt(0)) }">
+                                                                <span class="badge badge-danger">반려</span>
+                                                            </c:when>
+                                                            <c:when test="${(el.status eq 'W'.charAt(0)) or (el.status eq 'w'.charAt(0)) }">
+                                                                <span class="badge badge-light">대기</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="badge badge-outline-info">임시저장</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+
+                                </section>
+                                <!--  -->
+
+                                <!-- section4 - 임시 보관함 -->
+                                <section class="email-details pl-4 pr-4 pt-4">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="text-dark">임시 보관함</h4>
+                                        <button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
+                                    </div>
+
+                                    <div class="email-details-content pl-0 pr-0">
+                                        <table class="table">
+
+                                            <thead>
+                                            <tr>
+                                                <th class="col-2">기안일</th>
+                                                <th class="col-6">제목</th>
+                                                <th class="col-1">파일</th>
+                                                <th class="col-2">부서</th>
+                                                <th class="col-1">상태</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody>
+                                            <c:forEach items="${tempList }" var="el">
+                                                <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
+                                                    <td>${fn:substring(el.createdAt, 0, 10) }</td>
+                                                    <td>${el.formTitle }</td>
+                                                    <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
+                                                    <td>${el.departmentName }</td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${(el.status eq 'Y'.charAt(0)) or (el.status eq 'y'.charAt(0)) }">
+                                                                <span class="badge badge-info">승인</span>
+                                                            </c:when>
+                                                            <c:when test="${(el.status eq 'N'.charAt(0)) or (el.status eq 'n'.charAt(0)) }">
+                                                                <span class="badge badge-danger">반려</span>
+                                                            </c:when>
+                                                            <c:when test="${(el.status eq 'W'.charAt(0)) or (el.status eq 'w'.charAt(0)) }">
+                                                                <span class="badge badge-light">대기</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="badge badge-outline-info">임시저장</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+
+                                </section>
+                                <!--  -->
+                            </c:when>
+
+                            <c:when test="${request ne null or temp ne null}">
+                                <!-- 결재 요청 목록 / 임시 저장 목록 -->
+                                <section class="email-details pl-4 pr-4 pt-4">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="text-dark">${request ne null ? '결재 요청 목록' : '임시 보관함'}</h4>
+                                        <button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
+                                    </div>
+
+                                    <div class="email-details-content pl-0 pr-0">
+                                        <table class="table">
+
+                                            <thead>
+                                            <tr>
+                                                <th class="col-2">기안일</th>
+                                                <th class="col-6">제목</th>
+                                                <th class="col-1">파일</th>
+                                                <th class="col-2">부서</th>
+                                                <th class="col-1">상태</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody>
+                                            <c:forEach items="${request ne null ? request : temp }" var="el">
+                                                <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
+                                                    <td>${fn:substring(el.createdAt, 0, 10) }</td>
+                                                    <td>${el.formTitle }</td>
+                                                    <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
+                                                    <td>${el.departmentName }</td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${(el.status eq 'Y'.charAt(0)) or (el.status eq 'y'.charAt(0)) }">
+                                                                <span class="badge badge-info">승인</span>
+                                                            </c:when>
+                                                            <c:when test="${(el.status eq 'N'.charAt(0)) or (el.status eq 'n'.charAt(0)) }">
+                                                                <span class="badge badge-danger">반려</span>
+                                                            </c:when>
+                                                            <c:when test="${(el.status eq 'W'.charAt(0)) or (el.status eq 'w'.charAt(0)) }">
+                                                                <span class="badge badge-light">대기</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="badge badge-outline-info">임시저장</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+
+                                </section>
+                                <!--  -->
+                            </c:when>
+
+                            <c:when test="${wait ne null or storage ne null}">
+                                <!-- 결재 대기 목록 / 결재 문서함 -->
+                                <section class="email-details pl-4 pr-4 pt-4">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="text-dark">${wait ne null ? '결재 대기 목록': '결재 완료 목록'}</h4>
+                                        <button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
+                                    </div>
+
+                                    <div class="email-details-content pl-0 pr-0">
+                                        <table class="table">
+
+                                            <thead>
+                                            <tr>
+                                                <th class="col-2">기안일</th>
+                                                <th class="col-4">제목</th>
+                                                <th class="col-1">파일</th>
+                                                <th class="col-2">기안부서</th>
+                                                <th class="col-2">기안자</th>
+                                                <th class="col-1">상태</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody>
+                                            <c:forEach items="${wait ne null ? wait : storage }" var="el">
+                                                <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
+                                                    <td>${fn:substring(el.createdAt, 0, 10) }</td>
+                                                    <td>${el.formTitle }</td>
+                                                    <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
+                                                    <td>${el.departmentName }</td>
+                                                    <td>${el.username }</td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${(el.status eq 'Y'.charAt(0)) or (el.status eq 'y'.charAt(0)) }">
+                                                                <span class="badge badge-info">승인</span>
+                                                            </c:when>
+                                                            <c:when test="${(el.status eq 'N'.charAt(0)) or (el.status eq 'n'.charAt(0)) }">
+                                                                <span class="badge badge-danger">반려</span>
+                                                            </c:when>
+                                                            <c:when test="${(el.status eq 'W'.charAt(0)) or (el.status eq 'w'.charAt(0)) }">
+                                                                <span class="badge badge-light">대기</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="badge badge-outline-info">임시저장</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+
+                                </section>
+                                <%--  --%>
+                            </c:when>
+
+                        </c:choose>
+
+                        <%-- 페이징 --%>
+                        <c:if test="${request ne null or wait ne null}">
+                            <br>
+                            <nav class="d-flex justify-content-center">
+                                <ul class="pagination pagination-flat pagination-flat-rounded">
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" aria-label="Previous">
+                                            <span aria-hidden="true" class="mdi mdi-chevron-left"></span>
+                                            <span class="sr-only">Previous</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item active">
+                                        <a class="page-link" href="#">1</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">2</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">3</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" aria-label="Next">
+                                            <span aria-hidden="true" class="mdi mdi-chevron-right"></span>
+                                            <span class="sr-only">Next</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </c:if>
+
 					</div>
 				</div>
 				

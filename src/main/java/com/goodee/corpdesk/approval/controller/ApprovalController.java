@@ -105,17 +105,24 @@ public class ApprovalController {
 
         // 2. 결재 목록 데이터 뿌리기
         if (listType == null || listType.equals("")) {
+            List<ResApprovalDTO> tempList = approvalService.getApprovalList("temp", username); // list 혹은 null 반환
             List<ResApprovalDTO> reqList = approvalService.getApprovalList("request", username); // list 혹은 null 반환
-            log.info("{}", reqList);
-            model.addAttribute("reqList", reqList);
-
             List<ResApprovalDTO> waitList = approvalService.getApprovalList("wait", username); // list 혹은 null 반환
+            List<ResApprovalDTO> storList = approvalService.getApprovalList("storage", username); // list 혹은 null 반환
+
+            log.info("{}", tempList);
+            log.info("{}", reqList);
             log.info("{}", waitList);
+            log.info("{}", storList);
+
+            model.addAttribute("tempList", tempList);
+            model.addAttribute("reqList", reqList);
             model.addAttribute("waitList", waitList);
+            model.addAttribute("storList", storList);
         } else {
-            List<ResApprovalDTO> result = approvalService.getApprovalList(listType, username); // list 혹은 null 반환
+            List<ResApprovalDTO> result = approvalService.getAllApprovalList(listType, username); // list 혹은 null 반환
             log.info("{}", result);
-            model.addAttribute("list", result);
+            model.addAttribute(listType, result);
         }
 
         return "approval/list";

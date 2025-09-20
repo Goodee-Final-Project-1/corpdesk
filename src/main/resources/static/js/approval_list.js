@@ -33,5 +33,5 @@ const formCheck = document.querySelector('#formCheck');
 const departmentIdEl = document.querySelector('#departmentId');
 
 formCheck.addEventListener('click', function () {
-  location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}`; // "/approval-form/{formId}?departmentId={departmentId}"로 이동
+    location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}`; // "/approval-form/{formId}?departmentId={departmentId}"로 이동
 });
