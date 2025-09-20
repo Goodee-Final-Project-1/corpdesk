@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.department.entity;
 
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,12 +19,18 @@ import org.hibernate.annotations.DynamicUpdate;
 public class Department extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long departmentId;
+    private Integer departmentId;
 
     @Column(nullable = false)
-    private Long departmentHigh;
+    private Integer parentDepartmentId;
 
     @Column(nullable = false)
     private String departmentName;
 
+    public ResApprovalDTO toResApprovalDTO() {
+        return ResApprovalDTO.builder()
+                .departmentId(departmentId)
+                .departmentName(departmentName)
+                .build();
+    }
 }

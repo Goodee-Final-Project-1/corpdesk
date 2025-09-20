@@ -17,7 +17,7 @@
 	
 	<!-- Modal -->
 	<div class="modal fade" id="newApprovalModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	  <div class="modal-dialog modal-dialog-centered">
+	  <div class="modal-dialog modal-lg modal-dialog-centered">
 	    <div class="modal-content">
 	    
 	      <div class="modal-header">
@@ -28,20 +28,16 @@
 	      <div class="modal-body d-flex justify-content-between">
 	        	
         	<!-- left col -->
-        	<div class="card mb-4 p-0 w-50">
+        	<div class="card mb-4 p-0 w-75">
 	          
 					<div class="card-body p-4">
 						<ul class="list-unstyled">
                             <%-- TODO 아래 li들의 1, 2, 3은 예시이고, 최종적으로는 서버에서 값을 뿌려 줘야 함 --%>
-							<li class="text-start">
-                                <a data-approval-form-id="1" class="approval-form-name btn px-0 mr-3 text-dark">업무 기안</a>
-                            </li>
-							<li class="text-start">
-                                <a data-approval-form-id="2" class="approval-form-name btn px-0 mr-3 text-dark">출장 신청</a>
-                            </li>
-							<li class="text-start">
-                                <a data-approval-form-id="3" class="approval-form-name btn px-0 mr-3 text-dark">휴가 신청</a>
-                            </li>
+							<c:forEach items="${formList }" var="el">
+                                <li class="text-start">
+                                    <a data-approval-form-id="${el.approvalFormId }" class="approval-form-name btn px-0 mr-3 text-dark">${el.formTitle }</a>
+                                </li>
+                            </c:forEach>
 						</ul>
 					</div>
 	          
@@ -57,7 +53,7 @@
 	            <ul class="list-unstyled">
 	            	<li class="d-flex py-2 text-dark">
 	            		<b class="col-5 p-0">제목</b>
-	            		<p id="approvalTitle">asdfasdf</p>
+	            		<p id="approvalTitle"></p>
 	            	</li>
 	            	<li class="d-flex py-2 text-dark">
 	            		<b class="col-5 p-0">기안부서</b>
@@ -66,14 +62,12 @@
 	            	<li class="d-flex py-2 text-dark align-items-center">
 	            		<label class="col-5 p-0">결재부서</label>
 	            		<div class="form-group">
-	 								  <select class="form-control" id="departmentId">
-								      <option value="1">1</option>
-								      <option value="2">2</option>
-								      <option value="3">3</option>
-								      <option value="4">4</option>
-								      <option value="5">5</option>
-								    </select>
-								  </div>
+                            <select class="form-control" id="departmentId">
+                              <c:forEach items="${departmentList }" var="el">
+                                  <option value="${el.departmentId}">${el.departmentName}</option>
+                              </c:forEach>
+                            </select>
+                        </div>
 	            	</li>
 	            </ul>
 	          </div>
@@ -146,8 +140,9 @@
 								    <tr>
 								      <th class="col-2">기안일</th>
 								      <th class="col-6">제목</th>
+								      <th class="col-1">파일</th>
 								      <th class="col-2">부서</th>
-								      <th class="col-2">상태</th>
+								      <th class="col-1">상태</th>
 								    </tr>
 								  </thead>
 								  
@@ -156,7 +151,8 @@
 									    <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
 									      <td>${fn:substring(el.createdAt, 0, 10) }</td>
 									      <td>${el.formTitle }</td>
-									      <td>${el.departmentId }</td>
+									      <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
+									      <td>${el.departmentName }</td>
 									      <td>
 									      	<c:choose>
 									      		<c:when test="${el.status eq 89}">
@@ -198,9 +194,10 @@
 								    <tr>
 								      <th class="col-2">기안일</th>
 								      <th class="col-4">제목</th>
+								      <th class="col-1">파일</th>
 								      <th class="col-2">기안부서</th>
 								      <th class="col-2">기안자</th>
-								      <th class="col-2">상태</th>
+								      <th class="col-1">상태</th>
 								    </tr>
 								  </thead>
 								  
@@ -209,7 +206,8 @@
 									    <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
 									      <td>${fn:substring(el.createdAt, 0, 10) }</td>
 									      <td>${el.formTitle }</td>
-									      <td>${el.departmentId }</td>
+									      <td>${el.fileCount eq 0 ? '' : '<i class="mdi mdi-paperclip"></i>' += el.fileCount }</td>
+									      <td>${el.departmentName }</td>
 									      <td>${el.username }</td>
 									      <td>
 									      	<c:choose>

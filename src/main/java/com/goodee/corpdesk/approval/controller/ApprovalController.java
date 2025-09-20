@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.Approval;
+import com.goodee.corpdesk.approval.service.ApprovalFormService;
+import com.goodee.corpdesk.department.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -21,17 +23,33 @@ import lombok.extern.slf4j.Slf4j;
 //@RestController // TODO postman을 사용하여 controller를 테스트하기 위해 임시로 붙임. 추후 @Controller로 수정
 @RequestMapping(value = "/approval/**")
 public class ApprovalController {
-	
+
+    @Autowired
+    private ApprovalService approvalService;
+    @Autowired
+    private ApprovalFormService approvalFormService;
+    @Autowired
+    private DepartmentService departmentService;
+
 	@Value("${cat.approval}")
 	private String cat;
-	
+
 	@ModelAttribute("cat")
 	public String getCat() {
 		return cat;
 	}
-	
-	@Autowired
-	private ApprovalService approvalService;
+
+    // 결재 양식 데이터 뿌리기
+    @ModelAttribute("formList")
+    public List<ResApprovalDTO> getFormList() throws  Exception {
+        return approvalFormService.getApprovalFormList();
+    }
+
+    // 부서 목록 데이터 뿌리기
+    @ModelAttribute("departmentList")
+    public List<ResApprovalDTO> getDepartmentList() throws  Exception {
+        return departmentService.getApprovalFormList();
+    }
 	
 	// 결재 요청 
 	@PostMapping("")
@@ -81,10 +99,11 @@ public class ApprovalController {
     // TODO 기안일 내림차순으로 정렬해서 상위 10개씩만 화면에 뿌리도록 수정
 	// 특정 결재 목록 조회
     @GetMapping("list")
-    public String getApprovalList(@RequestParam("listType") String listType, @RequestParam("username") String username, Model model) throws Exception {
+    public String getApprovalList(@RequestParam(value = "listType", required = false) String listType, @RequestParam("username") String username, Model model) throws Exception {
 
         System.err.println("list()");
 
+        // 2. 결재 목록 데이터 뿌리기
         if (listType == null || listType.equals("")) {
             List<ResApprovalDTO> reqList = approvalService.getApprovalList("request", username); // list 혹은 null 반환
             log.info("{}", reqList);

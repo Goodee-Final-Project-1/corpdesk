@@ -52,10 +52,10 @@ public class ResApprovalDTO {
         this.departmentName = departmentName;
     }
 
-    public ResApprovalDTO(Long approvalId, LocalDateTime createdAt, Character status,
+    public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status,
                           String formTitle, Long fileCount, String departmentName) {
         this.approvalId = approvalId;
-        this.createdAt = createdAt;
+        this.createdAt = LocalDateTime.ofInstant(createdAt.toInstant(), ZoneId.of("Asia/Seoul"));
         this.status = status;
         this.formTitle = formTitle;
         this.fileCount = fileCount != null ? fileCount.intValue() : 0;

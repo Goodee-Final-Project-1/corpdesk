@@ -36,4 +36,10 @@ public class ApprovalFormService {
         return approvalForm.toResApprovalDTO();
     }
 
+    public List<ResApprovalDTO> getApprovalFormList() throws Exception {
+        List<ApprovalForm> result = approvalFormRepository.findAll();
+
+        return result.stream().map(ApprovalForm::toResApprovalDTO).toList();
+    }
+
 }
