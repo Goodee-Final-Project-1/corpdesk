@@ -28,7 +28,7 @@ public class EmailApiController {
 		String username = authentication.getName();
 		Pageable pageable = PageRequest.of(page - 1, 10);
 
-		return emailService.receivedBox(username, pageable);
+		return emailService.receivedList(username, pageable);
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class EmailApiController {
 		String username = authentication.getName();
 		Pageable pageable = PageRequest.of(page - 1, 10);
 
-		return emailService.sentBox(username, pageable);
+		return emailService.sentList(username, pageable);
 	}
 
 	@PostMapping("sent/detail")
