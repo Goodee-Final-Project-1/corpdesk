@@ -9,14 +9,16 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ReceivedDTO {
+public class EmailDTO {
 
-	private Integer messageNumber;
+	private Integer emailNo;
 	private String subject;
-	private String content;
+	private String text;
+//	private Object content;
 	private String from;
 	private String sentDate;
 	private String receivedDate;
-	private String replyTo;
+//	private String to;
+	private String recipients;
 
 }

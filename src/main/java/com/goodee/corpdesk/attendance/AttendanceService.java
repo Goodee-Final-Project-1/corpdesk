@@ -1,9 +1,6 @@
 package com.goodee.corpdesk.attendance;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +10,8 @@ public class AttendanceService {
 	
 	@Autowired
 	private AttendanceRepository attendanceRepository;
+	
+	
 	
 //	// 문자열을 LocalDateTime으로 파싱하기 위한 포맷 (예: "2025-09-10T09:00")
 //	private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -32,4 +31,25 @@ public class AttendanceService {
 //				.collect(Collectors.toList());
 //	}
 
+	
+	
+	
+	
+	 public List<Attendance> getAttendanceByUsername(String username) {
+	        return attendanceRepository.findByUsername(username);
+	    }
+
+	    public void deleteAttendances(List<Long> ids) {
+	        attendanceRepository.deleteAllById(ids);
+	    }
+
+	    public Attendance getAttendance(Long id) {
+	        return attendanceRepository.findById(id).orElse(null);
+	    }
+
+	    public Attendance saveAttendance(Attendance attendance) {
+	        return attendanceRepository.save(attendance);
+	    }
+	
+	
 }

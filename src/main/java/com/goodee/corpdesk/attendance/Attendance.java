@@ -26,7 +26,7 @@ public class Attendance {
     
     // 직원 ID
     @Column(nullable = false)
-    private Integer employeeId;
+    private String username;
     
     // 출근 일시
     private LocalDateTime checkInDateTime;
