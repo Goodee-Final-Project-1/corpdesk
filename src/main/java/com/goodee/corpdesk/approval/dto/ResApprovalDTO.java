@@ -2,6 +2,7 @@ package com.goodee.corpdesk.approval.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.goodee.corpdesk.approval.entity.Approval;
+import com.goodee.corpdesk.department.entity.Department;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -22,6 +23,7 @@ public class ResApprovalDTO {
 	private String username;
 	private Integer departmentId;
     private Long approvalFormId;
+    private String approvalContent;
 	private Character status;
 	
 //	private LocalDateTime createdAt;
@@ -36,6 +38,7 @@ public class ResApprovalDTO {
 
     // department
     private String departmentName;
+    private Integer parentDepartmentId;
 
     // file
     private Integer fileCount;

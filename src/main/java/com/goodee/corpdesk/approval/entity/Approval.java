@@ -46,7 +46,10 @@ public class Approval extends BaseEntity {
 
     @Column(nullable = false)
     private Long approvalFormId;
-	
+
+    @Column(columnDefinition = "longtext")
+    private String approvalContent;
+
 	@Column(nullable = false)
 	@ColumnDefault("'w'") // 기본값은 w(결재대기)
 	private Character status;
