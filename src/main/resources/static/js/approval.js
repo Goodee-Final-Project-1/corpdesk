@@ -34,5 +34,5 @@ const departmentIdEl = document.querySelector('#departmentId');
 
 formCheckBtn.addEventListener('click', function () {
     if(formId === 0) alert('결재 양식을 선택해 주세요.')
-    else location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}`; // "/approval-form/{formId}?departmentId={departmentId}"로 이동
+    else location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}&username=jung_frontend`; // TODO username 정보는 사용자의 인증 정보를 사용하도록 수정
 });

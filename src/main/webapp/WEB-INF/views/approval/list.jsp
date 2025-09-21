@@ -10,7 +10,7 @@
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	
-	<script defer type="text/javascript" src="/js/approval_list.js"></script>
+	<script defer type="text/javascript" src="/js/approval.js"></script>
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/>
@@ -102,19 +102,19 @@
 
 						<ul class="pb-2">
                             <li class="d-block mb-4">
-                                <a href="/approval/list?username=team_leader">전체</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
+                                <a href="/approval/list?username=jung_frontend">전체</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
                             </li>
                             <li class="d-block mb-4">
-						        <a href="/approval/list?listType=request&username=team_leader">요청 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
+						        <a href="/approval/list?listType=request&username=jung_frontend">요청 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
                             </li>
                             <li class="d-block mb-4">
-                                <a href="/approval/list?listType=wait&username=team_leader">대기 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
+                                <a href="/approval/list?listType=wait&username=jung_frontend">대기 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
                             </li>
                             <li class="d-block mb-4">
-                                <a href="/approval/list?listType=storage&username=team_leader">완료 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
+                                <a href="/approval/list?listType=storage&username=jung_frontend">완료 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
                             </li>
                             <li class="d-block mb-4">
-                                <a href="/approval/list?listType=temp&username=team_leader">임시보관함</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
+                                <a href="/approval/list?listType=temp&username=jung_frontend">임시보관함</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
                             </li>
 						</ul>
 					</div>
@@ -125,7 +125,7 @@
 
                         <c:choose>
 
-                            <c:when test="${reqList ne null and waitList ne null }">
+                            <c:when test="${reqList ne null }">
                                 <!-- section1 - 결재 요청 목록 -->
                                 <section class="email-details pl-4 pr-4 pt-4">
 
@@ -464,7 +464,7 @@
                         </c:choose>
 
                         <%-- 페이징 --%>
-                        <c:if test="${request ne null or wait ne null}">
+                        <c:if test="${reqList eq null}">
                             <br>
                             <nav class="d-flex justify-content-center">
                                 <ul class="pagination pagination-flat pagination-flat-rounded">

@@ -4,44 +4,84 @@ import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.service.ApprovalFormService;
 import com.goodee.corpdesk.approval.service.ApprovalService;
+import com.goodee.corpdesk.department.service.DepartmentService;
+import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeRepository;
+import com.goodee.corpdesk.employee.EmployeeService;
+import com.goodee.corpdesk.employee.ResEmployeeDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Controller
 //@RestController // TODO postman을 사용하여 controller를 테스트하기 위해 임시로 붙임. 추후 @Controller로 수정
 @RequestMapping(value = "/approval-form/**")
 public class ApprovalFormController {
-	
+
+    @Autowired
+    private ApprovalFormService approvalFormService;
+    @Autowired
+    private DepartmentService departmentService;
+
 	@Value("${cat.approval}")
 	private String cat;
-	
-	@ModelAttribute("cat")
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    @Autowired
+    private EmployeeService employeeService;
+
+    @ModelAttribute("cat")
 	public String getCat() {
 		return cat;
 	}
+
+    // 결재 양식 데이터 뿌리기
+    @ModelAttribute("formList")
+    public List<ResApprovalDTO> getFormList() throws  Exception {
+        return approvalFormService.getApprovalFormList();
+    }
+
+    // 부서 목록 데이터 뿌리기
+    @ModelAttribute("departmentList")
+    public List<ResApprovalDTO> getDepartmentList() throws  Exception {
+        return departmentService.getApprovalFormList();
+    }
 	
-	@Autowired
-	private ApprovalFormService approvalFormService;
-	
+    // TODO 유저의 부서 정보를 인증 정보에서 가져오도록 수정
     // 결재 폼 조회
     @GetMapping("{formId}")
-    public String getApproval(@PathVariable("formId") Long formId, @RequestParam("departmentId") Integer departmentId, Model model) throws Exception {
+    public String getApproval(@PathVariable("formId") Long formId, @RequestParam("departmentId") Integer departmentId, @RequestParam("username") String username, Model model) throws Exception {
 
         System.err.println("getApproval()");
 
-        // 1. 폼 정보 얻어오기
-        ResApprovalDTO resApprovalDTO = approvalFormService.getApprovalForm(formId);
-        
-        // 2. model에 폼이랑 departmentId 바인딩
-        resApprovalDTO.setDepartmentId(departmentId);
-        model.addAttribute("res", resApprovalDTO);
+        // 0. 유저 정보 얻어오기
+        Employee employee = employeeRepository.findById(username).get();
+        ResApprovalDTO resApprovalDTO = new ResApprovalDTO();
+//        resApprovalDTO.set
+
+        // 0. 폼 정보 얻어오기
+        ResApprovalDTO form = approvalFormService.getApprovalForm(formId);
+
+        // 1. 유저 정보 얻어오기
+        ResEmployeeDTO userInfo = employeeService.getFulldetail(username);
+
+        // 2. 결재 대상 부서의 정보 얻어오기
+        ResApprovalDTO targetDept = departmentService.getDepartment(departmentId);
+
+        // 3. model에 폼이랑 departmentId 바인딩
+        model.addAttribute("form", form);
+        model.addAttribute("userInfo", userInfo);
+        model.addAttribute("targetDept", targetDept);
+        model.addAttribute("today", LocalDate.now().toString());
 
         return "approval/detail";
 
