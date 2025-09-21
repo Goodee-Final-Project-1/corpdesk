@@ -32,8 +32,8 @@ public class Employee implements UserDetails {
 //	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 //	private Integer employeeId;
 
-//	private Integer positionId;
-//	private Integer departmentId;
+	private Integer positionId;
+	private Integer departmentId;
     @ColumnDefault("2")
 	private Integer roleId;
 	
