@@ -1,4 +1,4 @@
-package com.goodee.corpdesk.vacation;
+package com.goodee.corpdesk.vacation.entity;
 
 import com.goodee.corpdesk.common.BaseEntity;
 import jakarta.persistence.*;
