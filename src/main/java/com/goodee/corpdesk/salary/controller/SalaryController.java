@@ -1,0 +1,15 @@
+package com.goodee.corpdesk.salary.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/salary")
+public class SalaryController {
+
+	@RequestMapping("/list/{page}")
+	public String list(@PathVariable Integer page) {
+		return "salary/list";
+	}
+}
