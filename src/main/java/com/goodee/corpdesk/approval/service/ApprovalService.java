@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.approval.entity.ApprovalForm;
+import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,8 @@ public class ApprovalService {
 	private ApprovalRepository approvalRepository;
 	@Autowired
 	private ApproverRepository approverRepository;
+    @Autowired
+    private ApprovalFormRepository approvalFormRepository;
 	
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
@@ -154,22 +158,37 @@ public class ApprovalService {
 		return "PROCESSED";
 	}
     
-    public List<ResApprovalDTO> getApprovalList(String listType, String username) throws Exception {
+    public List<ResApprovalDTO> getAllApprovalList(String listType, String username) throws Exception {
 
-        List<Approval> approvalList = null;
-        List<ResApprovalDTO> result = null;
+        List<ResApprovalDTO> result = new ArrayList<>();
         switch (listType) {
-            case "request" -> approvalList = approvalRepository.findAllByUseYnAndUsername(true, username);
-            case "wait" -> approvalList = approvalRepository.findAllByUseYnAndApproverUsername(true, username);
-            default -> {
-                approvalList = new ArrayList<>();
-                approvalList.addAll(approvalRepository.findAllByUseYnAndUsername(true, username));
-                approvalList.addAll(approvalRepository.findAllByUseYnAndApproverUsername(true, username));
-                log.warn("{}", approvalList);
-            }
+            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("T")); // 내 결재 임시 보관함
+            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("W", "N", "Y")); // 내 결재 요청 목록
+            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("W"), List.of("W")); // 결재 대기 목록
+            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("Y", "N"), List.of("W", "Y", "N")); // 내가 결재한 목록
         }
 
-        result = approvalList.stream().map(Approval::toResApprovalDTO).toList();
+        return result;
+
+    }
+
+    public List<ResApprovalDTO> getApprovalList(String listType, String username) throws Exception {
+
+        List<ResApprovalDTO> result = new ArrayList<>();
+        switch (listType) {
+            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(
+                                                    true, username, List.of("T"), 10L
+                                                        ); // 내 결재 임시 보관함
+            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(
+                                                    true, username, List.of("W", "N", "Y"), 10L
+                                                        ); // 내 결재 요청 목록
+            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(
+                                                    true, username, List.of("W"), List.of("W"), 10L
+                                                        ); // 결재 대기 목록
+            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(
+                                                    true, username, List.of("Y", "N"), List.of("W", "Y", "N"), 10L
+                                                        ); // 내가 결재한 목록
+        }
 
         return result;
 

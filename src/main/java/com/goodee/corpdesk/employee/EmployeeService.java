@@ -277,4 +277,9 @@ public class EmployeeService implements UserDetailsService {
 
 		return employeeRepository.save(origin);
 	}
+    
+  public ResEmployeeDTO getFulldetail(String username) {
+    return employeeRepository.findEmployeeWithDeptAndPosition(username);
+  }
+
 }
