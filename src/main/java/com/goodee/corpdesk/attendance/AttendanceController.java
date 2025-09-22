@@ -1,46 +1,74 @@
 package com.goodee.corpdesk.attendance;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
 @RequestMapping("/employee/{username}/attendance")
 public class AttendanceController {
 
-	@Autowired
-    private AttendanceService attendanceService;
+    private final AttendanceService attendanceService;
 
-    @PostMapping("/delete") // POST 방식
+    private final DateTimeFormatter formatterInput = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private final DateTimeFormatter formatterOutput = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    @PostMapping("/delete")
     public String deleteAttendance(@PathVariable("username") String username,
                                    @RequestParam("attendanceIds") List<Long> attendanceIds) {
         attendanceService.deleteAttendances(username, attendanceIds);
         return "redirect:/employee/edit/" + username;
     }
-    
+
     @PostMapping("/edit")
     @ResponseBody
-    public Map<String, Object> editAttendanceAjax(@PathVariable("username") String username,
-            @RequestBody Map<String, String> payload) {
+    public Map<String, Object> editAttendance(@PathVariable("username") String username,
+                                              @RequestBody AttendanceEditDTO dto) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Attendance attendance = attendanceService.getAttendanceById(dto.getAttendanceId());
 
-        Long attendanceId = Long.valueOf(payload.get("attendanceId"));
-        String workStatus = payload.get("workStatus");
-        String dateTime = payload.get("dateTime");
+            // 구분 처리 (빈값이면 "-"로)
+            if (!StringUtils.hasText(dto.getWorkStatus())) {
+                attendance.setWorkStatus("-");
+            } else {
+                attendance.setWorkStatus(dto.getWorkStatus());
+            }
 
-        attendanceService.updateAttendanceInline(attendanceId, workStatus, dateTime);
+            // 일시 처리
+            if (StringUtils.hasText(dto.getDateTime())) {
+                LocalDateTime dateTime = LocalDateTime.parse(dto.getDateTime(), formatterInput);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        return response;
+                // "출근" / "퇴근"에 따라 일시 저장
+                if ("출근".equals(attendance.getWorkStatus())) {
+                    attendance.setCheckInDateTime(dateTime);
+                } else if ("퇴근".equals(attendance.getWorkStatus())) {
+                    attendance.setCheckOutDateTime(dateTime);
+                }
+            }
+
+            attendanceService.updateAttendance(attendance);
+
+            result.put("success", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("error", e.getMessage());
+        }
+        return result;
     }
-    
 }

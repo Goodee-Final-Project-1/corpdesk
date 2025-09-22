@@ -41,6 +41,7 @@ public class EmployeeController {
 
 	@Autowired
 	private EmployeeService employeeService;
+	@Autowired
 	private  AttendanceService attendanceService;
 	
 	@Autowired
@@ -154,6 +155,7 @@ public class EmployeeController {
 	        return "fail";
 	    }
 	}
+		
 	
 	@PostMapping("/delete/{id}")
 	public String deleteEmployee(@PathVariable("id") String id) {

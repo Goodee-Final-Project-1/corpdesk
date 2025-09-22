@@ -1,48 +1,34 @@
 package com.goodee.corpdesk.attendance;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AttendanceService {
-	
-	@Autowired
-	private AttendanceRepository attendanceRepository;
-	
-	
-	
-//	// 문자열을 LocalDateTime으로 파싱하기 위한 포맷 (예: "2025-09-10T09:00")
-//	private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-//	
-//    // 기간 전체 조회(직원 미지정) → 풀캘린더 DTO 변환
-//	public List<CalendarEventDTO> getEvents(String startIso, String endIso) {
-//		// 문자열 → LocalDateTime
-//		LocalDateTime start = LocalDateTime.parse(startIso, ISO);
-//		LocalDateTime end = LocalDateTime.parse(endIso, ISO);
-//		
-//		List<Attendance> list = attendanceRepository
-//								.findAllByCheckInDatetimeBetween(start, end);
-//		
-//        // 엔티티 → 풀캘린더 DTO로 변환
-//		return list.stream()
-//			    .map(this::toCalendarEvent)
-//				.collect(Collectors.toList());
-//	}
 
-	
-	
-	
-	// useYn = true 인 데이터만 조회
-	public List<Attendance> getAttendanceByUsername(String username) {
-	    return attendanceRepository.findByUsernameAndUseYn(username, true);
-	}
+    private final AttendanceRepository attendanceRepository;
 
-	 // 소프트 삭제
+    // ID로 출퇴근 기록 조회
+    public Attendance getAttendanceById(Long id) {
+        return attendanceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Attendance record not found"));
+    }
+
+    // Attendance 엔티티 저장/업데이트
+    @Transactional
+    public void updateAttendance(Attendance attendance) {
+        attendanceRepository.save(attendance);
+    }
+
+    // 소프트 삭제
+    @Transactional
     public void deleteAttendances(String username, List<Long> attendanceIds) {
-    	List<Attendance> records = attendanceRepository.findAllById(attendanceIds);
+        List<Attendance> records = attendanceRepository.findAllById(attendanceIds);
 
         for (Attendance att : records) {
             if (!att.getUsername().equals(username)) {
@@ -54,23 +40,8 @@ public class AttendanceService {
         attendanceRepository.saveAll(records);
     }
 
-	    public Attendance getAttendance(Long id) {
-	        return attendanceRepository.findById(id).orElse(null);
-	    }
-
-	    public Attendance saveAttendance(Attendance attendance) {
-	        return attendanceRepository.save(attendance);
-	    }
-	
-	    public void updateAttendanceInline(Long attendanceId, String workStatus, String dateTime) {
-	        Attendance attendance = attendanceRepository.findById(attendanceId)
-	                .orElseThrow(() -> new RuntimeException("출퇴근 기록이 없습니다."));
-	        attendance.setWorkStatus(workStatus);
-	        if(workStatus.equals("출근")) {
-	            attendance.setCheckInDateTime(LocalDateTime.parse(dateTime));
-	        } else {
-	            attendance.setCheckOutDateTime(LocalDateTime.parse(dateTime));
-	        }
-	        attendanceRepository.save(attendance);
-	    }
+    // 특정 직원 출퇴근 내역 조회
+    public List<Attendance> getAttendanceByUsername(String username) {
+        return attendanceRepository.findByUsernameAndUseYn(username, true);
+    }
 }
