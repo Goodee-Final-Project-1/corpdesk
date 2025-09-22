@@ -1,8 +1,9 @@
-package com.goodee.corpdesk.employee;
+package com.goodee.corpdesk.file.repository;
+
+import com.goodee.corpdesk.file.entity.EmployeeFile;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeFileRepository extends JpaRepository<EmployeeFile, Long> {
     // ⭐ username으로 EmployeeFile을 찾습니다.

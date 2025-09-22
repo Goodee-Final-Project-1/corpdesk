@@ -3,6 +3,9 @@ package com.goodee.corpdesk.employee;
 import java.util.List;
 import java.util.Optional;
 
+import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.position.repository.PositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -21,12 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.goodee.corpdesk.attendance.Attendance;
 import com.goodee.corpdesk.attendance.AttendanceRepository;
 import com.goodee.corpdesk.attendance.AttendanceService;
-import com.goodee.corpdesk.department.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee.CreateGroup;
 import com.goodee.corpdesk.employee.Employee.UpdateGroup;
 import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
-import com.goodee.corpdesk.position.PositionRepository;
 
 import lombok.Getter;
 import lombok.Setter;
