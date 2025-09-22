@@ -9,6 +9,8 @@ import com.goodee.corpdesk.approval.entity.Approver;
 import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
 import com.goodee.corpdesk.approval.repository.ApprovalRepository;
 import com.goodee.corpdesk.approval.repository.ApproverRepository;
+import com.goodee.corpdesk.vacation.entity.VacationType;
+import com.goodee.corpdesk.vacation.repository.VacationTypeRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ public class ApprovalFormService {
 
     @Autowired
 	private ApprovalFormRepository approvalFormRepository;
+    @Autowired
+    private VacationTypeRepository vacationTypeRepository;
 
     public ResApprovalDTO getApprovalForm(Long approvalId) throws Exception {
         Optional<ApprovalForm> result = approvalFormRepository.findById(approvalId);
@@ -40,6 +44,12 @@ public class ApprovalFormService {
         List<ApprovalForm> result = approvalFormRepository.findAll();
 
         return result.stream().map(ApprovalForm::toResApprovalDTO).toList();
+    }
+
+    public List<ResApprovalDTO> getVacationTypeList() throws Exception {
+        List<VacationType> result = vacationTypeRepository.findAllByUseYn(true);
+
+        return result.stream().map(VacationType::toResApprovalDTO).toList();
     }
 
 }

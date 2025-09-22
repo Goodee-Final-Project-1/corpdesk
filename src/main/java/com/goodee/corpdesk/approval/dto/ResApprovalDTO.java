@@ -3,6 +3,7 @@ package com.goodee.corpdesk.approval.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.goodee.corpdesk.approval.entity.Approval;
 import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.vacation.entity.VacationType;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -42,6 +43,10 @@ public class ResApprovalDTO {
 
     // file
     private Integer fileCount;
+
+    // vacation
+    private Integer vacationTypeId;
+    private String vacationTypeName;
 
     // SQL 결과용 생성자
     public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status, String username,

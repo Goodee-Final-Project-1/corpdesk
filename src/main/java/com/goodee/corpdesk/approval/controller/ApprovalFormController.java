@@ -9,6 +9,8 @@ import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
+import com.goodee.corpdesk.vacation.entity.VacationType;
+import com.goodee.corpdesk.vacation.repository.VacationTypeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,13 +33,13 @@ public class ApprovalFormController {
     private ApprovalFormService approvalFormService;
     @Autowired
     private DepartmentService departmentService;
-
-	@Value("${cat.approval}")
-	private String cat;
     @Autowired
     private EmployeeRepository employeeRepository;
     @Autowired
     private EmployeeService employeeService;
+
+	@Value("${cat.approval}")
+	private String cat;
 
     @ModelAttribute("cat")
 	public String getCat() {
@@ -54,6 +56,12 @@ public class ApprovalFormController {
     @ModelAttribute("departmentList")
     public List<ResApprovalDTO> getDepartmentList() throws  Exception {
         return departmentService.getApprovalFormList();
+    }
+
+    // 휴가 목록 데이터 뿌리기
+    @ModelAttribute("vacationTypeList")
+    public List<ResApprovalDTO> getVacationTypeList() throws  Exception {
+        return approvalFormService.getVacationTypeList();
     }
 	
     // TODO 유저의 부서 정보를 인증 정보에서 가져오도록 수정
