@@ -84,6 +84,75 @@
 </div>
 <!--  -->
 
+<!-- Modal2 - 결재선 지정 -->
+<div class="modal fade" id="selectApproverModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title fs-5" id="exampleModalLabel">결재선 지정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body d-flex justify-content-between">
+
+        <!-- left col -->
+        <div class="card mb-4 p-0 w-75">
+
+          <div class="card-body p-4">
+            <ul class="list-unstyled">
+              <c:forEach items="${employeeList }" var="el">
+                <li class="text-start">
+                  <a data-approval-form-id="${el.username }" class="approval-form-name btn px-0 mr-3 text-dark">${el.name }</a>
+                </li>
+              </c:forEach>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- right col -->
+        <div class="card mb-4 p-0 ml-2 w-100">
+
+          <h5 class="card-title pt-4 px-4">상세정보</h5>
+
+          <div class="card-body p-4">
+            <ul class="list-unstyled">
+              <li class="d-flex py-2 text-dark">
+                <b class="col-5 p-0">제목</b>
+                <p id="approvalTitle"></p>
+              </li>
+              <li class="d-flex py-2 text-dark">
+                <b class="col-5 p-0">기안부서</b>
+                <p>asdfasdf</p>
+              </li>
+              <li class="d-flex py-2 text-dark align-items-center">
+                <label class="col-5 p-0">결재부서</label>
+                <div class="form-group">
+                  <select class="form-control" id="vacationType">
+
+                    <option value="연차">${el.departmentName}</option>
+
+                  </select>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="formCheck" class="btn btn-info">확인</button>
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">취소</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!--  -->
+
 	<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
 
 	<c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
@@ -131,7 +200,7 @@
 							  <button type="button" class="btn btn-light" data-toggle="modal" data-target="#modal-add-contact">취소</button>
               </div>
               <div>
-                <button type="button" class="btn btn-block btn-primary"><i class="mdi mdi-plus mr-1"></i>결재선 지정</button>
+                <button data-bs-toggle="modal" data-bs-target="#selectApproverModal" id="selectApprover" type="button" class="btn btn-block btn-primary"><i class="mdi mdi-plus mr-1"></i>결재선 지정</button>
               </div>
 						</div>
 						<hr>
@@ -194,7 +263,17 @@
               <%--  --%>
 
               <%-- 2. 결재 양식 종류에 따라 다른 HTML을 뿌림 --%>
-              ${form.formContent}
+              <c:choose>
+                <c:when test="${form.approvalFormId eq 1}">
+                  <c:import url="/WEB-INF/views/approval/form_type/vacation.jsp"/>
+                </c:when>
+                <c:when test="${form.approvalFormId eq 2}">
+                  <c:import url="/WEB-INF/views/approval/form_type/business_trip.jsp"/>
+                </c:when>
+                <c:when test="${form.approvalFormId eq 3}">
+                  <c:import url="/WEB-INF/views/approval/form_type/draft.jsp"/>
+                </c:when>
+              </c:choose>
 
             </form>
             <%--  --%>

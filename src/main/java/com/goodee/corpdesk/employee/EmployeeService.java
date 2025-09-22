@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
@@ -281,8 +282,12 @@ public class EmployeeService implements UserDetailsService {
 		return employeeRepository.save(origin);
 	}
     
-  public ResEmployeeDTO getFulldetail(String username) {
+  public ResEmployeeDTO getDetailWithDeptAndPosition(String username) {
     return employeeRepository.findEmployeeWithDeptAndPosition(username);
+  }
+
+  public List<ResApprovalDTO> getEmployeeWithDeptAndPositionAndFile(Integer departmentId, Boolean useYn) {
+        return employeeRepository.findEmployeeWithDeptAndPositionAndFile(departmentId, useYn);
   }
 
 }

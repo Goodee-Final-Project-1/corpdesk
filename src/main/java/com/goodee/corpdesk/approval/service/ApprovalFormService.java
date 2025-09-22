@@ -48,6 +48,7 @@ public class ApprovalFormService {
 
     public List<ResApprovalDTO> getVacationTypeList() throws Exception {
         List<VacationType> result = vacationTypeRepository.findAllByUseYn(true);
+        log.warn("VacationType list result: {}", result);
 
         return result.stream().map(VacationType::toResApprovalDTO).toList();
     }

@@ -22,12 +22,13 @@ public class ResApprovalDTO {
     // approval
 	private Long approvalId;
 	private String username;
+    private String name;
 	private Integer departmentId;
+	private Integer positionId;
     private Long approvalFormId;
     private String approvalContent;
 	private Character status;
-	
-//	private LocalDateTime createdAt;
+
 	private LocalDateTime createdAt;
 
     // approver
@@ -41,8 +42,16 @@ public class ResApprovalDTO {
     private String departmentName;
     private Integer parentDepartmentId;
 
+    // position
+    private String positionName;
+
     // file
     private Integer fileCount;
+
+    private Long fileId;
+    private String oriName;
+    private String saveName;
+    private String extension;
 
     // vacation
     private Integer vacationTypeId;
@@ -68,5 +77,17 @@ public class ResApprovalDTO {
         this.formTitle = formTitle;
         this.fileCount = fileCount != null ? fileCount.intValue() : 0;
         this.departmentName = departmentName;
+    }
+
+    public ResApprovalDTO(String departmentName, String username, String name, String positionName,
+                          Long fileId, String oriName, String saveName, String extension) {
+        this.departmentName = departmentName;
+        this.username = username;
+        this.name = name;
+        this.positionName = positionName;
+        this.fileId = fileId;
+        this.oriName = oriName;
+        this.saveName = saveName;
+        this.extension = extension;
     }
 }

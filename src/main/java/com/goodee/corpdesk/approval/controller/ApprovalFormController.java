@@ -61,6 +61,7 @@ public class ApprovalFormController {
     // 휴가 목록 데이터 뿌리기
     @ModelAttribute("vacationTypeList")
     public List<ResApprovalDTO> getVacationTypeList() throws  Exception {
+        log.warn("getVacationTypeList(): {}", approvalFormService.getVacationTypeList());
         return approvalFormService.getVacationTypeList();
     }
 	
@@ -80,16 +81,20 @@ public class ApprovalFormController {
         ResApprovalDTO form = approvalFormService.getApprovalForm(formId);
 
         // 1. 유저 정보 얻어오기
-        ResEmployeeDTO userInfo = employeeService.getFulldetail(username);
+        ResEmployeeDTO userInfo = employeeService.getDetailWithDeptAndPosition(username);
 
         // 2. 결재 대상 부서의 정보 얻어오기
         ResApprovalDTO targetDept = departmentService.getDepartment(departmentId);
+
+        // 3. 결재 대상 부서의 직원 목록 얻어오기 - 직원id, 직원이름, 부서명, 직위명, 파일정보
+        List<ResApprovalDTO> employeeList = employeeService.getEmployeeWithDeptAndPositionAndFile(departmentId, true);
 
         // 3. model에 폼이랑 departmentId 바인딩
         model.addAttribute("form", form);
         model.addAttribute("userInfo", userInfo);
         model.addAttribute("targetDept", targetDept);
         model.addAttribute("today", LocalDate.now().toString());
+        model.addAttribute("employeeList", employeeList);
 
         return "approval/add";
 
