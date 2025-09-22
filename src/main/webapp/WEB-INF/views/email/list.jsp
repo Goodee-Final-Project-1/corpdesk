@@ -25,37 +25,10 @@
 		<%--	<%@ include file="aside.jsp"%>--%>
 		<main class="col-lg-8 col-xl-9 col-xxl-10">
 			<div class="email-right-column p-4 p-xl-5">
-				<div class="email-right-header justify-content-center mb-5">
+				<div class="email-right-header justify-content-center mb-0">
 					<%-- 페이징 --%>
 					<!-- Flat Rounded Pagination -->
-					<div id="card" class="card card-default align-items-center border-0">
-<%--						<div class="card-body">--%>
-<%--							<nav aria-label="Page navigation example">--%>
-<%--								<ul class="pagination pagination-flat pagination-flat-rounded">--%>
-<%--									<li class="page-item">--%>
-<%--										<a class="page-link" href="#" aria-label="Previous">--%>
-<%--											<span aria-hidden="true" class="mdi mdi-chevron-left"></span>--%>
-<%--											<span class="sr-only">Previous</span>--%>
-<%--										</a>--%>
-<%--									</li>--%>
-<%--									<li class="page-item active">--%>
-<%--										<a class="page-link" href="#">1</a>--%>
-<%--									</li>--%>
-<%--									<li class="page-item">--%>
-<%--										<a class="page-link" href="#">2</a>--%>
-<%--									</li>--%>
-<%--									<li class="page-item">--%>
-<%--										<a class="page-link" href="#">3</a>--%>
-<%--									</li>--%>
-<%--									<li class="page-item">--%>
-<%--										<a class="page-link" href="#" aria-label="Next">--%>
-<%--											<span aria-hidden="true" class="mdi mdi-chevron-right"></span>--%>
-<%--											<span class="sr-only">Next</span>--%>
-<%--										</a>--%>
-<%--									</li>--%>
-<%--								</ul>--%>
-<%--							</nav>--%>
-<%--						</div>--%>
+					<div id="card" class="card card-default align-items-center border-0 mb-0">
 					</div>
 				</div>
 				<div class="border border-top-0 rounded table-responsive email-list">
