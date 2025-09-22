@@ -19,7 +19,21 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
-<main class="container d-flex align-items-center justify-content-center" style="min-height: 80vh">
+<div class="card-footer card-profile-footer">
+	<ul class="nav nav-border-top justify-content-center">
+		<li class="nav-item">
+			<a class="nav-link" href="/employee/detail">내 정보</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="/employee/update/email">이메일 변경</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link active" href="/employee/update/password">비밀번호 변경</a>
+		</li>
+	</ul>
+</div>
+
+<main class="container d-flex align-items-center justify-content-center" style="min-height: 60vh">
 	<div class="d-flex flex-column justify-content-between">
 		<div class="row justify-content-center">
 			<div class="col-lg-6 col-xl-5 col-md-10 ">

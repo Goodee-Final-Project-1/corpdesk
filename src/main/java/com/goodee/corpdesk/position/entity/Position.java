@@ -2,11 +2,14 @@ package com.goodee.corpdesk.position.entity;
 
 import com.goodee.corpdesk.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+@NoArgsConstructor
 @Setter
 @Getter
 @ToString

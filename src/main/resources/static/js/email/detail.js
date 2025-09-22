@@ -28,7 +28,9 @@ async function getDetail() {
 		subject.append(data.subject);
 		from.append(data.from);
 		recipients.append(data.recipients);
-		sentDate.append(data.sentDate);
+		const date = new Date(data.sentDate);
+		sentDate.append(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
+		// sentDate.setAttribute('datetime', data.sentDate);
 		content.append(data.text);
 
 	} catch (e) {

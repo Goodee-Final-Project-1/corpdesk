@@ -32,7 +32,7 @@
 				</li>
 				
 				<li>
-					<a class="sidenav-item-link" href="contacts.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/email/received"> <!-- TODO href 수정 -->
 							<i class="mdi mdi-email"></i> <span class="nav-text">메일</span>
 					</a>
 				</li>
