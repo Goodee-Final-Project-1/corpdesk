@@ -83,7 +83,7 @@ public class ApprovalFormController {
         model.addAttribute("targetDept", targetDept);
         model.addAttribute("today", LocalDate.now().toString());
 
-        return "approval/detail";
+        return "approval/add";
 
     }
     

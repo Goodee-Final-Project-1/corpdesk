@@ -5,6 +5,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
+import com.goodee.corpdesk.position.entity.Position;
+import com.goodee.corpdesk.position.repository.PositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value; // ⭐ 추가
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,12 +25,9 @@ import org.springframework.web.multipart.MultipartFile; // ⭐ 추가
 
 import com.goodee.corpdesk.attendance.Attendance;
 import com.goodee.corpdesk.attendance.AttendanceService;
-import com.goodee.corpdesk.department.Department;
-import com.goodee.corpdesk.department.DepartmentRepository;
 import com.goodee.corpdesk.file.FileManager; // ⭐ 추가
 import com.goodee.corpdesk.file.dto.FileDTO; // ⭐ 추가
-import com.goodee.corpdesk.position.Position;
-import com.goodee.corpdesk.position.PositionRepository;
+
 
 @Service
 @Transactional

@@ -21,7 +21,6 @@ public class Department extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer departmentId;
 
-    @Column(nullable = false)
     private Integer parentDepartmentId;
 
     @Column(nullable = false)
@@ -32,5 +31,11 @@ public class Department extends BaseEntity {
                 .departmentId(departmentId)
                 .departmentName(departmentName)
                 .build();
+    }
+
+    // departmentName만 받는 생성자 추가
+    public Department(Integer parentDepartmentId, String departmentName) {
+        this.parentDepartmentId = parentDepartmentId;
+        this.departmentName = departmentName;
     }
 }

@@ -24,13 +24,11 @@ public abstract class BaseEntity {
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 	
-	@Column(nullable = false) @CreationTimestamp
+	@CreationTimestamp
 	private LocalDateTime createdAt;
-	
-	@Column(nullable = false)
+
 	private String modifiedBy;
-	
-	@Column(nullable = false)
+
 	@ColumnDefault("true")
 	private Boolean useYn;
 }

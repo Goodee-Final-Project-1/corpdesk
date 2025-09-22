@@ -19,10 +19,14 @@ public class Position extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer positionId;
 
-    @Column(nullable = false)
     private Integer parentPositionId;
 
     @Column(nullable = false)
     private String positionName;
+
+    public Position(Integer parentPositionId, String positionName) {
+        this.parentPositionId = parentPositionId;
+        this.positionName = positionName;
+    }
 
 }
