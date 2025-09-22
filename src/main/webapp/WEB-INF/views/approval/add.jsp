@@ -10,7 +10,7 @@
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script defer type="text/javascript" src="/js/approval.js"></script>
+    <script defer type="text/javascript" src="/js/approval/approval.js"></script>
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/>
