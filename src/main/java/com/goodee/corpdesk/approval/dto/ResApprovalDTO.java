@@ -2,9 +2,12 @@ package com.goodee.corpdesk.approval.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.goodee.corpdesk.approval.entity.Approval;
+import com.goodee.corpdesk.department.entity.Department;
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Getter
@@ -15,27 +18,50 @@ import java.util.List;
 @Builder
 public class ResApprovalDTO {
 
+    // approval
 	private Long approvalId;
 	private String username;
 	private Integer departmentId;
-	private String formType;
-	private String formContent;
+    private Long approvalFormId;
+    private String approvalContent;
 	private Character status;
 	
+//	private LocalDateTime createdAt;
 	private LocalDateTime createdAt;
-	
-	List<ApproverDTO> approverDTOList;
-	
-	public Approval toApprovalEntity() {
-		return Approval.builder()
-					.approvalId(approvalId)
-					.username(username)
-					.departmentId(departmentId)
-					.formType(formType)
-					.formContent(formContent)
-					.status(status)
-					.createdAt(createdAt)
-					.build();
-	}
-	
+
+    // approver
+	private List<ApproverDTO> approverDTOList;
+
+    // approval_form
+    private String formTitle;
+    private String formContent;
+
+    // department
+    private String departmentName;
+    private Integer parentDepartmentId;
+
+    // file
+    private Integer fileCount;
+
+    // SQL 결과용 생성자
+    public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status, String username,
+                          String formTitle, Long fileCount, String departmentName) {
+        this.approvalId = approvalId;
+        this.createdAt = LocalDateTime.ofInstant(createdAt.toInstant(), ZoneId.of("Asia/Seoul"));
+        this.status = status;
+        this.username = username;
+        this.formTitle = formTitle;
+        this.fileCount = fileCount != null ? fileCount.intValue() : 0;
+        this.departmentName = departmentName;
+    }
+
+    public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status,
+                          String formTitle, Long fileCount, String departmentName) {
+        this.approvalId = approvalId;
+        this.createdAt = LocalDateTime.ofInstant(createdAt.toInstant(), ZoneId.of("Asia/Seoul"));
+        this.status = status;
+        this.formTitle = formTitle;
+        this.fileCount = fileCount != null ? fileCount.intValue() : 0;
+        this.departmentName = departmentName;
+    }
 }

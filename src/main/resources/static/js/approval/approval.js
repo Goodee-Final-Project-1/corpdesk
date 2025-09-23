@@ -19,19 +19,20 @@ approvalRows.forEach((row) => {
 const approvalFormNames = document.querySelectorAll('.approval-form-name');
 const approvalTitle = document.querySelector('#approvalTitle');
 
-let formType = "1";
+let formId = 0;
 
 approvalFormNames.forEach((name) => {
   name.addEventListener('click', function () {
     approvalTitle.textContent = name.textContent;
 
-    formType = name.getAttribute('data-approval-form-id');
+    formId = name.getAttribute('data-approval-form-id');
   });
 });
 
-const formCheck = document.querySelector('#formCheck');
+const formCheckBtn = document.querySelector('#formCheck');
 const departmentIdEl = document.querySelector('#departmentId');
 
-formCheck.addEventListener('click', function () {
-  location.href=`../${formType}/${departmentIdEl.value}`; // "/approval/{formType}/{departmentId}"로 이동
+formCheckBtn.addEventListener('click', function () {
+    if(formId === 0) alert('결재 양식을 선택해 주세요.')
+    else location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}&username=jung_frontend`; // TODO username 정보는 사용자의 인증 정보를 사용하도록 수정
 });

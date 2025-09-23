@@ -29,7 +29,7 @@
 				<div class="email-body-head mb-5 ">
 					<h4 class="text-dark">New Message</h4>
 				</div>
-				<form class="email-compose" action="/api/email/sending" method="post">
+				<form id="form_data" class="email-compose mb-5" action="/api/email/sending" method="post">
 					<div class="form-group">
 						<input type="email" class="form-control" name="to" id="exampleEmail" placeholder="To: ">
 					</div>
@@ -295,18 +295,11 @@
                 </span>
 						</div>
 					</div>
-					<textarea name="text"></textarea>
-					<%--					<div id="editor" class="ql-container ql-snow">--%>
-					<%--						<div class="ql-editor ql-blank" data-gramm="false" contenteditable="true" data-placeholder="Enter Text ...">--%>
-					<%--							<p><br></p></div>--%>
-					<%--						<div class="ql-clipboard" contenteditable="true" tabindex="-1"></div>--%>
-					<%--						<div class="ql-tooltip ql-hidden"><a class="ql-preview" target="_blank" href="about:blank"></a><input--%>
-					<%--										type="text" data-formula="e=mc^2" data-link="https://quilljs.com" data-video="Embed URL"><a--%>
-					<%--										class="ql-action"></a><a class="ql-remove"></a></div>--%>
-					<%--					</div>--%>
-					<button class="btn btn-primary btn-pill mb-5" type="submit">보내기</button>
+					<textarea name="text" id="text" hidden></textarea>
+					<div id="editor" class="ql-container ql-snow"></div>
 				</form>
-				<%--				<div>--%>
+				<button id="submit_btn" class="btn btn-primary btn-pill mb-5" type="submit">보내기</button>
+			<%--				<div>--%>
 				<%--					<main>--%>
 				<%--						<form action="/api/email/sending" method="post">--%>
 				<%--							<div>--%>
@@ -329,5 +322,6 @@
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
+<script src="/js/email/sending.js"></script>
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>

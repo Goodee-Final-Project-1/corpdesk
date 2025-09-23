@@ -23,13 +23,13 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+import java.sql.Timestamp;
+
 @Setter
 @Getter
 @ToString
-@NoArgsConstructor
-@AllArgsConstructor
 @SuperBuilder
-@Builder
+@Builder @NoArgsConstructor @AllArgsConstructor
 @Entity @Table(name = "approval")
 @DynamicInsert
 @DynamicUpdate
@@ -43,16 +43,13 @@ public class Approval extends BaseEntity {
 	
 	@Column(nullable = false)
 	private Integer departmentId;
-	
-	@Column(nullable = false)
-	private String formType;
-	
-//	@Column(nullable = false) @Lob 대신 아래의 어노테이션 적용
-//	이유: String 타입에 @Lob을 붙여도 text 타입 대신 tinytext 타입으로 매핑됨
-//	대용량 데이터를 담기 위해 tinytext 대신 longtext 사용
-	@Column(nullable = false, columnDefinition = "longtext")
-	private String formContent;
-	
+
+    @Column(nullable = false)
+    private Long approvalFormId;
+
+    @Column(columnDefinition = "longtext")
+    private String approvalContent;
+
 	@Column(nullable = false)
 	@ColumnDefault("'w'") // 기본값은 w(결재대기)
 	private Character status;
@@ -62,8 +59,6 @@ public class Approval extends BaseEntity {
                         .approvalId(approvalId)
                         .username(username)
                         .departmentId(departmentId)
-                        .formType(formType)
-                        .formContent(formContent)
                         .status(status)
                         .build();
     }
@@ -73,10 +68,8 @@ public class Approval extends BaseEntity {
                                 .approvalId(approvalId)
                                 .username(username)
                                 .departmentId(departmentId)
-                                .formType(formType)
-                                .formContent(formContent)
                                 .status(status)
-                                .createdAt(super.getCreatedAt())
+                                .createdAt(getCreatedAt())
                                 .build();
     }
 
@@ -85,8 +78,6 @@ public class Approval extends BaseEntity {
                 .approvalId(approvalId)
                 .username(username)
                 .departmentId(departmentId)
-                .formType(formType)
-                .formContent(formContent)
                 .status(status)
                 .build();
     }

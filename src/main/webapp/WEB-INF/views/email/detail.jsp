@@ -32,13 +32,13 @@
 						<div class="email-details-content-header">
 							<ul>
 								<li>
-									<h6 id="from" class="mt-0 text-dark font-weight-bold"></h6>
+									<h6 id="from" class="mt-0 text-dark font-weight-bold">From: </h6>
 								</li>
 								<li>
-									<span id="recipients"></span>
+									<span id="recipients">To: </span>
 								</li>
 								<li>
-									<time id="sentDate" class="p-1 p-xl-2"></time>
+									<time id="sentDate">Sent: </time>
 								</li>
 							</ul>
 						</div>

@@ -15,8 +15,8 @@ public class ApprovalDTO {
 	private Long approvalId;
 	private String username;
 	private Integer departmentId;
-	private String formType;
-	private String formContent;
+	private Long approvalFormId;
+    private String approvalContent;
 	private Character status;
 		
 	public Approval toEntity() {
@@ -24,8 +24,8 @@ public class ApprovalDTO {
 					.approvalId(approvalId)
 					.username(username)
 					.departmentId(departmentId)
-					.formType(formType)
-					.formContent(formContent)
+                    .approvalFormId(approvalFormId)
+                    .approvalContent(approvalContent)
 					.status(status)
 					.build();
 	}
