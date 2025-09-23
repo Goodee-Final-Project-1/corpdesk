@@ -179,3 +179,213 @@ switch (approvalFormId) {
   default:
 
 }
+
+/**
+ * 결재자 목록 드래그앤드롭 및 제거 로직
+ */
+
+(function() {
+    // 1. DOM 요소 선택
+    const employeeList = document.getElementById('employee-list');
+    const dropArea = document.getElementById('approver-drop-area');
+    const approverList = document.getElementById('approver-list');
+
+    // 필수 요소 없으면 스크립트 중단
+    if (!employeeList || !dropArea || !approverList) return;
+
+    // 제거 버튼 생성 및 이벤트 등록 함수
+    function addRemoveButton(liElement) {
+        // 이미 버튼이 있다면 중단
+        if (liElement.querySelector('.remove-approver')) return;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'X';
+        removeBtn.type = 'button';
+        // ms-auto로 버튼을 오른쪽 끝으로 정렬
+        removeBtn.className = 'btn btn-sm btn-outline-danger ms-3 remove-approver ms-auto';
+
+        // 기존 자식 노드들을 감싸는 Wrapper 생성 (이미지/이름)
+        const contentWrapper = document.createElement('div');
+        // flex-grow-1: 남은 공간 모두 차지 -> 버튼을 오른쪽 끝으로 밀어냄
+        contentWrapper.className = 'd-flex align-items-center flex-grow-1';
+
+        // li의 모든 내용을 Wrapper로 이동
+        Array.from(liElement.children).forEach(child => contentWrapper.appendChild(child));
+
+        // li 내부 초기화 후, Wrapper와 버튼을 추가
+        liElement.innerHTML = '';
+        liElement.appendChild(contentWrapper);
+        liElement.appendChild(removeBtn);
+
+        // 제거 이벤트 등록
+        removeBtn.addEventListener('click', () => liElement.remove());
+    }
+
+    // 2. 드래그 시작/종료 이벤트
+    employeeList.addEventListener('dragstart', (e) => {
+        const targetLi = e.target.closest('li[draggable="true"]');
+        if (!targetLi) return;
+
+        e.dataTransfer.setData('text/html', targetLi.outerHTML);
+        e.dataTransfer.effectAllowed = 'copy';
+        targetLi.classList.add('is-dragging');
+    });
+
+    employeeList.addEventListener('dragend', (e) => {
+        const targetLi = e.target.closest('li[draggable="true"]');
+        if (targetLi) targetLi.classList.remove('is-dragging');
+    });
+
+    // 3. 드롭 영역 이벤트
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        dropArea.classList.add('drag-over');
+    });
+
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag-over'));
+
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('drag-over');
+
+        const draggedHtml = e.dataTransfer.getData('text/html');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = draggedHtml.trim();
+        const newLi = tempDiv.firstChild;
+
+        const username = newLi.getAttribute('data-username');
+        // 중복 확인: data-username이 같은 요소가 이미 있는지 확인
+        if (approverList.querySelector(`[data-username="${username}"]`)) {
+            alert('이미 추가된 결재자입니다.');
+            return;
+        }
+
+        newLi.classList.remove('is-dragging');
+        newLi.classList.add('added-approver');
+
+        addRemoveButton(newLi);
+        approverList.appendChild(newLi);
+    });
+})();
+
+/**
+ * 결재선 지정 후 확인 버튼을 눌렀을 때의 로직
+ */
+const MAX_COLUMNS = 4; // 승인란 한 행에 표시되는 최대 결재자 수
+const newApproverRow = document.querySelector('#newApproverRow'); // HTML에 정의된 기준점 DIV
+
+// 1. 셀 생성 헬퍼 함수
+const createCells = (approver) => {
+    const hasApprover = !!approver;
+
+    // 결재자 정보 추출 (없으면 &nbsp;)
+    const positionText = hasApprover
+        ? `${approver.getAttribute('data-department-name')} ${approver.getAttribute('data-position-name')}`
+        : '&nbsp;';
+    const nameText = hasApprover ? approver.getAttribute('data-name') : '&nbsp;';
+
+    // TD 엘리먼트 생성
+    const createTd = (text, width = '20%') => {
+        const td = document.createElement('td');
+        td.className = 'text-center align-middle';
+        td.style.width = width;
+        td.innerHTML = text;
+        return td;
+    };
+
+    // 직위/부서, 이름, 날짜(빈 칸) TD를 반환
+    return [createTd(positionText), createTd(nameText), createTd('&nbsp;')];
+};
+
+// 2. 추가 승인란 테이블 컨테이너 생성 함수
+function createExtraApprovalTableContainer() {
+    const container = document.createElement('div');
+    container.id = 'extraApprovalTableContainer';
+
+    const table = document.createElement('table');
+    table.className = 'table table-bordered no-top-border';
+
+    // 왼쪽 <th>는 빈 칸(&nbsp;) 처리
+    table.innerHTML = `
+        <tbody>
+            <tr class="approver-position">
+                <th class="align-middle table-light col-2" rowspan="3">&nbsp;</th> 
+            </tr>
+            <tr class="approver-name" style="height: 90px;"></tr>
+            <tr class="approval-date"></tr>
+        </tbody>
+    `;
+
+    container.appendChild(table);
+    return container;
+}
+
+// 3. 결재자 정보를 테이블에 렌더링하는 핵심 함수
+function renderApproversToTable(approvers) {
+    // ID를 통해 실제 결재 승인 테이블을 정확히 찾음
+    const baseRow = document.getElementById('approverPosition');
+    if (!baseRow) return console.error("기본 결재 TR을 찾을 수 없습니다.");
+
+    // 기존 추가 테이블 제거
+    document.querySelectorAll('#extraApprovalTableContainer').forEach(el => el.remove());
+
+    // 기본 테이블의 TR 엘리먼트들
+    const baseRows = [
+        baseRow,
+        document.getElementById('approverName'),
+        document.getElementById('approvalDate')
+    ];
+
+    // 기본 테이블의 기존 TD 셀들 제거 (<th>는 남김)
+    baseRows.forEach(row => {
+        if (!row) return;
+        while (row.lastElementChild && row.lastElementChild.tagName === 'TD') {
+            row.removeChild(row.lastElementChild);
+        }
+    });
+
+    // 4. 테이블 채우기 로직
+    let insertionReferenceNode = newApproverRow; // 첫 삽입 기준은 newApproverRow
+
+    // 결재자 목록을 4명 단위로 순회 (4명 이하일 경우 1회 실행)
+    for (let i = 0; i < approvers.length || i < MAX_COLUMNS; i += MAX_COLUMNS) {
+        const approverChunk = approvers.slice(i, i + MAX_COLUMNS);
+
+        let currentRowSet = baseRows;
+
+        if (i > 0) { // 4명 초과 시 새 테이블 생성
+            const extraTableContainer = createExtraApprovalTableContainer();
+
+            // 직전 삽입된 요소 다음에 추가
+            insertionReferenceNode.after(extraTableContainer);
+            insertionReferenceNode = extraTableContainer; // 다음 삽입 위치 업데이트
+
+            // 새 테이블의 TR 엘리먼트 가져오기
+            currentRowSet = [
+                extraTableContainer.querySelector('.approver-position'),
+                extraTableContainer.querySelector('.approver-name'),
+                extraTableContainer.querySelector('.approval-date')
+            ];
+        }
+
+        // 현재 4칸을 채움 (결재자가 없으면 빈 칸으로)
+        for (let j = 0; j < MAX_COLUMNS; j++) {
+            const approver = approverChunk[j];
+            const [positionTd, nameTd, dateTd] = createCells(approver);
+
+            currentRowSet[0].appendChild(positionTd);
+            currentRowSet[1].appendChild(nameTd);
+            currentRowSet[2].appendChild(dateTd);
+        }
+
+        // 4명 이하이고 첫 루프가 끝났으면 종료 (불필요한 i < MAX_COLUMNS 루프 방지)
+        if (approvers.length <= MAX_COLUMNS && i === 0) break;
+    }
+}
+
+// 4. 결재선 확인 버튼 이벤트 리스너 등록
+document.getElementById('approverCheck').addEventListener('click', () => {
+    const approvers = Array.from(document.querySelectorAll('#approver-list li'));
+    renderApproversToTable(approvers);
+});

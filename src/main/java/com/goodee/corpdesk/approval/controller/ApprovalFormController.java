@@ -34,8 +34,6 @@ public class ApprovalFormController {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private EmployeeRepository employeeRepository;
-    @Autowired
     private EmployeeService employeeService;
 
 	@Value("${cat.approval}")
@@ -73,8 +71,8 @@ public class ApprovalFormController {
         System.err.println("getApproval()");
 
         // 0. 유저 정보 얻어오기
-        Employee employee = employeeRepository.findById(username).get();
-        ResApprovalDTO resApprovalDTO = new ResApprovalDTO();
+//        Employee employee = employeeRepository.findById(username).get();
+//        ResApprovalDTO resApprovalDTO = new ResApprovalDTO();
 //        resApprovalDTO.set
 
         // 0. 폼 정보 얻어오기

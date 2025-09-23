@@ -11,6 +11,25 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script defer type="text/javascript" src="/js/approval/approval.js"></script>
+
+    <style>
+        /* 테이블 전체의 위쪽 테두리 제거 */
+        .no-top-border {
+            border-top: none;
+        }
+
+        /* 테이블 헤더(thead) 내부의 th/td 셀의 위쪽 테두리 제거 */
+        /* table-bordered 클래스에 의해 셀에도 테두리가 적용되므로 이를 제거합니다. */
+        .no-top-border thead th,
+        .no-top-border thead td {
+            border-top: none;
+        }
+
+        /* Bootstrap 5의 경우, thead, tbody, tfoot 요소에도 기본적으로 border-top이 적용될 수 있습니다. */
+        .no-top-border > :not(caption) > * > * {
+            border-top: none;
+        }
+    </style>
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/>
@@ -100,11 +119,21 @@
         <div class="card mb-4 p-0 w-75">
 
           <div class="card-body p-4">
-            <ul class="list-unstyled">
+            <ul class="list-unstyled" id="employee-list">
               <c:forEach items="${employeeList }" var="el">
-                <li class="text-start">
-                  <a data-approval-form-id="${el.username }" class="approval-form-name btn px-0 mr-3 text-dark">${el.name }</a>
-                </li>
+                  <c:if test="${el.username ne userInfo.username}"> <%-- 기안자를 제외한 나머지 직원들의 데이터만 뿌림 --%>
+                        <li class="text-start d-flex align-items-center" draggable="true"
+                            data-username="${el.username}" data-name="${el.name}"
+                            data-department-name="${el.departmentName}" data-position-name="${el.positionName}">
+                            <div class="col-lg-3">
+                                <img class="mr-2 img-fluid" style="border-radius: 50%;"
+                                     src="${el.oriName ne null ?
+                                                '/files/employee/' += el.oriName += '.' += el.extension
+                                                : '/images/default_profile.jpg'}"> <%-- TODO 프로필이미지가 정확히 어떤 경로에 저장되는지 준수님과 이야기해야 함 --%>
+                            </div>
+                            <a class="approval-form-name btn px-0 mr-3 text-dark">${el.departmentName } ${el.positionName } ${el.name }</a>
+                        </li>
+                  </c:if>
               </c:forEach>
             </ul>
           </div>
@@ -112,31 +141,12 @@
         </div>
 
         <!-- right col -->
-        <div class="card mb-4 p-0 ml-2 w-100">
+        <div class="card mb-4 p-0 ml-2 w-75">
 
-          <h5 class="card-title pt-4 px-4">상세정보</h5>
+<%--          <h5 class="card-title pt-4 px-4">상세정보</h5>--%>
 
-          <div class="card-body p-4">
-            <ul class="list-unstyled">
-              <li class="d-flex py-2 text-dark">
-                <b class="col-5 p-0">제목</b>
-                <p id="approvalTitle"></p>
-              </li>
-              <li class="d-flex py-2 text-dark">
-                <b class="col-5 p-0">기안부서</b>
-                <p>asdfasdf</p>
-              </li>
-              <li class="d-flex py-2 text-dark align-items-center">
-                <label class="col-5 p-0">결재부서</label>
-                <div class="form-group">
-                  <select class="form-control" id="vacationType">
-
-                    <option value="연차">${el.departmentName}</option>
-
-                  </select>
-                </div>
-              </li>
-            </ul>
+          <div class="card-body p-4" id="approver-drop-area">
+              <ul id="approver-list" class="list-unstyled"></ul>
           </div>
 
         </div>
@@ -144,7 +154,7 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" id="formCheck" class="btn btn-info">확인</button>
+        <button type="button" id="approverCheck" class="btn btn-info" data-bs-dismiss="modal">확인</button>
         <button type="button" class="btn btn-light" data-bs-dismiss="modal">취소</button>
       </div>
 
@@ -236,31 +246,38 @@
               <table class="table table-bordered">
                 <tbody>
                 <%-- 승인란 --%>
-                <tr>
-                  <th class="align-middle table-light" rowspan="3">승인</th>
-                  <td>팀장</td>
-                  <td>실장</td>
-                  <td>팀장</td>
-                  <td>실장</td>
+                <tr id="approverPosition">
+                    <th class="align-middle table-light col-2" rowspan="3">승인</th>
+                    <div>
+                        <td class="text-center" style="width: 20%;">&nbsp;</td>
+                        <td class="text-center" style="width: 20%;"></td>
+                        <td class="text-center" style="width: 20%;"></td>
+                        <td class="text-center" style="width: 20%;"></td>
+                    </div>
                 </tr>
 
-                <tr>
-                  <td>이유미</td>
-                  <td>박우진</td>
-                  <td>이유미</td>
-                  <td>박우진</td>
+                <tr id="approverName" style="height: 90px;">
+                    <div>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                    </div>
                 </tr>
 
-                <tr>
-                  <td>Lucia</td>
-                  <td>Christ</td>
-                  <td>Lucia</td>
-                  <td>Christ</td>
+                <tr id="approvalDate">
+                    <div>
+                        <td class="text-center">&nbsp;</td>
+                        <td class="text-center"></td>
+                        <td class="text-center"></td>
+                        <td class="text-center"></td>
+                    </div>
                 </tr>
                 <%--  --%>
                 </tbody>
               </table>
               <%--  --%>
+                  <div id="newApproverRow"></div>
 
               <%-- 2. 결재 양식 종류에 따라 다른 HTML을 뿌림 --%>
               <c:choose>
