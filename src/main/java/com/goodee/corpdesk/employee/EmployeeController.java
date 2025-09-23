@@ -1,37 +1,30 @@
 package com.goodee.corpdesk.employee;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.goodee.corpdesk.attendance.Attendance;
+import com.goodee.corpdesk.attendance.AttendanceRepository;
+import com.goodee.corpdesk.attendance.AttendanceService;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.employee.Employee.CreateGroup;
+import com.goodee.corpdesk.employee.Employee.UpdateGroup;
+import com.goodee.corpdesk.employee.validation.UpdateEmail;
+import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.position.repository.PositionRepository;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.goodee.corpdesk.attendance.Attendance;
-import com.goodee.corpdesk.attendance.AttendanceRepository;
-import com.goodee.corpdesk.attendance.AttendanceService;
-import com.goodee.corpdesk.employee.Employee.CreateGroup;
-import com.goodee.corpdesk.employee.Employee.UpdateGroup;
-import com.goodee.corpdesk.employee.validation.UpdateEmail;
-import com.goodee.corpdesk.employee.validation.UpdatePassword;
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -193,13 +186,15 @@ public class EmployeeController {
 
     @GetMapping("detail")
     public void detail(Authentication authentication, Model model) {
-        Employee employee = employeeService.detail(authentication.getName());
-        model.addAttribute("employee", employee);
+		Map<String, Object> map = employeeService.detail(authentication.getName());
+        model.addAttribute("employee", map.get("employee"));
+		model.addAttribute("department", map.get("department"));
+        model.addAttribute("position", map.get("position"));
     }
 
 	@GetMapping("update/email")
 	public String updateEmail(Authentication authentication, Model model) {
-		Employee employee = employeeService.detail(authentication.getName());
+		Employee employee = employeeService.detailSecret(authentication.getName());
 		model.addAttribute("employee", employee);
 		return "employee/update_email";
 	}
@@ -223,7 +218,7 @@ public class EmployeeController {
 
     @GetMapping("update/password")
     public String updatePassword(Authentication authentication, Model model) {
-        Employee employee = employeeService.detail(authentication.getName());
+        Employee employee = employeeService.detailSecret(authentication.getName());
         model.addAttribute("employee", employee);
 		return "employee/update_password";
     }
