@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.goodee.corpdesk.chat.entity.ChatMessage;
 import com.goodee.corpdesk.chat.entity.ChatParticipant;
+import com.goodee.corpdesk.chat.repository.ChatMessageRepository;
 import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
 
 @Service
@@ -14,6 +16,8 @@ public class ChatParticipantService {
 
 	@Autowired
 	private ChatParticipantRepository chatParticipantRepository;
+	@Autowired
+	private ChatMessageRepository chatMessageRepository;
 	
 	public List<ChatParticipant> participantList(Long chatRoomId) {
 		List<ChatParticipant> list = chatParticipantRepository.findAllByChatRoomId(chatRoomId);
@@ -27,10 +31,11 @@ public class ChatParticipantService {
 		return result;
 	}
 	
-	// 채팅방 닫을 때 제일 최신 메세지ID를 저장 
 	  @Transactional
-	public void updateLastMessage(String username, Long roomId, Long lastMessage) {
-		chatParticipantRepository.updateLastMessage(username,roomId,lastMessage);
-		
-	}
+	// 채팅방 닫을 때 제일 최신 메세지ID를 저장 
+	  public void updateLastMessage(String username, Long roomId) {
+		ChatMessage chatMessage =  chatMessageRepository.findTopByChatRoomIdOrderByMessageIdDesc(roomId);
+			chatParticipantRepository.updateLastMessage(username,roomId,chatMessage.getMessageId());
+			
+		}
 }

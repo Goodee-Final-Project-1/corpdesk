@@ -31,7 +31,7 @@ public class ChatMessageController {
 
 	// websocket 요청에 대한 매핑 위의 requestMapping과 관련없고 websocket config에서 지정해준 prefix 사용
 	@MessageMapping("/chat/message")
-	public void chatsendMessage(ChatMessage msg, Principal principal) {
+	public void chatsendMessage(ChatMessage msg) {
 		chatMessageService.messageSave(msg);
 		messagingTemplate.convertAndSend("/sub/chat/room/" + msg.getChatRoomId(), msg);
 		

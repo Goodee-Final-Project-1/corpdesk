@@ -16,10 +16,10 @@ import com.goodee.corpdesk.chat.service.ChatParticipantService;
 public class ChatParticipantController {
 	@Autowired
 	ChatParticipantService chatParticipantService;
-	@PostMapping("lastMessage/{last}/{roomId}")
-	public void saveLastMessage(@PathVariable(value="last") Long lastMessage, @PathVariable(value="roomId") Long roomId,Principal principal) {
+	@PostMapping("lastMessage/{roomId}")
+	public void saveLastMessage(@PathVariable(value="roomId") Long roomId,Principal principal) {
 		String username = principal.getName();
-		chatParticipantService.updateLastMessage(username,roomId,lastMessage);
+		chatParticipantService.updateLastMessage(username,roomId);
 		
 	}
 }

@@ -137,6 +137,7 @@
 					const roomId= list.getAttribute('data-roomId');
 					list.addEventListener("click",()=>{
 						window.open("/chat/room/detail/"+roomId,"","width=500,height=600 ,left=600, top=100");
+						navigator.sendBeacon("/chat/participant/lastMessage/"+roomId);	
 						list.querySelector(".unreadCount").innerText="";
 						list.setAttribute("data-unreadCount","0");
 					})

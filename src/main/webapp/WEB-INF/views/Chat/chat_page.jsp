@@ -175,7 +175,7 @@
 	window.addEventListener("beforeunload",()=>{
 		const last = document.querySelector("#chat-list li:last-child").getAttribute("data-no");
 		if(last){
-			navigator.sendBeacon("/chat/participant/lastMessage/"+last+"/"+roomId);	
+			navigator.sendBeacon("/chat/participant/lastMessage/"+roomId);	
 		}
 		
 		

@@ -15,10 +15,10 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 	boolean existsByChatRoomIdAndEmployeeUsername(Long chatRoomId , String username);
 	@Modifying
 	@Query("UPDATE ChatParticipant c SET lastCheckMessageId = :lastMessage "+
-		   "WHERE c.employeeUsername = :username AND c.chatRoomId =:roomId")
-	void updateLastMessage(@Param("username") String username, @Param("roomId") Long roomId,@Param("lastMessage") Long lastMessage);
-	ChatParticipant findByChatRoomIdAndEmployeeUsername(Long roomId, String username);
-	
+			   "WHERE c.employeeUsername = :username AND c.chatRoomId =:roomId")
+		void updateLastMessage(@Param("username") String username, @Param("roomId") Long roomId,@Param("lastMessage") Long lastMessage);
+		ChatParticipant findByChatRoomIdAndEmployeeUsername(Long roomId, String username);
+		
 	@Query("SELECT COUNT(*) FROM ChatMessage "+
 			"WHERE messageId > :lastMessageId AND "+
 			"chatRoomId =:chatRoomId")
