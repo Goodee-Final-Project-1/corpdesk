@@ -26,7 +26,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		this.jwtTokenManager = jwtTokenManager;
 		
 		// 로그인 URL
-		this.setFilterProcessesUrl("/login");
+		this.setFilterProcessesUrl("/login-process");
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		}
 		
 		message = URLEncoder.encode(message, "UTF-8");
-		response.sendRedirect("/" + message);
+		response.sendRedirect("/login/" + message);
 	}
 	
 	

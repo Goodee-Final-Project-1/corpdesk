@@ -11,7 +11,7 @@
 
     <span class="page-title">
     	<!-- TODO 여기에 카테고리명 입력 -->
-    	<span>여기에 카테고리명 입력</span>
+    	<span>${cat }</span>
     </span>
 
     <div class="navbar-right ">
@@ -48,12 +48,12 @@
 
                   <div class="media media-sm p-4 mb-0">
                     <div class="media-sm-wrapper">
-                      <a href="user-profile.html"> <!-- TODO 추후 href 변경 -->
+                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
                         <img src="/images/user/user-sm-03.jpg" alt="User Image">
                       </a>
                     </div>
                     <div class="media-body">
-                      <a href="user-profile.html"> <!-- TODO 추후 href 변경 -->
+                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
                         <span class="title mb-0">Sagge Hudson</span>
                         <span class="discribe">On disposal of as landlord Afraid at highly months do things on at.</span>
                         <span class="time">
@@ -65,12 +65,12 @@
 
                   <div class="media media-sm p-4 mb-0">
                     <div class="media-sm-wrapper bg-info-dark">
-                      <a href="user-profile.html"> <!-- TODO 추후 href 변경 -->
+                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
                         <i class="mdi mdi-account-multiple-check"></i>
                       </a>
                     </div>
                     <div class="media-body">
-                      <a href="user-profile.html"> <!-- TODO 추후 href 변경 -->
+                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
                         <span class="title mb-0">Add request</span>
                         <span class="discribe">Add Dany Jones as your contact.</span>
                         <span class="time">
@@ -88,12 +88,12 @@
 
                   <div class="media media-sm p-4 mb-0">
                     <div class="media-sm-wrapper">
-                      <a href="user-profile.html"> <!-- TODO 추후 href 변경 -->
+                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
                         <img src="/images/user/user-sm-04.jpg" alt="User Image">
                       </a>
                     </div>
                     <div class="media-body">
-                      <a href="user-profile.html"> <!-- TODO 추후 href 변경 -->
+                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
                         <span class="title mb-0">Albrecht Straub</span>
                         <span class="discribe"> Beatae quia natus assumenda laboriosam, nisi perferendis aliquid consectetur expedita non tenetur.</span>
                         <span class="time">
@@ -111,12 +111,12 @@
 
                   <div class="media media-sm p-4 mb-0">
                     <div class="media-sm-wrapper bg-info-dark">
-                      <a href="user-profile.html">
+                      <a href="/employee/detail">
                         <i class="mdi mdi-account-multiple-check"></i>
                       </a>
                     </div>
                     <div class="media-body">
-                      <a href="user-profile.html"> <!-- TODO 추후 href 변경 -->
+                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
                         <span class="title mb-0">Add request</span>
                         <span class="discribe">Add Dany Jones as your contact.</span>
                         <span class="time">
@@ -142,7 +142,7 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-right">
             <li>
-              <a class="dropdown-link-item" href="user-profile.html"> <!-- TODO 추후 사용시 href 변경 -->
+              <a class="dropdown-link-item" href="/employee/detail"> <!-- TODO 추후 사용시 href 변경 -->
                 <i class="mdi mdi-account-outline"></i>
                 <span class="nav-text">내 정보</span>
               </a>

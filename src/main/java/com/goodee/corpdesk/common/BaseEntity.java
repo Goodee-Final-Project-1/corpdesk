@@ -8,23 +8,27 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @MappedSuperclass
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class BaseEntity {
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 	
-	@Column(nullable = false) @CreationTimestamp
+	@CreationTimestamp
 	private LocalDateTime createdAt;
-	
-	@Column(nullable = false)
-	private Integer modifiedBy;
-	
-	@Column(nullable = false)
+
+	private String modifiedBy;
+
 	@ColumnDefault("true")
 	private Boolean useYn;
 }

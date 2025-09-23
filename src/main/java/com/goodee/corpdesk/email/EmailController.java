@@ -1,39 +1,48 @@
 package com.goodee.corpdesk.email;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
-
 @Controller
-@RequestMapping("/email/*")
-@Slf4j
+@RequestMapping("/email/**")
 public class EmailController {
 
-    @Autowired
-    EmailService emailService;
+//	@Autowired
+//	EmailService emailService;
 
 	@GetMapping("received")
-	public void received(Authentication authentication, Model model, Pageable pageable) {
-		String username = authentication.getName();
-		List<ReceivedDTO> messageList = emailService.mailBox(username, pageable);
-		model.addAttribute("messageList", messageList);
+	public String received() {
+		return "email/list";
 	}
 
-	@GetMapping("send")
-	public void send() {
+	@GetMapping("received/{page}")
+	public String received(@PathVariable Integer page) {
+		return "email/list";
 	}
 
-	@PostMapping("send")
-	public void send(Authentication authentication, SendDTO sendDTO) {
-		sendDTO.setReplyTo(authentication.getName());
-		emailService.sendSimpleMail(sendDTO);
+	@GetMapping("received/detail/{emailNo}")
+	public String receivedDetail(@PathVariable Integer emailNo) {
+		return "email/detail";
+	}
+
+	@GetMapping("sending")
+	public void sending() {
+	}
+
+	@GetMapping("sent")
+	public String sent() {
+		return "email/list";
+	}
+
+	@GetMapping("sent/{page}")
+	public String sent(@PathVariable Integer page) {
+		return "email/list";
+	}
+
+	@GetMapping("sent/detail/{emailNo}")
+	public String sentDetail(@PathVariable Integer emailNo) {
+		return "email/detail";
 	}
 }
