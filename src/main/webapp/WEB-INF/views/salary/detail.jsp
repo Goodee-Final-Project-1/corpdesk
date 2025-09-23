@@ -19,31 +19,36 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
-<div class="email-wrapper rounded border bg-white">
-	<div class="row no-gutters justify-content-center">
-		<jsp:include page="aside.jsp"/>
-		<%--	<%@ include file="aside.jsp"%>--%>
-		<main class="col-lg-8 col-xl-9 col-xxl-10">
-			<div class="email-right-column p-4 p-xl-5">
-				<div class="email-right-header justify-content-center mb-0">
-					<%-- 페이징 --%>
-					<!-- Flat Rounded Pagination -->
-					<div id="card" class="card card-default align-items-center border-0 mb-0">
+
+<div class="card card-default">
+	<div class="card-body">
+		<main>
+			<div>
+				<h2>급여 상세</h2>
+			</div>
+			<div>
+				<nav></nav>
+				<article>
+					<div>
+						<h3>지급 항목 합계</h3>
+						<ul id="salary"></ul>
+						<ul id="allowance"></ul>
 					</div>
-				</div>
-				<div class="border border-top-0 rounded table-responsive email-list">
-					<table id="table" class="table mb-0 table-email">
-					</table>
-				</div>
+					<div>
+						<h3>공제 항목 합계</h3>
+						<ul id="deduction"></ul>
+					</div>
+				</article>
 			</div>
 		</main>
 	</div>
 </div>
-<script src="/js/email/list.js"></script>
+
 <!-- 내용 끝 -->
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
+<script src="/js/salary/detail.js"></script>
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>
