@@ -21,16 +21,16 @@ async function getSalary() {
 
 			tr.innerHTML = `
 			<tr>
-				<th>ID</th>
-				<th>사원명</th>
-				<th>부서</th>
-				<th>직위</th>
-				<th>직책</th>
-				<th>기본급</th>
-				<th>수당</th>
-				<th>공제</th>
-				<th>실지급액</th>
-				<th>지급일</th>
+				<th>${e.paymentId}</th>
+				<th>${e.name}</th>
+				<th>${e.departmentName}</th>
+				<th>${e.positionName}</th>
+				<th>${e.responsibility}</th>
+				<th>${e.baseSalary.toLocaleString('ko-KR')}</th>
+				<th>${e.allowanceAmount.toLocaleString('ko-KR')}</th>
+				<th>${e.deductionAmount.toLocaleString('ko-KR')}</th>
+				<th>${(e.baseSalary + e.allowanceAmount - e.deductionAmount).toLocaleString('ko-KR')}</th>
+				<th>${e.paymentDate.substring(0, 10)}</th>
 			</tr>
 			`;
 

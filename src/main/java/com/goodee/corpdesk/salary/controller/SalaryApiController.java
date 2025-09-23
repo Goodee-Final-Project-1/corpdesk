@@ -20,7 +20,7 @@ public class SalaryApiController {
 
 	@PostMapping("/list/{page}")
 	public Page<EmployeeSalaryDTO> list(@PathVariable Integer page) {
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(page - 1, 10);
 
 		return salaryService.getList(pageable);
 	}

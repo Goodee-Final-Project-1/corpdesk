@@ -19,28 +19,34 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
-<main>
-	<table id="productsTable" class="table table-hover table-product" style="width:100%">
-		<thead>
-		<tr>
-			<th>ID</th>
-			<th>사원명</th>
-			<th>부서</th>
-			<th>직위</th>
-			<th>직책</th>
-			<th>기본급</th>
-			<th>수당</th>
-			<th>공제</th>
-			<th>실지급액</th>
-			<th>지급일</th>
-		</tr>
-		</thead>
-		<tbody id="tbody">
-		</tbody>
-	</table>
+<div class="card card-default">
+	<div class="card-header">
+		<h2>급여 지급 목록</h2>
+	</div>
+	<div class="card-body">
+		<main>
+			<table data-page-length='10' <%--id="productsTable"--%> class="table table-hover table-product display" style="width:100%">
+				<thead>
+				<tr>
+					<th>번호</th>
+					<th>사원명</th>
+					<th>부서</th>
+					<th>직위</th>
+					<th>직책</th>
+					<th>기본급</th>
+					<th>수당</th>
+					<th>공제</th>
+					<th>실지급액</th>
+					<th>지급일</th>
+				</tr>
+				</thead>
+				<tbody id="tbody">
+				</tbody>
+			</table>
 
-</main>
-
+		</main>
+	</div>
+</div>
 
 <!-- 내용 끝 -->
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>

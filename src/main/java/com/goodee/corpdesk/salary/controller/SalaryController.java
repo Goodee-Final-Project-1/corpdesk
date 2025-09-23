@@ -8,6 +8,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/salary")
 public class SalaryController {
 
+
+	@RequestMapping("/list")
+	public String list() {
+		return "salary/list";
+	}
+
 	@RequestMapping("/list/{page}")
 	public String list(@PathVariable Integer page) {
 		return "salary/list";
