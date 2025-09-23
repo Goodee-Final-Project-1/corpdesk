@@ -58,3 +58,10 @@ btnActions.forEach((btn) => {
 
   });
 });
+
+/**
+ * json 형태의 결재내용 데이터를 폼에 뿌리기
+ */
+
+const form = document.querySelector('#approvalContentByType');
+

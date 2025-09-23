@@ -30,7 +30,7 @@ public class ApprovalFormService {
     @Autowired
     private VacationTypeRepository vacationTypeRepository;
 
-    public ResApprovalDTO getApprovalForm(Long approvalId) throws Exception {
+    public ResApprovalDTO getApprovalForm(Integer approvalId) throws Exception {
         Optional<ApprovalForm> result = approvalFormRepository.findById(approvalId);
 
         if(result.isEmpty())  return null;

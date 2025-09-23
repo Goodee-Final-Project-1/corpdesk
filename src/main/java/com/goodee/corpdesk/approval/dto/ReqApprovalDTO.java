@@ -16,7 +16,7 @@ public class ReqApprovalDTO {
 	private Long approvalId;
 	private String username;
 	private Integer departmentId;
-    private Long approvalFormId;
+    private Integer approvalFormId;
     private String approvalContent;
 	private Character status;
     private Character approveYn;

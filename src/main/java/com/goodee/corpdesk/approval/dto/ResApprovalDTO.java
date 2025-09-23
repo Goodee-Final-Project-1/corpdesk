@@ -25,11 +25,12 @@ public class ResApprovalDTO {
     private String name;
 	private Integer departmentId;
 	private Integer positionId;
-    private Long approvalFormId;
+    private Integer approvalFormId;
     private String approvalContent;
 	private Character status;
 
 	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 
     // approver
     private Long approverId;

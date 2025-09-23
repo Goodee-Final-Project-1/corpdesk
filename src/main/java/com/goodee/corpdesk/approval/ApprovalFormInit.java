@@ -21,19 +21,19 @@ public class ApprovalFormInit implements InitializingBean {
 
 	private void init() {
         ApprovalForm form1 = new ApprovalForm();
-        form1.setApprovalFormId(1L);
+        form1.setApprovalFormId(1);
         form1.setFormTitle("휴가 신청");
         form1.setUseYn(true);
         approvalFormRepository.save(form1);        
         
         ApprovalForm form2 = new ApprovalForm();
-        form2.setApprovalFormId(2L);
+        form2.setApprovalFormId(2);
         form2.setFormTitle("출장 신청");
         form2.setUseYn(true);
         approvalFormRepository.save(form2);
         
         ApprovalForm form3 = new ApprovalForm();
-        form3.setApprovalFormId(3L);
+        form3.setApprovalFormId(3);
         form3.setFormTitle("업무 기안");
         form3.setUseYn(true);
         approvalFormRepository.save(form3);
