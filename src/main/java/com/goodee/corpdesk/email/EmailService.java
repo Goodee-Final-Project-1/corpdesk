@@ -6,7 +6,10 @@ import jakarta.mail.*;
 import jakarta.mail.internet.MimeUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -22,7 +25,7 @@ public class EmailService {
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
-	@Autowired
+	@Autowired // 양방향 암호화
 	private AesBytesEncryptor aesBytesEncryptor;
 
 	// 받은 메일 상세
@@ -38,13 +41,13 @@ public class EmailService {
 	}
 
 	// 받은 메일 목록
-	public List<EmailDTO> receivedList(String username, Pageable pageable) {
+	public PagedModel<EmailDTO> receivedList(String username, Pageable pageable) {
 		Employee employee = getEmployee(username);
 		return this.mailList(employee, pageable, "INBOX");
 	}
 
 	// 보낸 메일 목록
-	public List<EmailDTO> sentList(String username, Pageable pageable) {
+	public PagedModel<EmailDTO> sentList(String username, Pageable pageable) {
 		Employee employee = getEmployee(username);
 		return mailList(employee, pageable, getSentFolderName(employee));
 	}
@@ -68,19 +71,29 @@ public class EmailService {
 	}
 
 	// 메일 목록 가져오기
-	private List<EmailDTO> mailList(Employee employee, Pageable pageable, String folderName) {
+	private PagedModel<EmailDTO> mailList(Employee employee, Pageable pageable, String folderName) {
 		return withStoreAndFolder(employee, folderName, (folder) -> {
 			int total = folder.getMessageCount();
-			int start = total;
-			int page = pageable.getPageNumber();
 			int size = pageable.getPageSize();
+			int page = pageable.getPageNumber();
 
-			Message[] messages = folder.getMessages(start - size - page, start - page);
+			int end = total - (page * size);
+			int start = end - size + 1;
+
+			if (total == 0 || end < start) {
+				Page<EmailDTO> result = new PageImpl<>(Collections.emptyList(), pageable, total);
+				return new PagedModel<>(result);
+			}
+
+			Message[] messages = folder.getMessages(start, end);
 			List<EmailDTO> messageList = new ArrayList<>();
 			for (Message message : messages) {
 				messageList.add(messageToDto(message));
 			}
-			return messageList;
+
+			Page<EmailDTO> result = new PageImpl<>(messageList, pageable, total);
+
+			return new PagedModel<>(result);
 		});
 	}
 
