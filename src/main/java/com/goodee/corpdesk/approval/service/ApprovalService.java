@@ -7,6 +7,9 @@ import java.util.Optional;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.ApprovalForm;
 import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
+import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeRepository;
+import com.goodee.corpdesk.employee.ResEmployeeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +35,9 @@ public class ApprovalService {
 	private ApproverRepository approverRepository;
     @Autowired
     private ApprovalFormRepository approvalFormRepository;
-	
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
 	// Exception: approval 혹은 approval의 조회 결과가 없거나 insert 실패
@@ -101,8 +106,16 @@ public class ApprovalService {
     // NOT_FOUND: 수정할 결재자 정보 혹은 수정할 결재 정보가 없음
     // PROCESSED: 결재 반려/승인이 처리됨
     // Exception: 그 외 예외상황
-	public String processApproval(Long approvalId, Long approverId, String approveYn) throws Exception {
-		// 1. 해당 결재의 결재자 정보의 approve_yn 정보를 approveYn값으로 수정
+	public String processApproval(Long approvalId, ReqApprovalDTO reqApprovalDTO) throws Exception {
+        
+        // 0. DTO에서 approverId, approveYn를 받아옴
+        log.warn("{}", reqApprovalDTO);
+        Long approverId = reqApprovalDTO.getApproverId();
+        System.err.println("approverId = " + approverId);
+        String approveYn = reqApprovalDTO.getApproveYn().toString();
+        System.err.println("approveYn = " + approveYn);
+
+        // 1. 해당 결재의 결재자 정보의 approve_yn 정보를 approveYn값으로 수정
 		// 결재자 정보 중 approval_id = approvalId 이고 approver_id = approverId 인 정보 select
 		Approver result = approverRepository.findByApprovalIdAndApproverId(approvalId, approverId);
 		
@@ -215,4 +228,19 @@ public class ApprovalService {
         return resApprovalDTO;
     }
 
+    public ResEmployeeDTO getDetailWithDeptAndPosition(String username) {
+        return employeeRepository.findEmployeeWithDeptAndPosition(username);
+    }
+
+    public List<ResApprovalDTO> getEmployeeWithDeptAndPositionAndFile(Integer departmentId, Boolean useYn) {
+        return employeeRepository.findEmployeeWithDeptAndPositionAndFile(departmentId, useYn);
+    }
+
+    public ResApprovalDTO getDetail(String username) {
+        return employeeRepository.findByUsername(username).get().toResApprovalDTO();
+    }
+
+    public ResApprovalDTO getAppover(Long approvalId, String username) {
+        return approverRepository.findAllByApprovalIdAndUsername(approvalId, username).toResApprovalDTO();
+    }
 }

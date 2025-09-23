@@ -426,20 +426,10 @@ btnSubmits.forEach((btn) => {
   btn.addEventListener('click', function () {
     // 1-1. 결재 기본 속성 가져오기
     const commonForm = document.querySelector('#approvalContentCommon');
-    // console.log(commonForm);
     const formData = new FormData(commonForm);
-    // formData.forEach((value, key) => {
-    //   console.log(`${key}: ${value}`);
-    // });
 
     // 2. 결재 상세내용 가져오기
     const formByType = document.querySelector('#approvalContentByType');
-    // const strFormByType = formByType.innerHTML; // 태그를 문자열로 변환
-    // console.log(strFormByType);
-    // formData.append('approvalContent', strFormByType);
-    // formData.forEach((value, key) => {
-    //   console.log(`${key}: ${value}`);
-    // });
 
     const formData2 = new FormData(formByType);
 
@@ -467,5 +457,3 @@ btnSubmits.forEach((btn) => {
     ;
   });
 });
-
-

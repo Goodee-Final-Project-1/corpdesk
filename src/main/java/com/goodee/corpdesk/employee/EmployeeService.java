@@ -281,13 +281,5 @@ public class EmployeeService implements UserDetailsService {
 
 		return employeeRepository.save(origin);
 	}
-    
-  public ResEmployeeDTO getDetailWithDeptAndPosition(String username) {
-    return employeeRepository.findEmployeeWithDeptAndPosition(username);
-  }
-
-  public List<ResApprovalDTO> getEmployeeWithDeptAndPositionAndFile(Integer departmentId, Boolean useYn) {
-        return employeeRepository.findEmployeeWithDeptAndPositionAndFile(departmentId, useYn);
-  }
 
 }

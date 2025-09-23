@@ -1,13 +1,12 @@
 package com.goodee.corpdesk.employee;
 
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,12 +36,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@NoArgsConstructor
 @Getter
 @Setter
 @ToString
-@Entity
-@Table
+@Builder
+@NoArgsConstructor @AllArgsConstructor
+@Entity @Table
 @DynamicInsert
 @DynamicUpdate
 public class Employee implements UserDetails {
@@ -169,4 +168,10 @@ public class Employee implements UserDetails {
 
 		return authorities;
 	}
+
+    public ResApprovalDTO  toResApprovalDTO() {
+        return ResApprovalDTO.builder()
+                .username(this.username)
+                .build();
+    }
 }

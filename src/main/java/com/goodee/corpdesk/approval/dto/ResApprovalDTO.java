@@ -32,6 +32,7 @@ public class ResApprovalDTO {
 	private LocalDateTime createdAt;
 
     // approver
+    private Long approverId;
 	private List<ApproverDTO> approverDTOList;
 
     // approval_form

@@ -38,6 +38,8 @@ public class ApprovalFormController {
 
 	@Value("${cat.approval}")
 	private String cat;
+    @Autowired
+    private ApprovalService approvalService;
 
     @ModelAttribute("cat")
 	public String getCat() {
@@ -79,13 +81,13 @@ public class ApprovalFormController {
         ResApprovalDTO form = approvalFormService.getApprovalForm(formId);
 
         // 1. 유저 정보 얻어오기
-        ResEmployeeDTO userInfo = employeeService.getDetailWithDeptAndPosition(username);
+        ResEmployeeDTO userInfo = approvalService.getDetailWithDeptAndPosition(username);
 
         // 2. 결재 대상 부서의 정보 얻어오기
         ResApprovalDTO targetDept = departmentService.getDepartment(departmentId);
 
         // 3. 결재 대상 부서의 직원 목록 얻어오기 - 직원id, 직원이름, 부서명, 직위명, 파일정보
-        List<ResApprovalDTO> employeeList = employeeService.getEmployeeWithDeptAndPositionAndFile(departmentId, true);
+        List<ResApprovalDTO> employeeList = approvalService.getEmployeeWithDeptAndPositionAndFile(departmentId, true);
 
         // 3. model에 폼이랑 departmentId 바인딩
         model.addAttribute("form", form);
