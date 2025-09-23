@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,11 +27,21 @@ public class AttendanceController {
     private final DateTimeFormatter formatterOutput = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @PostMapping("/delete")
-    public String deleteAttendance(@PathVariable("username") String username,
-                                   @RequestParam("attendanceIds") List<Long> attendanceIds) {
-        attendanceService.deleteAttendances(username, attendanceIds);
-        return "redirect:/employee/edit/" + username;
+    @ResponseBody
+    public Map<String, Object> deleteAttendance(@PathVariable("username") String username,
+                                                @RequestBody Map<String, List<Long>> payload) {
+        List<Long> attendanceIds = payload.get("attendanceIds");
+        Map<String, Object> result = new HashMap<>();
+        try {
+            attendanceService.deleteAttendances(username, attendanceIds);
+            result.put("success", true);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("error", e.getMessage());
+        }
+        return result;
     }
+
 
     @PostMapping("/edit")
     @ResponseBody

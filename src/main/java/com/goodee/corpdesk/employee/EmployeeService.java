@@ -168,30 +168,32 @@ public class EmployeeService implements UserDetailsService {
         employeeRepository.save(persisted);
         
         // ⭐⭐ 파일 처리 로직 ⭐⭐
+        employeeRepository.save(persisted);
+
         if (profileImageFile != null && !profileImageFile.isEmpty()) {
-            // 1. 기존 파일 삭제
-            Optional<EmployeeFile> oldFileOptional = employeeFileRepository.findByUsername(persisted.getUsername());
-            
-            if (oldFileOptional.isPresent()) {
-                EmployeeFile oldFile = oldFileOptional.get();
-                FileDTO oldFileDTO = new FileDTO(oldFile.getSaveName(), oldFile.getExtension());
-                fileManager.deleteFile(uploadPath + "profile" + File.separator, oldFileDTO);
-                employeeFileRepository.delete(oldFile);
-            }
-            
-            // 2. 새 파일 저장
+            Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(persisted.getUsername());
+
             String profileImagePath = uploadPath + "profile" + File.separator;
             FileDTO fileDTO = fileManager.saveFile(profileImagePath, profileImageFile);
-            
-            EmployeeFile newFile = new EmployeeFile();
-            newFile.setUsername(persisted.getUsername());
-            newFile.setOriName(fileDTO.getOriName());
-            newFile.setSaveName(fileDTO.getSaveName());
-            newFile.setExtension(fileDTO.getExtension());
-            employeeFileRepository.save(newFile);
+
+            if (fileOptional.isPresent()) {
+                EmployeeFile existingFile = fileOptional.get();
+                existingFile.setOriName(fileDTO.getOriName());
+                existingFile.setSaveName(fileDTO.getSaveName());
+                existingFile.setExtension(fileDTO.getExtension());
+                existingFile.setUseYn(true); // 다시 활성화
+                employeeFileRepository.save(existingFile);
+            } else {
+                EmployeeFile newFile = new EmployeeFile();
+                newFile.setUsername(persisted.getUsername());
+                newFile.setOriName(fileDTO.getOriName());
+                newFile.setSaveName(fileDTO.getSaveName());
+                newFile.setExtension(fileDTO.getExtension());
+                newFile.setUseYn(true);
+                employeeFileRepository.save(newFile);
+            }
         }
     }
-
 	// 삭제(비활성화)
 	public void deactivateEmployee(String id) {
 		Employee employee = employeeRepository.findById(id)
@@ -213,7 +215,10 @@ public class EmployeeService implements UserDetailsService {
             FileDTO fileDTO = new FileDTO(employeeFile.getSaveName(), employeeFile.getExtension());
             String profileImagePath = uploadPath + "profile" + File.separator;
             fileManager.deleteFile(profileImagePath, fileDTO);
-            employeeFileRepository.delete(employeeFile);
+            
+            // 삭제 대신 useYn false
+            employeeFile.setUseYn(false);
+            employeeFileRepository.save(employeeFile);
         }
     }
 
