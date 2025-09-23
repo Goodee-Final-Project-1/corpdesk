@@ -44,10 +44,6 @@ public class ChatMessageController {
 			@PathVariable(value = "messageNo")Long lastMessageNo, @PathVariable(value = "size")int size){
 		
 		List<ChatMessage> list = chatMessageService.chatMessageList(chatRoomId,lastMessageNo,size);
-		for(ChatMessage c : list) {
-			System.out.println("~~~~~~~~~~~~~~~~~~~~~~");
-			System.out.println(c.getMessageContent());
-		}
 		Map<String, Object> map = new HashMap<>();
 		map.put("size", list.size());
 		map.put("messages",list);

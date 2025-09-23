@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,6 +23,8 @@ public class ChatRoom {
 	private Long chatRoomId;
 	private String chatRoomTitle;
 	
+	@Transient
+	private Long unreadCount;
 	
 	private LocalDateTime updated_at;
 	private LocalDateTime creates_at;

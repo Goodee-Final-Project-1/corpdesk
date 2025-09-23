@@ -53,19 +53,23 @@ public class StompHandler implements ChannelInterceptor{
 			//stomp 헤더에서 principal을 꺼냄
 			Authentication auth = (Authentication)accessor.getUser();
 			String username = auth.getName();
-			System.out.println("##########################################");
-			System.out.println(username);
+			String destination = accessor.getDestination();
 			//목적지 url을 가져와서 방번호를 추출함
-			Long chatRoomId = Long.parseLong(accessor.getDestination().substring(accessor.getDestination().lastIndexOf("/")+1)); 
-	        System.out.println(chatRoomId);
-			ChatParticipant chatParticipant = new  ChatParticipant();
-			chatParticipant.setChatRoomId(chatRoomId);
-			chatParticipant.setEmployeeUsername(username);
+			if(destination.startsWith("/sub/chat/room/")) {
+				Long chatRoomId = Long.parseLong(destination.substring(destination.lastIndexOf("/")+1)); 
+				ChatParticipant chatParticipant = new  ChatParticipant();
+				chatParticipant.setChatRoomId(chatRoomId);
+				chatParticipant.setEmployeeUsername(username);	
+				if(!chatParticipantService.isRoomParticipant(chatParticipant)) {
+		        	throw new AccessDeniedException("");
+		        }
+			}else if(destination.equals("/user/queue/notifications")) {
+				
+			}
 			
-			if(!chatParticipantService.isRoomParticipant(chatParticipant)) {
-				System.out.println("예외발생");
-	        	throw new AccessDeniedException("");
-	        }
+			
+			
+			
 		}
 		return message;
 	}

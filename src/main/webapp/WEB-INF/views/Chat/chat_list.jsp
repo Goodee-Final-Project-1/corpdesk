@@ -24,11 +24,14 @@
 					<tr>
 						<th>채팅방 번호</th>
 						<th>채팅방 제목</th>
+						<th>읽음</th>
 					</tr>
 					<c:forEach items="${roomList}" var="room">
-						<tr class="chatListOne" data-roomId="${room.chatRoomId }" style="cursor:pointer;">
+						<tr class="chatListOne" data-roomId="${room.chatRoomId }" data-unreadCount="${room.unreadCount }" style="cursor:pointer;">
 								<td>${room.chatRoomId}</td>
 								<td>${room.chatRoomTitle}</td>
+								<td class="unreadCount">&nbsp; <c:if test="${room.unreadCount ne 0}">${room.unreadCount }</c:if></td>
+								
 						</tr>
 					</c:forEach>
 				</table>
@@ -49,15 +52,29 @@
 				<script type="text/javascript">
 				const socket = new SockJS("/ws");
 	            stompClient = Stomp.over(socket);
-	            console.log("개인 메시지:");
 	            
 	            stompClient.connect({}, function(frame) {
-	                console.log("소켓 연결됨:", frame);
-
 	                // 기본적으로 본인 개인큐 구독 (알림/DM 수신)
 	                stompClient.subscribe("/user/queue/notifications",(message)=>{
 	                	
+	                	 console.log("raw message:", message);
+	                	    console.log("message.body:", message.body);
+	                	const chatRoom = JSON.parse(message.body)
+	                	const table = document.querySelector("table");
+	            		const newRow = document.createElement("tr");
+	            		
+	            		newRow.classList.add("chatListOne");
+	            		newRow.dataset.roomId=chatRoom.chatRoomId;
+	            		newRow.style.cursor = "pointer";
+	            		newRow.innerHTML = "<td>"+chatRoom.chatRoomId+"</td><td>"+chatRoom.chatRoomTitle+"</td>"+"<td>"+chatRoom.unreadCount+"</td>";
+	            		newRow.addEventListener("click",()=>{
+	            			window.open("/chat/room/detail/"+chatRoom.chatRoomId,"","width=500,height=600 ,left=600, top=100");
+	            		});
+	            		table.appendChild(newRow);
+	                	
+	                	
 	                });
+	           
 	               
 	            });    
 				
@@ -78,11 +95,37 @@
 			            	body : JSON.stringify(roomdata)
 			            })
 			            .then(res=>res.json())
-			            .then(roomId=>{
+			            .then(chatRoom=>{
 			            	
-			            	stompClient.subscribe("/sub/chat/room/"+roomId,(message)=>{
+			            	stompClient.subscribe("/sub/chat/room/"+chatRoom.chatRoomId,(message)=>{
 			            		
 			            	})
+			            	//방생성 후 화면에서도 바로 목록을 보여줌
+			            	let existing = false;
+			            	document.querySelectorAll(".chatListOne").forEach(tr=>{
+			            		if(tr.getAttribute("data-roomId")==chatRoom.chatRoomId){
+			            			existing=true;
+			            		}
+			            	});
+			            	
+			            	if(!existing){
+			            		const table = document.querySelector("table");
+			            		const newRow = document.createElement("tr");
+			            		
+			            		newRow.classList.add("chatListOne");
+			            		newRow.dataset.roomId=chatRoom.chatRoomId;
+			            		newRow.style.cursor = "pointer";
+			            		newRow.innerHTML = "<td>"+chatRoom.chatRoomId+"</td><td>"+chatRoom.chatRoomTitle+"</td>";
+			            		newRow.addEventListener("click",()=>{
+			            			window.open("/chat/room/detail/"+chatRoom.chatRoomId,"","width=500,height=600 ,left=600, top=100");
+			            			
+			            		});
+			            		table.appendChild(newRow);
+			            		console.log("1");
+			            	}else{
+			            		window.open("/chat/room/detail/"+chatRoom.chatRoomId,"","width=500,height=600 ,left=600, top=100");
+			            	}
+			            	
 			         
 						
 			            });
@@ -93,7 +136,9 @@
 				const chatListOne = document.querySelectorAll(".chatListOne").forEach(list =>{
 					const roomId= list.getAttribute('data-roomId');
 					list.addEventListener("click",()=>{
-						window.open("/chat/room/detail/"+roomId);
+						window.open("/chat/room/detail/"+roomId,"","width=500,height=600 ,left=600, top=100");
+						list.querySelector(".unreadCount").innerText="";
+						list.setAttribute("data-unreadCount","0");
 					})
 					
 				});

@@ -27,8 +27,6 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
 				for(Cookie cookie : cookies) {
 					if("accessToken".equals(cookie.getName())) {
 						String token = cookie.getValue();
-						System.out.println("=========================================================");
-						System.out.println(token);
 						
 						//stompHandler에서 accessor.getSessionAttributes().get("accessToken")으로 꺼낼수있음
 						attributes.put("token", token);

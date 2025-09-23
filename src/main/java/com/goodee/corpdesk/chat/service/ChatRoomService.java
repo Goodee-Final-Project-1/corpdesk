@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.goodee.corpdesk.chat.dto.RoomData;
-import com.goodee.corpdesk.chat.entity.ChatMessage;
 import com.goodee.corpdesk.chat.entity.ChatParticipant;
 import com.goodee.corpdesk.chat.entity.ChatRoom;
 import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
@@ -24,7 +23,25 @@ public class ChatRoomService {
 
 	//해당 유저의 모든 채팅방 목록을 불러옴
 	public List<ChatRoom> getChatRoomList(String username) {
+		
+		//해당 유저의 모든 채팅방 목록을 가져옴
 		List<ChatRoom> list= chatRoomRepository.findAllByUsername(username);
+		
+		//각 채팅방 별로 어떤 메세지 까지 읽었는 지를 확인 후 계산해서 list에 다시 넣고 반환
+		//이 때 처음 생성되서 lastCheck가 null인경우 해당 방의 모든 메세지의 개수를 가져옴
+		list.forEach(l->{
+			Long roomId = l.getChatRoomId();
+			ChatParticipant cp= chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(roomId, username);
+			if(cp.getLastCheckMessageId()==null) {
+				l.setUnreadCount((chatParticipantRepository.countAll(roomId)));
+			}
+			else {
+				l.setUnreadCount(chatParticipantRepository.count(cp.getLastCheckMessageId(),roomId));
+			}
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"+l.getUnreadCount());
+		});
+		
+		
 		return list;
 	}
 
@@ -51,11 +68,5 @@ public class ChatRoomService {
 	}
 
 	
-	//채팅방에 이전 메세지들을 가져옴 최신순으로 
-	public List<ChatMessage> MessageList(Long roomId) {
-		
-		
-		return null;
-	}
 
 }

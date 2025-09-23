@@ -37,7 +37,6 @@ public class ChatRoomController {
 	}
 	@GetMapping("detail/{roomId}")
 	public String chatRoomDetail(@PathVariable(value = "roomId") Long roomId , Model model) {
-		List<ChatMessage> list = chatRoomService.MessageList(roomId);
 		model.addAttribute("roomId",roomId);
 		
 		return "Chat/chat_page";
@@ -45,13 +44,15 @@ public class ChatRoomController {
 	
 	@ResponseBody
 	@PostMapping("createRoom")
-	public Long createRoom(@RequestBody RoomData roomdata , Principal principal) {
+	public ChatRoom createRoom(@RequestBody RoomData roomdata , Principal principal) {
 		//채팅방 생성 
 		Long roomId =chatRoomService.createRoom(roomdata, principal);
-		
+		ChatRoom chatRoom = new ChatRoom();
+		chatRoom.setChatRoomId(roomId);
+		chatRoom.setChatRoomTitle(roomdata.getRoomTitle());
 		
 		//상대방 구독 알림 보냄
-		simpMessagingTemplate.convertAndSendToUser(roomdata.getUsername(),"/queue/notifications" , roomId);
-		return roomId;
+		simpMessagingTemplate.convertAndSendToUser(roomdata.getUsername(),"/queue/notifications" , chatRoom);
+		return chatRoom;
 	}
 }

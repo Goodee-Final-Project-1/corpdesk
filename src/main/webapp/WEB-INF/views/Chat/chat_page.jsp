@@ -69,10 +69,12 @@
     	// 메세지 수신
     	stompClient.connect({},function(frame){
     		stompClient.subscribe("/sub/chat/room/"+${roomId},(message)=>{
-    			console.log(JSON.parse(message.body).messageContent)
-    			 const p = document.createElement("p");
-        	     p.innerText = JSON.parse(message.body).messageContent;
-        		 listChat.appendChild(p);
+    			 const li = document.createElement("li");
+    			 const msg = JSON.parse(message.body);
+        	     li.innerText =  "["+msg.employeeUsername+"]"+msg.messageContent;
+        	     li.setAttribute('data-no',msg.messageId);
+        	    
+        		 listChat.appendChild(li);
         		 messageContainer.scrollTop = messageContainer.scrollHeight;
         	})
         
@@ -121,7 +123,6 @@
 		
 	//서버에서 이전 메시지 가져오기
 	    function fetchList(){
-		console.log("111");
 		//처음 데이터까지 다 가져온 경우면 db접근안하고 리턴
 		if(isEnd == true){
 			return;
@@ -145,11 +146,11 @@
 			const oldScrollHeight = messageContainer.scrollHeight;
 			//메세지를 화면에 뿌려줌
 			messages.forEach(msg=>{
-				console.log("확인")
-				console.log(msg)
+				console.log(msg.messageId)
 				const li = document.createElement('li');
 				li.setAttribute('data-no',msg.messageId);
 				li.textContent = "["+msg.employeeUsername+"]"+msg.messageContent;
+				console.log(li.getAttribute("data-no"));
 				listChat.insertBefore(li,listChat.firstChild);
 				
 				
@@ -163,7 +164,23 @@
 		  .finally(()=>{
 			  isScrolled=false;
 		  });
+		const li = document.querySelectorAll("#chat-list li");
+		li.forEach(l=>{
+			console.log(l.getAttribute("data-no"));
+			})
 	}
+	    const last = document.querySelector("#chat-list li:last-child");
+	
+	//마지막으로 확인한 메세지 저장
+	window.addEventListener("beforeunload",()=>{
+		const last = document.querySelector("#chat-list li:last-child").getAttribute("data-no");
+		if(last){
+			navigator.sendBeacon("/chat/participant/lastMessage/"+last+"/"+roomId);	
+		}
+		
+		
+		
+	})
 	
 	</script>
 	

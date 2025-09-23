@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.chat.dto;
 
+
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
