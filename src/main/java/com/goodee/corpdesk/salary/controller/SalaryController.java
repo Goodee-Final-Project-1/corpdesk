@@ -18,4 +18,9 @@ public class SalaryController {
 	public String list(@PathVariable Integer page) {
 		return "salary/list";
 	}
+
+	@RequestMapping("/detail/{paymentId}")
+	public String detail(@PathVariable Long paymentId) {
+		return "salary/detail";
+	}
 }

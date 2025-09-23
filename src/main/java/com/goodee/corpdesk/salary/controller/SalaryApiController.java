@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/salary")
 @RequiredArgsConstructor
@@ -23,5 +25,10 @@ public class SalaryApiController {
 		Pageable pageable = PageRequest.of(page - 1, 10);
 
 		return salaryService.getList(pageable);
+	}
+
+	@PostMapping("/detail/{paymentId}")
+	public Map<String, Object> detail(@PathVariable Long paymentId) {
+		return salaryService.getDetail(paymentId);
 	}
 }

@@ -7,6 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 public interface SalaryRepository extends JpaRepository<SalaryPayment, Long> {
 
 	@Query(value = """
@@ -15,13 +18,13 @@ public interface SalaryRepository extends JpaRepository<SalaryPayment, Long> {
 					s.username as username,
 					s.payment_date as paymentDate,
 					s.base_salary as baseSalary,
-								
+			
 					e.name as name,
 					e.responsibility as responsibility,
-								
+			
 					d.department_name as departmentName,
 					p.position_name as positionName,
-								
+			
 					a.allowance_amount as allowanceAmount,
 					de.deduction_amount as deductionAmount
 			FROM salary_payment s
@@ -43,4 +46,15 @@ public interface SalaryRepository extends JpaRepository<SalaryPayment, Long> {
 			countQuery = "SELECT count(*) FROM salary_payment",
 			nativeQuery = true)
 	Page<EmployeeSalaryDTO> findAllEmployeeSalary(Pageable pageable);
+
+//	@Query(
+//			"""
+//				SELECT s
+//				FROM SalaryPayment s
+//				WHERE s.username = :username
+//				AND FUNCTION('YEAR', s.paymentDate) = FUNCTION('YEAR', :paymentDate)
+//				AND FUNCTION('MONTH', s.paymentDate) = FUNCTION('MONTH', :paymentDate)
+//			"""
+//	)
+//	Optional<SalaryPayment> findByIdAndPaymentDate(String username, LocalDateTime paymentDate);
 }

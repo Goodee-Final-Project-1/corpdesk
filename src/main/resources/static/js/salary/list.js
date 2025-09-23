@@ -19,18 +19,21 @@ async function getSalary() {
 		data.content.forEach(function (e) {
 			const tr = document.createElement('tr');
 
+			// tr.setAttribute("onclick", "detail(${e.paymentId})")
+
 			tr.innerHTML = `
 			<tr>
-				<th>${e.paymentId}</th>
-				<th>${e.name}</th>
-				<th>${e.departmentName}</th>
-				<th>${e.positionName}</th>
-				<th>${e.responsibility}</th>
-				<th>${e.baseSalary.toLocaleString('ko-KR')}</th>
-				<th>${e.allowanceAmount.toLocaleString('ko-KR')}</th>
-				<th>${e.deductionAmount.toLocaleString('ko-KR')}</th>
-				<th>${(e.baseSalary + e.allowanceAmount - e.deductionAmount).toLocaleString('ko-KR')}</th>
-				<th>${e.paymentDate.substring(0, 10)}</th>
+				<td onclick="detail(${e.paymentId})">조회</td>
+				<td>${e.name}</td>
+				<td>${e.paymentId}</td>
+				<td>${e.departmentName}</td>
+				<td>${e.positionName}</td>
+				<td>${e.responsibility}</td>
+				<td>${e.baseSalary.toLocaleString('ko-KR')}</td>
+				<td>${e.allowanceAmount.toLocaleString('ko-KR')}</td>
+				<td>${e.deductionAmount.toLocaleString('ko-KR')}</td>
+				<td>${(e.baseSalary + e.allowanceAmount - e.deductionAmount).toLocaleString('ko-KR')}</td>
+				<td>${e.paymentDate.substring(0, 10)}</td>
 			</tr>
 			`;
 
@@ -42,3 +45,7 @@ async function getSalary() {
 }
 
 getSalary();
+
+function detail(e) {
+	location.href = '/salary/detail/' + e;
+}

@@ -19,33 +19,27 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
+
 <div class="card card-default">
-	<div class="card-header">
-		<h2>급여 지급 목록</h2>
-	</div>
 	<div class="card-body">
 		<main>
-			<table data-page-length='10' <%--id="productsTable"--%>
-						 class="table table-hover table-product display table-striped" style="width:100%">
-				<thead>
-				<tr>
-					<th>조회</th>
-					<th>사원명</th>
-					<th>번호</th>
-					<th>부서</th>
-					<th>직위</th>
-					<th>직책</th>
-					<th>기본급</th>
-					<th>수당</th>
-					<th>공제</th>
-					<th>실지급액</th>
-					<th>지급일</th>
-				</tr>
-				</thead>
-				<tbody id="tbody">
-				</tbody>
-			</table>
-
+			<div>
+				<h2>급여 상세</h2>
+			</div>
+			<div>
+				<nav></nav>
+				<article>
+					<div>
+						<h3>지급 항목 합계</h3>
+						<ul id="salary"></ul>
+						<ul id="allowance"></ul>
+					</div>
+					<div>
+						<h3>공제 항목 합계</h3>
+						<ul id="deduction"></ul>
+					</div>
+				</article>
+			</div>
 		</main>
 	</div>
 </div>
@@ -55,7 +49,6 @@
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
-<script src="/js/salary/list.js"></script>
-
+<script src="/js/salary/detail.js"></script>
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>
