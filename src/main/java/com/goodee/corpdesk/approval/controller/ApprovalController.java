@@ -62,12 +62,13 @@ public class ApprovalController {
 		ResApprovalDTO resApprovalDTO = approvalService.createApproval(reqApprovalDTO, modifiedBy);
 		log.info("{}", resApprovalDTO);
 		
-		return resApprovalDTO.toString();
+		return "approval/list";
 		
 	}
 	
 	// 결재 요청 취소
 	@DeleteMapping("{approvalId}")
+    @ResponseBody
 	public String cancel(@PathVariable("approvalId") Long approvalId) throws Exception {
 		
 		System.err.println("cancel()");
@@ -131,13 +132,14 @@ public class ApprovalController {
 
     // 결재 상세 조회
     @GetMapping("{approvalId}")
-    public String getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
+    public String getApproval(@PathVariable("approvalId") Long approvalId, Model model) throws Exception {
 //    public ResApprovalDTO getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
 
         System.err.println("getApproval()");
 
         ResApprovalDTO result = approvalService.getApproval(approvalId);
         log.info("{}", result);
+        model.addAttribute("res", result);
 
         return "approval/detail";
 

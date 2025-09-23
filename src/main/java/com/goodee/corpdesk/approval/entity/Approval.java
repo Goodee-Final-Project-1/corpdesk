@@ -68,6 +68,8 @@ public class Approval extends BaseEntity {
                                 .approvalId(approvalId)
                                 .username(username)
                                 .departmentId(departmentId)
+                                .approvalFormId(approvalFormId)
+                                .approvalContent(approvalContent)
                                 .status(status)
                                 .createdAt(getCreatedAt())
                                 .build();

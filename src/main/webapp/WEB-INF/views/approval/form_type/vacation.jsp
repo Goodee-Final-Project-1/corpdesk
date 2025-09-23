@@ -11,7 +11,6 @@
     <td>
       <div class="form-group">
         <select name="vacationTypeId" class="form-control" id="vacationTypeId">
-          <p>d${vacationTypeList }</p>
           <c:forEach items="${vacationTypeList }" var="el">
             <option value="${el.vacationTypeId}">${el.vacationTypeName}</option>
           </c:forEach>

@@ -8,7 +8,7 @@ approvalRows.forEach((row) => {
   row.addEventListener('click', function() {
     const approvalId = row.getAttribute('data-approval-id');
     
-    location.href=`../${approvalId}`; // "/approval/{approvalId}"로 이동
+    location.href=`/approval/${approvalId}`; // "/approval/{approvalId}"로 이동
   });
 });
 
@@ -345,6 +345,29 @@ function renderApproversToTable(approvers) {
         }
     });
 
+    // --- hidden input 필드 관리 ---
+    const form = document.getElementById('approvalContentCommon');
+    // 기존의 모든 approverDTOList 관련 hidden input을 제거
+    form.querySelectorAll('input[name^="approverDTOList"]').forEach(el => el.remove());
+
+    // 각 결재자마다 hidden input 생성 및 추가
+    approvers.forEach((approver, index) => {
+      const username = approver.getAttribute('data-username');
+
+      const hiddenInputUsername = document.createElement('input');
+      hiddenInputUsername.type = 'hidden';
+      hiddenInputUsername.name = `approverDTOList[${index}].username`;
+      hiddenInputUsername.value = username;
+      form.appendChild(hiddenInputUsername);
+
+      const hiddenInputOrder = document.createElement('input');
+      hiddenInputOrder.type = 'hidden';
+      hiddenInputOrder.name = `approverDTOList[${index}].approvalOrder`;
+      hiddenInputOrder.value = index + 1;
+      form.appendChild(hiddenInputOrder);
+    });
+    // ---  ---
+
     // 4. 테이블 채우기 로직
     let insertionReferenceNode = newApproverRow; // 첫 삽입 기준은 newApproverRow
 
@@ -389,3 +412,60 @@ document.getElementById('approverCheck').addEventListener('click', () => {
     const approvers = Array.from(document.querySelectorAll('#approver-list li'));
     renderApproversToTable(approvers);
 });
+
+/**
+ * 결재 요청/임시저장/취소 버튼을 눌렀을 때
+ */
+// 0. 버튼 요소들을 가져옴
+const btnSubmits = document.querySelectorAll('.btn-submit');
+const btnCancel = document.querySelector('#btnCancel');
+
+// 결재 요청 버튼을 눌렀을 때
+// 결재 기본 속성들&상세내용을 formData로 받아와서 ajax로 요청 후 상세페이지로 이동
+btnSubmits.forEach((btn) => {
+  btn.addEventListener('click', function () {
+    // 1-1. 결재 기본 속성 가져오기
+    const commonForm = document.querySelector('#approvalContentCommon');
+    // console.log(commonForm);
+    const formData = new FormData(commonForm);
+    // formData.forEach((value, key) => {
+    //   console.log(`${key}: ${value}`);
+    // });
+
+    // 2. 결재 상세내용 가져오기
+    const formByType = document.querySelector('#approvalContentByType');
+    // const strFormByType = formByType.innerHTML; // 태그를 문자열로 변환
+    // console.log(strFormByType);
+    // formData.append('approvalContent', strFormByType);
+    // formData.forEach((value, key) => {
+    //   console.log(`${key}: ${value}`);
+    // });
+
+    const formData2 = new FormData(formByType);
+
+    // FormData2를 일반 객체로 변환
+    const data2 = {};
+    for (const [key, value] of formData2.entries()) {
+      data2[key] = value;
+    }
+    // JSON 문자열로 변환
+    const jsonData2 = JSON.stringify(data2);
+    // 메인 FormData에 추가
+    formData.append('approvalContent', jsonData2);
+    console.log(jsonData2);
+
+    // 버튼 종류(결재 요청/임시저장)에 따라 status를 다르게 지정
+    if(btn.id === 'tempSave') formData.append('status', 't');
+
+    // 3. ajax 요청
+    fetch('/approval/', {
+      method: 'POST',
+      body: formData
+    })
+        .then(r => r.text())
+        .then(r => console.log(r))
+    ;
+  });
+});
+
+

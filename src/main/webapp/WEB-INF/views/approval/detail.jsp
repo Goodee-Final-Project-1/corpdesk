@@ -10,7 +10,7 @@
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script defer type="text/javascript" src="/js/approval/approval.js"></script>
+    <script defer type="text/javascript" src="/js/approval/approval_detail.js"></script>
 
     <style>
         /* 테이블 전체의 위쪽 테두리 제거 */
@@ -203,22 +203,15 @@
 						
 						<!-- 양식 시작 -->
             <%-- 양식 헤더 --%>
-						<div class="d-flex justify-content-between">
-              <div>
-						  	<button type="button" class="btn btn-info mr-1 btn-submit" id="requestApproval">결재 요청</button>
-						  	<button type="button" class="btn btn-outline-info mr-1 btn-submit" id="tempSave">임시저장</button>
-							  <button type="button" class="btn btn-light" id="btnCancel">취소</button>
-              </div>
-              <div>
-                <button data-bs-toggle="modal" data-bs-target="#selectApproverModal" id="selectApprover" type="button" class="btn btn-block btn-primary"><i class="mdi mdi-plus mr-1"></i>결재선 지정</button>
-              </div>
+						<div data-approval-id="${res.approvalId}">
+              <button type="button" class="btn btn-info mr-1 btn-action" id="btnEdit">수정</button>
+              <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete">삭제</button>
+              <button type="button" class="btn btn-light" id="btnCancel">취소</button>
 						</div>
 						<hr>
             <%--  --%>
 
             <%-- 양식 내용 --%>
-            <div class="col-lg-7">
-
             <form id="approvalContentCommon">
               <%-- 1. 공통 양식 --%>
               <h1 class="text-center p-4">${form.formTitle}</h1>
@@ -287,23 +280,9 @@
               <input type="hidden" name="approvalFormId" value="${form.approvalFormId}">
             </form>
 
-            <form id="approvalContentByType">
-              <%-- 2. 결재 양식 종류에 따라 다른 HTML을 뿌림 --%>
-              <c:choose>
-                <c:when test="${form.approvalFormId eq 1}">
-                  <c:import url="/WEB-INF/views/approval/form_type/vacation.jsp"/>
-                </c:when>
-                <c:when test="${form.approvalFormId eq 2}">
-                  <c:import url="/WEB-INF/views/approval/form_type/business_trip.jsp"/>
-                </c:when>
-                <c:when test="${form.approvalFormId eq 3}">
-                  <c:import url="/WEB-INF/views/approval/form_type/draft.jsp"/>
-                </c:when>
-              </c:choose>
-            </form>
+            ${res}
             <%--  --%>
 						<!--  -->
-            </div>
 					
 					</div>
 				</div>
