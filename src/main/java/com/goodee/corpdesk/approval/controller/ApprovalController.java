@@ -6,6 +6,7 @@ import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.Approval;
 import com.goodee.corpdesk.approval.service.ApprovalFormService;
 import com.goodee.corpdesk.department.service.DepartmentService;
+import com.goodee.corpdesk.employee.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -33,8 +34,10 @@ public class ApprovalController {
 
 	@Value("${cat.approval}")
 	private String cat;
+    @Autowired
+    private EmployeeService employeeService;
 
-	@ModelAttribute("cat")
+    @ModelAttribute("cat")
 	public String getCat() {
 		return cat;
 	}
@@ -62,12 +65,13 @@ public class ApprovalController {
 		ResApprovalDTO resApprovalDTO = approvalService.createApproval(reqApprovalDTO, modifiedBy);
 		log.info("{}", resApprovalDTO);
 		
-		return resApprovalDTO.toString();
+		return "approval/list";
 		
 	}
 	
 	// 결재 요청 취소
 	@DeleteMapping("{approvalId}")
+    @ResponseBody
 	public String cancel(@PathVariable("approvalId") Long approvalId) throws Exception {
 		
 		System.err.println("cancel()");
@@ -82,12 +86,15 @@ public class ApprovalController {
 	
 	// 결재 승인/반려
 	// 1. approvalId, approverId를 사용해 결재와 결재자 데이터를 받아와 수정하는 방식의 메서드
-	@PutMapping("{approvalId}/{approverId}/{approveYn}")
-	public String process(@PathVariable("approvalId") Long approvalId, @PathVariable("approverId") Long approverId, @PathVariable("approveYn") String approveYn) throws Exception {
+	@PatchMapping("{approvalId}")
+    @ResponseBody
+	public String process(@PathVariable("approvalId") Long approvalId, @RequestBody ReqApprovalDTO reqApprovalDTO) throws Exception {
 		
 		System.err.println("process()");
-		
-		String result = approvalService.processApproval(approvalId, approverId, approveYn); // NOT_FOUND, PROCESSED 중 하나의 값이 반환됨
+
+        // reqApprovalDTO에는 approverId, approveYn가 있음
+        log.warn("{}", reqApprovalDTO);
+		String result = approvalService.processApproval(approvalId, reqApprovalDTO); // NOT_FOUND, PROCESSED 중 하나의 값이 반환됨
 		log.info("{}", result);
 		
 		return result;
@@ -131,13 +138,19 @@ public class ApprovalController {
 
     // 결재 상세 조회
     @GetMapping("{approvalId}")
-    public String getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
+    public String getApproval(@PathVariable("approvalId") Long approvalId, @RequestParam("username") String username, Model model) throws Exception {
 //    public ResApprovalDTO getApproval(@PathVariable("approvalId") Long approvalId) throws Exception {
 
         System.err.println("getApproval()");
 
         ResApprovalDTO result = approvalService.getApproval(approvalId);
-        log.info("{}", result);
+        ResApprovalDTO userInfo = approvalService.getDetail(username);
+        // TODO username과 approvalId로 approverId를 가져오는 로직 추가
+        ResApprovalDTO approverInfo = approvalService.getAppover(approvalId,  username);
+
+        model.addAttribute("res", result);
+        model.addAttribute("userInfo", userInfo);
+        model.addAttribute("approverInfo", approverInfo);
 
         return "approval/detail";
 

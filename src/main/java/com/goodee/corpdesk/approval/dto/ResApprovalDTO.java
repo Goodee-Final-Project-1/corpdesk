@@ -3,6 +3,7 @@ package com.goodee.corpdesk.approval.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.goodee.corpdesk.approval.entity.Approval;
 import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.vacation.entity.VacationType;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -21,15 +22,17 @@ public class ResApprovalDTO {
     // approval
 	private Long approvalId;
 	private String username;
+    private String name;
 	private Integer departmentId;
+	private Integer positionId;
     private Long approvalFormId;
     private String approvalContent;
 	private Character status;
-	
-//	private LocalDateTime createdAt;
+
 	private LocalDateTime createdAt;
 
     // approver
+    private Long approverId;
 	private List<ApproverDTO> approverDTOList;
 
     // approval_form
@@ -40,8 +43,20 @@ public class ResApprovalDTO {
     private String departmentName;
     private Integer parentDepartmentId;
 
+    // position
+    private String positionName;
+
     // file
     private Integer fileCount;
+
+    private Long fileId;
+    private String oriName;
+    private String saveName;
+    private String extension;
+
+    // vacation
+    private Integer vacationTypeId;
+    private String vacationTypeName;
 
     // SQL 결과용 생성자
     public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status, String username,
@@ -63,5 +78,17 @@ public class ResApprovalDTO {
         this.formTitle = formTitle;
         this.fileCount = fileCount != null ? fileCount.intValue() : 0;
         this.departmentName = departmentName;
+    }
+
+    public ResApprovalDTO(String departmentName, String username, String name, String positionName,
+                          Long fileId, String oriName, String saveName, String extension) {
+        this.departmentName = departmentName;
+        this.username = username;
+        this.name = name;
+        this.positionName = positionName;
+        this.fileId = fileId;
+        this.oriName = oriName;
+        this.saveName = saveName;
+        this.extension = extension;
     }
 }

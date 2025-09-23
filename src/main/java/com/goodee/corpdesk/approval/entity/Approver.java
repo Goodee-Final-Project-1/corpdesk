@@ -1,6 +1,7 @@
 package com.goodee.corpdesk.approval.entity;
 
 import com.goodee.corpdesk.approval.dto.ApproverDTO;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -55,5 +56,11 @@ public class Approver extends BaseEntity {
                           .approvalOrder(approvalOrder)
                           .approveYn(approveYn)
                           .build();
+    }
+
+    public ResApprovalDTO toResApprovalDTO() {
+        return ResApprovalDTO.builder()
+                .approverId(approverId)
+                .build();
     }
 }

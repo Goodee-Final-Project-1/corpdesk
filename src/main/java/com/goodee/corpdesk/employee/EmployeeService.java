@@ -1,7 +1,10 @@
 package com.goodee.corpdesk.employee;
 
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+
 import com.goodee.corpdesk.attendance.Attendance;
 import com.goodee.corpdesk.attendance.AttendanceService;
+
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.file.FileManager;
@@ -292,10 +295,6 @@ public class EmployeeService implements UserDetailsService {
 		origin.setEncodedEmailPassword(encoded);
 
 		return employeeRepository.save(origin);
-	}
-
-	public ResEmployeeDTO getFulldetail(String username) {
-		return employeeRepository.findEmployeeWithDeptAndPosition(username);
 	}
 
 }
