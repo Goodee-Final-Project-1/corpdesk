@@ -117,6 +117,8 @@ public class Employee implements UserDetails {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate lastWorkingDay;
 
+	private Long currentBaseSalary;
+
 	@Transient
 	private Role role;
 
