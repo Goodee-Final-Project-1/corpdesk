@@ -157,7 +157,7 @@ public class ApprovalController {
         ResApprovalDTO detail = approvalService.getApproval(approvalId);
 
         // approvalContent는 JSON 파싱해서 별도로 전달
-        if (detail.getApprovalContent() != null) {
+        if (detail != null && detail.getApprovalContent() != null) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, String> approvalContentMap = mapper.readValue(

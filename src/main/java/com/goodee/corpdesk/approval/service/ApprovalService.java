@@ -258,6 +258,10 @@ public class ApprovalService {
     }
 
     public ResApprovalDTO getAppover(Long approvalId, String username) {
-        return approverRepository.findAllByApprovalIdAndUsername(approvalId, username).toResApprovalDTO();
+        Approver approver = approverRepository.findAllByApprovalIdAndUsername(approvalId, username);
+
+        if(approver == null)  return null;
+
+        return approver.toResApprovalDTO();
     }
 }
