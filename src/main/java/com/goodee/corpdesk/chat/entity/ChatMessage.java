@@ -1,4 +1,4 @@
-package com.goodee.corpdesk.Chat;
+package com.goodee.corpdesk.chat.entity;
 
 import java.time.LocalDateTime;
 
@@ -21,19 +21,19 @@ import lombok.ToString;
 public class ChatMessage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Long messageId;
+	private Long messageId;
 	
-	String employeeUsername;
-	Long chatRoomId;
-	String messageContent;
-	String messageType;
+	private String employeeUsername;
+	private Long chatRoomId;
+	private String messageContent;
+	private String messageType;
 	
 	@CreationTimestamp
-	LocalDateTime sent_at;
+	private LocalDateTime sent_at;
 	
 	
-	LocalDateTime updated_at;
-	LocalDateTime creates_at;
-	String modifed_by;
-	boolean use_yn;
+	private LocalDateTime updated_at;
+	private LocalDateTime creates_at;
+	private String modifed_by;
+	private boolean use_yn;
 }
