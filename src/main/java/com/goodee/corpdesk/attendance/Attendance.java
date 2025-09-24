@@ -44,7 +44,7 @@ public class Attendance {
         
     // 생성 일시
 	@Column(nullable = false)
-	private LocalDateTime createdAt;
+	private LocalDateTime createdAt = LocalDateTime.now();
 
     // 수정 일시
     @Column(nullable = false)
