@@ -68,7 +68,7 @@ public class ApprovalFormController {
     // TODO 유저의 부서 정보를 인증 정보에서 가져오도록 수정
     // 결재 폼 조회
     @GetMapping("{formId}")
-    public String getApproval(@PathVariable("formId") Long formId, @RequestParam("departmentId") Integer departmentId, @RequestParam("username") String username, Model model) throws Exception {
+    public String getApproval(@PathVariable("formId") Integer formId, @RequestParam("departmentId") Integer departmentId, @RequestParam("username") String username, Model model) throws Exception {
 
         System.err.println("getApproval()");
 

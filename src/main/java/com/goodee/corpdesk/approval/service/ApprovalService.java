@@ -7,6 +7,8 @@ import java.util.Optional;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.ApprovalForm;
 import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
+import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
@@ -37,6 +39,8 @@ public class ApprovalService {
     private ApprovalFormRepository approvalFormRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
@@ -208,21 +212,34 @@ public class ApprovalService {
     }
 
     public ResApprovalDTO getApproval(Long approvalId) throws Exception {
-        // 1. 결재 조회
+        // 1. 결재 + 결재 양식 + 부서 + 기안자 조회
+        // 결재 조회
         Optional<Approval> result = approvalRepository.findById(approvalId);
 
         if(result.isEmpty())  return null;
 
         Approval approval = result.get();
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
-        
-        // 2. 결재자 조회
-        List<Approver> result2 = approverRepository.findAllByApprovalId(approvalId);
 
-        if(result2.isEmpty())  return resApprovalDTO; // 결재자가 없으면? approval만 DTO에 담아서 return
+        // 결재 양식 조회
+        ApprovalForm result3 = approvalFormRepository.findById(approval.getApprovalFormId()).get();
+        resApprovalDTO.setApprovalFormId(result3.getApprovalFormId());
+        resApprovalDTO.setFormTitle(result3.getFormTitle());
+
+        // 부서 조회
+        Department result4 = departmentRepository.findById(approval.getDepartmentId()).get();
+        resApprovalDTO.setDepartmentName(result4.getDepartmentName());
+
+        // 기안자 조회
+        Employee result5 = employeeRepository.findById(approval.getUsername()).get();
+        resApprovalDTO.setName(result5.getName());
+
+        // 2. 결재자 조회
+        List<ApproverDTO> approverDTOList = approverRepository.findByApprovalIdWithEmployeeAndDepartment(approvalId);
+
+        if(approverDTOList.isEmpty())  return resApprovalDTO; // 결재자가 없으면? approval만 DTO에 담아서 return
 
         // 3. 결재와 결재자를 DTO에 담아 반환
-        List<ApproverDTO> approverDTOList = result2.stream().map(Approver::toDTO).toList();
         resApprovalDTO.setApproverDTOList(approverDTOList);
 
         return resApprovalDTO;
@@ -241,6 +258,10 @@ public class ApprovalService {
     }
 
     public ResApprovalDTO getAppover(Long approvalId, String username) {
-        return approverRepository.findAllByApprovalIdAndUsername(approvalId, username).toResApprovalDTO();
+        Approver approver = approverRepository.findAllByApprovalIdAndUsername(approvalId, username);
+
+        if(approver == null)  return null;
+
+        return approver.toResApprovalDTO();
     }
 }

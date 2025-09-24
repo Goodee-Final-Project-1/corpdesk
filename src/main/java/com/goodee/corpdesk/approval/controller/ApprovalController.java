@@ -1,7 +1,11 @@
 package com.goodee.corpdesk.approval.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.Approval;
 import com.goodee.corpdesk.approval.service.ApprovalFormService;
@@ -52,6 +56,13 @@ public class ApprovalController {
     @ModelAttribute("departmentList")
     public List<ResApprovalDTO> getDepartmentList() throws  Exception {
         return departmentService.getApprovalFormList();
+    }
+
+    // 휴가 목록 데이터 뿌리기
+    @ModelAttribute("vacationTypeList")
+    public List<ResApprovalDTO> getVacationTypeList() throws  Exception {
+        log.warn("getVacationTypeList(): {}", approvalFormService.getVacationTypeList());
+        return approvalFormService.getVacationTypeList();
     }
 	
 	// 결재 요청 
@@ -143,12 +154,28 @@ public class ApprovalController {
 
         System.err.println("getApproval()");
 
-        ResApprovalDTO result = approvalService.getApproval(approvalId);
+        ResApprovalDTO detail = approvalService.getApproval(approvalId);
+
+        // approvalContent는 JSON 파싱해서 별도로 전달
+        if (detail != null && detail.getApprovalContent() != null) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, String> approvalContentMap = mapper.readValue(
+                        detail.getApprovalContent(),
+                        new TypeReference<Map<String, String>>() {}
+                );
+                model.addAttribute("approvalContentMap", approvalContentMap);
+            } catch (Exception e) {
+                model.addAttribute("approvalContentMap", new HashMap<>());
+            }
+        }
+
         ResApprovalDTO userInfo = approvalService.getDetail(username);
         // TODO username과 approvalId로 approverId를 가져오는 로직 추가
         ResApprovalDTO approverInfo = approvalService.getAppover(approvalId,  username);
 
-        model.addAttribute("res", result);
+        model.addAttribute("detail", detail);
+        log.warn("{}", detail);
         model.addAttribute("userInfo", userInfo);
         model.addAttribute("approverInfo", approverInfo);
 
