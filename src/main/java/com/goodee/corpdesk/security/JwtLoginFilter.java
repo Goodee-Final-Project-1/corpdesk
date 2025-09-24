@@ -55,7 +55,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		
 		response.addCookie(cookie);
 		
-		response.sendRedirect("/home"); // 로그인 성공 시 리다이렉트
+		response.sendRedirect("/dashboard"); // 로그인 성공 시 리다이렉트
 	}
 
 	@Override
