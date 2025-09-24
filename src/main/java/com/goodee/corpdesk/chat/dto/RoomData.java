@@ -1,6 +1,8 @@
 package com.goodee.corpdesk.chat.dto;
 
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -12,6 +14,6 @@ import lombok.Setter;
 
 public class RoomData {
 	private String roomTitle;
-	private String username;
+	private List<String> usernames;
 	private String chatRoomType;
 }

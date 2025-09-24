@@ -18,6 +18,8 @@ import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatMessage;
 import com.goodee.corpdesk.chat.entity.ChatRoom;
 import com.goodee.corpdesk.chat.service.ChatRoomService;
+import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeService;
 
 @Controller
 @RequestMapping("/chat/room/**")
@@ -26,12 +28,16 @@ public class ChatRoomController {
 	@Autowired
 	ChatRoomService chatRoomService;
 	@Autowired
+	EmployeeService employeeService;
+	@Autowired
 	SimpMessagingTemplate simpMessagingTemplate;
 	@GetMapping("list")
 	public String chatRoomList(Principal principal ,Model model) {
 			String username= principal.getName();
 			List<ChatRoom> roomList= chatRoomService.getChatRoomList(username);
+			List<Employee> employeeList = employeeService.getActiveEmployees();
 			model.addAttribute("roomList", roomList);
+			model.addAttribute("employeeList",employeeList);
 		
 		return "Chat/chat_list";
 	}
@@ -54,7 +60,10 @@ public class ChatRoomController {
 		chatRoom.setChatRoomTitle(roomdata.getRoomTitle());
 		
 		//상대방 구독 알림 보냄
-		simpMessagingTemplate.convertAndSendToUser(roomdata.getUsername(),"/queue/notifications" , chatRoom);
+		for(int i = 0; i <roomdata.getUsernames().size();i++) {
+			simpMessagingTemplate.convertAndSendToUser(roomdata.getUsernames().get(i),"/queue/notifications" , chatRoom);
+		}
+		
 		return chatRoom;
 	}
 }

@@ -2,6 +2,7 @@ package com.goodee.corpdesk.chat.service;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class ChatRoomService {
 			ChatParticipant cp= chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(roomId, username);
 			
 			//1대1채팅일경우 채팅방 제목을 상대방 이름으로 설정
-			if(l.getChatRoomTitle()==null) {
+			if(l.getChatRoomType().equals("direct")) {
 				List<ChatParticipant> cps = chatParticipantRepository.findAllByChatRoomId(roomId);
 				for(ChatParticipant c : cps) {
 					if(!c.getEmployeeUsername().equals(username)) {
@@ -62,22 +63,54 @@ public class ChatRoomService {
 	//채팅방 생성
 	public Long createRoom(RoomData roomdata , Principal principal ) {
 		String chatRoomType = roomdata.getChatRoomType();
-		String chatRoomTitle = roomdata.getChatRoomType();
-		String username = roomdata.getUsername();
+		String chatRoomTitle = roomdata.getRoomTitle();
+		List<String> usernames = roomdata.getUsernames();
 		ChatRoom chatroom = new ChatRoom();
 		ChatParticipant chatParticipant = new ChatParticipant();
-
-		chatroom.setChatRoomTitle(roomdata.getUsername());
-		chatroom = chatRoomRepository.save(chatroom);
 		
-		chatParticipant.setEmployeeUsername(roomdata.getUsername());
-		chatParticipant.setChatRoomId(chatroom.getChatRoomId());
-		chatParticipantRepository.save(chatParticipant);
-		
-		chatParticipant = new ChatParticipant();
-		chatParticipant.setChatRoomId(chatroom.getChatRoomId());
-		chatParticipant.setEmployeeUsername(principal.getName());
-		chatParticipantRepository.save(chatParticipant);
+		//1대1 채팅방 생성
+		if(usernames.size()==1) {
+			//중복먼저 확인
+			//채팅방 상대랑 , 사용자를 넣고 확인해옴
+			Optional<ChatRoom> directRoom= chatRoomRepository.findDuplicatedRoom(principal.getName(),usernames.getFirst());
+			if(!directRoom.isEmpty()) {
+				return directRoom.get().getChatRoomId();
+			}
+			else {
+				//채팅방 타입 설정
+				chatroom.setChatRoomType(roomdata.getChatRoomType());
+				chatroom = chatRoomRepository.save(chatroom);
+				
+				//상대방 저장
+				chatParticipant.setEmployeeUsername(usernames.getFirst());
+				chatParticipant.setChatRoomId(chatroom.getChatRoomId());
+				chatParticipantRepository.save(chatParticipant);
+				//사용자 저장
+				chatParticipant = new ChatParticipant();
+				chatParticipant.setChatRoomId(chatroom.getChatRoomId());
+				chatParticipant.setEmployeeUsername(principal.getName());
+				chatParticipantRepository.save(chatParticipant);
+			}
+		}
+		//그룹채팅 생성
+		else {
+			chatroom.setChatRoomTitle(roomdata.getRoomTitle());
+			chatroom.setChatRoomType(roomdata.getChatRoomType());
+			chatroom = chatRoomRepository.save(chatroom);
+			
+			//사용자 저장
+			chatParticipant.setChatRoomId(chatroom.getChatRoomId());
+			chatParticipant.setEmployeeUsername(principal.getName());
+			chatParticipantRepository.save(chatParticipant);
+			
+			for(String user : roomdata.getUsernames()) {
+				chatParticipant = new ChatParticipant();
+				chatParticipant.setChatRoomId(chatroom.getChatRoomId());
+				chatParticipant.setEmployeeUsername(user);
+				chatParticipantRepository.save(chatParticipant);
+			}
+			
+		}
 		
 		return chatroom.getChatRoomId();
 		
