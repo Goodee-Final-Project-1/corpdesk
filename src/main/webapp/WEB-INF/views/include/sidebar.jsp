@@ -113,6 +113,11 @@
 						<i class="mdi mdi-account-details"></i> <span class="nav-text">인사관리</span>
 					</a>
 				</li>
+				<li>
+					<a class="sidenav-item-link" href="/salary/list"> <!-- TODO href 수정 -->
+						<i class="mdi mdi-currency-krw"></i> <span class="nav-text">급여 관리</span>
+					</a>
+				</li>
 
 			</ul>
 		</div>

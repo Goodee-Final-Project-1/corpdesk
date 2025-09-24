@@ -25,7 +25,7 @@ class SalaryRepositoryTest {
 
 	@Test
 	void findAllEmployeeSalary() {
-		Pageable pageable = PageRequest.of(1, 10);
+		Pageable pageable = PageRequest.of(0, 10);
 		Page<EmployeeSalaryDTO> page = salaryRepository.findAllEmployeeSalary(pageable);
 
 		System.out.println("===================== " + page.getContent());
