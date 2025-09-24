@@ -120,7 +120,7 @@ public class EmployeeService implements UserDetailsService {
         return employees;
     }
 
-    // 직원 정보 수정 (파일 포함)
+ // 직원 정보 수정 (파일 포함)
     @Transactional
     public void updateEmployee(Employee employeeFromForm, MultipartFile profileImageFile) {
         Employee persisted = employeeRepository.findById(employeeFromForm.getUsername())
@@ -141,7 +141,12 @@ public class EmployeeService implements UserDetailsService {
         persisted.setVisaStatus(employeeFromForm.getVisaStatus());
         persisted.setResidentNumber(employeeFromForm.getResidentNumber());
         persisted.setNationality(employeeFromForm.getNationality());
-        persisted.setPassword(employeeFromForm.getPassword());
+        
+        // ---------------- 비밀번호 처리 ----------------
+        if (employeeFromForm.getPassword() != null && !employeeFromForm.getPassword().isEmpty()) {
+            persisted.setPassword(passwordEncoder.encode(employeeFromForm.getPassword()));
+        } // null이면 기존 비밀번호 그대로 유지
+
         persisted.setGender(employeeFromForm.getGender());
         persisted.setEnabled(employeeFromForm.getEnabled());
         persisted.setLastWorkingDay(employeeFromForm.getLastWorkingDay());
@@ -149,7 +154,7 @@ public class EmployeeService implements UserDetailsService {
 
         employeeRepository.save(persisted);
 
-        // 프로필 이미지 처리
+        // ---------------- 프로필 이미지 처리 ----------------
         if (profileImageFile != null && !profileImageFile.isEmpty()) {
             Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(persisted.getUsername());
             String profileImagePath = uploadPath + "profile" + File.separator;
@@ -174,6 +179,7 @@ public class EmployeeService implements UserDetailsService {
         }
     }
 
+
     // 프로필 이미지 삭제
     @Transactional
     public void deleteProfileImage(String username) {
@@ -189,15 +195,17 @@ public class EmployeeService implements UserDetailsService {
     }
 
     // 직원 삭제(비활성화)
-    public void deactivateEmployee(String id) {
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
-        if (employee.getLastWorkingDay() == null) {
-            throw new IllegalStateException("퇴사일자가 없는 사원은 삭제할 수 없습니다.");
-        }
-        employee.setUseYn(false);
-        employeeRepository.save(employee);
+    @Transactional
+    public void deactivateEmployee(String username) {
+        Employee employee = employeeRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
+ 
+
+        employee.setUseYn(false);  // 여기 수정
+        employeeRepository.save(employee); // DB 반영
     }
+
+
 
     // ---------------------- 기타 기존 메서드 ----------------------
     @Override

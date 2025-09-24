@@ -23,6 +23,10 @@
 .tab-button.active { font-weight: bold; border-bottom: 2px solid #007bff; }
 
 </style>
+
+<meta name="_csrf" content="${_csrf.token}" />
+<meta name="_csrf_header" content="${_csrf.headerName}" />
+
 </head>
 <body>
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
@@ -108,7 +112,7 @@
             
             <div class="buttonBox">
                 <input type="submit" value="수정" class="btn btn-info">
-                <button type="button" onclick="deleteEmployee()" class="btn btn-info">삭제</button>
+                <button type="button" onclick="deleteEmployee('${employee.username}')" class="btn btn-info">삭제</button>
             </div>
         </div>
     </div>
@@ -131,7 +135,7 @@
         <label>일시</label>
         <input type="datetime-local" id="newDateTime" class="form-control" style="width:200px; display:inline-block;">
 
-        <button type="button" id="addAttendanceBtn" class="btn btn-info">추가</button>
+        <button type="button"  id="addAttendanceBtn" class="btn btn-info">추가</button>
     </div>
 
 
@@ -185,7 +189,7 @@
     </form>
 </div>
 
-<a href="<d:url value='/employee/list'/>" class="btn btn-info">목록으로</a>
+<a href="/employee/list" class="btn btn-info">목록으로</a>
 
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
@@ -265,6 +269,32 @@ document.addEventListener("DOMContentLoaded", function() {
             alert("추가 중 오류 발생"); 
         });
     });
+
+ // 삭제 버튼
+    window.deleteEmployee = function(username) {
+        if (!confirm("정말 삭제하시겠습니까?")) return;
+
+        fetch(`/employee/delete/${username}`, {
+            method: 'POST'
+            // CSRF 헤더 제거
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("삭제 성공!");
+                window.location.href = "/employee/list";
+            } else {
+                alert("삭제 실패: " + (data.error || "서버 오류"));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("삭제 중 오류 발생");
+        });
+    };
+
+
+
 
 
     

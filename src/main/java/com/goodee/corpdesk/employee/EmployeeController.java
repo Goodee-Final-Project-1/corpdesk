@@ -3,6 +3,7 @@ package com.goodee.corpdesk.employee;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -311,23 +312,30 @@ public class EmployeeController {
         }
     }
 
-    // 직원 삭제(비활성화)
-    @PostMapping("/delete/{id}")
-    public String deleteEmployee(@PathVariable("id") String id) {
-        employeeService.deactivateEmployee(id);
-        return "redirect:/employee/list";
+    @PostMapping("/delete/{username}")
+    @ResponseBody
+    public Map<String, Object> deleteEmployee(@PathVariable("username") String username) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            log.info("삭제 요청 username={}", username);
+            employeeService.deactivateEmployee(username);
+            result.put("success", true);
+        } catch (Exception e) {
+            log.error("삭제 실패: {}", e.getMessage(), e);
+            result.put("success", false);
+            result.put("error", "삭제 중 오류가 발생했습니다.");
+        }
+        return result;
     }
+
+
+
 
 	// FIXME: 배포 전에 삭제 해야됨
 	@GetMapping
 	public String link() {
 		return "employee/link";
 	}
-    // 단순 링크
-    @GetMapping
-    public String link() {
-        return "employee/link";
-    }
 
     @GetMapping("sample_page")
     public void sample() {
