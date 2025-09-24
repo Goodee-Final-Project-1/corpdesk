@@ -1,10 +1,7 @@
 package com.goodee.corpdesk.employee;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-
 import com.goodee.corpdesk.attendance.Attendance;
 import com.goodee.corpdesk.attendance.AttendanceService;
-
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.file.FileManager;
@@ -15,7 +12,6 @@ import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,6 +19,8 @@ import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -260,22 +258,27 @@ public class EmployeeService implements UserDetailsService {
 		return map;
 	}
 
-	public Employee updatePassword(Employee employee) {
+	public Employee updatePassword(Employee employee, BindingResult bindingResult) {
 		Optional<Employee> optional = employeeRepository.findById(employee.getUsername());
 		Employee origin = optional.get();
 
-		if (passwordEncoder.matches(origin.getPassword(), employee.getPasswordNew())) {
-			throw new BadCredentialsException("비밀번호가 다릅니다.");
+		if (!passwordEncoder.matches(employee.getPassword(), origin.getPassword())) {
+			bindingResult.addError(new FieldError("Employee", "password", "비밀번호가 다릅니다."));
+			return null;
+//			throw new BadCredentialsException("비밀번호가 다릅니다.");
 		}
 
 		if (!Objects.equals(employee.getPasswordNew(), employee.getPasswordCheck())) {
-			throw new RuntimeException("비밀번호 확인이 다릅니다.");
+			bindingResult.addError(new FieldError("Employee", "passwordNew", "비밀번호 확인이 다릅니다."));
+			return null;
+//			throw new RuntimeException("비밀번호 확인이 다릅니다.");
 		}
 
 		String encoded = passwordEncoder.encode(employee.getPasswordNew());
 
 		origin.setPassword(encoded);
-		return employeeRepository.save(origin);
+		return origin;
+//		return employeeRepository.save(origin);
 	}
 
 	public Employee detailSecret(String username) {

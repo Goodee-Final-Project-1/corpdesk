@@ -192,14 +192,14 @@ public class EmployeeController {
 	public String updateEmail(Authentication authentication, @Validated(UpdateEmail.class) Employee employee,
 			BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
-			return "employee/detail";
+			return "employee/update_email";
 		}
 
 		employee.setUsername(authentication.getName());
 		Employee result = employeeService.updateEmail(employee);
 
 		if (result == null) {
-			return "employee/detail";
+			return "employee/update_email";
 		}
 
 		return "redirect:/employee/link";
@@ -216,14 +216,14 @@ public class EmployeeController {
 	public String updatePassword(Authentication authentication, @Validated(UpdatePassword.class) Employee employee,
 			BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
-			return "employee/update";
+			return "employee/update_password";
 		}
 
 		employee.setUsername(authentication.getName());
-		Employee result = employeeService.updatePassword(employee);
+		Employee result = employeeService.updatePassword(employee, bindingResult);
 
 		if (result == null) {
-			return "employee/update";
+			return "employee/update_password";
 		}
 
 		return "redirect:/logout";
