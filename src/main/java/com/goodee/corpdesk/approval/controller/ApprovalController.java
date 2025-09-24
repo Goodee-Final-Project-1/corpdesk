@@ -67,7 +67,8 @@ public class ApprovalController {
 	
 	// 결재 요청 
 	@PostMapping("")
-	public String submit(ReqApprovalDTO reqApprovalDTO) throws Exception {
+    @ResponseBody
+	public ResApprovalDTO submit(ReqApprovalDTO reqApprovalDTO) throws Exception {
 		
 		System.err.println("submit()");
 		
@@ -76,7 +77,7 @@ public class ApprovalController {
 		ResApprovalDTO resApprovalDTO = approvalService.createApproval(reqApprovalDTO, modifiedBy);
 		log.info("{}", resApprovalDTO);
 		
-		return "approval/list";
+		return resApprovalDTO;
 		
 	}
 	

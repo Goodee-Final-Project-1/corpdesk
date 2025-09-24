@@ -1,5 +1,8 @@
+const params = new URLSearchParams(window.location.search);
+const username = params.get("username");
+
 /**
- * 
+ * 목록에서 항목 클릭시 상세정보 페이지로 이동
  */
 
 const approvalRows = document.querySelectorAll('.approval-row');
@@ -8,7 +11,7 @@ approvalRows.forEach((row) => {
   row.addEventListener('click', function() {
     const approvalId = row.getAttribute('data-approval-id');
     
-    location.href=`/approval/${approvalId}`; // "/approval/{approvalId}"로 이동
+    location.href=`/approval/${approvalId}?username=${username}`; // "/approval/{approvalId}"로 이동
   });
 });
 
@@ -448,12 +451,20 @@ btnSubmits.forEach((btn) => {
     if(btn.id === 'tempSave') formData.append('status', 't');
 
     // 3. ajax 요청
-    fetch('/approval/', {
+    fetch('/approval', {
       method: 'POST',
       body: formData
     })
-        .then(r => r.text())
-        .then(r => console.log(r))
+        .then(r => r.json())
+        .then(r => {
+            console.log(r);
+
+            location.href=`/approval/${r.approvalId}?username=${username}`;
+        })
     ;
   });
+});
+
+btnCancel.addEventListener('click', function () {
+    location.href=`/approval/list?username=${username}`;
 });
