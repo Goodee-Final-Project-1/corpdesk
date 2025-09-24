@@ -318,6 +318,11 @@ public class EmployeeController {
         return "redirect:/employee/list";
     }
 
+	// FIXME: 배포 전에 삭제 해야됨
+	@GetMapping
+	public String link() {
+		return "employee/link";
+	}
     // 단순 링크
     @GetMapping
     public String link() {
@@ -363,19 +368,19 @@ public class EmployeeController {
         return "employee/update_email";
     }
 
-    @PostMapping("update/email")
-    public String updateEmail(Authentication authentication, @Validated(UpdateEmail.class) Employee employee,
-                              BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "employee/detail";
-        }
+	@PostMapping("update/email")
+	public String updateEmail(Authentication authentication, @Validated(UpdateEmail.class) Employee employee,
+			BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			return "employee/update_email";
+		}
 
         employee.setUsername(authentication.getName());
         Employee result = employeeService.updateEmail(employee);
 
-        if (result == null) {
-            return "employee/detail";
-        }
+		if (result == null) {
+			return "employee/update_email";
+		}
 
         return "redirect:/employee/link";
     }
@@ -387,19 +392,19 @@ public class EmployeeController {
         return "employee/update_password";
     }
 
-    @PostMapping("update/password")
-    public String updatePassword(Authentication authentication, @Validated(UpdatePassword.class) Employee employee,
-                                 BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "employee/update";
-        }
+	@PostMapping("update/password")
+	public String updatePassword(Authentication authentication, @Validated(UpdatePassword.class) Employee employee,
+			BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			return "employee/update_password";
+		}
 
-        employee.setUsername(authentication.getName());
-        Employee result = employeeService.updatePassword(employee);
+		employee.setUsername(authentication.getName());
+		Employee result = employeeService.updatePassword(employee, bindingResult);
 
-        if (result == null) {
-            return "employee/update";
-        }
+		if (result == null) {
+			return "employee/update_password";
+		}
 
         return "redirect:/logout";
     }

@@ -12,13 +12,17 @@ import lombok.*;
 @Builder @NoArgsConstructor @AllArgsConstructor
 public class ReqApprovalDTO {
 
+    // approval
 	private Long approvalId;
 	private String username;
 	private Integer departmentId;
-    private Long approvalFormId;
+    private Integer approvalFormId;
     private String approvalContent;
 	private Character status;
-	
+    private Character approveYn;
+
+    // approver
+    private Long approverId;
 	ArrayList<ApproverDTO> approverDTOList;
 	
 	public Approval toApprovalEntity() {

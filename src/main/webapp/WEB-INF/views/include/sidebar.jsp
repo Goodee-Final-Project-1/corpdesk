@@ -38,7 +38,7 @@
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="team.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/approval/list?username=jung_frontend"> <!-- TODO href 수정 -->
 						<i class="mdi mdi-pencil-box-outline"></i> <span class="nav-text">전자결재</span>
 					</a>
 				</li>

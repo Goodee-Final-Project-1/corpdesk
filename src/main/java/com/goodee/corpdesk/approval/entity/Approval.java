@@ -45,7 +45,7 @@ public class Approval extends BaseEntity {
 	private Integer departmentId;
 
     @Column(nullable = false)
-    private Long approvalFormId;
+    private Integer approvalFormId;
 
     @Column(columnDefinition = "longtext")
     private String approvalContent;
@@ -68,8 +68,11 @@ public class Approval extends BaseEntity {
                                 .approvalId(approvalId)
                                 .username(username)
                                 .departmentId(departmentId)
+                                .approvalFormId(approvalFormId)
+                                .approvalContent(approvalContent)
                                 .status(status)
                                 .createdAt(getCreatedAt())
+                                .updatedAt(getUpdatedAt())
                                 .build();
     }
 
