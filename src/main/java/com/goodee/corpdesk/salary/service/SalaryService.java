@@ -46,7 +46,11 @@ public class SalaryService {
 
 
 	public Page<EmployeeSalaryDTO> getList(Pageable pageable) {
-		return salaryRepository.findAllEmployeeSalary(pageable);
+		Page<EmployeeSalaryDTO> page = salaryRepository.findAllEmployeeSalary(pageable);
+
+		log.info("======================= {}", page.getContent());
+
+		return page;
 	}
 
 	public Map<String, Object> getDetail(Long paymentId) {
