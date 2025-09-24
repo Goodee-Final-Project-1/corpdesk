@@ -1,6 +1,7 @@
 package com.goodee.corpdesk.attendance;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,6 +56,28 @@ public class Attendance {
     
     // 사용 여부
     @Column(nullable = false)
-    private Boolean useYn;
+    private Boolean useYn = true;
     
+    
+    public String getFormattedCheckInDateTime() {
+        if (checkInDateTime == null) return "";
+        return checkInDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    public String getFormattedCheckOutDateTime() {
+        if (checkOutDateTime == null) return "";
+        return checkOutDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+    
+    public String getCheckInDateTimeForInput() {
+        return checkInDateTime != null
+            ? checkInDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
+            : "";
+    }
+
+    public String getCheckOutDateTimeForInput() {
+        return checkOutDateTime != null
+            ? checkOutDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
+            : "";
+    }
 }

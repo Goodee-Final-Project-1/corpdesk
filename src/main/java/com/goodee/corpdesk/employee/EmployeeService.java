@@ -145,55 +145,57 @@ public class EmployeeService implements UserDetailsService {
 		Employee persisted = employeeRepository.findById(employeeFromForm.getUsername())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + employeeFromForm.getUsername()));
 
-		// Employee 엔티티 필드 업데이트 (기존 updateEmployee 로직과 동일)
-		persisted.setName(employeeFromForm.getName());
-		persisted.setEmployeeType(employeeFromForm.getEmployeeType());
-		persisted.setExternalEmail(employeeFromForm.getExternalEmail());
-		persisted.setMobilePhone(employeeFromForm.getMobilePhone());
-		persisted.setDepartmentId(employeeFromForm.getDepartmentId());
-		persisted.setPositionId(employeeFromForm.getPositionId());
-		persisted.setHireDate(employeeFromForm.getHireDate());
-		persisted.setAddress(employeeFromForm.getAddress());
-		persisted.setStatus(employeeFromForm.getStatus());
-		persisted.setBirthDate(employeeFromForm.getBirthDate());
-		persisted.setEnglishName(employeeFromForm.getEnglishName());
-		persisted.setVisaStatus(employeeFromForm.getVisaStatus());
-		persisted.setResidentNumber(employeeFromForm.getResidentNumber());
-		persisted.setNationality(employeeFromForm.getNationality());
-		persisted.setPassword(employeeFromForm.getPassword());
-		persisted.setGender(employeeFromForm.getGender());
-		persisted.setEnabled(employeeFromForm.getEnabled());
-		persisted.setLastWorkingDay(employeeFromForm.getLastWorkingDay());
-		persisted.setDirectPhone(employeeFromForm.getDirectPhone());
-		persisted.setExternalEmail(employeeFromForm.getExternalEmail());
+        // Employee 엔티티 필드 업데이트 (기존 updateEmployee 로직과 동일)
+        persisted.setName(employeeFromForm.getName());
+        persisted.setEmployeeType(employeeFromForm.getEmployeeType());
+        persisted.setExternalEmail(employeeFromForm.getExternalEmail());
+        persisted.setMobilePhone(employeeFromForm.getMobilePhone());
+        persisted.setDepartmentId(employeeFromForm.getDepartmentId());
+        persisted.setPositionId(employeeFromForm.getPositionId());
+        persisted.setHireDate(employeeFromForm.getHireDate());
+        persisted.setAddress(employeeFromForm.getAddress());
+        persisted.setStatus(employeeFromForm.getStatus());
+        persisted.setBirthDate(employeeFromForm.getBirthDate());
+        persisted.setEnglishName(employeeFromForm.getEnglishName());
+        persisted.setVisaStatus(employeeFromForm.getVisaStatus());
+        persisted.setResidentNumber(employeeFromForm.getResidentNumber());
+        persisted.setNationality(employeeFromForm.getNationality());
+        persisted.setPassword(employeeFromForm.getPassword());
+        persisted.setGender(employeeFromForm.getGender());
+        persisted.setEnabled(employeeFromForm.getEnabled());
+        persisted.setLastWorkingDay(employeeFromForm.getLastWorkingDay());
+        persisted.setDirectPhone(employeeFromForm.getDirectPhone());
+        persisted.setExternalEmail(employeeFromForm.getExternalEmail());
+        
+        employeeRepository.save(persisted);
+        
+        // ⭐⭐ 파일 처리 로직 ⭐⭐
+        employeeRepository.save(persisted);
 
-		employeeRepository.save(persisted);
+        if (profileImageFile != null && !profileImageFile.isEmpty()) {
+            Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(persisted.getUsername());
 
-		// ⭐⭐ 파일 처리 로직 ⭐⭐
-		if (profileImageFile != null && !profileImageFile.isEmpty()) {
-			// 1. 기존 파일 삭제
-			Optional<EmployeeFile> oldFileOptional = employeeFileRepository.findByUsername(persisted.getUsername());
+            String profileImagePath = uploadPath + "profile" + File.separator;
+            FileDTO fileDTO = fileManager.saveFile(profileImagePath, profileImageFile);
 
-			if (oldFileOptional.isPresent()) {
-				EmployeeFile oldFile = oldFileOptional.get();
-				FileDTO oldFileDTO = new FileDTO(oldFile.getSaveName(), oldFile.getExtension());
-				fileManager.deleteFile(uploadPath + "profile" + File.separator, oldFileDTO);
-				employeeFileRepository.delete(oldFile);
-			}
-
-			// 2. 새 파일 저장
-			String profileImagePath = uploadPath + "profile" + File.separator;
-			FileDTO fileDTO = fileManager.saveFile(profileImagePath, profileImageFile);
-
-			EmployeeFile newFile = new EmployeeFile();
-			newFile.setUsername(persisted.getUsername());
-			newFile.setOriName(fileDTO.getOriName());
-			newFile.setSaveName(fileDTO.getSaveName());
-			newFile.setExtension(fileDTO.getExtension());
-			employeeFileRepository.save(newFile);
-		}
-	}
-
+            if (fileOptional.isPresent()) {
+                EmployeeFile existingFile = fileOptional.get();
+                existingFile.setOriName(fileDTO.getOriName());
+                existingFile.setSaveName(fileDTO.getSaveName());
+                existingFile.setExtension(fileDTO.getExtension());
+                existingFile.setUseYn(true); // 다시 활성화
+                employeeFileRepository.save(existingFile);
+            } else {
+                EmployeeFile newFile = new EmployeeFile();
+                newFile.setUsername(persisted.getUsername());
+                newFile.setOriName(fileDTO.getOriName());
+                newFile.setSaveName(fileDTO.getSaveName());
+                newFile.setExtension(fileDTO.getExtension());
+                newFile.setUseYn(true);
+                employeeFileRepository.save(newFile);
+            }
+        }
+    }
 	// 삭제(비활성화)
 	public void deactivateEmployee(String id) {
 		Employee employee = employeeRepository.findById(id)
@@ -204,20 +206,23 @@ public class EmployeeService implements UserDetailsService {
 		employee.setUseYn(false);
 		employeeRepository.save(employee);
 	}
-
-	// ⭐⭐ 프로필 이미지 삭제 메서드 추가
-	@Transactional
-	public void deleteProfileImage(String username) {
-		Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(username);
-
-		if (fileOptional.isPresent()) {
-			EmployeeFile employeeFile = fileOptional.get();
-			FileDTO fileDTO = new FileDTO(employeeFile.getSaveName(), employeeFile.getExtension());
-			String profileImagePath = uploadPath + "profile" + File.separator;
-			fileManager.deleteFile(profileImagePath, fileDTO);
-			employeeFileRepository.delete(employeeFile);
-		}
-	}
+    
+    // ⭐⭐ 프로필 이미지 삭제 메서드 추가
+    @Transactional
+    public void deleteProfileImage(String username) {
+        Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(username);
+        
+        if (fileOptional.isPresent()) {
+            EmployeeFile employeeFile = fileOptional.get();
+            FileDTO fileDTO = new FileDTO(employeeFile.getSaveName(), employeeFile.getExtension());
+            String profileImagePath = uploadPath + "profile" + File.separator;
+            fileManager.deleteFile(profileImagePath, fileDTO);
+            
+            // 삭제 대신 useYn false
+            employeeFile.setUseYn(false);
+            employeeFileRepository.save(employeeFile);
+        }
+    }
 
 
 	// Spring Security 로그인
