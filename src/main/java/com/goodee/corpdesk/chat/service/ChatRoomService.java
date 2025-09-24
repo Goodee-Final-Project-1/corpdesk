@@ -32,22 +32,38 @@ public class ChatRoomService {
 		list.forEach(l->{
 			Long roomId = l.getChatRoomId();
 			ChatParticipant cp= chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(roomId, username);
+			
+			//1대1채팅일경우 채팅방 제목을 상대방 이름으로 설정
+			if(l.getChatRoomTitle()==null) {
+				List<ChatParticipant> cps = chatParticipantRepository.findAllByChatRoomId(roomId);
+				for(ChatParticipant c : cps) {
+					if(!c.getEmployeeUsername().equals(username)) {
+			//TODO 추후 해당 username으로 사원정보를 불러와서 넣어주면됨					
+						l.setChatRoomTitle(c.getEmployeeUsername());
+						break;
+					}
+				}
+			}
+			
 			if(cp.getLastCheckMessageId()==null) {
 				l.setUnreadCount((chatParticipantRepository.countAll(roomId)));
 			}
 			else {
 				l.setUnreadCount(chatParticipantRepository.count(cp.getLastCheckMessageId(),roomId));
 			}
-			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"+l.getUnreadCount());
 		});
 		
 		
 		return list;
 	}
 
-
+	
+	
+	//채팅방 생성
 	public Long createRoom(RoomData roomdata , Principal principal ) {
-		
+		String chatRoomType = roomdata.getChatRoomType();
+		String chatRoomTitle = roomdata.getChatRoomType();
+		String username = roomdata.getUsername();
 		ChatRoom chatroom = new ChatRoom();
 		ChatParticipant chatParticipant = new ChatParticipant();
 

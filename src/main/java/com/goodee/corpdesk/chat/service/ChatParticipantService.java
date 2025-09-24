@@ -21,7 +21,7 @@ public class ChatParticipantService {
 	
 	public List<ChatParticipant> participantList(Long chatRoomId) {
 		List<ChatParticipant> list = chatParticipantRepository.findAllByChatRoomId(chatRoomId);
-		return null;
+		return list;
 	}
 
 	public boolean isRoomParticipant(ChatParticipant chatParticipant) {
@@ -35,7 +35,10 @@ public class ChatParticipantService {
 	// 채팅방 닫을 때 제일 최신 메세지ID를 저장 
 	  public void updateLastMessage(String username, Long roomId) {
 		ChatMessage chatMessage =  chatMessageRepository.findTopByChatRoomIdOrderByMessageIdDesc(roomId);
+		if(chatMessage != null) {
 			chatParticipantRepository.updateLastMessage(username,roomId,chatMessage.getMessageId());
+		}
+		
 			
 		}
 }

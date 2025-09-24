@@ -13,4 +13,5 @@ import lombok.Setter;
 public class RoomData {
 	private String roomTitle;
 	private String username;
+	private String chatRoomType;
 }

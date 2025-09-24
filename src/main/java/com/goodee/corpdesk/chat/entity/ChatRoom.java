@@ -22,6 +22,7 @@ public class ChatRoom {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long chatRoomId;
 	private String chatRoomTitle;
+	private String chatRoomType;
 	
 	@Transient
 	private Long unreadCount;
