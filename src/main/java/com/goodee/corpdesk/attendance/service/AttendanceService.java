@@ -117,7 +117,7 @@ public class AttendanceService {
             // 4. 출근전
             // 가장 최근의 출퇴근 내역 조회(a)
             // a.출근일시 != 오늘날짜 & a.퇴근일시 != null
-            else if(!checkInDate.isEqual(today)) resAttendanceDTO.setStatus("퇴근");
+            else if(!checkInDate.isEqual(today)) resAttendanceDTO.setStatus("출근전");
         }
 
         return resAttendanceDTO;

@@ -31,12 +31,12 @@
         <div class="card card-default mb-3">
           <div class="card-body d-flex justify-content-around p-3">
             <div class="text-center">
-              <p class="card-text mb-1">출근시간</p>
-              <p class="card-text mb-0">00:00</p>
+              <p class="card-text mb-1">출근</p>
+              <p class="card-text mb-0">0000-00-00 00:00</p>
             </div>
             <div class="text-center">
-              <p class="card-text mb-1">퇴근시간</p>
-              <p class="card-text mb-0">00:00</p>
+              <p class="card-text mb-1">퇴근</p>
+              <p class="card-text mb-0">0000-00-00 00:00</p>
             </div>
           </div>
         </div>
@@ -134,14 +134,14 @@
               <div class="card-body p-4 d-flex justify-content-around flex-wrap">
 
                 <div class="col-4 text-center">
-                  <h6>지각</h6>
+                  <h6>근무 일수</h6>
                   <br>
-                  <b>2</b><span>회</span>
+                  <b>2</b><span>일</span>
                 </div>
                 <div class="col-4 text-center">
-                  <h6>조퇴</h6>
+                  <h6>근무 시간</h6>
                   <br>
-                  <b>2</b><span>회</span>
+                  <b>2</b><span>시간</span>
                 </div>
 
               </div>
@@ -155,10 +155,9 @@
           <table class="table table-hover">
             <thead>
             <tr>
-              <th>출근 날짜</th>
-              <th>부서</th>
-              <th>이름</th>
+              <th>출근일</th>
               <th>출근 시간</th>
+              <th>퇴근일</th>
               <th>퇴근 시간</th>
               <th>근무 상태</th>
             </tr>
@@ -166,9 +165,8 @@
             <tbody>
             <tr>
               <td>2024-09-25</td>
-              <td>개발팀</td>
-              <td>홍길동</td>
               <td>09:00</td>
+              <td>2024-09-25</td>
               <td>18:00</td>
               <td>정상출근</td>
             </tr>
