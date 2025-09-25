@@ -37,7 +37,7 @@ async function getDetail() {
 		sentDate.append(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
 		// sentDate.setAttribute('datetime', data.sentDate);
 		// content.append(data.text);
-		content.innerHTML = data.text;
+		content.innerHTML = DOMPurify.sanitize(data.text);
 
 	} catch (e) {
 		console.log(e);

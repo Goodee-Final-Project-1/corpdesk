@@ -65,7 +65,7 @@
 							</span>
 						</div>
 					</div>
-					<textarea name="text" id="text" name="text" hidden></textarea>
+					<textarea id="text" name="text" hidden></textarea>
 					<div class="form-group">
 						<div id="editor" class="ql-container ql-snow"></div>
 					</div>

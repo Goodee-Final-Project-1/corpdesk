@@ -174,7 +174,6 @@ public class EmailService {
 		return emailDTO;
 	}
 
-	// FIXME: content에서 text 정보만 가져오기
 	private String getTextFromMultipart(Multipart multipart) throws Exception {
 		StringBuilder sb = new StringBuilder();
 
@@ -188,10 +187,7 @@ public class EmailService {
 				sb.append(bodyPart.getContent());
 			} else if (bodyPart.isMimeType("multipart/*")) {
 				MimeMultipart mimeMultipart = (MimeMultipart) bodyPart.getContent();
-
-				for (int j = 0; j < mimeMultipart.getCount(); j++) {
-					sb.append(this.getTextFromMultipart(mimeMultipart));
-				}
+				sb.append(this.getTextFromMultipart(mimeMultipart));
 			}
 //			else {
 //				log.info("첨부 파일: {}", bodyPart.getFileName());

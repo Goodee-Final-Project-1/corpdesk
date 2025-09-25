@@ -46,7 +46,7 @@
 							</ul>
 						</div>
 						<div>
-							<p id="content" class="overflow-auto"></p>
+							<div id="content" class="overflow-auto"></div>
 						</div>
 					</div>
 				</div>
@@ -60,6 +60,8 @@
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.7/dist/purify.min.js"></script>
 <script src="/js/email/detail.js"></script>
+
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>
