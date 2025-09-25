@@ -159,14 +159,17 @@ public class EmailService {
 		emailDTO.setFrom(from);
 		emailDTO.setSubject(message.getSubject());
 		emailDTO.setEmailNo(message.getMessageNumber());
-		emailDTO.setReceivedDate(format.format(message.getReceivedDate()));
-		emailDTO.setSentDate(format.format(message.getSentDate()));
+		if (message.getReceivedDate() == null) emailDTO.setReceivedDate("0000-00-00 00:00:00");
+		else emailDTO.setReceivedDate(format.format(message.getReceivedDate()));
+		if (message.getSentDate() == null) emailDTO.setSentDate("0000-00-00 00:00:00");
+		else emailDTO.setSentDate(format.format(message.getSentDate()));
 		emailDTO.setRecipients(Arrays.toString(message.getAllRecipients()));
 
 		Object content = message.getContent();
 
 		if (content instanceof String) {
-			emailDTO.setText(content.toString());
+			String text = content.toString().replaceAll("\n", "<\\br>").replaceAll(" ", "&nbsp");
+			emailDTO.setText(text);
 		} else if (content instanceof Multipart) {
 			emailDTO.setText(getTextFromMultipart((Multipart) content));
 		}
@@ -213,7 +216,7 @@ public class EmailService {
 	}
 
 	// 메일 보내기
-	public void sendSimpleMail(SendDTO sendDTO) throws Exception {
+	public void sendMail(SendDTO sendDTO) throws Exception {
 		Optional<Employee> optional = employeeRepository.findById(sendDTO.getUser());
 		Employee employee = optional.get();
 
