@@ -20,8 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
+    private final VacationDetailRepository vacationDetailRepository;
 
- // insert / update 통합 처리
+    // insert / update 통합 처리
     @Transactional
     public Attendance saveOrUpdateAttendance(Attendance attendance) {
         // 로그인 사용자 가져오기
