@@ -168,7 +168,8 @@ public class EmailService {
 		Object content = message.getContent();
 
 		if (content instanceof String) {
-			String text = content.toString().replaceAll("\n", "<\\br>").replaceAll(" ", "&nbsp");
+			String text = content.toString().replaceAll("\n", "<br/>")
+					.replaceAll(" ", "&nbsp;");
 			emailDTO.setText(text);
 		} else if (content instanceof Multipart) {
 			emailDTO.setText(getTextFromMultipart((Multipart) content));
