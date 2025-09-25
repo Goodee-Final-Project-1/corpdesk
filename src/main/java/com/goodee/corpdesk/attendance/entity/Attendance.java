@@ -1,4 +1,4 @@
-package com.goodee.corpdesk.attendance;
+package com.goodee.corpdesk.attendance.entity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

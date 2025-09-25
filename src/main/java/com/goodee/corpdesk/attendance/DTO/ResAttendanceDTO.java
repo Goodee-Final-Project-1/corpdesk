@@ -1,4 +1,4 @@
-package com.goodee.corpdesk.attendance;
+package com.goodee.corpdesk.attendance.DTO;
 
 import lombok.Getter;
 import lombok.Setter;

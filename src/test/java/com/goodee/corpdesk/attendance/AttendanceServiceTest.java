@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.attendance;
 
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
+import com.goodee.corpdesk.attendance.service.AttendanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
