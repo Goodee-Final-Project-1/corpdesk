@@ -34,7 +34,7 @@ public class ChatRoomController {
 	@GetMapping("list")
 	public String chatRoomList(Principal principal ,Model model) {
 			String username= principal.getName();
-			List<ChatRoom> roomList= chatRoomService.getChatRoomList(username);
+			List<RoomData> roomList= chatRoomService.getChatRoomList(username);
 			List<Employee> employeeList = employeeService.getActiveEmployees();
 			model.addAttribute("roomList", roomList);
 			model.addAttribute("employeeList",employeeList);
@@ -57,10 +57,17 @@ public class ChatRoomController {
 		Long roomId =chatRoomService.createRoom(roomdata, principal);
 		ChatRoom chatRoom = new ChatRoom();
 		chatRoom.setChatRoomId(roomId);
-		chatRoom.setChatRoomTitle(roomdata.getRoomTitle());
+		if(roomdata.getChatRoomTitle()==null) {
+			chatRoom.setChatRoomTitle(principal.getName());
+			chatRoom.setUnreadCount(0L);
+		}
 		
 		//상대방 구독 알림 보냄
 		for(int i = 0; i <roomdata.getUsernames().size();i++) {
+			if(roomdata.getUsernames().get(i).equals(principal.getName())) {
+				continue;
+			}
+			
 			simpMessagingTemplate.convertAndSendToUser(roomdata.getUsernames().get(i),"/queue/notifications" , chatRoom);
 		}
 		

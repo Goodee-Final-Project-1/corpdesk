@@ -8,7 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.goodee.corpdesk.chat.entity.ChatMessage;
+import com.goodee.corpdesk.chat.entity.ChatParticipant;
 import com.goodee.corpdesk.chat.repository.ChatMessageRepository;
+import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
 
 @Service
 public class ChatMessageService {
@@ -16,9 +18,16 @@ public class ChatMessageService {
 	@Autowired
 	private ChatMessageRepository chatMessageRepository;
 	
+	@Autowired
+	private ChatParticipantRepository chatParticipantRepository;
+	
 	public void messageSave(ChatMessage msg) {
 		chatMessageRepository.save(msg);
 		
+	}
+	
+	public List<ChatParticipant> participantListByRoom(Long RoomId){
+		return chatParticipantRepository.findAllByChatRoomId(RoomId);
 	}
 
 	//방번호로 해당 방의 메세지를 조회해옴

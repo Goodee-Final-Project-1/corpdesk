@@ -24,15 +24,13 @@
 			
 		
 			<p>연락처 목록 </p>
-			<table>
+			<table class= "contact">
 					<tr>
 						<th>부서</th>&nbsp;
 						<th>직위</th>&nbsp;
 						<th>이름</th>
 					</tr>
 					<c:forEach items="${employeeList}" var="employee">
-					
-						<c:if test="${employee.username ne user}  ">
 						<tr class="employeeListOne" data-employee="${employee.username }" style="cursor:pointer;">
 								<td>${employee.departmentName } &nbsp;</td>
 								
@@ -40,13 +38,13 @@
 								
 								<td>${employee.name }</td>
 						</tr>
-						</c:if>
+						
 					</c:forEach>
 				</table>
 				<br>
 			<br><br><br>
 			
-				<table>
+				<table class = "chatList">
 					<tr>
 						<th>채팅방 번호</th>
 						<th>채팅방 제목</th>

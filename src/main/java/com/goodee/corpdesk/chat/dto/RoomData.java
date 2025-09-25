@@ -13,7 +13,9 @@ import lombok.Setter;
 @Component
 
 public class RoomData {
-	private String roomTitle;
+	private String chatRoomTitle;
 	private List<String> usernames;
 	private String chatRoomType;
+	private Long chatRoomId;
+	private Long unreadCount;
 }
