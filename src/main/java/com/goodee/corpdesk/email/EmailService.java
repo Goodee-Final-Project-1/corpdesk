@@ -192,9 +192,10 @@ public class EmailService {
 				for (int j = 0; j < mimeMultipart.getCount(); j++) {
 					sb.append(this.getTextFromMultipart(mimeMultipart));
 				}
-			} else {
-				log.info("첨부 파일: {}", bodyPart.getFileName());
 			}
+//			else {
+//				log.info("첨부 파일: {}", bodyPart.getFileName());
+//			}
 		}
 
 		return sb.toString();

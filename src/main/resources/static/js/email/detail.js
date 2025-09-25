@@ -1,3 +1,5 @@
+const spinner = document.getElementById('spinner');
+const detail = document.getElementById('detail');
 
 const subject = document.getElementById('subject');
 const from = document.getElementById('from');
@@ -24,6 +26,9 @@ async function getDetail() {
 		const data = await response.json();
 
 		// console.log(data);
+
+		spinner.classList.remove('d-flex');
+		detail.classList.remove('d-none');
 
 		subject.append(data.subject);
 		from.append(data.from);

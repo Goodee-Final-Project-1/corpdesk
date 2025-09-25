@@ -1,4 +1,6 @@
-const table = document.getElementById('table');
+const spinner = document.getElementById('spinner');
+const list = document.getElementById('list');
+const tbody = document.getElementById('tbody');
 const pathArr = location.pathname.split('/');
 if (pathArr.length <= 3) pathArr.push('1');
 
@@ -18,6 +20,9 @@ async function getMail() {
 
 		console.log(data);
 
+		spinner.classList.remove('d-flex');
+		list.classList.remove('d-none');
+
 		data.content.forEach(function (e) {
 			const tr = document.createElement('tr');
 			const date = new Date(e.sentDate);
@@ -29,9 +34,9 @@ async function getMail() {
 				</a></td>
 				<td class="date">${date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate()}</td>
 			`;
-			// table.appendChild(tr);
+			// tbody.appendChild(tr);
 			// 백엔드에서 오래된 순으로 넣었기 때문에, 거꾸로 출력
-			table.prepend(tr);
+			tbody.prepend(tr);
 		});
 
 		paging(data.page);
