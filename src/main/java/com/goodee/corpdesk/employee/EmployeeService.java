@@ -98,6 +98,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     // 직원 등록
+    @Transactional(rollbackFor = Exception.class)
     public Employee addEmployee(Employee employee) {
     	employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         employee.setUseYn(true);
