@@ -1,7 +1,13 @@
 package com.goodee.corpdesk.attendance;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import com.goodee.corpdesk.vacation.entity.VacationDetail;
+import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -12,6 +18,9 @@ import lombok.RequiredArgsConstructor;
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private VacationDetailRepository vacationDetailRepository;
 
     // ID로 출퇴근 기록 조회
     public Attendance getAttendanceById(Long id) {
@@ -43,5 +52,54 @@ public class AttendanceService {
     // 특정 직원 출퇴근 내역 조회
     public List<Attendance> getAttendanceByUsername(String username) {
         return attendanceRepository.findByUsernameAndUseYn(username, true);
+    }
+
+    // 휴가/퇴근/출근/출근전 상태 조회
+    // 가장 최근의 출퇴근 내역이 없거나 위의 네 상태 중 어느 것도 아니면 빈 객체 반환
+    public ResAttendanceDTO AttendanceStatus(String username) {
+
+        ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();
+
+        // 0. 오늘은 공휴일이거나 휴일인가?
+        Boolean isHoliday = false;
+        // 1) 오늘이 공휴일인지 구함
+        // TODO 특일 api 사용 가능해지면 구현
+
+        // 2) 오늘이 휴일인지 구함
+        LocalDate today = LocalDate.now();
+        if(today.getDayOfWeek().getValue() >= 6) isHoliday = true;
+
+        // 1. 휴가
+        // !공휴일 & !휴일 & 연차사용일
+        VacationDetail vacationDetail = vacationDetailRepository.findVacationDetailOnDate(username, today);
+        if(!isHoliday && vacationDetail != null) {
+            resAttendanceDTO.setStatus("휴가");
+
+            return resAttendanceDTO;
+        }
+
+        // 0. 가장 최근의 출퇴근 내역
+        Attendance attendance = attendanceRepository.findLatestAttendanceByUsername(username);
+
+        if(attendance == null) return resAttendanceDTO;
+
+        LocalDate checkInDate = attendance.getCheckInDateTime().toLocalDate();
+        LocalDate checkOutDate = attendance.getCheckOutDateTime().toLocalDate();
+        if(checkInDate != null) {
+            // 2. 퇴근
+            // 가장 최근의 출퇴근 내역 조회(a)
+            // a.출근일시 != null & a.퇴근일시 != null & a.출근일시 == 오늘날짜
+            if(checkOutDate != null && checkInDate.isEqual(today)) resAttendanceDTO.setStatus("퇴근");
+            // 3. 출근
+            // 가장 최근의 출퇴근 내역 조회(a)
+            // a.출근일시 != null & a.퇴근일시 == null
+            else if(checkOutDate == null) resAttendanceDTO.setStatus("출근");
+            // 4. 출근전
+            // 가장 최근의 출퇴근 내역 조회(a)
+            // a.출근일시 != 오늘날짜 & a.퇴근일시 != null
+            else if(!checkInDate.isEqual(today)) resAttendanceDTO.setStatus("퇴근");
+        }
+
+        return resAttendanceDTO;
     }
 }

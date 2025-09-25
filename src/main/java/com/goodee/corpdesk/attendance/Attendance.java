@@ -3,6 +3,7 @@ package com.goodee.corpdesk.attendance;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.goodee.corpdesk.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,45 +19,30 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "attendance")
-public class Attendance {
-	
-	// PK
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class Attendance extends BaseEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long attendanceId;
-    
-    // 직원 ID
+
     @Column(nullable = false)
     private String username;
     
-    // 출근 일시
-    private LocalDateTime checkInDateTime;
-    
-    // 퇴근 일시
-    private LocalDateTime checkOutDateTime;
-    
-    // 휴일 여부
-    private boolean isHoliday;
-    
-    // 근무 상태
-    @Column(nullable = false, length = 255)
-    private String workStatus;
-        
-    // 생성 일시
-	@Column(nullable = false)
-	private LocalDateTime createdAt;
+    private LocalDateTime checkInDateTime;  // 출근 일시
 
-    // 수정 일시
+    private LocalDateTime checkOutDateTime; // 퇴근 일시
+
+    private boolean isHoliday; // 휴일 여부
+
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
-    
-    // 수정한 사람
-    @Column(nullable = false, length = 255)
-    private String modifiedBy;
-    
-    // 사용 여부
-    @Column(nullable = false)
-    private Boolean useYn = true;
+    private String workStatus; // 근무 상태
+
+//	private LocalDateTime createdAt; // 생성 일시
+//
+//    private LocalDateTime updatedAt; // 수정 일시
+//
+//    private String modifiedBy; // 수정한 사람
+//
+//    private Boolean useYn = true; // 사용 여부
     
     
     public String getFormattedCheckInDateTime() {
