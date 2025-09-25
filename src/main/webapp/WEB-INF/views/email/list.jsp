@@ -32,7 +32,8 @@
 					</div>
 				</div>
 				<div class="border border-top-0 rounded table-responsive email-list">
-					<table id="table" class="table mb-0 table-email">
+					<table class="table mb-0 table-email">
+						<tbody id="table"></tbody>
 					</table>
 				</div>
 			</div>

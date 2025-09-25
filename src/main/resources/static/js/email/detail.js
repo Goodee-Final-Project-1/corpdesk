@@ -31,7 +31,8 @@ async function getDetail() {
 		const date = new Date(data.sentDate);
 		sentDate.append(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
 		// sentDate.setAttribute('datetime', data.sentDate);
-		content.append(data.text);
+		// content.append(data.text);
+		content.innerHTML = data.text;
 
 	} catch (e) {
 		console.log(e);
