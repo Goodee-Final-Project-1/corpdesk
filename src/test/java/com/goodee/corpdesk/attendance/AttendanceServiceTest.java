@@ -17,7 +17,7 @@ class AttendanceServiceTest {
 
     @Test
     void attendanceStatus() {
-        ResAttendanceDTO resAttendanceDTO = attendanceService.AttendanceStatus("choi_cto");
+        ResAttendanceDTO resAttendanceDTO = attendanceService.getAttendanceStatus("choi_cto");
         log.warn("{}", resAttendanceDTO.getStatus());
 
         assertNotNull(resAttendanceDTO);

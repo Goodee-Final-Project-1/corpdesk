@@ -2,6 +2,7 @@ package com.goodee.corpdesk.attendance.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
@@ -76,7 +77,7 @@ public class AttendanceService {
 
     // 휴가/퇴근/출근/출근전 상태 조회
     // 가장 최근의 출퇴근 내역이 없거나 위의 네 상태 중 어느 것도 아니면 빈 객체 반환
-    public ResAttendanceDTO AttendanceStatus(String username) {
+    public ResAttendanceDTO getAttendanceStatus(String username) {
 
         ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();
 
@@ -119,6 +120,20 @@ public class AttendanceService {
             // a.출근일시 != 오늘날짜 & a.퇴근일시 != null
             else if(!checkInDate.isEqual(today)) resAttendanceDTO.setStatus("출근전");
         }
+
+        resAttendanceDTO.setAttendanceId(attendance.getAttendanceId());
+        resAttendanceDTO.setCheckInDateTime(attendance.getCheckInDateTime());
+        resAttendanceDTO.setCheckOutDateTime(attendance.getCheckOutDateTime());
+
+        resAttendanceDTO.setOldestCheckInDateTime(
+           LocalDateTime.ofInstant(attendanceRepository.findOldestAttendanceByUsername(username)
+                                                        .toInstant(), ZoneId.of("Asia/Seoul"))
+        );
+
+        // TODO 더 뿌려야 할 데이터
+        // TODO (해당 월의/전체)지각, 조퇴, 결근 횟수
+        // TODO (해당 월의/전체)근무 시간
+        // TODO 출근일, 출근시간, 퇴근일, 퇴근시간, 근무상태(출근/퇴근/출근전/휴가)
 
         return resAttendanceDTO;
     }

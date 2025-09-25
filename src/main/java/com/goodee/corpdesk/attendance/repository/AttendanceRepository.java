@@ -1,7 +1,10 @@
 package com.goodee.corpdesk.attendance.repository;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,7 +31,19 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     @NativeQuery("""
         SELECT *
         FROM attendance
-        WHERE attendance_id = (SELECT MAX(attendance_id) FROM attendance WHERE username = :username)
+        WHERE
+        	check_in_date_time = (SELECT MAX(check_in_date_time) FROM attendance WHERE username = :username)
+        	AND username  = :username
     """)
     public Attendance findLatestAttendanceByUsername(@Param("username") String username);
+
+    @NativeQuery("""
+        SELECT check_in_date_time AS oldestCheckInDateTime
+        FROM attendance
+        WHERE
+        	check_in_date_time = (SELECT MIN(check_in_date_time) FROM attendance WHERE username = :username)
+        	AND username  = :username
+    """)
+    public Timestamp findOldestAttendanceByUsername(@Param("username") String username);
+
 }

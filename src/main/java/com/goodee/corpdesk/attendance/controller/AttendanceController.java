@@ -1,30 +1,39 @@
 package com.goodee.corpdesk.attendance.controller;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
-import lombok.Getter;
-import org.springframework.data.repository.query.Param;
+import com.goodee.corpdesk.employee.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import lombok.RequiredArgsConstructor;
-
-@RequestMapping("/attendance/**")
 @Controller
-@RequiredArgsConstructor
+@RequestMapping("/attendance/**")
 public class AttendanceController {
 
-    private final AttendanceService attendanceService;
+    @Autowired
+    private AttendanceService attendanceService;
+
+    @Value("${cat.attendance}")
+    private String cat;
+    @Autowired
+    private EmployeeService employeeService;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
 
     @GetMapping("list")
-    public String list(@RequestParam("username") String username) {
+    public String list(@RequestParam("username") String username, Model model) {
+        ResAttendanceDTO resAttendanceDTO = attendanceService.getAttendanceStatus(username);
+
+
+
+        model.addAttribute("resAttendanceDTO", resAttendanceDTO);
+
         return "attendance/list";
     }
 
