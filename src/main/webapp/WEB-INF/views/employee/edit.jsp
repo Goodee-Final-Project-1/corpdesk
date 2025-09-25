@@ -23,6 +23,10 @@
 .tab-button.active { font-weight: bold; border-bottom: 2px solid #007bff; }
 
 </style>
+
+<meta name="_csrf" content="${_csrf.token}" />
+<meta name="_csrf_header" content="${_csrf.headerName}" />
+
 </head>
 <body>
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
@@ -53,7 +57,15 @@
         <div class="info-container d-flex">
             <div>
                 이름: &nbsp;<form:input path="name" />
-                직원구분: &nbsp;<form:input path="employeeType"/>
+                직원구분: &nbsp;<form:select path="employeeType">
+							    <form:option value="" label="선택하세요"/>
+							    <form:option value="정규" label="정규"/>
+							    <form:option value="계약" label="계약"/>
+							    <form:option value="외주" label="외주"/>
+							    <form:option value="파견" label="파견"/>
+							    <form:option value="파트" label="파트"/>
+							    <form:option value="기타" label="기타"/>
+							</form:select>
                 부서: &nbsp;<form:select path="departmentId">
                         <form:option value="" label="부서를 선택하세요"/>
                         <form:options items="${departments}" itemValue="departmentId" itemLabel="departmentName"/>
@@ -100,7 +112,7 @@
             
             <div class="buttonBox">
                 <input type="submit" value="수정" class="btn btn-info">
-                <button type="button" onclick="deleteEmployee()" class="btn btn-info">삭제</button>
+                <button type="button" onclick="deleteEmployee('${employee.username}')" class="btn btn-info">삭제</button>
             </div>
         </div>
     </div>
@@ -109,6 +121,26 @@
 
 <!-- 출퇴근 탭 -->
 <div class="tab-content" id="attendance">
+
+	<!-- 출퇴근 추가 폼 -->
+    <div class="mb-3">
+        <label>구분</label>
+        <select id="newWorkStatus" class="form-control" style="width:150px; display:inline-block;">
+            <option value="출근">출근</option>
+            <option value="퇴근">퇴근</option>
+            <option value="출근전">출근전</option>
+            <option value="휴가">휴가</option>
+        </select>
+
+        <label>일시</label>
+        <input type="datetime-local" id="newDateTime" class="form-control" style="width:200px; display:inline-block;">
+
+        <button type="button"  id="addAttendanceBtn" class="btn btn-info">추가</button>
+    </div>
+
+
+
+
     <form id="attendanceForm">
         <button type="submit" class="btn btn-danger btn-sm">삭제</button>
         <input type="hidden" name="username" value="${employee.username}"/>
@@ -130,11 +162,23 @@
 						    ${att.workStatus != null ? att.workStatus : '-'}
 						</span>
 			        </td>
-			        <td class="dateTimeCell" 
-			            data-checkin="${att.checkInDateTimeForInput != null ? att.checkInDateTimeForInput : ''}" 
-			            data-checkout="${att.checkOutDateTimeForInput != null ? att.checkOutDateTimeForInput : ''}">
-			            ${att.checkInDateTimeForInput != null ? att.checkInDateTimeForInput.replace("T"," ") : ''}
-			        </td>
+			        <td class="dateTimeCell"
+					    data-checkin="${att.checkInDateTimeForInput != null ? att.checkInDateTimeForInput : ''}"
+					    data-checkout="${att.checkOutDateTimeForInput != null ? att.checkOutDateTimeForInput : ''}">
+					    
+					    <c:choose>
+					        <c:when test="${att.workStatus == '출근' and att.checkInDateTimeForInput != null}">
+					            ${att.checkInDateTimeForInput.replace("T"," ")}
+					        </c:when>
+					        <c:when test="${att.workStatus == '퇴근' and att.checkOutDateTimeForInput != null}">
+					            ${att.checkOutDateTimeForInput.replace("T"," ")}
+					        </c:when>
+					        <c:otherwise>
+					            -
+					        </c:otherwise>
+					    </c:choose>
+					</td>
+
 			        <td>
 			            <button type="button" class="btn btn-warning updateAttendanceBtn">수정</button>
 			        </td>
@@ -145,7 +189,7 @@
     </form>
 </div>
 
-<a href="<d:url value='/employee/list'/>" class="btn btn-info">목록으로</a>
+<a href="/employee/list" class="btn btn-info">목록으로</a>
 
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
@@ -154,16 +198,29 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-    // 탭 처리
+	// ---------------- 탭 처리 ----------------
     document.querySelectorAll(".tab-button").forEach(button => {
-      button.addEventListener("click", () => {
+        button.addEventListener("click", () => {
+            document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+            button.classList.add("active");
+            const tabId = button.getAttribute("data-tab");
+            document.getElementById(tabId).classList.add("active");
+        });
+    });
+
+    // 페이지 로드 시 hash 체크해서 해당 탭 활성화
+    if(window.location.hash === "#attendance"){
         document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
         document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-        button.classList.add("active");
-        const tabId = button.getAttribute("data-tab");
-        document.getElementById(tabId).classList.add("active");
-      });
-    });
+
+        const attendanceButton = document.querySelector(".tab-button[data-tab='attendance']");
+        const attendanceTab = document.getElementById("attendance");
+        if(attendanceButton && attendanceTab){
+            attendanceButton.classList.add("active");
+            attendanceTab.classList.add("active");
+        }
+    }
 
     // 이미지 미리보기
     const profileInput = document.getElementById('profileImageInput');
@@ -180,6 +237,68 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+ // ---------------- 출퇴근 추가 ----------------
+    document.getElementById("addAttendanceBtn").addEventListener("click", function() {
+        const username = document.getElementById("username").value;
+        const workStatus = document.getElementById("newWorkStatus").value;
+        const dateTime = document.getElementById("newDateTime").value;
+
+        if (!dateTime) { 
+            alert("날짜와 시간을 입력해주세요."); 
+            return; 
+        }
+
+        fetch(`/employee/${username}/attendance/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ workStatus, dateTime })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                // 새로고침 전에 hash 설정
+                location.hash = "#attendance";
+                location.reload(); // 페이지 새로고침
+
+            } else {
+                alert("추가 실패: " + data.error);
+            }
+        })
+        .catch(err => { 
+            console.error(err); 
+            alert("추가 중 오류 발생"); 
+        });
+    });
+
+ // 삭제 버튼
+    window.deleteEmployee = function(username) {
+        if (!confirm("정말 삭제하시겠습니까?")) return;
+
+        fetch(`/employee/delete/${username}`, {
+            method: 'POST'
+            // CSRF 헤더 제거
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("삭제 성공!");
+                window.location.href = "/employee/list";
+            } else {
+                alert("삭제 실패: " + (data.error || "서버 오류"));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("삭제 중 오류 발생");
+        });
+    };
+
+
+
+
+
+    
+    
     // 사진 삭제
     function deleteProfileImage() {
         const username = document.getElementById('username').value;
@@ -219,6 +338,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const attendanceForm = document.getElementById("attendanceForm");
     if(attendanceForm){
         attendanceForm.addEventListener("submit", function(e){
+        	
+        	e.preventDefault(); // 기본 submit 막기
+        	
             // 선택된 체크박스 확인
             const selectedIds = Array.from(document.querySelectorAll("input[name='attendanceIds']:checked"))
                                      .map(cb => cb.value);
@@ -244,6 +366,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     selectedIds.forEach(id => {
                         const row = document.querySelector(`tr[data-attendance-id='${id}']`);
                         if(row) row.remove();
+                     // 삭제 성공 후 hash 설정 + 페이지 새로고침
+                        location.hash = "#attendance";
+                        location.reload();
                     });
                 } else {
                     alert("삭제 실패: " + data.error);
@@ -253,106 +378,87 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    
-    
-    // 출퇴근 수정 버튼
-    document.querySelectorAll(".updateAttendanceBtn").forEach(button => {
-        button.addEventListener("click", function () {
-            const row = this.closest("tr");
-            const workStatusCell = row.querySelector(".workStatusCell");
-            const dateTimeCell = row.querySelector(".dateTimeCell");
-            const username = document.getElementById("username").value;
-            const statusSelect = row.querySelector(".statusSelect"); // select 요소
-            
-
-
-            if (this.textContent.trim() == "수정") {
-                // 기존 상태 가져오기
-	            let currentStatus = workStatusCell.dataset.status?.trim() 
-                 || workStatusCell.innerText.trim()
-                 || "";
-	            console.log("dataset.status:", workStatusCell.dataset.status);
-	            console.log("innerText:", workStatusCell.innerText);
-	            console.log("최종 currentStatus:", currentStatus);
-	                
-                let dateTimeValue = "";
-                if (currentStatus == "출근") {
-                    dateTimeValue = dateTimeCell.dataset.checkin || '';
-                } else if (currentStatus == "퇴근") {
-                    dateTimeValue = dateTimeCell.dataset.checkout || '';
-                }
-             // datetime-local input 형식 맞추기 (yyyy-MM-ddTHH:mm)
-                if (dateTimeValue) {
-                    dateTimeValue = dateTimeValue.replace(" ", "T").slice(0, 16);
-                }
-
-             // select 생성
-                workStatusCell.innerHTML = `
-                    <select class="form-control workStatusInput">
-                        <option value="출근" ${currentStatus == "출근" ? "selected" : ""}>출근</option>
-                        <option value="퇴근" ${currentStatus == "퇴근" ? "selected" : ""}>퇴근</option>
-                        <option value="출근전" ${currentStatus == "출근전" ? "selected" : ""}>출근전</option>
-                        <option value="휴가" ${currentStatus == "휴가" ? "selected" : ""}>휴가</option>
-                    </select>`;
-
-                // 일시 input
-                dateTimeCell.innerHTML = `<input type="datetime-local" class="form-control dateTimeInput" value="${dateTimeValue}"/>`;
-
-                // 버튼 텍스트 변경
-                this.textContent = "완료";
-                this.classList.remove("btn-warning");
-                this.classList.add("btn-success");
-
-            } else {
-                // 완료 모드
-                const selectEl = row.querySelector(".workStatusInput");
-				console.log("selectEl:", selectEl);
-				console.log("options:", selectEl ? selectEl.outerHTML : "없음");
-				const newStatus = selectEl ? selectEl.value.trim() : "";
-				console.log("newStatus 최종:", `"${newStatus}"`);
-                const newDateTime = row.querySelector(".dateTimeInput")?.value || '';
-                const attendanceId = row.dataset.attendanceId;
-
-                fetch(`/employee/${username}/attendance/edit`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        attendanceId: attendanceId,
-                        workStatus: newStatus,
-                        dateTime: newDateTime
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        // 완료 후 안전하게 span 표시
-                        workStatusCell.innerHTML = ''; // 기존 내용 제거
-                        const span = document.createElement('span');
-                        span.className = 'badge badge-primary'; // 색상 통일
-                        span.textContent = newStatus;
-                        workStatusCell.appendChild(span);
-                        workStatusCell.dataset.status = newStatus;
-
-
-                        // 일시 표시
-                        dateTimeCell.textContent = newDateTime.replace("T", " ");
-                        if (newStatus == "출근") dateTimeCell.dataset.checkin = newDateTime;
-                        else if (newStatus == "퇴근") dateTimeCell.dataset.checkout = newDateTime;
-
-                        // 버튼 복구
-                        button.textContent = "수정";
-                        button.classList.remove("btn-success");
-                        button.classList.add("btn-warning");
-                    } else {
-                        alert("수정 실패: " + data.error);
-                    }
-                })
-                .catch(err => { console.error(err); alert("수정 중 오류 발생"); });
-            }
-        });
-    });
-
 });
+
+
+//---------------- 출퇴근 수정 이벤트 함수 ----------------
+function attachUpdateEvent(button){
+    button.addEventListener("click", function () {
+        const row = this.closest("tr");
+        const workStatusCell = row.querySelector(".workStatusCell");
+        const dateTimeCell = row.querySelector(".dateTimeCell");
+        const username = document.getElementById("username").value;
+
+        if (this.textContent.trim() == "수정") {
+            let currentStatus = workStatusCell.dataset.status?.trim() || workStatusCell.innerText.trim() || "";
+
+            let dateTimeValue = "";
+            if (currentStatus == "출근") dateTimeValue = dateTimeCell.dataset.checkin || '';
+            else if (currentStatus == "퇴근") dateTimeValue = dateTimeCell.dataset.checkout || '';
+
+            if (dateTimeValue) dateTimeValue = dateTimeValue.replace(" ", "T").slice(0, 16);
+
+            // select 생성
+            workStatusCell.innerHTML = `
+                <select class="form-control workStatusInput">
+                    <option value="출근" ${currentStatus == "출근" ? "selected" : ""}>출근</option>
+                    <option value="퇴근" ${currentStatus == "퇴근" ? "selected" : ""}>퇴근</option>
+                    <option value="출근전" ${currentStatus == "출근전" ? "selected" : ""}>출근전</option>
+                    <option value="휴가" ${currentStatus == "휴가" ? "selected" : ""}>휴가</option>
+                </select>`;
+
+            dateTimeCell.innerHTML = `<input type="datetime-local" class="form-control dateTimeInput" value="${dateTimeValue}"/>`;
+
+            this.textContent = "완료";
+            this.classList.remove("btn-warning");
+            this.classList.add("btn-success");
+
+        } else {
+            const selectEl = row.querySelector(".workStatusInput");
+            const newStatus = selectEl ? selectEl.value.trim() : "";
+            const newDateTime = row.querySelector(".dateTimeInput")?.value || '';
+            const attendanceId = row.dataset.attendanceId;
+
+            fetch(`/employee/${username}/attendance/edit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    attendanceId: attendanceId,
+                    workStatus: newStatus,
+                    dateTime: newDateTime
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // 완료 후 span 표시
+                    workStatusCell.innerHTML = '';
+                    const span = document.createElement('span');
+                    span.className = 'badge badge-primary';
+                    span.textContent = newStatus;
+                    workStatusCell.appendChild(span);
+                    workStatusCell.dataset.status = newStatus;
+
+                    dateTimeCell.textContent = newDateTime.replace("T", " ");
+                    if (newStatus == "출근") dateTimeCell.dataset.checkin = newDateTime;
+                    else if (newStatus == "퇴근") dateTimeCell.dataset.checkout = newDateTime;
+
+                    this.textContent = "수정";
+                    this.classList.remove("btn-success");
+                    this.classList.add("btn-warning");
+                } else {
+                    alert("수정 실패: " + data.error);
+                }
+            })
+            .catch(err => { console.error(err); alert("수정 중 오류 발생"); });
+        }
+    });
+}
+
+
+// 기존 버튼에도 적용
+document.querySelectorAll(".updateAttendanceBtn").forEach(btn => attachUpdateEvent(btn));
+
 </script>
 
 
