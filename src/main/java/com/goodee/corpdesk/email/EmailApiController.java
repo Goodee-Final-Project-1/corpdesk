@@ -77,7 +77,7 @@ public class EmailApiController {
 	@PostMapping("sending")
 	public String sending(Authentication authentication, SendDTO sendDTO) throws Exception {
 		sendDTO.setUser(authentication.getName());
-		emailService.sendSimpleMail(sendDTO);
+		emailService.sendMail(sendDTO);
 		return "success";
 	}
 }
