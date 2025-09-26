@@ -23,11 +23,18 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
+<div class="d-flex row">
+	<div class="card card-default h-50">
+		<div class="card-body">
+			<jsp:include page="aside.jsp"/>
+		</div>
+	</div>
 
-<div class="card card-default">
-	<div class="card-header"></div>
-	<div class="card-body">
-		<div id='calendar'></div>
+	<div class="card card-default w-75">
+		<div class="card-header"></div>
+		<div class="card-body">
+			<div id='calendar'></div>
+		</div>
 	</div>
 </div>
 

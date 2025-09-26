@@ -22,4 +22,12 @@ public class CalendarApiController {
 //		System.out.println(calendarDTO);
 		return calendarService.getAttendance(calendarDTO, authentication.getName());
 	}
+
+//	public List<VacationDetail> getVacation(@RequestBody CalendarDTO calendarDTO, Authentication authentication) {
+//		return calendarService.getVacation(calendarDTO, authentication.getName());
+//	}
+
+//	public List<PersonalSchedule> getSchedule(@RequestBody CalendarDTO calendarDTO, Authentication authentication) {
+//		return calendarService.getSchedule(calendarDTO, authentication.getName());
+//	}
 }
