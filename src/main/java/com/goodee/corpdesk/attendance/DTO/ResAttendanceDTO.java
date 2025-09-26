@@ -22,7 +22,4 @@ public class ResAttendanceDTO {
 
     private LocalDateTime oldestCheckInDateTime;
 
-    public ResAttendanceDTO(Timestamp oldestCheckInDateTime) {
-        this.oldestCheckInDateTime = LocalDateTime.ofInstant(oldestCheckInDateTime.toInstant(), ZoneId.of("Asia/Seoul"));
-    }
 }

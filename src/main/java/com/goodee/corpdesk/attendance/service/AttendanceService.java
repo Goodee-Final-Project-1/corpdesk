@@ -77,7 +77,7 @@ public class AttendanceService {
 
     // 휴가/퇴근/출근/출근전 상태 조회
     // 가장 최근의 출퇴근 내역이 없거나 위의 네 상태 중 어느 것도 아니면 빈 객체 반환
-    public ResAttendanceDTO getAttendanceStatus(String username) {
+    public ResAttendanceDTO getAttendanceStatus(String username, String year, String month) {
 
         ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();
 

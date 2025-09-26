@@ -28,11 +28,11 @@ public class AttendanceController {
 
     @GetMapping("list")
     public String list(@RequestParam("username") String username, Model model) {
-        ResAttendanceDTO resAttendanceDTO = attendanceService.getAttendanceStatus(username);
-
-
-
-        model.addAttribute("resAttendanceDTO", resAttendanceDTO);
+//        ResAttendanceDTO resAttendanceDTO = attendanceService.getAttendanceStatus(username);
+//
+//
+//
+//        model.addAttribute("resAttendanceDTO", resAttendanceDTO);
 
         return "attendance/list";
     }
