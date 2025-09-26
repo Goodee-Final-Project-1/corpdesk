@@ -21,11 +21,22 @@ public class AttendanceController {
     @Autowired
     private EmployeeService employeeService;
 
+    /**
+     * Exposes the configured attendance category value to the model under the key "cat".
+     *
+     * @return the configured attendance category string
+     */
     @ModelAttribute("cat")
     public String getCat() {
         return cat;
     }
 
+    /**
+     * Render the attendance list view for the specified user.
+     *
+     * @param username the username whose attendance view is requested
+     * @return the logical view name "attendance/list"
+     */
     @GetMapping("list")
     public String list(@RequestParam("username") String username, Model model) {
 //        ResAttendanceDTO resAttendanceDTO = attendanceService.getAttendanceStatus(username);

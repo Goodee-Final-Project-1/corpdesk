@@ -34,7 +34,11 @@ public class Attendance extends BaseEntity {
     private Character isHoliday; // 휴일 여부
 
     @Column(nullable = false)
-    private String workStatus; // 근무 상태
+    private String workStatus; /**
+     * Get the check-in timestamp formatted as yyyy-MM-dd HH:mm:ss.
+     *
+     * @return {@code ""} if {@code checkInDateTime} is null, otherwise the check-in timestamp formatted as {@code "yyyy-MM-dd HH:mm:ss"}.
+     */
     
     public String getFormattedCheckInDateTime() {
         if (checkInDateTime == null) return "";
