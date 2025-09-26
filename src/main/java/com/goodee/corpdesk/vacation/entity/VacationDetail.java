@@ -19,18 +19,18 @@ import java.time.LocalDate;
 public class VacationDetail extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long vacation_detail_id;
+    private Long vacationDetailId;
 
     @Column(nullable = false)
-    private Integer vacation_id;
+    private Integer vacationId;
 
     @Column(nullable = false)
-    private Integer vacation_type_id;
+    private Integer vacationTypeId;
 
     @Column(nullable = false)
-    private LocalDate start_date;
+    private LocalDate startDate;
 
     @Column(nullable = false)
-    private LocalDate end_date;
+    private LocalDate endDate;
 
 }
