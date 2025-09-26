@@ -1,6 +1,6 @@
 package com.goodee.corpdesk.calendar;
 
-import com.goodee.corpdesk.attendance.Attendance;
+import com.goodee.corpdesk.attendance.entity.Attendance;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -2,12 +2,15 @@ package com.goodee.corpdesk.employee;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
+import com.goodee.corpdesk.attendance.entity.Attendance;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -21,17 +24,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.goodee.corpdesk.attendance.AttendanceService;
+import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.employee.Employee.CreateGroup;
 import com.goodee.corpdesk.employee.Employee.UpdateGroup;
 import com.goodee.corpdesk.employee.validation.UpdateEmail;
@@ -55,6 +52,12 @@ public class EmployeeController {
     private final EmployeeService employeeService;
     private final AttendanceService attendanceService;
 
+    private final DateTimeFormatter formatterInput = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private final DateTimeFormatter formatterOutput = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * Creates an EmployeeController with the required services and password encoder.
+     */
     public EmployeeController(EmployeeService employeeService, AttendanceService attendanceService, PasswordEncoder passwordEncoder) {
         this.employeeService = employeeService;
         this.attendanceService = attendanceService;
@@ -400,7 +403,19 @@ public class EmployeeController {
         return "employee/update_password";
     }
 
-	@PostMapping("update/password")
+	/**
+     * Handles the password update form submission for the authenticated user and redirects to logout on success.
+     *
+     * The method validates the provided Employee against the UpdatePassword group, applies the update for the
+     * currently authenticated username, and returns the appropriate view name.
+     *
+     * @param authentication the authentication token whose username identifies the account to update
+     * @param employee the employee payload containing the password fields validated by the UpdatePassword group
+     * @param bindingResult container for validation errors for the `employee` argument
+     * @return the view name: redirects to "/logout" when the password was successfully updated; returns
+     *         "employee/update_password" to redisplay the form when validation fails or the update was unsuccessful
+     */
+    @PostMapping("update/password")
 	public String updatePassword(Authentication authentication, @Validated(UpdatePassword.class) Employee employee,
 			BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
@@ -415,5 +430,133 @@ public class EmployeeController {
 		}
 
         return "redirect:/logout";
+    }
+
+    /**
+     * Deletes multiple attendance records for the specified employee.
+     *
+     * Expects a JSON payload with an "attendanceIds" array of attendance record IDs to remove.
+     *
+     * @param username the employee's username whose attendance records will be deleted
+     * @param payload  a map containing the key "attendanceIds" mapped to a list of attendance IDs
+     * @return         a map containing "success" set to `true` on success; on failure, "success" is `false` and "error" contains the exception message
+     */
+    @PostMapping("{username}/attendance/delete")
+    @ResponseBody
+    public Map<String, Object> deleteAttendance(@PathVariable("username") String username,
+                                                @RequestBody Map<String, List<Long>> payload) {
+        List<Long> attendanceIds = payload.get("attendanceIds");
+        Map<String, Object> result = new HashMap<>();
+        try {
+            attendanceService.deleteAttendances(username, attendanceIds);
+            result.put("success", true);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("error", e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Create a new attendance record for the specified user.
+     *
+     * @param username the employee's username from the path
+     * @param dto      attendance payload; expected fields include `workStatus` (e.g., "출근" or "퇴근")
+     *                 and an optional `dateTime` string in the format `yyyy-MM-dd'T'HH:mm`
+     * @return a map containing:
+     *         - `success`: `true` if the record was created, `false` otherwise;
+     *         - on success: `attendanceId` (Long), `workStatus` (String), `dateTime` (String formatted as `yyyy-MM-dd HH:mm:ss` or `null`);
+     *         - on failure: `error` (String) with the exception message.
+     */
+    @PostMapping("{username}/attendance/add")
+    @ResponseBody
+    public Map<String, Object> addAttendance(
+        @PathVariable(name = "username") String username,   // 명시적으로 name 지정
+        @RequestBody AttendanceEditDTO dto) {
+
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Attendance att = new Attendance();
+            att.setUsername(username);
+            att.setWorkStatus(dto.getWorkStatus());
+            att.setUseYn(true);
+
+            if (dto.getDateTime() != null && !dto.getDateTime().isEmpty()) {
+                LocalDateTime dt = LocalDateTime.parse(dto.getDateTime(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+                if ("출근".equals(dto.getWorkStatus())) {
+                    att.setCheckInDateTime(dt);
+                } else if ("퇴근".equals(dto.getWorkStatus())) {
+                    att.setCheckOutDateTime(dt);
+                }
+            }
+
+            Attendance saved = attendanceService.saveOrUpdateAttendance(att);
+            result.put("success", true);
+            result.put("attendanceId", saved.getAttendanceId());
+            result.put("workStatus", saved.getWorkStatus());
+            result.put("dateTime", saved.getCheckInDateTime() != null ?
+                saved.getCheckInDateTime().format(formatterOutput) :
+                (saved.getCheckOutDateTime() != null ?
+                    saved.getCheckOutDateTime().format(formatterOutput) : null));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("error", e.getMessage());
+        }
+
+        return result;
+
+    }
+
+
+    /**
+     * Update an existing attendance record for the given username using values from the DTO.
+     *
+     * If the DTO's `workStatus` is blank, the attendance's work status is set to "-". If the DTO
+     * provides `dateTime`, the corresponding check-in or check-out timestamp is updated based on the
+     * resulting work status. The updated attendance is persisted before returning.
+     *
+     * @param dto contains `attendanceId` (identifier of the record to update), `workStatus`, and
+     *            `dateTime` (parsed with pattern "yyyy-MM-dd'T'HH:mm")
+     * @return a map where `"success"` is `true` on success; on failure `"success"` is `false` and
+     *         `"error"` contains the exception message
+     */
+    @PostMapping("{username}/attendance/edit")
+    @ResponseBody
+    public Map<String, Object> editAttendance(@PathVariable("username") String username,
+                                              @RequestBody AttendanceEditDTO dto) {
+
+        Map<String, Object> result = new java.util.HashMap<>();
+        try {
+            Attendance attendance = attendanceService.getAttendanceById(dto.getAttendanceId());
+
+            if (!org.springframework.util.StringUtils.hasText(dto.getWorkStatus())) {
+                attendance.setWorkStatus("-");
+            } else {
+                attendance.setWorkStatus(dto.getWorkStatus());
+            }
+
+            if (org.springframework.util.StringUtils.hasText(dto.getDateTime())) {
+                LocalDateTime dateTime = LocalDateTime.parse(dto.getDateTime(), formatterInput);
+                if ("출근".equals(attendance.getWorkStatus())) {
+                    attendance.setCheckInDateTime(dateTime);
+                } else if ("퇴근".equals(attendance.getWorkStatus())) {
+                    attendance.setCheckOutDateTime(dateTime);
+                }
+            }
+
+            attendanceService.saveOrUpdateAttendance(attendance);
+
+            result.put("success", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("error", e.getMessage());
+        }
+
+        return result;
+
     }
 }

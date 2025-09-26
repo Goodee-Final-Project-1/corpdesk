@@ -60,7 +60,7 @@
 
 				<!-- 근태, 휴가, 일정 -->
 				<li>
-					<a class="sidenav-item-link" href="team.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/attendance/list">
 					<i class="mdi mdi-account-clock"></i> <span class="nav-text">근태</span>
 					</a>
 				</li>
