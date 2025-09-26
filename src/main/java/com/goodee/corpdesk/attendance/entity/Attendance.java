@@ -31,19 +31,10 @@ public class Attendance extends BaseEntity {
 
     private LocalDateTime checkOutDateTime; // 퇴근 일시
 
-    private boolean isHoliday; // 휴일 여부
+    private Character isHoliday; // 휴일 여부
 
     @Column(nullable = false)
     private String workStatus; // 근무 상태
-
-//	private LocalDateTime createdAt; // 생성 일시
-//
-//    private LocalDateTime updatedAt; // 수정 일시
-//
-//    private String modifiedBy; // 수정한 사람
-//
-//    private Boolean useYn = true; // 사용 여부
-    
     
     public String getFormattedCheckInDateTime() {
         if (checkInDateTime == null) return "";
