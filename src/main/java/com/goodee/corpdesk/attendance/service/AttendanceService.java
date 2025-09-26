@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.attendance.service;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -125,10 +126,15 @@ public class AttendanceService {
         resAttendanceDTO.setCheckInDateTime(attendance.getCheckInDateTime());
         resAttendanceDTO.setCheckOutDateTime(attendance.getCheckOutDateTime());
 
-        resAttendanceDTO.setOldestCheckInDateTime(
-           LocalDateTime.ofInstant(attendanceRepository.findOldestAttendanceByUsername(username)
-                                                        .toInstant(), ZoneId.of("Asia/Seoul"))
-        );
+        Timestamp oldestCheckInTime = attendanceRepository.findOldestAttendanceByUsername(username);
+
+        // 기존 출근 기록이 아예 없는 경우가 있을 수 있음 (첫출근 + 출근 버튼 누르기 전)
+        if(oldestCheckInTime != null) {
+            resAttendanceDTO.setOldestCheckInDateTime(
+               LocalDateTime.ofInstant(attendanceRepository.findOldestAttendanceByUsername(username)
+                                                            .toInstant(), ZoneId.of("Asia/Seoul"))
+            );
+        }
 
         // TODO 더 뿌려야 할 데이터
         // TODO (해당 월의/전체)지각, 조퇴, 결근 횟수
