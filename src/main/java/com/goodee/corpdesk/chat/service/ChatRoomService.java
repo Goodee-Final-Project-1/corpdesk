@@ -1,18 +1,26 @@
 package com.goodee.corpdesk.chat.service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.goodee.corpdesk.chat.dto.RoomData;
+import com.goodee.corpdesk.chat.entity.ChatMessage;
 import com.goodee.corpdesk.chat.entity.ChatParticipant;
 import com.goodee.corpdesk.chat.entity.ChatRoom;
+import com.goodee.corpdesk.chat.repository.ChatMessageRepository;
 import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
 import com.goodee.corpdesk.chat.repository.ChatRoomRepository;
+import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeService;
+import com.goodee.corpdesk.position.entity.Position;
 
 @Service
 public class ChatRoomService {
@@ -22,6 +30,10 @@ public class ChatRoomService {
 	
 	@Autowired
 	private ChatParticipantRepository chatParticipantRepository;
+	@Autowired
+	EmployeeService employeeService;
+	@Autowired
+	ChatMessageRepository chatMessageRepository;
 
 	//해당 유저의 모든 채팅방 목록을 불러옴
 	public List<RoomData> getChatRoomList(String username) {
@@ -32,9 +44,25 @@ public class ChatRoomService {
 		listE.forEach(le->{
 			RoomData data = new RoomData();
 			data.setChatRoomId(le.getChatRoomId());
+			
 			data.setChatRoomType(le.getChatRoomType());
 			data.setChatRoomTitle(le.getChatRoomTitle());
 			data.setUnreadCount(le.getUnreadCount());		
+			
+			
+			// 해당 방의 마지막 메세지 내용, 시간을 가져옴
+			
+			ChatMessage chatMessage = chatMessageRepository.findTopByChatRoomIdOrderByMessageIdDesc(data.getChatRoomId());
+			if(chatMessage==null) {
+				data.setLastMessageTime(null);
+				data.setChatRoomLastMessage(" ");			
+				
+			}else {
+				data.setLastMessageTime(chatMessage.getSent_at());
+				data.setChatRoomLastMessage(chatMessage.getMessageContent());			
+				
+			}
+			
 			list.add(data);
 		});
 		
@@ -48,16 +76,27 @@ public class ChatRoomService {
 			if(l.getChatRoomType().equals("direct")) {
 				List<ChatParticipant> cps = chatParticipantRepository.findAllByChatRoomId(roomId);
 				if(cps.size()==1) {
-					l.setChatRoomTitle(username);
+					Map<String, Object> map;
+					map =employeeService.detail(username);
+					Employee emp = (Employee)map.get("employee");
+					Department department = (Department)map.get("department");
+					Position position = (Position)map.get("position");
+					String roomtitle = department.getDepartmentName()+" "+position.getPositionName()+" "+emp.getName();
+					l.setChatRoomTitle(roomtitle);
 				}else {
-					
-				}
-				for(ChatParticipant c : cps) {
-					
-					if(!c.getEmployeeUsername().equals(username)) {
-			//TODO 추후 해당 username으로 사원정보를 불러와서 넣어주면됨					
-						l.setChatRoomTitle(c.getEmployeeUsername());
-						break;
+					for(ChatParticipant c : cps) {
+						
+						if(!c.getEmployeeUsername().equals(username)) {
+							//TODO 추후 해당 username으로 사원정보를 불러와서 넣어주면됨		
+							Map<String, Object> map;
+							map =employeeService.detail(c.getEmployeeUsername());
+							Employee emp = (Employee)map.get("employee");
+							Department department = (Department)map.get("department");
+							Position position = (Position)map.get("position");
+							String roomtitle = department.getDepartmentName()+" "+position.getPositionName()+" "+emp.getName();
+							l.setChatRoomTitle(roomtitle);
+							break;
+						}
 					}
 				}
 			}

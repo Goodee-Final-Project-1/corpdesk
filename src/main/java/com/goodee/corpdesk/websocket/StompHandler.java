@@ -13,14 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
 import com.goodee.corpdesk.chat.entity.ChatParticipant;
-import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
 import com.goodee.corpdesk.chat.service.ChatParticipantService;
 import com.goodee.corpdesk.security.JwtTokenManager;
 
 @Component
 public class StompHandler implements ChannelInterceptor{
 
-    private final ChatParticipantRepository chatParticipantRepository;
 
 	@Autowired
 	private JwtTokenManager jwtTokenManager;
@@ -28,9 +26,7 @@ public class StompHandler implements ChannelInterceptor{
 	private ChatParticipantService chatParticipantService;
 	@Autowired
 	private ChatSessionTracker chatSessionTracker;
-    StompHandler(ChatParticipantRepository chatParticipantRepository) {
-        this.chatParticipantRepository = chatParticipantRepository;
-    }
+   
 	
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {

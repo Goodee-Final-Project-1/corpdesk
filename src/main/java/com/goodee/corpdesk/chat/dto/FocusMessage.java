@@ -8,4 +8,5 @@ import lombok.Setter;
 public class FocusMessage {
 	private Long chatRoomId;
     private boolean focused;
+    private String notificationType;
 }

@@ -44,27 +44,56 @@
 				<br>
 			<br><br><br>
 			
-				<table class = "chatList">
-					<tr>
-						<th>채팅방 번호</th>
-						<th>채팅방 제목</th>
-						<th>읽음</th>
-					</tr>
-					<c:forEach items="${roomList}" var="room">
-						<tr class="chatListOne" data-roomId="${room.chatRoomId }" data-unreadCount="${room.unreadCount }" style="cursor:pointer;">
-								<td>${room.chatRoomId}</td>
-								<td>${room.chatRoomTitle}</td>
-								<td class="unreadCount">&nbsp; <c:if test="${room.unreadCount ne 0}">${room.unreadCount }</c:if></td>
-						</tr>
-					</c:forEach>
-				</table>
-				
+						
 				<br>
 				<button type="button" id="createRoomBtn">채팅방 생성하기</button>
-				
-				
-				
-				<!-- 사원 목록 모달 창 -->
+
+<!-- 채팅방 목록 -->
+<div class="col-lg-7 col-xxl-5">
+	<div class="card card-default chat-left-sidebar">
+		<ul class="card-body px-0 chatList" data-simplebar style="height: 630px;">
+			<c:forEach items="${roomList}" var="room">
+				<li class="mb-4 px-5 py-2 chatListOne" data-roomId="${room.chatRoomId }" data-unreadCount="${room.unreadCount }">
+					<div class="media media-message">
+					<div class="position-relative mr-3">
+						<img class="rounded-circle" src="/images/default_profile.jpg"
+							alt="User Image" style="width:70px; ">
+					</div>
+
+					<div class="media-body">
+						<div class="message-contents">
+							<span
+								class="d-flex justify-content-between align-items-center mb-1">
+								<span class="username text-dark">${room.chatRoomTitle}</span> 
+								<span class="">
+									<c:choose>
+										<c:when test="${room.unreadCount ne 0 }">
+											<span class="badge badge-secondary unreadCount" >
+												${room.unreadCount }
+											</span> 
+										</c:when>
+										<c:otherwise>
+											<span class="unreadCount" >
+											</span> 
+										</c:otherwise>
+									</c:choose>
+									
+									<span class="state text-smoke last-msg-time" data-lastMessageTime="${room.lastMessageTime}"><em></em></span>
+							</span>
+							</span>
+
+							<p class="last-msg text-smoke">${room.chatRoomLastMessage}</p>
+						</div>
+					</div>
+					
+					</div>
+				</li>
+			</c:forEach>
+		</ul>
+	</div>
+</div>
+
+<!-- 사원 목록 모달 창 -->
 				<div id="createRoomModal" class="modal" style="display: none;">
 					<div class="modal-content">
 						<span class="close">&times;</span>
