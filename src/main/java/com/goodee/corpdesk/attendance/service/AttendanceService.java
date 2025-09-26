@@ -32,7 +32,20 @@ public class AttendanceService {
     @Value("${attendance.work-hour.end}")
     private String workHourEnd;
 
-    // insert / update 통합 처리
+    @Value("${attendance.work-hour.start}")
+    private String workHourStart;
+    @Value("${attendance.work-hour.end}")
+    private String workHourEnd;
+
+    /**
+     * Save a new attendance record or update an existing one, while populating audit fields.
+     *
+     * The method sets `modifiedBy` to the currently authenticated user, sets `createdAt`
+     * when inserting (attendanceId is null), and always updates `updatedAt` before persisting.
+     *
+     * @param attendance the Attendance entity to persist; its audit fields (`createdAt`, `updatedAt`, `modifiedBy`) will be updated
+     * @return the persisted Attendance entity
+     */
     @Transactional
     public Attendance saveOrUpdateAttendance(Attendance attendance) {
         // 로그인 사용자 가져오기
@@ -54,19 +67,37 @@ public class AttendanceService {
     }
     
     
-    // ID로 출퇴근 기록 조회
+    /**
+     * Retrieve an Attendance record by its identifier.
+     *
+     * @param id the identifier of the attendance record
+     * @return the Attendance with the given id
+     * @throws RuntimeException if no attendance record exists for the given id
+     */
     public Attendance getAttendanceById(Long id) {
         return attendanceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Attendance record not found"));
     }
 
-    // Attendance 엔티티 저장/업데이트
+    /**
+     * Persist changes to the provided Attendance entity.
+     *
+     * Saves the given Attendance to the repository, applying updates when the entity already exists.
+     */
     @Transactional
     public void updateAttendance(Attendance attendance) {
         attendanceRepository.save(attendance);
     }
 
-    // 소프트 삭제
+    /**
+     * Soft-delete the specified attendance records by marking them inactive.
+     *
+     * Each identified record will have its `useYn` set to `false`, its `modifiedBy`
+     * set to the currently authenticated user, and its `updatedAt` set to the current time.
+     *
+     * @param username      the username requesting the deletion (not used to filter records)
+     * @param attendanceIds list of attendance record IDs to mark inactive
+     */
     @Transactional
     public void deleteAttendances(String username, java.util.List<Long> attendanceIds) {
         attendanceIds.forEach(id -> {
@@ -78,7 +109,12 @@ public class AttendanceService {
         });
     }
 
-    // 특정 직원 출퇴근 내역 조회
+    /**
+     * Retrieve active attendance records for the specified employee.
+     *
+     * @param username the employee's username
+     * @return a list of Attendance entities for the given username where `useYn` is `true`
+     */
     public List<Attendance> getAttendanceByUsername(String username) {
         return attendanceRepository.findByUsernameAndUseYn(username, true);
     }
