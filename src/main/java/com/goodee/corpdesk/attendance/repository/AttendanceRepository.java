@@ -23,10 +23,10 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	// 살아있는 데이터만 조회
 	List<Attendance> findByUsernameAndUseYn(String username, Boolean useYn);
 	
-	
 	@Modifying
     @Query("UPDATE Attendance a SET a.useYn = false WHERE a.attendanceId IN :ids")
     void softDeleteByIds(@Param("ids") List<Long> ids);
+
 
     @NativeQuery("""
         SELECT *
@@ -46,4 +46,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     """)
     public Timestamp findOldestAttendanceByUsername(@Param("username") String username);
 
+
+    // 캘린더
+    List<Attendance> findAllByUsernameAndCheckInDateTimeBetween(String username, LocalDateTime start, LocalDateTime end);
 }

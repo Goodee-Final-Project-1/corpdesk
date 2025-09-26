@@ -1,3 +1,5 @@
+const spinner = document.getElementById('spinner');
+const detail = document.getElementById('detail');
 
 const subject = document.getElementById('subject');
 const from = document.getElementById('from');
@@ -6,8 +8,6 @@ const sentDate = document.getElementById('sentDate');
 const content = document.getElementById('content');
 const pathArr = location.pathname.split('/');
 const emailNo = parseInt(pathArr[pathArr.length - 1]);
-
-// console.log(emailNo);
 
 async function getDetail() {
 	try {
@@ -23,15 +23,21 @@ async function getDetail() {
 		if (!response.ok) throw new Error('수신 오류');
 		const data = await response.json();
 
-		// console.log(data);
+		spinner.classList.remove('d-flex');
+		detail.classList.remove('d-none');
 
 		subject.append(data.subject);
 		from.append(data.from);
 		recipients.append(data.recipients);
-		const date = new Date(data.sentDate);
+
+		let date = new Date(data.sentDate);
+		if (isNaN(date.getTime())) {
+			date = new Date(data.receivedDate)
+		}
 		sentDate.append(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
 		// sentDate.setAttribute('datetime', data.sentDate);
-		content.append(data.text);
+		// content.append(data.text);
+		content.innerHTML = DOMPurify.sanitize(data.text);
 
 	} catch (e) {
 		console.log(e);
