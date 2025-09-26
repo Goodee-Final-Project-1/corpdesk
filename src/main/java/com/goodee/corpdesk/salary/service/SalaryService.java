@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.salary.service;
 
+import com.goodee.corpdesk.attendance.Attendance;
+import com.goodee.corpdesk.attendance.AttendanceRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
@@ -17,11 +19,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @Transactional
@@ -33,6 +38,7 @@ public class SalaryService {
 	private final AllowanceRepository allowanceRepository;
 	private final DeductionRepository deductionRepository;
 	private final EmployeeRepository employeeRepository;
+	private final AttendanceRepository attendanceRepository;
 
 	@Value("${deduction.pension.national}")
 	private Double nationalPension;
@@ -43,12 +49,13 @@ public class SalaryService {
 	@Value("${deduction.insurance.employment}")
 	private Double employmentInsurance;
 
-
+	@Value("${allowance.work.hours}")
+	private Integer fixedWorkHours;
 
 	public Page<EmployeeSalaryDTO> getList(Pageable pageable) {
 		Page<EmployeeSalaryDTO> page = salaryRepository.findAllEmployeeSalary(pageable);
 
-		log.info("======================= {}", page.getContent());
+//		log.info("======================= {}", page.getContent());
 
 		return page;
 	}
@@ -78,11 +85,10 @@ public class SalaryService {
 
 			SalaryPayment result = salaryRepository.save(salaryPayment);
 
-			// 통상 임금
-			Long avgSalary = result.getBaseSalary() / 209;
 			// 총 임금 : 기본급 + 수당
-			Long totalPayment = 0L;
-			totalPayment += result.getBaseSalary();
+			AtomicLong totalPayment = new AtomicLong(); // 포인터 쓰고 싶다..
+
+			totalPayment.set(result.getBaseSalary());
 
 			// 수당
 			// TODO: attendance 정보 가져오기
@@ -93,7 +99,7 @@ public class SalaryService {
 			 */
 
 			// FIXME: 참조 변수로 넘겨주면 바뀐 값이 유지 되는지 확인이 필요함
-			List<Allowance> allowanceList = this.getAllowanceList(totalPayment);
+			List<Allowance> allowanceList = this.getAllowanceList(salaryPayment, totalPayment);
 			allowanceRepository.saveAll(allowanceList);
 
 
@@ -115,16 +121,48 @@ public class SalaryService {
 
 	}
 
-	// 수당 목록
-	private List<Allowance> getAllowanceList(Long totalPayment) {
+	// 근로수당
+	private List<Allowance> getAllowanceList(SalaryPayment salaryPayment, AtomicLong totalPayment) {
 		List<Allowance> allowanceList = new ArrayList<>();
 		// TODO:
+		List<Attendance> attendanceList = attendanceRepository.findAllByUsernameAndMonth(salaryPayment.getUsername());
+
+		// 통상 임금
+		Long avgSalary = salaryPayment.getBaseSalary() / 209;
+
+		for (Attendance a : attendanceList) {
+			LocalDateTime checkIn = a.getCheckInDateTime();
+			LocalDateTime checkOut = a.getCheckOutDateTime();
+
+			Long workHours = Duration.between(checkIn, checkOut).toHours();
+			// 연장근로
+			if (workHours > fixedWorkHours) {
+				Allowance allowance = new Allowance();
+
+				allowance.setPaymentId(salaryPayment.getPaymentId());
+				allowance.setAllowanceName("연장근로수당");
+				allowance.setAllowanceAmount(avgSalary * (workHours - fixedWorkHours));
+
+				totalPayment.set(totalPayment.get() + allowance.getAllowanceAmount());
+				allowanceList.add(allowance);
+			}
+
+			// 휴일근로
+//			if ("Y".equalsIgnoreCase(a.isHoliday())) {
+//
+//			}
+			// 야간근로
+			if (checkIn.toLocalTime().isAfter(LocalTime.parse("22:00:00"))
+					|| checkIn.toLocalTime().isBefore(LocalTime.parse("06:00:00"))
+					|| checkOut.toLocalTime().isAfter(LocalTime.parse("22:00:00"))
+					|| checkOut.toLocalTime().isBefore(LocalTime.parse("06:00:00")));
+		}
 
 		return allowanceList;
 	}
 
 	// 공제 목록
-	private List<Deduction> getDeductionList(Long paymentId, Long totalPayment) {
+	private List<Deduction> getDeductionList(Long paymentId, AtomicLong totalPayment) {
 		List<Deduction> deductionList = new ArrayList<>();
 		String[] categories = {"국민연금", "건강보험", "장기요양보험", "고용보험"};
 
@@ -145,7 +183,7 @@ public class SalaryService {
 				default:
 					throw new IllegalStateException("Unexpected value: " + c);
 			};
-			Long amount = (long) Math.ceil((double) totalPayment * percent / 100);
+			Long amount = (long) Math.ceil((double) totalPayment.get() * percent / 100);
 			deduction.setDeductionAmount(amount);
 
 			deductionList.add(deduction);

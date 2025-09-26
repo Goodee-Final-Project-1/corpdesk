@@ -1,11 +1,12 @@
 package com.goodee.corpdesk.attendance;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	
@@ -22,4 +23,30 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	@Modifying
     @Query("UPDATE Attendance a SET a.useYn = false WHERE a.attendanceId IN :ids")
     void softDeleteByIds(@Param("ids") List<Long> ids);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// 급여
+	// FIXME: 정상 퇴근만 가져오기?
+	@NativeQuery("""
+				SELECT *
+				FROM attendance
+				WHERE use_yn = true
+				AND username = :username
+				AND YEAR(check_in_date_time) = YEAR(NOW())
+				AND MONTH(check_in_date_time) = MONTH(NOW()) - 1
+			""")
+	List<Attendance> findAllByUsernameAndMonth(String username);
 }
