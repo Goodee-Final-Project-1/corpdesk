@@ -1,8 +1,7 @@
 package com.goodee.corpdesk.holiday.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import lombok.*;
 
 import java.time.LocalDate;
 

@@ -33,23 +33,21 @@ public class HolidayService {
     @Autowired
     private HolidayRepository holidayRepository;
 
+    // WebClient Bean 주입
+    @Autowired
+    private WebClient webClient;
+
     @Value("${api.holiday.key}")
     private String key;
 
 //    private ObjectMapper objectMapper = new ObjectMapper();
 
     private XmlMapper xmlMapper = new XmlMapper();
-
     public void getHoliday(){
-        WebClient webClient = WebClient.create("http://apis.data.go.kr");
 
         Mono<List<Holiday>> holidayListMono = webClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/B090041/openapi/service/SpcdeInfoService/getRestDeInfo")
-                .queryParam("solYear", 2025)
-                .queryParam("solMonth", "05")
-                .queryParam("ServiceKey", key)
-                .build())
+            .uri("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo" +
+                "?solYear=2025&solMonth=05&ServiceKey=" + key)
             .retrieve()
             // bodyToMono를 사용하여 전체 응답 객체(HolidayResponseDTO)를 받습니다.
             .bodyToMono(String.class)
