@@ -3,6 +3,7 @@ package com.goodee.corpdesk.attendance.service;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
 import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,11 @@ public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final VacationDetailRepository vacationDetailRepository;
+
+    @Value("${attendance.work-hour.start}")
+    private String workHourStart;
+    @Value("${attendance.work-hour.end}")
+    private String workHourEnd;
 
     // insert / update 통합 처리
     @Transactional
@@ -76,9 +83,8 @@ public class AttendanceService {
         return attendanceRepository.findByUsernameAndUseYn(username, true);
     }
 
-    // 휴가/퇴근/출근/출근전 상태 조회
-    // 가장 최근의 출퇴근 내역이 없거나 위의 네 상태 중 어느 것도 아니면 빈 객체 반환
-    public ResAttendanceDTO getAttendanceStatus(String username, String year, String month) {
+    // 특정 직원의 현재 상태(휴가/퇴근/출근/출근전) & 출퇴근id & 출퇴근일시 조회
+    public ResAttendanceDTO getCurrentAttendance(String username) throws Exception {
 
         ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();
 
@@ -95,52 +101,61 @@ public class AttendanceService {
         // !공휴일 & !휴일 & 연차사용일
         VacationDetail vacationDetail = vacationDetailRepository.findVacationDetailOnDate(username, today);
         if(!isHoliday && vacationDetail != null) {
-            resAttendanceDTO.setStatus("휴가");
+            resAttendanceDTO.setWorkStatus("휴가");
 
             return resAttendanceDTO;
         }
 
         // 0. 가장 최근의 출퇴근 내역
-        Attendance attendance = attendanceRepository.findLatestAttendanceByUsername(username);
+        Attendance latestAttendance = attendanceRepository.findLatestAttendanceByUsername(username);
+        
+        // 가장 최근의 출퇴근 내역이 없으면 첫출근이므로 "출근전" 처리
+        if(latestAttendance == null) {
+            resAttendanceDTO.setWorkStatus("출근전");
+            
+            return resAttendanceDTO;
+        }
 
-        if(attendance == null) return resAttendanceDTO;
+        LocalDate checkInDate = latestAttendance.getCheckInDateTime().toLocalDate();
+        LocalDate checkOutDate = latestAttendance.getCheckOutDateTime().toLocalDate();
 
-        LocalDate checkInDate = attendance.getCheckInDateTime().toLocalDate();
-        LocalDate checkOutDate = attendance.getCheckOutDateTime().toLocalDate();
         if(checkInDate != null) {
+            // 2. 출근전
+            // 가장 최근의 출퇴근 내역 조회(a)
+            // a.출근일시 != 오늘날짜 & a.퇴근일시 != null
+            if(!checkInDate.isEqual(today)) resAttendanceDTO.setWorkStatus("출근전");
+            // 3. 퇴근, 출근 -> 가장 최근의 출퇴근 내역에 있는 workStatus값 사용
+            resAttendanceDTO.setWorkStatus(latestAttendance.getWorkStatus());
+
+            /*
             // 2. 퇴근
             // 가장 최근의 출퇴근 내역 조회(a)
             // a.출근일시 != null & a.퇴근일시 != null & a.출근일시 == 오늘날짜
-            if(checkOutDate != null && checkInDate.isEqual(today)) resAttendanceDTO.setStatus("퇴근");
+            else if(checkOutDate != null && checkInDate.isEqual(today)) resAttendanceDTO.setWorkStatus("퇴근");
             // 3. 출근
             // 가장 최근의 출퇴근 내역 조회(a)
             // a.출근일시 != null & a.퇴근일시 == null
-            else if(checkOutDate == null) resAttendanceDTO.setStatus("출근");
-            // 4. 출근전
-            // 가장 최근의 출퇴근 내역 조회(a)
-            // a.출근일시 != 오늘날짜 & a.퇴근일시 != null
-            else if(!checkInDate.isEqual(today)) resAttendanceDTO.setStatus("출근전");
+            else if(checkOutDate == null) resAttendanceDTO.setWorkStatus("출근");
+            */
         }
 
-        resAttendanceDTO.setAttendanceId(attendance.getAttendanceId());
-        resAttendanceDTO.setCheckInDateTime(attendance.getCheckInDateTime());
-        resAttendanceDTO.setCheckOutDateTime(attendance.getCheckOutDateTime());
-
-        Timestamp oldestCheckInTime = attendanceRepository.findOldestAttendanceByUsername(username);
-
-        // 기존 출근 기록이 아예 없는 경우가 있을 수 있음 (첫출근 + 출근 버튼 누르기 전)
-        if(oldestCheckInTime != null) {
-            resAttendanceDTO.setOldestCheckInDateTime(
-               LocalDateTime.ofInstant(attendanceRepository.findOldestAttendanceByUsername(username)
-                                                            .toInstant(), ZoneId.of("Asia/Seoul"))
-            );
-        }
-
-        // TODO 더 뿌려야 할 데이터
-        // TODO (해당 월의/전체)지각, 조퇴, 결근 횟수
-        // TODO (해당 월의/전체)근무 시간
-        // TODO 출근일, 출근시간, 퇴근일, 퇴근시간, 근무상태(출근/퇴근/출근전/휴가)
+        resAttendanceDTO.setAttendanceId(latestAttendance.getAttendanceId());
+        resAttendanceDTO.setCheckInDateTime(latestAttendance.getCheckInDateTime());
+        resAttendanceDTO.setCheckOutDateTime(latestAttendance.getCheckOutDateTime());
 
         return resAttendanceDTO;
     }
+
+    // 특정 직원의 출퇴근 기록 중 출근 날짜가 가장 오래된 년도 조회
+    public LocalDateTime getOldestCheckInDateTime(String username) throws Exception {
+        return attendanceRepository.findOldestAttendanceByUsername(username);
+    }
+
+    // 특정 직원의 지각 횟수 조회
+//    public ResAttendanceDTO getLateAttendance(LocalTime time, String username, String year, String month) {
+//        if()
+//
+//        return null;
+//    }
+
 }

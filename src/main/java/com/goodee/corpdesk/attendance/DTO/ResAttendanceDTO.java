@@ -16,7 +16,7 @@ import java.time.ZoneId;
 public class ResAttendanceDTO {
 
     private Long attendanceId;
-    private String status;
+    private String workStatus;
     private LocalDateTime checkInDateTime;
     private LocalDateTime checkOutDateTime;
 
