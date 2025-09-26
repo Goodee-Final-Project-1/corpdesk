@@ -13,7 +13,7 @@ public class CalendarService {
 
 	private final AttendanceRepository attendanceRepository;
 
-	public List<Attendance> getAttendance(CalendarDTO calendarDTO) {
-		return attendanceRepository.findAllByCheckInDateTimeBetween(calendarDTO.getStartDateTime(), calendarDTO.getEndDateTime());
+	public List<Attendance> getAttendance(CalendarDTO calendarDTO, String username) {
+		return attendanceRepository.findAllByUsernameAndCheckInDateTimeBetween(username, calendarDTO.getStartDateTime(), calendarDTO.getEndDateTime());
 	}
 }

@@ -59,7 +59,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
 
 	// 캘린더
-	List<Attendance> findAllByCheckInDateTimeBetween(LocalDateTime start, LocalDateTime end);
+	List<Attendance> findAllByUsernameAndCheckInDateTimeBetween(String username, LocalDateTime start, LocalDateTime end);
 
 
 

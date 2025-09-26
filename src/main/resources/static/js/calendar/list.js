@@ -3,28 +3,26 @@ document.addEventListener('DOMContentLoaded', function () {
 	const calendar = new FullCalendar.Calendar(calendarEl, {
 		initialView: 'dayGridMonth',
 		headerToolbar: {
-			left: 'dayGridMonth listWeek timeGridDay',
+			left: 'dayGridMonth dayGridWeek listDay',
 			center: 'title',
 			right: 'today prev,next',
 		},
-		// views: {
-		// 	dayGridMonth: {
-		// 		year: 'numeric',
-		// 		month: 'long',
-		// 	},
-		// 	listWeek: {
-		// 		noEventsText: '이번 주 일정이 없습니다.',
-		// 	},
-		// 	timeGridDay: {
-		// 		titleFormat: {
-		// 			year: 'numeric',
-		// 			month: 'long',
-		// 			day: 'numeric',
-		// 		},
-		// 		nowIndicator: true,
-		// 	},
-		// },
+		views: {
+			// dayGridMonth: {
+			// 	year: 'numeric',
+			// 	month: 'long',
+			// },
+			// listWeek: {
+			// 	noEventsText: '이번 주 일정이 없습니다.',
+			// 	buttonText: 'week'
+			// },
+			listDay: {
+				noEventsContent: '오늘 일정이 없습니다.',
+				buttonText: 'day'
+			}
+		},
 		datesSet: function (info) {
+			calendar.removeAllEvents();
 			getAttendance(info);
 		}
 	});
