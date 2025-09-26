@@ -25,7 +25,15 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final VacationDetailRepository vacationDetailRepository;
 
-    // insert / update 통합 처리
+    /**
+     * Save a new attendance record or update an existing one, while populating audit fields.
+     *
+     * The method sets `modifiedBy` to the currently authenticated user, sets `createdAt`
+     * when inserting (attendanceId is null), and always updates `updatedAt` before persisting.
+     *
+     * @param attendance the Attendance entity to persist; its audit fields (`createdAt`, `updatedAt`, `modifiedBy`) will be updated
+     * @return the persisted Attendance entity
+     */
     @Transactional
     public Attendance saveOrUpdateAttendance(Attendance attendance) {
         // 로그인 사용자 가져오기
@@ -47,19 +55,37 @@ public class AttendanceService {
     }
     
     
-    // ID로 출퇴근 기록 조회
+    /**
+     * Retrieve an Attendance record by its identifier.
+     *
+     * @param id the identifier of the attendance record
+     * @return the Attendance with the given id
+     * @throws RuntimeException if no attendance record exists for the given id
+     */
     public Attendance getAttendanceById(Long id) {
         return attendanceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Attendance record not found"));
     }
 
-    // Attendance 엔티티 저장/업데이트
+    /**
+     * Persist changes to the provided Attendance entity.
+     *
+     * Saves the given Attendance to the repository, applying updates when the entity already exists.
+     */
     @Transactional
     public void updateAttendance(Attendance attendance) {
         attendanceRepository.save(attendance);
     }
 
-    // 소프트 삭제
+    /**
+     * Soft-delete the specified attendance records by marking them inactive.
+     *
+     * Each identified record will have its `useYn` set to `false`, its `modifiedBy`
+     * set to the currently authenticated user, and its `updatedAt` set to the current time.
+     *
+     * @param username      the username requesting the deletion (not used to filter records)
+     * @param attendanceIds list of attendance record IDs to mark inactive
+     */
     @Transactional
     public void deleteAttendances(String username, java.util.List<Long> attendanceIds) {
         attendanceIds.forEach(id -> {
@@ -71,13 +97,27 @@ public class AttendanceService {
         });
     }
 
-    // 특정 직원 출퇴근 내역 조회
+    /**
+     * Retrieve active attendance records for the specified employee.
+     *
+     * @param username the employee's username
+     * @return a list of Attendance entities for the given username where `useYn` is `true`
+     */
     public List<Attendance> getAttendanceByUsername(String username) {
         return attendanceRepository.findByUsernameAndUseYn(username, true);
     }
 
     // 휴가/퇴근/출근/출근전 상태 조회
-    // 가장 최근의 출퇴근 내역이 없거나 위의 네 상태 중 어느 것도 아니면 빈 객체 반환
+    /**
+     * Determine the user's attendance status for today and populate a ResAttendanceDTO with relevant timestamps.
+     *
+     * <p>The returned DTO may have status set to "휴가", "퇴근", "출근", or "출근전" based on today's holiday/vacation checks
+     * and the most recent attendance record; if no applicable record or status exists, an empty DTO is returned.</p>
+     *
+     * @param username the user identifier whose attendance is being evaluated
+     * @param year     the year context (currently unused; intended for future/monthly statistics)
+     * @param month    the month context (currently unused; intended for future/monthly statistics)
+     * @return a ResAttendanceDTO populated with attendanceId, checkInDateTime, checkOutDateTime, oldestCheckInDateTime when available, and a status string describing today's attendance state
     public ResAttendanceDTO getAttendanceStatus(String username, String year, String month) {
 
         ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();

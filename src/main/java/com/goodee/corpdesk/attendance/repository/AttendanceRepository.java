@@ -20,14 +20,31 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 //    // 직원별 + 기간 내 근태 (필요시 사용)
 //    List<Attendance> findAllByEmployeeIdAndCheckInDatetimeBetween(Long employeeId, LocalDateTime start, LocalDateTime end);
     
-	// 살아있는 데이터만 조회
+	/**
+ * Retrieve attendance records for a specific user filtered by the `useYn` flag.
+ *
+ * @param username the user's username
+ * @param useYn    `true` to fetch active records, `false` to fetch inactive records
+ * @return         a list of Attendance entities matching the given username and `useYn`; an empty list if none found
+ */
 	List<Attendance> findByUsernameAndUseYn(String username, Boolean useYn);
 	
-	@Modifying
+	/**
+     * Marks the specified attendance records as inactive by setting their `useYn` flag to false.
+     *
+     * @param ids the attendance record IDs to mark inactive
+     */
+    @Modifying
     @Query("UPDATE Attendance a SET a.useYn = false WHERE a.attendanceId IN :ids")
     void softDeleteByIds(@Param("ids") List<Long> ids);
 
 
+    /**
+     * Retrieve the most recent attendance record for a user.
+     *
+     * @param username the username to look up
+     * @return the Attendance with the latest check-in time for the given username, or `null` if none exists
+     */
     @NativeQuery("""
         SELECT *
         FROM attendance
@@ -37,6 +54,12 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     """)
     public Attendance findLatestAttendanceByUsername(@Param("username") String username);
 
+    /**
+     * Retrieves the oldest check-in timestamp for the specified user.
+     *
+     * @param username the username whose earliest attendance check-in time to retrieve
+     * @return the earliest check_in_date_time for the given username, or null if no records exist
+     */
     @NativeQuery("""
         SELECT check_in_date_time AS oldestCheckInDateTime
         FROM attendance
@@ -47,6 +70,13 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     public Timestamp findOldestAttendanceByUsername(@Param("username") String username);
 
 
-    // 캘린더
+    /**
+ * Finds attendance records for a user whose check-in timestamps fall within the specified range.
+ *
+ * @param username the user's username to filter records by
+ * @param start the inclusive lower bound of the check-in date-time range
+ * @param end the inclusive upper bound of the check-in date-time range
+ * @return a list of Attendance entities matching the username with check-in date-times between `start` and `end`
+ */
     List<Attendance> findAllByUsernameAndCheckInDateTimeBetween(String username, LocalDateTime start, LocalDateTime end);
 }

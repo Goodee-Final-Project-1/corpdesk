@@ -43,6 +43,11 @@ public class HolidayService {
 //    private ObjectMapper objectMapper = new ObjectMapper();
 
     private XmlMapper xmlMapper = new XmlMapper();
+    /**
+     * Fetches holiday data for May 2025 from the external government API, parses the XML response into Holiday entities, and logs the resulting list.
+     *
+     * <p>If XML parsing fails, the parsing error is logged and no Holiday entities are produced. Persistence of the parsed holidays is intentionally disabled in the current implementation.</p>
+     */
     public void getHoliday(){
 
         Mono<List<Holiday>> holidayListMono = webClient.get()
@@ -82,7 +87,12 @@ public class HolidayService {
 
     }
 
-    // HolidayItemDTO를 Holiday 엔티티로 변환하는 메서드
+    /**
+     * Convert a HolidayItemDTO into a Holiday entity.
+     *
+     * @param itemDTO the DTO containing holiday data; expects `locdate` as an integer in YYYYMMDD form, `dateName`, and `isHoliday`
+     * @return a Holiday populated with `dateName`, `locdate` parsed to a LocalDate, and `isHoliday` taken as the first character
+     */
     private Holiday convertToEntity(HolidayItemDTO itemDTO) {
         // 1. Integer(20250505)를 String으로 변환
         String dateString = String.valueOf(itemDTO.getLocdate());

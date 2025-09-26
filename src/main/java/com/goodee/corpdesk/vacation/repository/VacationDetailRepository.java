@@ -10,6 +10,13 @@ import java.time.LocalDate;
 
 public interface VacationDetailRepository extends JpaRepository<VacationDetail, Long> {
 
+    /**
+     * Finds the vacation detail that applies to the given user's vacation on the specified date.
+     *
+     * @param username the user's username whose vacation is being queried
+     * @param date the date to check for an active vacation detail
+     * @return the VacationDetail covering the specified date for the user's vacation, or `null` if none exists
+     */
     @NativeQuery("""
         WITH vd AS (
         	SELECT *
