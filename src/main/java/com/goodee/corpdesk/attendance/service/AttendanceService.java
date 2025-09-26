@@ -1,22 +1,21 @@
 package com.goodee.corpdesk.attendance.service;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
 import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -118,6 +117,7 @@ public class AttendanceService {
      * @param year     the year context (currently unused; intended for future/monthly statistics)
      * @param month    the month context (currently unused; intended for future/monthly statistics)
      * @return a ResAttendanceDTO populated with attendanceId, checkInDateTime, checkOutDateTime, oldestCheckInDateTime when available, and a status string describing today's attendance state
+	 */
     public ResAttendanceDTO getAttendanceStatus(String username, String year, String month) {
 
         ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();

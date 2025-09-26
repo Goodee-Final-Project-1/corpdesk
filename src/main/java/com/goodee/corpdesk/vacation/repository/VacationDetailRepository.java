@@ -1,12 +1,12 @@
 package com.goodee.corpdesk.vacation.repository;
 
-import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface VacationDetailRepository extends JpaRepository<VacationDetail, Long> {
 
@@ -30,4 +30,19 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
     """)
     public VacationDetail findVacationDetailOnDate(@Param("username") String username, @Param("date")LocalDate date);
 
+
+
+
+	// 캘린더
+	@NativeQuery("""
+	SELECT *
+	FROM vacation_detail
+	WHERE vacation_id = :vacationId
+	AND (
+	    start_date BETWEEN :start AND :end
+	    OR
+	    end_date BETWEEN :start AND :end
+	)
+""")
+	List<VacationDetail> findAllByVacationIdAndDateTime(Integer vacationId, LocalDate start, LocalDate end);
 }

@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			calendar.removeAllEvents();
 			currentDateInfo = info;
 			if (checkAttendance.checked == true) getAttendance(info);
+			if (checkVacation.checked == true) getVacation(info);
 		},
 		themeSystem: 'bootstrap5',
 	});
@@ -74,6 +75,50 @@ document.addEventListener('DOMContentLoaded', function () {
 					end: a.checkOutDateTime,
 					groupId: 'attendance',
 					backgroundColor: '#9e6de0'
+				});
+			});
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	checkVacation.addEventListener('change', function () {
+		if (checkVacation.checked == true) getVacation(currentDateInfo);
+		else {
+			calendar.getEvents().forEach(event => {
+				if (event.groupId == 'vacation') {
+					event.remove();
+				}
+			})
+		}
+	})
+
+	async function getVacation(info) {
+		console.log(info);
+		try {
+			const response = await fetch('/api/calendar/vacation', {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({
+					startDateTime: info.start,
+					endDateTime: info.end
+				})
+			});
+
+			if (!response.ok) throw new Error('수신 오류');
+			const data = await response.json();
+			console.log(data);
+
+			data.forEach(v => {
+				calendar.addEvent({
+					id: v.vacationId,
+					title: v.vacationTypeId,
+					start: v.startDate,
+					end: v.endDate,
+					groupId: 'vacation',
+					backgroundColor: '#fd5190'
 				});
 			});
 		} catch (error) {
