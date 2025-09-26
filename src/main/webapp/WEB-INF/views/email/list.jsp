@@ -24,7 +24,10 @@
 		<jsp:include page="aside.jsp"/>
 		<%--	<%@ include file="aside.jsp"%>--%>
 		<main class="col-lg-8 col-xl-9 col-xxl-10">
-			<div class="email-right-column p-4 p-xl-5">
+			<div id="spinner" class="d-flex d-none align-items-center justify-content-center" style="height: 160px">
+				<div class="sk-pulse"></div>
+			</div>
+			<div id="list" class="d-none email-right-column p-4 p-xl-5">
 				<div class="email-right-header justify-content-center mb-0">
 					<%-- 페이징 --%>
 					<!-- Flat Rounded Pagination -->
@@ -32,7 +35,8 @@
 					</div>
 				</div>
 				<div class="border border-top-0 rounded table-responsive email-list">
-					<table id="table" class="table mb-0 table-email">
+					<table class="table mb-0 table-email">
+						<tbody id="tbody"></tbody>
 					</table>
 				</div>
 			</div>

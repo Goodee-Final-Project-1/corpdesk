@@ -24,7 +24,10 @@
 		<jsp:include page="aside.jsp"/>
 		<main class="col-lg-8 col-xl-9 col-xxl-10">
 			<div class="email-right-column p-4 p-xl-5">
-				<div class="border rounded email-details">
+				<div id="spinner" class="d-flex d-none align-items-center justify-content-center" style="height: 160px">
+					<div class="sk-pulse"></div>
+				</div>
+				<div id="detail" class="d-none border rounded email-details">
 					<div class="email-details-header">
 						<h4 id="subject" class="text-dark"></h4>
 					</div>
@@ -43,7 +46,7 @@
 							</ul>
 						</div>
 						<div>
-							<p id="content"></p>
+							<div id="content" class="overflow-auto"></div>
 						</div>
 					</div>
 				</div>
@@ -57,6 +60,8 @@
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.7/dist/purify.min.js"></script>
 <script src="/js/email/detail.js"></script>
+
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>

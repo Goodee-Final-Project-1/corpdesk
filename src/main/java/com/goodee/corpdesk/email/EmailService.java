@@ -3,6 +3,8 @@ package com.goodee.corpdesk.email;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import jakarta.mail.*;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.internet.MimeUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.stereotype.Service;
 
@@ -157,14 +159,18 @@ public class EmailService {
 		emailDTO.setFrom(from);
 		emailDTO.setSubject(message.getSubject());
 		emailDTO.setEmailNo(message.getMessageNumber());
-		emailDTO.setReceivedDate(format.format(message.getReceivedDate()));
-		emailDTO.setSentDate(format.format(message.getSentDate()));
+		if (message.getReceivedDate() == null) emailDTO.setReceivedDate("0000-00-00 00:00:00");
+		else emailDTO.setReceivedDate(format.format(message.getReceivedDate()));
+		if (message.getSentDate() == null) emailDTO.setSentDate("0000-00-00 00:00:00");
+		else emailDTO.setSentDate(format.format(message.getSentDate()));
 		emailDTO.setRecipients(Arrays.toString(message.getAllRecipients()));
 
 		Object content = message.getContent();
 
 		if (content instanceof String) {
-			emailDTO.setText(content.toString());
+			String text = content.toString().replaceAll("\n", "<br/>")
+					.replaceAll(" ", "&nbsp;");
+			emailDTO.setText(text);
 		} else if (content instanceof Multipart) {
 			emailDTO.setText(getTextFromMultipart((Multipart) content));
 		}
@@ -172,18 +178,23 @@ public class EmailService {
 		return emailDTO;
 	}
 
-	// FIXME: content에서 text 정보만 가져오기
 	private String getTextFromMultipart(Multipart multipart) throws Exception {
 		StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < multipart.getCount(); i++) {
 			BodyPart bodyPart = multipart.getBodyPart(i);
 
-			if (bodyPart.isMimeType("text/plain")) {
+//			if (bodyPart.isMimeType("text/plain")) {
+//				sb.append(bodyPart.getContent()).append('\n');
+//			} else
+			if (bodyPart.isMimeType("text/html")) {
 				sb.append(bodyPart.getContent());
+			} else if (bodyPart.isMimeType("multipart/*")) {
+				MimeMultipart mimeMultipart = (MimeMultipart) bodyPart.getContent();
+				sb.append(this.getTextFromMultipart(mimeMultipart));
 			}
-//			else if (bodyPart.isMimeType("text/html")) {
-//				sb.append(bodyPart.getContent());
+//			else {
+//				log.info("첨부 파일: {}", bodyPart.getFileName());
 //			}
 		}
 
@@ -206,7 +217,7 @@ public class EmailService {
 	}
 
 	// 메일 보내기
-	public void sendSimpleMail(SendDTO sendDTO) throws Exception {
+	public void sendMail(SendDTO sendDTO) throws Exception {
 		Optional<Employee> optional = employeeRepository.findById(sendDTO.getUser());
 		Employee employee = optional.get();
 
@@ -217,16 +228,16 @@ public class EmailService {
 
 		JavaMailSender mailSender = this.javaMailSender(employee);
 
-		SimpleMailMessage message = new SimpleMailMessage();
-//		message.setFrom(sendDTO.getFrom());
+		// NOTE: SimpleMessage에서 MimeMessage로 전환
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
 		String encoded = MimeUtility.encodeText(employee.getName());
 		String from = encoded + " <" + employee.getExternalEmail() + ">";
-		message.setFrom(from);
-		message.setTo(sendDTO.getTo());
-		message.setSubject(sendDTO.getSubject());
-		String text = sendDTO.getText().replaceAll("<br\s*/?>", " ")
-				.replaceAll("</p>", "\n").replaceAll("<[^>]*>", "");
-		message.setText(text);
+		helper.setFrom(from);
+		helper.setTo(sendDTO.getTo());
+		helper.setSubject(sendDTO.getSubject());
+		helper.setText(sendDTO.getText(), true);
 
 		mailSender.send(message);
 	}

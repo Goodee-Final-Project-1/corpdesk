@@ -149,7 +149,7 @@
             </li>
 
             <li class="dropdown-footer">
-              <a class="dropdown-link-item" href="sign-in.html"> <!-- TODO 추후 사용시 href 변경 -->
+              <a class="dropdown-link-item" href="/logout"> <!-- TODO 추후 사용시 href 변경 -->
               	<i class="mdi mdi-logout"></i> 로그아웃
               </a>
             </li>
