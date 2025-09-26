@@ -16,7 +16,7 @@ public class CalendarService {
 //	private final PersonalScheduleRepository personalScheduleRepository;
 
 	public List<Attendance> getAttendance(CalendarDTO calendarDTO, String username) {
-		return attendanceRepository.findAllByUsernameAndUseYnTrueAndCheckInDateTimeGreaterThanEqualAndCheckOutDateTimeLessThanEqual(username, calendarDTO.getStartDateTime(), calendarDTO.getEndDateTime());
+		return attendanceRepository.findAllByUsernameAndDateTime(username, calendarDTO.getStartDateTime(), calendarDTO.getEndDateTime());
 	}
 
 //	public List<VacationDetail> getVacation(CalendarDTO calendarDTO, String username) {
@@ -24,6 +24,6 @@ public class CalendarService {
 //	}
 
 //	public List<PersonalSchedule> getSchedule(CalendarDTO calendarDTO, String username) {
-//		return personalScheduleRepository.findAllByUsernameAndUseYnTrueAndScheduleDateTimeBetween(username, calendarDTO.getStartDate(), calendarDTO.getEndDate());
+//		return personalScheduleRepository.findAllByUsernameAndUseYnTrueAndScheduleDateTimeGreaterThanEqualAndEndDateLessThanEqual(username, calendarDTO.getStartDate(), calendarDTO.getEndDate());
 //	}
 }

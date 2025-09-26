@@ -2,6 +2,7 @@ package com.goodee.corpdesk.attendance;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -59,7 +60,17 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
 
 	// 캘린더
-	List<Attendance> findAllByUsernameAndUseYnTrueAndCheckInDateTimeGreaterThanEqualAndCheckOutDateTimeLessThanEqual(String username, LocalDateTime start, LocalDateTime end);
+	@NativeQuery("""
+	SELECT *
+	FROM attendance
+	WHERE username = :username
+	AND (
+	    check_in_date_time BETWEEN :start AND :end
+	    OR
+	    check_out_date_time BETWEEN :start AND :end
+	)
+""")
+	List<Attendance> findAllByUsernameAndDateTime(String username, LocalDateTime start, LocalDateTime end);
 
 
 

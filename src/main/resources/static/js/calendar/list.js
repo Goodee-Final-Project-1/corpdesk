@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			calendar.removeAllEvents();
 			currentDateInfo = info;
 			if (checkAttendance.checked == true) getAttendance(info);
-		}
+		},
+		themeSystem: 'bootstrap5',
 	});
 	calendar.render();
 
@@ -48,8 +49,8 @@ document.addEventListener('DOMContentLoaded', function () {
 	})
 
 	async function getAttendance(info) {
+		console.log(info);
 		try {
-			console.log(info);
 			const response = await fetch('/api/calendar/attendance', {
 				method: 'POST',
 				headers: {
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			if (!response.ok) throw new Error('수신 오류');
 			const data = await response.json();
+			console.log(data);
 
 			data.forEach(a => {
 				calendar.addEvent({
@@ -71,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					start: a.checkInDateTime,
 					end: a.checkOutDateTime,
 					groupId: 'attendance',
+					backgroundColor: '#9e6de0'
 				});
 			});
 		} catch (error) {
@@ -80,3 +83,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 });
+
+
+/* primary		#9e6de0
+ * secondary	#fd5190
+ * success		#0acb8e
+ * warning		#fec400
+ */
