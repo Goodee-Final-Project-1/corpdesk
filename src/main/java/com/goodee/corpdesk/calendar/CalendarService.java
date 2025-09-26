@@ -1,7 +1,7 @@
 package com.goodee.corpdesk.calendar;
 
-import com.goodee.corpdesk.attendance.Attendance;
-import com.goodee.corpdesk.attendance.AttendanceRepository;
+import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
