@@ -21,11 +21,6 @@ public class AttendanceController {
     @Autowired
     private EmployeeService employeeService;
 
-    /**
-     * Exposes the configured attendance category value to the model under the key "cat".
-     *
-     * @return the configured attendance category string
-     */
     @ModelAttribute("cat")
     public String getCat() {
         return cat;
@@ -42,10 +37,10 @@ public class AttendanceController {
     // TODO 출근일, 출근시간, 퇴근일, 퇴근시간, 근무상태(출근/퇴근/출근전/휴가)
 
     /**
-     * Render the attendance list view for the specified user.
+     * 특정 직원에 대한 출퇴근 목록 화면을 반환
      *
-     * @param username the username whose attendance view is requested
-     * @return the logical view name "attendance/list"
+     * @param username 직원의 username
+     * @return 출퇴근 목록 화면 jsp가 있는 경로
      */
     @GetMapping("list")
     public String list(@RequestParam("username") String username, Model model)  throws Exception {
