@@ -36,7 +36,11 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
         FROM attendance
         WHERE
             use_yn = true
-        	AND check_in_date_time = (SELECT MAX(check_in_date_time) FROM attendance WHERE username = :username)
+        	AND check_in_date_time = (SELECT MAX(check_in_date_time)
+                                      FROM attendance
+                                      WHERE
+                                          use_yn = true
+                                          AND username = :username)
         	AND username  = :username
     """)
     Attendance findLatestAttendanceByUsername(@Param("username") String username);
@@ -47,7 +51,11 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
         FROM attendance
         WHERE
             use_yn = true
-        	AND check_in_date_time = (SELECT MIN(check_in_date_time) FROM attendance WHERE username = :username)
+        	AND check_in_date_time = (SELECT MIN(check_in_date_time)
+                                      FROM attendance
+                                      WHERE
+                                          use_yn = true
+                                          AND username = :username)
         	AND username  = :username
     """)
     LocalDateTime findOldestAttendanceByUsername(@Param("username") String username);
@@ -76,7 +84,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
             use_yn = true
             AND work_status = '결근'
             AND username = :username
-            AND (:month IS NULL OR YEAR(DATE(created_at) - INTERVAL 1 DAY) = :year)
+            AND (:year IS NULL OR YEAR(DATE(created_at) - INTERVAL 1 DAY) = :year)
             AND (:month IS NULL OR MONTH(DATE(created_at) - INTERVAL 1 DAY) = :month)
     """)
     long countAbsentDaysByUsernameAndYearMonth(@Param("username") String username,
