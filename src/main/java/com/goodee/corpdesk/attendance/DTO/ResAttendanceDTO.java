@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,4 +23,11 @@ public class ResAttendanceDTO {
 
     private LocalDateTime oldestCheckInDateTime;
 
+    private BigDecimal totalWorkHours;
+    private BigDecimal totalWorkDays;
+
+    public ResAttendanceDTO(BigDecimal totalWorkHours, BigDecimal totalWorkDays) {
+        this.totalWorkHours = totalWorkHours;
+        this.totalWorkDays = totalWorkDays;
+    }
 }

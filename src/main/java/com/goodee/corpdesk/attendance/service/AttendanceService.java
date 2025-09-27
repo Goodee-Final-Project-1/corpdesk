@@ -32,11 +32,6 @@ public class AttendanceService {
     @Value("${attendance.work-hour.end}")
     private String workHourEnd;
 
-    @Value("${attendance.work-hour.start}")
-    private String workHourStart;
-    @Value("${attendance.work-hour.end}")
-    private String workHourEnd;
-
     /**
      * Save a new attendance record or update an existing one, while populating audit fields.
      *
