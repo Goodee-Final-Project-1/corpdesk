@@ -29,9 +29,9 @@ public class AttendanceService {
     private final VacationDetailRepository vacationDetailRepository;
 
     @Value("${attendance.work-hour.start}")
-    private String workHourStart;
+    private String workStartHour;
     @Value("${attendance.work-hour.end}")
-    private String workHourEnd;
+    private String workEndHour;
 
     /**
      * 새 출퇴근 내역을 생성하거나 기존 출퇴근 내역을 수정합니다.
@@ -191,25 +191,35 @@ public class AttendanceService {
     // 특정 직원의 지각, 조퇴, 결근 횟수를 한 번에 묶어서 반환하는 DTO를 생성합니다.
     // year와 month가 null이면 전체 횟수를 조회합니다.
     public ResAttendanceDTO getAttendanceCounts(String username, String year, String month){
-        // TODO countLateArrivalsByUsernameAndYearMonth, countEarlyLeavingsByUsernameAndYearMonth, countAbsentDaysByUsernameAndYearMonth
 
-        return null;
+        ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();
+        LocalTime workStartTime = LocalTime.parse(workStartHour);
+        LocalTime workEndTime = LocalTime.parse(workEndHour);
+
+        resAttendanceDTO.setLateArrivalsCnt(
+                attendanceRepository.countLateArrivalsByUsernameAndYearMonth(workStartTime, username,  year, month)
+        );
+        resAttendanceDTO.setAbsentDaysCnt(
+                attendanceRepository.countAbsentDaysByUsernameAndYearMonth(username, year, month)
+        );
+        resAttendanceDTO.setEarlyLeavingsCnt(
+                attendanceRepository.countEarlyLeavingsByUsernameAndYearMonth(workEndTime, username, year, month)
+        );
+
+        return resAttendanceDTO;
+
     }
 
     // 특정 직원의 총 근무 시간 및 총 근무 일수를 조회하여 반환합니다.
     // year와 month가 null이면 전체 횟수를 조회합니다.
     public ResAttendanceDTO getWorkSummary(String username, String year, String month){
-        // TODO findWorkSummaryByUsernameAndYearMonth
-
-        return null;
+       return attendanceRepository.findWorkSummaryByUsernameAndYearMonth(username, year, month);
     }
 
     // 특정 직원의 상세 출퇴근 기록 목록 (출근일, 출퇴근 시간, 근무 상태 등)을 조회합니다.
     // year와 month가 null이면 전체 횟수를 조회합니다.
-    public ResAttendanceDTO getAttendanceDetailList(String username, String year, String month){
-        // TODO findByUseYnAndUsernameAndYearMonth
-
-        return null;
+    public List<ResAttendanceDTO> getAttendanceDetailList(String username, String year, String month){
+        return attendanceRepository.findByUseYnAndUsernameAndYearMonth(username, year, month).stream().map(Attendance::toDTO).toList();
     }
 
 }
