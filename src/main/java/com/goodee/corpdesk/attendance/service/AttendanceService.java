@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
@@ -33,15 +34,15 @@ public class AttendanceService {
     private String workHourEnd;
 
     /**
-     * Save a new attendance record or update an existing one, while populating audit fields.
+     * 새 출퇴근 내역을 생성하거나 기존 출퇴근 내역을 수정합니다.
      *
-     * The method sets `modifiedBy` to the currently authenticated user, sets `createdAt`
-     * when inserting (attendanceId is null), and always updates `updatedAt` before persisting.
+     * 현재 인증된 사용자로 'modifiedBy'를 설정합니다.
+     * insert하는 경우 'createdAt'을 설정합니다.
+     * update하는 경우 'updatedAt'을 설정합니다.
      *
-     * @param attendance the Attendance entity to persist; its audit fields (`createdAt`, `updatedAt`, `modifiedBy`) will be updated
-     * @return the persisted Attendance entity
+     * @param attendance 생성 혹은 수정할 Attendance entity
+     * @return 생성 혹은 수정된 Attendance entity
      */
-    @Transactional
     public Attendance saveOrUpdateAttendance(Attendance attendance) {
         // 로그인 사용자 가져오기
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -60,14 +61,13 @@ public class AttendanceService {
 
         return attendanceRepository.save(attendance);
     }
-    
-    
+
     /**
-     * Retrieve an Attendance record by its identifier.
+     * 출퇴근pk로 출퇴근 내역을 조회합니다.
      *
-     * @param id the identifier of the attendance record
-     * @return the Attendance with the given id
-     * @throws RuntimeException if no attendance record exists for the given id
+     * @param id 출퇴근pk
+     * @return id로 조회한 Attendance entity
+     * @throws RuntimeException 만약 id로 조회할 출퇴근 내역이 없다면 발생합니다.
      */
     public Attendance getAttendanceById(Long id) {
         return attendanceRepository.findById(id)
@@ -75,25 +75,25 @@ public class AttendanceService {
     }
 
     /**
-     * Persist changes to the provided Attendance entity.
+     * 제공된 Attendance 엔티티에 대한 변경 사항을 영속화합니다.
      *
-     * Saves the given Attendance to the repository, applying updates when the entity already exists.
+     * 주어진 Attendance 엔티티를 레포지토리에 저장하며, 이미 존재하는 엔티티일 경우 업데이트를 적용합니다.
+     *
+     * @param attendance 저장할 Attendance 엔티티
      */
-    @Transactional
     public void updateAttendance(Attendance attendance) {
         attendanceRepository.save(attendance);
     }
 
     /**
-     * Soft-delete the specified attendance records by marking them inactive.
+     * 지정된 출퇴근 기록을 비활성(inactive)으로 표시하여 소프트 삭제합니다.
      *
-     * Each identified record will have its `useYn` set to `false`, its `modifiedBy`
-     * set to the currently authenticated user, and its `updatedAt` set to the current time.
+     * 식별된 각 기록은 `useYn`이 `false`로 설정되고, `modifiedBy`는 현재 인증된 사용자로,
+     * `updatedAt`은 현재 시간으로 설정됩니다.
      *
-     * @param username      the username requesting the deletion (not used to filter records)
-     * @param attendanceIds list of attendance record IDs to mark inactive
+     * @param username      삭제를 요청하는 사용자 이름 (기록 필터링에는 사용되지 않습니다.)
+     * @param attendanceIds 비활성으로 표시할 출퇴근 기록 ID 목록
      */
-    @Transactional
     public void deleteAttendances(String username, java.util.List<Long> attendanceIds) {
         attendanceIds.forEach(id -> {
             Attendance att = getAttendanceById(id);
@@ -105,10 +105,10 @@ public class AttendanceService {
     }
 
     /**
-     * Retrieve active attendance records for the specified employee.
+     * 지정된 직원의 활성(Active) 출퇴근 기록을 조회합니다.
      *
-     * @param username the employee's username
-     * @return a list of Attendance entities for the given username where `useYn` is `true`
+     * @param username 직원의 사용자 이름
+     * @return 주어진 사용자 이름에 대해 `useYn`이 `true`인 Attendance 엔티티 목록
      */
     public List<Attendance> getAttendanceByUsername(String username) {
         return attendanceRepository.findByUsernameAndUseYn(username, true);
@@ -177,16 +177,39 @@ public class AttendanceService {
         return resAttendanceDTO;
     }
 
-    // 특정 직원의 출퇴근 기록 중 출근 날짜가 가장 오래된 년도 조회
+    /**
+     * 특정 직원의 출퇴근 기록 중 출근 날짜가 가장 오래된 시점을 조회합니다.
+     *
+     * @param username 직원의 사용자 이름
+     * @return 가장 오래된 출근 시점 (LocalDateTime)
+     * @throws Exception 예외 발생 시
+     */
     public LocalDateTime getOldestCheckInDateTime(String username) throws Exception {
         return attendanceRepository.findOldestAttendanceByUsername(username);
     }
 
-    // 특정 직원의 지각 횟수 조회
-//    public ResAttendanceDTO getLateAttendance(LocalTime time, String username, String year, String month) {
-//        if()
-//
-//        return null;
-//    }
+    // 특정 직원의 지각, 조퇴, 결근 횟수를 한 번에 묶어서 반환하는 DTO를 생성합니다.
+    // year와 month가 null이면 전체 횟수를 조회합니다.
+    public ResAttendanceDTO getAttendanceCounts(String username, String year, String month){
+        // TODO countLateArrivalsByUsernameAndYearMonth, countEarlyLeavingsByUsernameAndYearMonth, countAbsentDaysByUsernameAndYearMonth
+
+        return null;
+    }
+
+    // 특정 직원의 총 근무 시간 및 총 근무 일수를 조회하여 반환합니다.
+    // year와 month가 null이면 전체 횟수를 조회합니다.
+    public ResAttendanceDTO getWorkSummary(String username, String year, String month){
+        // TODO findWorkSummaryByUsernameAndYearMonth
+
+        return null;
+    }
+
+    // 특정 직원의 상세 출퇴근 기록 목록 (출근일, 출퇴근 시간, 근무 상태 등)을 조회합니다.
+    // year와 month가 null이면 전체 횟수를 조회합니다.
+    public ResAttendanceDTO getAttendanceDetailList(String username, String year, String month){
+        // TODO findByUseYnAndUsernameAndYearMonth
+
+        return null;
+    }
 
 }

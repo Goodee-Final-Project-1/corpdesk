@@ -1,9 +1,6 @@
 package com.goodee.corpdesk.attendance.DTO;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -13,7 +10,8 @@ import java.time.ZoneId;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
+@Builder
+@NoArgsConstructor @AllArgsConstructor
 public class ResAttendanceDTO {
 
     private Long attendanceId;
@@ -22,6 +20,10 @@ public class ResAttendanceDTO {
     private LocalDateTime checkOutDateTime;
 
     private LocalDateTime oldestCheckInDateTime;
+
+    private Long lateArrivalsCnt;
+    private Long absentDaysCnt;
+    private Long earlyLeavingsCnt;
 
     private BigDecimal totalWorkHours;
     private BigDecimal totalWorkDays;
