@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 
 @Getter
@@ -19,9 +20,12 @@ public class ResAttendanceDTO {
     private String workStatus;
     private LocalDateTime checkInDateTime;
     private LocalDateTime checkOutDateTime;
+    private String username;
 
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
+    private LocalTime checkInTime;
+    private LocalTime checkOutTime;
     private Boolean today;
 
     private LocalDateTime oldestCheckInDateTime;

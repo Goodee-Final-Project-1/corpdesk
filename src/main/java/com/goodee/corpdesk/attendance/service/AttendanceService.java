@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
@@ -115,6 +116,9 @@ public class AttendanceService {
         return attendanceRepository.findByUsernameAndUseYn(username, true);
     }
 
+
+    // =================== passing7by
+
     // 특정 직원의 현재 상태(휴가/퇴근/출근/출근전) & 출퇴근id & 출퇴근일시 조회
     public ResAttendanceDTO getCurrentAttendance(String username) throws Exception {
 
@@ -149,7 +153,8 @@ public class AttendanceService {
         }
 
         LocalDate checkInDate = latestAttendance.getCheckInDateTime().toLocalDate();
-        LocalDate checkOutDate = latestAttendance.getCheckOutDateTime().toLocalDate();
+        LocalDate checkOutDate = latestAttendance.getCheckOutDateTime() == null ?
+                                    null : latestAttendance.getCheckOutDateTime().toLocalDate();
 
         if(checkInDate != null) {
             // 2. 출근전
@@ -178,13 +183,18 @@ public class AttendanceService {
 
         resAttendanceDTO.setCheckInDate(checkInDate);
         resAttendanceDTO.setCheckOutDate(checkOutDate);
+        resAttendanceDTO.setCheckInTime(latestAttendance.getCheckInDateTime().toLocalTime());
+        resAttendanceDTO.setCheckOutTime(latestAttendance.getCheckOutDateTime() == null ?
+                                        null : latestAttendance.getCheckOutDateTime().toLocalTime());
 
-        resAttendanceDTO.setToday(checkOutDate.isEqual(today));
+        resAttendanceDTO.setToday(checkOutDate == null ? null : checkOutDate.isEqual(today));
+
+        resAttendanceDTO.setAttendanceId(latestAttendance.getAttendanceId());
 
         return resAttendanceDTO;
     }
 
-    public List<Integer> getYearRangeByEmployee(String username) {
+    public List<Integer> getYearRangeByEmployee(String username) throws Exception {
         Integer oldestYear = attendanceRepository.findOldestCheckInYearByUsername(username);
         int currentYear = LocalDate.now().getYear();
 
@@ -201,7 +211,7 @@ public class AttendanceService {
 
     // 특정 직원의 지각, 조퇴, 결근 횟수를 한 번에 묶어서 반환하는 DTO를 생성합니다.
     // year와 month가 null이면 전체 횟수를 조회합니다.
-    public ResAttendanceDTO getAttendanceCounts(String username, String year, String month){
+    public ResAttendanceDTO getAttendanceCounts(String username, String year, String month) throws Exception {
 
         ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();
         LocalTime workStartTime = LocalTime.parse(workStartHour);
@@ -223,14 +233,36 @@ public class AttendanceService {
 
     // 특정 직원의 총 근무 시간 및 총 근무 일수를 조회하여 반환합니다.
     // year와 month가 null이면 전체 횟수를 조회합니다.
-    public ResAttendanceDTO getWorkSummary(String username, String year, String month){
+    public ResAttendanceDTO getWorkSummary(String username, String year, String month) throws Exception {
        return attendanceRepository.findWorkSummaryByUsernameAndYearMonth(username, year, month);
     }
 
     // 특정 직원의 상세 출퇴근 기록 목록 (출근일, 출퇴근 시간, 근무 상태 등)을 조회합니다.
     // year와 month가 null이면 전체 횟수를 조회합니다.
-    public List<ResAttendanceDTO> getAttendanceDetailList(String username, String year, String month){
+    public List<ResAttendanceDTO> getAttendanceDetailList(String username, String year, String month) throws Exception {
         return attendanceRepository.findByUseYnAndUsernameAndYearMonth(username, year, month).stream().map(Attendance::toDTO).toList();
+    }
+
+    public ResAttendanceDTO checkIn(String username) throws Exception {
+        // username, 출근일시, 상태, modifiedBy insert
+        Attendance newAttd = new Attendance();
+        newAttd.setUsername(username);
+        newAttd.setCheckInDateTime(LocalDateTime.now());
+        newAttd.setWorkStatus("출근");
+        newAttd.setModifiedBy(username);
+
+        return attendanceRepository.save(newAttd).toDTO();
+    }
+
+    public ResAttendanceDTO checkOut(Long attendanceId, String username) throws Exception {
+        // 퇴근일시, 상태, modifiedBy update
+        Attendance attd = attendanceRepository.findById(attendanceId).get();
+
+        attd.setCheckOutDateTime(LocalDateTime.now());
+        attd.setWorkStatus("퇴근");
+        attd.setModifiedBy(username);
+
+        return attendanceRepository.save(attd).toDTO();
     }
 
 }

@@ -14,12 +14,16 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Getter
 @Setter
 @ToString
 @Entity
 @Table(name = "attendance")
+@DynamicInsert
+@DynamicUpdate
 public class Attendance extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,10 +65,12 @@ public class Attendance extends BaseEntity {
 
     public ResAttendanceDTO toDTO() {
         return ResAttendanceDTO.builder()
-                .checkInDateTime(checkInDateTime)
-                .checkOutDateTime(checkOutDateTime)
-                .workStatus(workStatus)
-                .build();
+                                .attendanceId(attendanceId)
+                                .username(username)
+                                .checkInDateTime(checkInDateTime)
+                                .checkOutDateTime(checkOutDateTime)
+                                .workStatus(workStatus)
+                                .build();
     }
 
 }

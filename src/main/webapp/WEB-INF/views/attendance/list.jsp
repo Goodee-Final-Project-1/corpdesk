@@ -46,11 +46,11 @@
               <c:otherwise>
                 <div class="text-center">
                   <p class="card-text mb-1">출근</p>
-                  <p class="card-text mb-0">${currAttd.checkInTime}</p>
+                  <p class="card-text mb-0">${fn:substring(currAttd.checkInTime, 0, 8)}</p>
                 </div>
                 <div class="text-center">
                   <p class="card-text mb-1">퇴근</p>
-                  <p class="card-text mb-0">${currAttd.checkOutTime eq null ? '00:00:00' : currAttd.checkOutTime}</p>
+                  <p class="card-text mb-0">${currAttd.checkOutTime eq null ? '00:00:00' : fn:substring(currAttd.checkOutTime, 0, 8)}</p>
                 </div>
               </c:otherwise>
             </c:choose>
@@ -61,17 +61,20 @@
         <!-- 출근/퇴근 버튼 -->
         <div class="row no-gutters">
           <div class="col-6 pr-2">
-            <%-- TODO 출근 버튼 클릭시 출근내역 insert --%>
-            <button type="button" class="btn btn-info btn-lg btn-block"
-              ${currAttd.workStatus eq '휴가' or currAttd.workStatus eq '출근' ? 'disabled' : ''}>출근
-            </button>
+            <form method="POST" action="/attendance">
+              <button class="btn btn-info btn-lg btn-block"
+                ${currAttd.workStatus eq '휴가' or currAttd.workStatus eq '출근' ? 'disabled' : ''}>출근
+              </button>
+            </form>
           </div>
 
           <div class="col-6 pl-2">
-            <%-- <%-- TODO 퇴근 버튼 클릭시 출근내역 update --%> --%>
-            <button type="button" class="btn btn-info btn-lg btn-block" disabled
-              ${currAttd.workStatus eq '휴가' or currAttd.workStatus eq '출근전' ? 'disabled' : ''}>퇴근
-            </button>
+            <form method="post" action="/attendance/${currAttd.attendanceId}">
+              <input type="hidden" name="_method" value="PATCH">
+              <button class="btn btn-info btn-lg btn-block"
+                ${currAttd.workStatus eq '휴가' or currAttd.workStatus eq '출근전' ? 'disabled' : ''}>퇴근
+              </button>
+            </form>
           </div>
         </div>
 
@@ -91,38 +94,48 @@
 
         <!-- 년, 월 선택 - 한 줄 배치 -->
         <div class="row mb-4 ml-0">
-          <div class="mr-3">
-            <div class="form-group">
-              <div class="d-flex align-items-center">
-                <select class="form-control mr-2" id="yearSelect" name="year">
-                  <option value="0">전체</option>
-                  <c:forEach var="year" items="${yearRange}">
-                    <option value="${year}" ${year eq currentYear ? 'selected' : ''}>
-                      ${year}
-                    </option>
-                  </c:forEach>
-                </select>
-                <span>년</span>
-              </div>
-            </div>
-          </div>
-          <div class="mr-6">
-            <div class="form-group">
-              <div class="d-flex align-items-center">
-                <select class="form-control mr-2" id="monthSelect">
-                    <option value="0" selected>전체</option>
-                    <c:forEach begin="1" end="12" var="num">
-                      <option value="${num}" ${num eq currentMonth ? 'selected' : ''}>${num}</option>
+
+          <%-- TODO 추후 인증정보를 사용하게 되면 username 삭제 --%>
+          <form method="get" action="/attendance/list">
+
+            <input type="hidden" name="username" value="jung_frontend">
+
+            <div class="mr-3">
+              <div class="form-group">
+                <div class="d-flex align-items-center">
+                  <select class="form-control mr-2" id="yearSelect" name="year">
+                    <option value="0">전체</option>
+                    <c:forEach var="year" items="${yearRange}">
+                      <option value="${year}" ${year eq currentYear ? 'selected' : ''}>
+                        ${year}
+                      </option>
                     </c:forEach>
-                </select>
-                <span>월</span>
+                  </select>
+                  <span>년</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div>
-            <%-- TODO 조회 버튼 클릭시 년, 월 데이터로 페이지 다시 조회 --%>
-            <button class="btn btn-primary">조회</button>
-          </div>
+
+            <div class="mr-6">
+              <div class="form-group">
+                <div class="d-flex align-items-center">
+                  <select class="form-control mr-2" id="monthSelect" name="month">
+                      <option value="0" selected>전체</option>
+                      <c:forEach begin="1" end="12" var="num">
+                        <option value="${num}" ${num eq currentMonth ? 'selected' : ''}>${num}</option>
+                      </c:forEach>
+                  </select>
+                  <span>월</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <%-- TODO 조회 버튼 클릭시 년, 월 데이터로 페이지 다시 조회 --%>
+              <button class="btn btn-primary">조회</button>
+            </div>
+
+          </form>
         </div>
 
         <!-- 근태현황, 근무시간 - 한 줄 배치 -->
