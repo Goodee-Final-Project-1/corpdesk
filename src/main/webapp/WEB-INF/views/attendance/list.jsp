@@ -61,12 +61,14 @@
         <!-- 출근/퇴근 버튼 -->
         <div class="row no-gutters">
           <div class="col-6 pr-2">
+            <%-- TODO 출근 버튼 클릭시 출근내역 insert --%>
             <button type="button" class="btn btn-info btn-lg btn-block"
               ${currAttd.workStatus eq '휴가' or currAttd.workStatus eq '출근' ? 'disabled' : ''}>출근
             </button>
           </div>
 
           <div class="col-6 pl-2">
+            <%-- <%-- TODO 퇴근 버튼 클릭시 출근내역 update --%> --%>
             <button type="button" class="btn btn-info btn-lg btn-block" disabled
               ${currAttd.workStatus eq '휴가' or currAttd.workStatus eq '출근전' ? 'disabled' : ''}>퇴근
             </button>
@@ -118,6 +120,7 @@
             </div>
           </div>
           <div>
+            <%-- TODO 조회 버튼 클릭시 년, 월 데이터로 페이지 다시 조회 --%>
             <button class="btn btn-primary">조회</button>
           </div>
         </div>
