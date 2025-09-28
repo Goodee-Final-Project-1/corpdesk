@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
@@ -18,6 +19,10 @@ public class ResAttendanceDTO {
     private String workStatus;
     private LocalDateTime checkInDateTime;
     private LocalDateTime checkOutDateTime;
+
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
+    private Boolean today;
 
     private LocalDateTime oldestCheckInDateTime;
 

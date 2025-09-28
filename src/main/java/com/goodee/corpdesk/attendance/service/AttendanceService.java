@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
@@ -171,21 +172,31 @@ public class AttendanceService {
         }
 
         resAttendanceDTO.setAttendanceId(latestAttendance.getAttendanceId());
+
         resAttendanceDTO.setCheckInDateTime(latestAttendance.getCheckInDateTime());
         resAttendanceDTO.setCheckOutDateTime(latestAttendance.getCheckOutDateTime());
+
+        resAttendanceDTO.setCheckInDate(checkInDate);
+        resAttendanceDTO.setCheckOutDate(checkOutDate);
+
+        resAttendanceDTO.setToday(checkOutDate.isEqual(today));
 
         return resAttendanceDTO;
     }
 
-    /**
-     * 특정 직원의 출퇴근 기록 중 출근 날짜가 가장 오래된 시점을 조회합니다.
-     *
-     * @param username 직원의 사용자 이름
-     * @return 가장 오래된 출근 시점 (LocalDateTime)
-     * @throws Exception 예외 발생 시
-     */
-    public LocalDateTime getOldestCheckInDateTime(String username) throws Exception {
-        return attendanceRepository.findOldestAttendanceByUsername(username);
+    public List<Integer> getYearRangeByEmployee(String username) {
+        Integer oldestYear = attendanceRepository.findOldestCheckInYearByUsername(username);
+        int currentYear = LocalDate.now().getYear();
+
+        if (oldestYear == null) {
+            return List.of(currentYear);
+        }
+
+        List<Integer> years = new ArrayList<>();
+        for (int year = oldestYear; year <= currentYear; year++) {
+            years.add(year);
+        }
+        return years;
     }
 
     // 특정 직원의 지각, 조퇴, 결근 횟수를 한 번에 묶어서 반환하는 DTO를 생성합니다.

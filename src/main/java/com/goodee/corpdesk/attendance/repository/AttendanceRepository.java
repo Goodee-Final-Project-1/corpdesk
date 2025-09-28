@@ -45,20 +45,15 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     """)
     Attendance findLatestAttendanceByUsername(@Param("username") String username);
 
-    // 특정 직원의 가장 오래된 출퇴근 기록 조회
+    // 특정 직원의 가장 오래된 출퇴근 기록에서 출근년도 조회
     @NativeQuery("""
-        SELECT check_in_date_time AS oldestCheckInDateTime
+        SELECT MIN(YEAR(check_in_date_time))
         FROM attendance
         WHERE
             use_yn = true
-        	AND check_in_date_time = (SELECT MIN(check_in_date_time)
-                                      FROM attendance
-                                      WHERE
-                                          use_yn = true
-                                          AND username = :username)
         	AND username  = :username
     """)
-    LocalDateTime findOldestAttendanceByUsername(@Param("username") String username);
+    Integer findOldestCheckInYearByUsername(@Param("username") String username);
 
     // 특정 직원의 지각 횟수 조회 - 전체/년/월/년&월
     @NativeQuery("""
