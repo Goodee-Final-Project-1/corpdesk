@@ -32,7 +32,7 @@ public class ChatMessage extends BaseEntity {
 	private String messageType;
 	
 	@CreationTimestamp
-	private LocalDateTime sent_at;
+	private LocalDateTime sentAt;
 	
 	@Transient
 	private String notificationType;

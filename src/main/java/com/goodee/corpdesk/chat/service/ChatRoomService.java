@@ -58,7 +58,7 @@ public class ChatRoomService {
 				data.setChatRoomLastMessage(" ");			
 				
 			}else {
-				data.setLastMessageTime(chatMessage.getSent_at());
+				data.setLastMessageTime(chatMessage.getSentAt());
 				data.setChatRoomLastMessage(chatMessage.getMessageContent());			
 				
 			}
@@ -87,7 +87,6 @@ public class ChatRoomService {
 					for(ChatParticipant c : cps) {
 						
 						if(!c.getEmployeeUsername().equals(username)) {
-							//TODO 추후 해당 username으로 사원정보를 불러와서 넣어주면됨		
 							Map<String, Object> map;
 							map =employeeService.detail(c.getEmployeeUsername());
 							Employee emp = (Employee)map.get("employee");
@@ -186,7 +185,7 @@ public class ChatRoomService {
 			//사용자 저장
 			chatParticipant.setChatRoomId(chatroom.getChatRoomId());
 			chatParticipant.setEmployeeUsername(principal.getName());
-			chatParticipant.setUseYn(false);
+			chatParticipant.setUseYn(true);
 			chatParticipantRepository.save(chatParticipant);
 			
 			for(String user : roomdata.getUsernames()) {

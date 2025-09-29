@@ -8,6 +8,12 @@
 	<meta charset="UTF-8">
 	<title>채팅 목록</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
+	<style type="text/css">
+	.hidden {
+		display: none !important;
+	}
+	</style>
+	
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
@@ -121,21 +127,23 @@
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="searchUserInput" placeholder="이름 검색">
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button">검색</button>
+            <button class="btn btn-outline-secondary namesearchBtn" type="button">검색</button>
           </div>
         </div>
 
         <!-- 사원 목록 (스크롤 가능) -->
         <ul class="list-group" id="participantList" style="max-height: 300px; overflow-y: auto;">
           <c:forEach items="${employeeList}" var="employee">
-            <li class="list-group-item d-flex align-items-center">
+          <c:if test="${employee.username ne user }">
+            <li class="list-group-item d-flex align-items-cent er">
               <img src="/images/default_profile.jpg" class="rounded-circle mr-3" style="width:40px; height:40px;">
               <div class="flex-fill">
-                <strong>${employee.name}</strong><br>
+                <strong class="employeeName">${employee.name}</strong><br>
                 <small>${employee.departmentName} ${employee.positionName}</small>
               </div>
               <input type="checkbox" value="${employee.username}" class="participant-checkbox">
             </li>
+            </c:if>
           </c:forEach>
         </ul>
       </div>

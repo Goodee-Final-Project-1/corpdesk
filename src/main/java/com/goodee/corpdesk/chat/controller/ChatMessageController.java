@@ -32,6 +32,7 @@ import com.goodee.corpdesk.chat.service.ChatParticipantService;
 @RequestMapping("/chat/message/**")
 public class ChatMessageController {
 
+
 	@Autowired
 	// Spring에서 서버가 클라이언트(STOMP 구독자)에게 메시지를 푸시하기 위해 제공하는 템플릿 객체
 	private SimpMessagingTemplate messagingTemplate;
@@ -46,26 +47,21 @@ public class ChatMessageController {
 	
 	@Autowired
 	private EmployeeService employeeService;
+	
+	@Autowired
+	private  ChatParticipantService chatParticipantService;
   
 	// websocket 요청에 대한 매핑 위의 requestMapping과 관련없고 websocket config에서 지정해준 prefix 사용
 	@MessageMapping("/chat/message")
 	public void chatsendMessage(ChatMessage msg , Principal principal) {
-		  //  메시지 저장
-		ChatMessage saveMsg = chatMessageService.messageSave(msg);
-	    saveMsg.setNotificationType("message");
-
-	    // 2) 방 타입 조회
+	    //  방 타입 조회
 	    String chatRoomType = chatRoomService.getChatRoomType(msg.getChatRoomId());
 
-	    // 3) 방 참가자 처리
+	    //  방 참가자 처리
 	    List<ChatParticipant> participants;
 	    RoomData chatRoom = new RoomData();
-	    chatRoom.setChatRoomId(msg.getChatRoomId());
-        chatRoom.setChatRoomLastMessage(saveMsg.getMessageContent());
-        chatRoom.setLastMessageTime(saveMsg.getSent_at());
-        chatRoom.setNotificationType("room");
-        chatRoom.setUnreadCount(0L);
-        
+	  
+        //참가자 활성화
 	    if (chatRoomType.equals("direct")) {
 	        // 1대1이면 나간 사람도 다시 참여 처리
 	        participants = chatMessageService.participantOnetoOneByRoom(msg.getChatRoomId());
@@ -82,16 +78,29 @@ public class ChatMessageController {
 
 	    } else {
 	        // 그룹 채팅은 나간 사람한테 안보냄
-	        participants = chatMessageService.participantListByRoom(saveMsg.getChatRoomId());
-	        chatRoom.setChatRoomTitle(chatRoomService.getRoomTitle(saveMsg.getChatRoomId()));
+	    	if(chatMessageService.checkFirstMessage(msg.getChatRoomId())==0) {
+	    		chatMessageService.RoomUserAllUseYnTrue(msg.getChatRoomId());
+	    		
+	    	}
+	        participants = chatMessageService.participantListByRoom(msg.getChatRoomId());
+	        chatRoom.setChatRoomTitle(chatRoomService.getRoomTitle(msg.getChatRoomId()));
 	        chatRoom.setNotificationType("room");
 	    }
 	    
+	    //  메시지 저장
+	  		ChatMessage saveMsg = chatMessageService.messageSave(msg);
+	  	    saveMsg.setNotificationType("message");
 
-	    // 4) 방 전체 브로드캐스트
+	  	    
+	  	  chatRoom.setChatRoomId(msg.getChatRoomId());
+	        chatRoom.setChatRoomLastMessage(saveMsg.getMessageContent());
+	        chatRoom.setLastMessageTime(saveMsg.getSentAt());
+	        chatRoom.setNotificationType("room");
+	        chatRoom.setUnreadCount(0L);
+	    //  방 전체 브로드캐스트
 	    messagingTemplate.convertAndSend("/sub/chat/room/" + msg.getChatRoomId(), saveMsg);
 
-	    // 5) 개인 알림 전송
+	    //  개인 알림 전송
 	    for (ChatParticipant p : participants) {
 	        String username = p.getEmployeeUsername();
 	        Long chatRoomId = p.getChatRoomId();
@@ -108,7 +117,7 @@ public class ChatMessageController {
 	        	 RoomData chatRoomMe = new RoomData();
 	        	 chatRoomMe.setChatRoomId(msg.getChatRoomId());
 	        	 chatRoomMe.setChatRoomLastMessage(saveMsg.getMessageContent());
-	        	 chatRoomMe.setLastMessageTime(saveMsg.getSent_at());
+	        	 chatRoomMe.setLastMessageTime(saveMsg.getSentAt());
 	        	 chatRoomMe.setNotificationType("room");
 	        	 chatRoomMe.setUnreadCount(0L);
 	        	 chatRoomMe.setChatRoomTitle(chatRoom.getChatRoomTitle());
@@ -135,7 +144,6 @@ public class ChatMessageController {
 	        messagingTemplate.convertAndSendToUser(username, "/queue/notifications", saveMsg);
 	    }
 	    
-	    // 방을 생성한사람한테 상대방 이름 전송
 	    
 	    
 	    
@@ -157,9 +165,9 @@ public class ChatMessageController {
 	@GetMapping("list/{chatRoomId}/{messageNo}/{size}")
 	@ResponseBody
 	public Map<String , Object> chatMessageList(@PathVariable(value = "chatRoomId")Long chatRoomId , 
-			@PathVariable(value = "messageNo")Long lastMessageNo, @PathVariable(value = "size")int size){
+			@PathVariable(value = "messageNo")Long lastMessageNo, @PathVariable(value = "size")int size , Principal principal){
 		
-		List<ChatMessage> list = chatMessageService.chatMessageList(chatRoomId,lastMessageNo,size);
+		List<ChatMessage> list = chatMessageService.chatMessageList(chatRoomId,lastMessageNo,size,principal);
 		Map<String, Object> map = new HashMap<>();
 		map.put("size", list.size());
 		map.put("messages",list);

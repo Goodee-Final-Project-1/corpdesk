@@ -27,8 +27,8 @@ function createLi(chatRoom) {
 		fetch("/chat/participant/lastMessage/" + chatRoom.chatRoomId, {
 			method: "POST"
 		});
-		list.querySelector(".unreadCount").textContent = "";
-		list.setAttribute("data-unreadCount", 0);
+		newli.querySelector(".unreadCount").textContent = "";
+		newli.setAttribute("data-unreadCount", 0);
 	});
 
 	//a
@@ -189,7 +189,7 @@ stompClient.connect({}, function(frame) {
 						//그 창을 보고 있을때
 						if (notification.focused) {
 							lastMsg.textContent = notification.messageContent;
-							lastMsgTime.textContent = timeformat(notification.sent_at);
+							lastMsgTime.textContent = timeformat(notification.sentAt);
 
 						} else {
 
@@ -199,7 +199,7 @@ stompClient.connect({}, function(frame) {
 							unreadCount.textContent = (count + 1);
 							chat.setAttribute("data-unreadCount", count + 1);
 							lastMsg.textContent = notification.messageContent;
-							lastMsgTime.textContent = timeformat(notification.sent_at);
+							lastMsgTime.textContent = timeformat(notification.sentAt);
 						}
 
 
@@ -300,44 +300,127 @@ document.querySelector(".chatList").addEventListener("click", (e) => {
   }
 });
 
+//그룹 채팅 생성
 let selectedParticipants = [];
 
-// Step1 → Step2 이동
 document.getElementById("nextStepBtn").addEventListener("click", () => {
   selectedParticipants = Array.from(document.querySelectorAll(".participant-checkbox:checked"))
                               .map(cb => cb.value);
-  if (selectedParticipants.length === 0) {
-    alert("참여자를 최소 1명 이상 선택하세요.");
+  if (selectedParticipants.length < 2) {
+    alert("참여자를 최소 2명 이상 선택하세요.");
     return;
   }
-
-  // Step1 닫고 Step2 열기
   $("#createRoomStep1").modal("hide");
   $("#createRoomStep2").modal("show");
+ 
 });
+
+//이름으로 검색
+const namesearchBtn = document.querySelector(".namesearchBtn")
+namesearchBtn.addEventListener("click",()=>{
+	const searchUserInputValue = document.getElementById("searchUserInput").value.trim();
+	const participantList = document.getElementById("participantList")
+	const participantLi = participantList.querySelectorAll("li");
+		
+	participantLi.forEach(li=>{
+		const employeeName = li.querySelector(".employeeName") .textContent.trim();
+		if(searchUserInputValue == "" || employeeName == searchUserInputValue ){
+			li.classList.remove("hidden");
+			
+		}else{
+			li.classList.add("hidden");
+		}	
+	
+	})
+})
+
+
+
+//모달 닫힐때 원래 상태로 돌림
+
+// Step1 모달: 취소 버튼 + 닫기 버튼(X) + ESC 초기화
+// X 버튼 + 취소 버튼
+document.querySelectorAll("#createRoomStep1 [data-dismiss='modal'], #createRoomStep1 .close , #createRoomStep1 #nextStepBtn")
+  .forEach(btn => {
+    btn.addEventListener("click", ()=>{
+		
+		  // 검색 input 초기화
+		  document.getElementById("searchUserInput").value = "";
+
+		  // 체크박스 해제
+		  document.querySelectorAll("#participantList .participant-checkbox")
+		    .forEach(cb => cb.checked = false);
+
+		  // 숨겨진 li 복원
+		  document.querySelectorAll("#participantList li")
+		    .forEach(li => li.classList.remove("hidden"));
+		
+	});
+  });
+
+// Step2 모달: 취소 버튼 + 닫기 버튼(X) 초기화
+document.querySelectorAll("#createRoomStep2 [data-dismiss='modal'], #createRoomStep2 .close #createRoomStep2 #createRoomConfirmBtn")
+  .forEach(btn => {
+    btn.addEventListener("click", () => {
+      // 방 제목 input 초기화
+      document.getElementById("roomTitle").value = "";
+    });
+  });
+  
+  //esc 닫기
+  window.addEventListener("keydown", (e) => {
+	/*const modal = document.querySelector("#createRoomStep1");
+	const modal2 = document.querySelector("#createRoomStep2");*/
+	if(e.key=='Escape'){
+		// 검색 input 초기화
+			  document.getElementById("searchUserInput").value = "";
+
+			  // 체크박스 해제
+			  document.querySelectorAll("#participantList .participant-checkbox")
+			    .forEach(cb => cb.checked = false);
+
+			  // 숨겨진 li 복원
+			  document.querySelectorAll("#participantList li")
+			    .forEach(li => li.classList.remove("hidden"));	
+				
+				//step2 초기화	
+				document.getElementById("roomTitle").value = "";
+	}
+	
+	
+  });
+
 
 // 최종 생성
 document.getElementById("createRoomConfirmBtn").addEventListener("click", () => {
   const roomTitle = document.getElementById("roomTitle").value;
+  console.log(selectedParticipants);
   if (!roomTitle.trim()) {
     alert("방 제목을 입력하세요.");
     return;
   }
 
-  const payload = {
-    roomTitle: roomTitle,
-    participants: selectedParticipants
+  const data = {
+    chatRoomTitle: roomTitle,
+    usernames: selectedParticipants,
+	chatRoomType:"room"
   };
 
   fetch("/chat/room/createRoom", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(data)
   })
     .then(res => res.json())
     .then(chatRoom => {
-      console.log("방 생성됨:", chatRoom);
-      $("#createRoomStep2").modal("hide");
-      // TODO: 생성된 방 목록에 추가하는 로직 넣기
+		console.log(chatRoom);
+       $("#createRoomStep2").modal("hide");
+		chatRoom.chatRoomTitle= data.chatRoomTitle;
+	   createLi(chatRoom);
+	   const pop = window.open("/chat/room/detail/" + chatRoom.chatRoomId, "room_no_" + chatRoom.chatRoomId, "width=500,height=600 ,left=600, top=100");
+	   		if (pop) {
+	   			pop.focus();
+	   		}
+	   
     });
 });
