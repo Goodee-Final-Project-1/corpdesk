@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.employee;
 
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.repository.query.Param;
@@ -26,6 +27,31 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
         JOIN `position` p USING (position_id);
     """)
     public ResEmployeeDTO findEmployeeWithDeptAndPosition(@Param("username") String username);
+
+    @NativeQuery("""
+        WITH
+        	d AS (
+        		SELECT department_id, department_name
+        		FROM department
+        		WHERE department_id = :departmentId
+        ),
+        	e AS (
+        		SELECT *
+        		FROM employee
+        		WHERE use_yn = :useYn
+        )
+        SELECT
+        	d.department_name AS department_name
+        	, e.username AS username, e.name AS name
+        	, p.position_name AS position_name
+        	, ef.file_id AS file_id, ef.ori_name AS ori_name, ef.save_name AS save_name
+        	, ef.extension AS extension
+        FROM d
+        JOIN e USING (department_id)
+        JOIN `position` p USING (position_id)
+        LEFT JOIN employee_file ef USING (username)
+    """)
+    public List<ResApprovalDTO> findEmployeeWithDeptAndPositionAndFile(@Param("departmentId") Integer departmentId, @Param("useYn") Boolean useYn);
 
 	boolean existsByUsername(String username);
 

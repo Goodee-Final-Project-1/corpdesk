@@ -79,10 +79,58 @@
 				</c:forEach>
 		</table>
 		<a href="<c:url value='/employee/add'/>"class="btn btn-primary">사원 등록</a>
+		
+		<!-- 엑셀 내보내기 -->
+		<a href="<c:url value='/employee/export'/>" class="btn btn-success">Excel로 내보내기</a>
+		
+		<!-- 엑셀 가져오기 -->
+		<form id="importForm" action="<c:url value='/employee/import'/>" method="post" enctype="multipart/form-data" style="display:inline-block;">
+		    <input type="file" name="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none;" />
+		    <button type="button" class="btn btn-warning" onclick="document.getElementById('excelFileInput').click()">Excel로 가져오기</button>
+		</form>
+		
 		<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp" />
+		
+		<c:if test="${not empty message}">
+		    <script>
+		        alert("${message}");
+		    </script>
+		</c:if>
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 	
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
+
+<script>
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.has('success')) {
+        const added = urlParams.get('added') || 0;
+        const skipped = urlParams.get('skipped') || 0;
+        alert(`엑셀 가져오기 완료!\n추가: ${added}명\n건너뜀: ${skipped}명`);
+    }
+
+    if (urlParams.has('error')) {
+        const errorType = urlParams.get('error');
+        if (errorType === 'emptyfile') {
+            alert("파일이 선택되지 않았습니다.");
+        } else {
+            alert("엑셀 가져오기 중 오류가 발생했습니다.");
+        }
+    }
+});
+
+
+
+
+document.getElementById("excelFileInput").addEventListener("change", function() {
+    if (this.files.length > 0) {
+        document.getElementById("importForm").submit();
+    }
+});
+</script>
+
 </html>

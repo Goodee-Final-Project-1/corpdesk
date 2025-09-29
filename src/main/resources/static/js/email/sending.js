@@ -5,12 +5,12 @@ const submitBtn = document.getElementById('submit_btn');
 
 submitBtn.onclick = async function () {
 	try {
-		// console.log(editor.firstElementChild);
 		const content = editor.firstElementChild;
-		// console.log(content.innerHTML);
-		textArea.innerText = content.innerHTML;
+		textArea.innerHTML = content.innerHTML;
 
 		const formData = new FormData(form);
+
+		console.log(textArea);
 
 		const response = await fetch('/api/email/sending', {
 			method: 'POST',

@@ -40,14 +40,14 @@
 				<div class="card card-default mb-0">
 					<div class="card-header pb-0">
 						<div class="app-brand w-100 d-flex justify-content-center border-bottom-0">
-							<a class="w-auto pl-0" href="/index.html">
-								<img src="images/logo.png" alt="Mono">
-								<span class="brand-name text-dark">MONO</span>
-							</a>
+							<h4 class="text-dark text-center mb-5">비밀번호 변경</h4>
+<%--							<a class="w-auto pl-0" href="/index.html">--%>
+<%--								<img src="images/logo.png" alt="Mono">--%>
+<%--								<span class="brand-name text-dark">MONO</span>--%>
+<%--							</a>--%>
 						</div>
 					</div>
 					<div class="card-body px-5 pb-5 pt-0">
-						<h4 class="text-dark text-center mb-5">비밀번호 변경</h4>
 						<form:form action="/employee/update/password" method="post" modelAttribute="employee">
 							<div class="row">
 								<div class="form-group col-md-12 mb-4">

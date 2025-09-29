@@ -79,7 +79,7 @@ public interface ApprovalRepository extends JpaRepository<Approval, Long> {
         	, a.username AS username
         	, af.form_title AS formTitle, count(DISTINCT af2.file_id) AS fileCount
         	, d.department_name AS departmentName
-        FROM approval a
+        FROM a
         JOIN a2 ON a.approval_id = a2.approval_id
         LEFT JOIN approval_file af2 ON a.approval_id = af2.approval_id
         JOIN approval_form af ON a.approval_form_id = af.approval_form_id
@@ -110,7 +110,7 @@ public interface ApprovalRepository extends JpaRepository<Approval, Long> {
         	, a.username AS username
         	, af.form_title AS formTitle, count(DISTINCT af2.file_id) AS fileCount
         	, d.department_name AS departmentName
-        FROM approval a
+        FROM a
         JOIN a2 ON a.approval_id = a2.approval_id
         LEFT JOIN approval_file af2 ON a.approval_id = af2.approval_id
         JOIN approval_form af ON a.approval_form_id = af.approval_form_id

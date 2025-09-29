@@ -1,15 +1,15 @@
 package com.goodee.corpdesk.employee;
 
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -23,12 +23,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@NoArgsConstructor
 @Getter
 @Setter
 @ToString
-@Entity
-@Table
+@Builder
+@NoArgsConstructor @AllArgsConstructor
+@Entity @Table
 @DynamicInsert
 @DynamicUpdate
 public class Employee implements UserDetails {
@@ -117,6 +117,9 @@ public class Employee implements UserDetails {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate lastWorkingDay;
 
+	@ColumnDefault("0")
+	private Long currentBaseSalary;
+
 	@Transient
 	private Role role;
 
@@ -129,4 +132,10 @@ public class Employee implements UserDetails {
 
 		return authorities;
 	}
+
+    public ResApprovalDTO  toResApprovalDTO() {
+        return ResApprovalDTO.builder()
+                .username(this.username)
+                .build();
+    }
 }

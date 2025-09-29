@@ -11,6 +11,25 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script defer type="text/javascript" src="/js/approval/approval.js"></script>
+
+    <style>
+        /* 테이블 전체의 위쪽 테두리 제거 */
+        .no-top-border {
+            border-top: none;
+        }
+
+        /* 테이블 헤더(thead) 내부의 th/td 셀의 위쪽 테두리 제거 */
+        /* table-bordered 클래스에 의해 셀에도 테두리가 적용되므로 이를 제거합니다. */
+        .no-top-border thead th,
+        .no-top-border thead td {
+            border-top: none;
+        }
+
+        /* Bootstrap 5의 경우, thead, tbody, tfoot 요소에도 기본적으로 border-top이 적용될 수 있습니다. */
+        .no-top-border > :not(caption) > * > * {
+            border-top: none;
+        }
+    </style>
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/>
@@ -84,6 +103,66 @@
 </div>
 <!--  -->
 
+<!-- Modal2 - 결재선 지정 -->
+<div class="modal fade" id="selectApproverModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title fs-5" id="exampleModalLabel">결재선 지정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body d-flex justify-content-between">
+
+        <!-- left col -->
+        <div class="card mb-4 p-0 w-75">
+
+          <div class="card-body p-4">
+            <ul class="list-unstyled" id="employee-list">
+              <c:forEach items="${employeeList }" var="el">
+                  <c:if test="${el.username ne userInfo.username}"> <%-- 기안자를 제외한 나머지 직원들의 데이터만 뿌림 --%>
+                        <li class="text-start d-flex align-items-center" draggable="true"
+                            data-username="${el.username}" data-name="${el.name}"
+                            data-department-name="${el.departmentName}" data-position-name="${el.positionName}">
+                            <div class="col-lg-3">
+                                <img class="mr-2 img-fluid" style="border-radius: 50%;"
+                                     src="${el.oriName ne null ?
+                                                '/files/employee/' += el.oriName += '.' += el.extension
+                                                : '/images/default_profile.jpg'}"> <%-- TODO 프로필이미지가 정확히 어떤 경로에 저장되는지 준수님과 이야기해야 함 --%>
+                            </div>
+                            <a class="approval-form-name btn px-0 mr-3 text-dark">${el.departmentName } ${el.positionName } ${el.name }</a>
+                        </li>
+                  </c:if>
+              </c:forEach>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- right col -->
+        <div class="card mb-4 p-0 ml-2 w-75">
+
+<%--          <h5 class="card-title pt-4 px-4">상세정보</h5>--%>
+
+          <div class="card-body p-4" id="approver-drop-area">
+              <ul id="approver-list" class="list-unstyled"></ul>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="approverCheck" class="btn btn-info" data-bs-dismiss="modal">확인</button>
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">취소</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!--  -->
+
 	<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
 
 	<c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
@@ -126,21 +205,23 @@
             <%-- 양식 헤더 --%>
 						<div class="d-flex justify-content-between">
               <div>
-						  	<button type="button" class="btn btn-info mr-1" data-toggle="modal" data-target="#modal-add-contact">결재 요청</button>
-						  	<button type="button" class="btn btn-outline-info mr-1" data-toggle="modal" data-target="#modal-add-contact">임시저장</button>
-							  <button type="button" class="btn btn-light" data-toggle="modal" data-target="#modal-add-contact">취소</button>
+						  	<button type="button" class="btn btn-info mr-1 btn-submit" id="requestApproval">결재 요청</button>
+						  	<button type="button" class="btn btn-outline-info mr-1 btn-submit" id="tempSave">임시저장</button>
+							  <button type="button" class="btn btn-light" id="btnCancel">취소</button>
               </div>
               <div>
-                <button type="button" class="btn btn-block btn-primary"><i class="mdi mdi-plus mr-1"></i>결재선 지정</button>
+                <button data-bs-toggle="modal" data-bs-target="#selectApproverModal" id="selectApprover" type="button" class="btn btn-block btn-primary"><i class="mdi mdi-plus mr-1"></i>결재선 지정</button>
               </div>
 						</div>
 						<hr>
             <%--  --%>
 
             <%-- 양식 내용 --%>
-            <form action="" style="max-width: 720px">
+            <div class="col-lg-7">
+
+            <form id="approvalContentCommon">
               <%-- 1. 공통 양식 --%>
-              <h1 class="text-center p-4">양식 제목</h1>
+              <h1 class="text-center p-4">${form.formTitle}</h1>
 
               <table class="table table-bordered">
                 <tbody>
@@ -166,228 +247,63 @@
 
               <table class="table table-bordered">
                 <tbody>
-
-                <%-- 신청란 --%>
-<%--                <tr>--%>
-<%--                  <th class="align-middle col-2" rowspan="3">신청</th>--%>
-<%--                  <td>팀장</td>--%>
-<%--                </tr>--%>
-
-<%--                <tr>--%>
-<%--                  <td>이유미</td>--%>
-<%--                </tr>--%>
-
-<%--                <tr>--%>
-<%--                  <td>Lucia</td>--%>
-<%--                </tr>--%>
-                <%--  --%>
-
                 <%-- 승인란 --%>
-                <tr>
-                  <th class="align-middle table-light" rowspan="3">승인</th>
-                  <td>팀장</td>
-                  <td>실장</td>
-                  <td>팀장</td>
-                  <td>실장</td>
+                <tr id="approverPosition">
+                    <th class="align-middle table-light col-2" rowspan="3">승인</th>
+                    <div>
+                        <td class="text-center" style="width: 20%;">&nbsp;</td>
+                        <td class="text-center" style="width: 20%;"></td>
+                        <td class="text-center" style="width: 20%;"></td>
+                        <td class="text-center" style="width: 20%;"></td>
+                    </div>
                 </tr>
 
-                <tr>
-                  <td>이유미</td>
-                  <td>박우진</td>
-                  <td>이유미</td>
-                  <td>박우진</td>
+                <tr id="approverName" style="height: 90px;">
+                    <div>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                    </div>
                 </tr>
 
-                <tr>
-                  <td>Lucia</td>
-                  <td>Christ</td>
-                  <td>Lucia</td>
-                  <td>Christ</td>
+                <tr id="approvalDate">
+                    <div>
+                        <td class="text-center">&nbsp;</td>
+                        <td class="text-center"></td>
+                        <td class="text-center"></td>
+                        <td class="text-center"></td>
+                    </div>
                 </tr>
                 <%--  --%>
                 </tbody>
               </table>
               <%--  --%>
+              <div id="newApproverRow"></div>
 
-              <%-- 결재 양식 종류에 따라 다른 HTML을 뿌림 --%>
+              <%-- 서버 전송용 input hidden --%>
+              <input type="hidden" name="username" value="${userInfo.username}">
+              <input type="hidden" name="departmentId" value="${targetDept.departmentId}">
+              <input type="hidden" name="approvalFormId" value="${form.approvalFormId}">
+            </form>
 
-<%--              <br>--%>
-<%--              ${form.formContent}--%>
-
-              <%-- 1) 출장 신청 --%>
-
-                  <%--
-                  <br>
-                  <h5 class="p-3">출장 내용</h5>
-                  <table class="table table-bordered">
-                    <tbody>
-                    <tr>
-                      <th class="col-2 table-light align-middle">출장 기간</th>
-                      <td class="col-4">
-                          <div class="d-flex align-items-center">
-                            <input type="date" class="form-control col-sm-10 mb-2"><p>&nbsp;&nbsp;&nbsp;&nbsp;~</p>
-                          </div>
-                          <input type="date" class="form-control col-sm-10">
-                      </td>
-                      <th class="col-2 table-light align-middle">출장지</th>
-                      <td class="col-4 align-middle"><input type="text" class="form-control"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">교통편</th>
-                      <td colspan="3"><input type="text" class="form-control"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">출장목적</th>
-                      <td colspan="3"><input type="text" class="form-control"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">비고</th>
-                      <td colspan="3"><input type="text" class="form-control"></td>
-                    </tr>
-                    </tbody>
-                  </table>
-
-                  <br>
-                  <h5 class="p-3">출장자 정보</h5>
-                  <table class="table table-bordered">
-                    <tbody>
-                    <tr>
-                      <th class="col-2 table-light align-middle">성명</th>
-                      <td><input type="text" class="form-control"></td>
-                      <th class="col-2 table-light align-middle">직위</th>
-                      <td><input type="text" class="form-control"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">소속</th>
-                      <td><input type="text" class="form-control"></td>
-                      <th class="table-light align-middle">전화번호</th>
-                      <td><input type="text" class="form-control"></td>
-                    </tr>
-                    </tbody>
-                  </table>
-
-                  <!-- 출장여비 -->
-                  <br>
-                  <h5 class="p-3">출장여비</h5>
-                  <table class="table table-bordered">
-                    <tbody>
-                    <tr>
-                      <th class="col-2 table-light">구분</th>
-                      <th class="table-light">산출내역</th>
-                      <th class="table-light">금액</th>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">교통비</th>
-                      <td><input type="text" class="form-control"></td>
-                      <td><input type="number" class="form-control amount-input"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">일비</th>
-                        <td><input type="text" class="form-control"></td>
-                        <td><input type="number" class="form-control amount-input"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">식비</th>
-                        <td><input type="text" class="form-control"></td>
-                        <td><input type="number" class="form-control amount-input"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">숙박비</th>
-                        <td><input type="text" class="form-control"></td>
-                        <td><input type="number" class="form-control amount-input"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light align-middle">기타</th>
-                        <td><input type="text" class="form-control"></td>
-                        <td><input type="number" class="form-control amount-input"></td>
-                    </tr>
-                    <tr>
-                      <th class="table-light">계</th>
-                      <th></th>
-                      <th id="total-amount" class="text-right">0</th>
-                    </tr>
-                    </tbody>
-                  </table>
-                  --%>
-
-
-              <%-- 2) 휴가 신청 --%>
-
-                <br>
-              <table class="table table-bordered">
-                <tbody>
-                <tr>
-                  <th class="col-2 table-light align-middle">휴가 종류</th>
-                  <td>
-                      <div class="form-group">
-                          <select class="form-control" id="departmentId">
-                              <c:forEach items="${departmentList }" var="el">
-                                  <option value="${el.departmentId}">${el.departmentName}</option>
-                              </c:forEach>
-                          </select>
-                      </div>
-                  </td>
-                </tr>
-                <tr>
-                  <th class="table-light align-middle">휴가 기간</th>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <input type="date" class="form-control col-sm-5 mb-2"><p>&nbsp;&nbsp;&nbsp;&nbsp;~</p>
-                        </div>
-                        <input type="date" class="form-control col-sm-5">
-                    </td>
-                </tr>
-                <tr>
-                  <th class="table-light align-middle">사용일수</th>
-                  <td><input type="text" class="form-control"></td>
-                </tr>
-                <tr>
-                  <th class="table-light align-middle">휴가 사유</th>
-                  <td><input type="text" class="form-control"></td>
-                </tr>
-                </tbody>
-              </table>
-
-
-              <%-- 3) 업무 기안 --%>
-<%--
-                <br>
-              <table class="table table-bordered">
-                <tbody>
-                <tr>
-                  <th class="col-2">시행일자</th>
-                  <td><input type="date" class="form-control"></td>
-                  <th class="col-2">협조부서</th>
-                  <td>
-                      <div class="form-group">
-                          <select class="form-control" id="departmentId">
-                              <c:forEach items="${departmentList }" var="el">
-                                  <option value="${el.departmentId}">${el.departmentName}</option>
-                              </c:forEach>
-                          </select>
-                      </div>
-                  </td>
-                </tr>
-                <tr>
-                  <th>합의</th>
-                  <td colspan="3">${userInfo.departmentName}</td>
-                </tr>
-                <tr>
-                  <th>제목</th>
-                  <td colspan="3"><input type="text" class="form-control"></td>
-                </tr>
-                <tr>
-                  <th>내용</th>
-                  <td colspan="3">
-                      <textarea class="form-control" rows="5"></textarea>
-                  </td>
-                </tr>
-                </tbody>
-              </table>
---%>
+            <form id="approvalContentByType">
+              <%-- 2. 결재 양식 종류에 따라 다른 HTML을 뿌림 --%>
+              <c:choose>
+                <c:when test="${form.approvalFormId eq 1}">
+                  <c:import url="/WEB-INF/views/approval/form_type/vacation.jsp"/>
+                </c:when>
+                <c:when test="${form.approvalFormId eq 2}">
+                  <c:import url="/WEB-INF/views/approval/form_type/business_trip.jsp"/>
+                </c:when>
+                <c:when test="${form.approvalFormId eq 3}">
+                  <c:import url="/WEB-INF/views/approval/form_type/draft.jsp"/>
+                </c:when>
+              </c:choose>
             </form>
             <%--  --%>
 						<!--  -->
+            </div>
 					
 					</div>
 				</div>
@@ -403,100 +319,3 @@
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>
 
-<script>
-    /**
-     * 출장 신청 폼 - 금액 합계 자동 계산
-     */
-    // 금액 입력 필드들을 모두 선택
-    const amountInputs = document.querySelectorAll('.amount-input');
-    const totalDisplay = document.getElementById('total-amount');
-
-    // 총합을 계산하는 함수
-    function calculateTotal() {
-        let total = 0;
-
-        amountInputs.forEach(input => {
-            const value = parseFloat(input.value) || 0; // 빈 값이면 0으로 처리
-            total += value;
-        });
-
-        // 총합을 천 단위 구분자와 함께 표시
-        totalDisplay.textContent = total.toLocaleString('ko-KR');
-    }
-
-    // 각 금액 입력 필드에 이벤트 리스너 추가
-    amountInputs.forEach(input => {
-        // 값이 변경될 때마다 총합 계산
-        input.addEventListener('input', calculateTotal);
-
-        // 포커스가 벗어날 때도 총합 계산 (더 확실하게)
-        input.addEventListener('blur', calculateTotal);
-    });
-
-    // 페이지 로드 시 초기 계산
-    calculateTotal();
-
-    /**
-     * 휴가 신청 폼 - 휴가 사용 일수 자동 계산
-     */
-        // 날짜 입력 필드 참조
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
-    const usedDaysInput = document.getElementById('usedDays');
-
-    // 평일(주말 제외) 계산 함수
-    function calculateWeekdays(startDate, endDate) {
-        if (!startDate || !endDate || startDate > endDate) {
-            return 0;
-        }
-
-        let count = 0;
-        let currentDate = new Date(startDate);
-
-        while (currentDate <= endDate) {
-            const dayOfWeek = currentDate.getDay();
-            // 0: 일요일, 6: 토요일 제외
-            if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-                count++;
-            }
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-
-        return count;
-    }
-
-    // 사용일수 업데이트 함수
-    function updateUsedDays() {
-        const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
-        const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
-
-        if (startDate && endDate) {
-            if (startDate > endDate) {
-                usedDaysInput.value = '종료일이 시작일보다 빨라요';
-                usedDaysInput.style.color = '#dc3545';
-            } else {
-                const weekdays = calculateWeekdays(startDate, endDate);
-                usedDaysInput.value = `${weekdays}일`;
-                usedDaysInput.style.color = '#198754';
-            }
-        } else {
-            usedDaysInput.value = '';
-            usedDaysInput.style.color = '#6c757d';
-        }
-    }
-
-    // 이벤트 리스너 추가
-    startDateInput.addEventListener('change', updateUsedDays);
-    endDateInput.addEventListener('change', updateUsedDays);
-
-    // 시작일 변경 시 종료일 최소값 설정
-    startDateInput.addEventListener('change', function() {
-        if (this.value) {
-            endDateInput.min = this.value;
-            // 종료일이 시작일보다 빠른 경우 초기화
-            if (endDateInput.value && endDateInput.value < this.value) {
-                endDateInput.value = '';
-            }
-        }
-    });
-</script>

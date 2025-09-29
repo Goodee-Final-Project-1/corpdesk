@@ -1,9 +1,7 @@
 package com.goodee.corpdesk.salary.entity;
 
 import com.goodee.corpdesk.common.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,7 +17,7 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 public class Allowance extends BaseEntity {
 
-	@Id
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long allowanceId;
 	private Long paymentId;
 	private String allowanceName;

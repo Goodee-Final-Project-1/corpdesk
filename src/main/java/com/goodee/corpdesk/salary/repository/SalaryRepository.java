@@ -7,9 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 public interface SalaryRepository extends JpaRepository<SalaryPayment, Long> {
 
 	@Query(value = """
@@ -25,18 +22,18 @@ public interface SalaryRepository extends JpaRepository<SalaryPayment, Long> {
 					d.department_name as departmentName,
 					p.position_name as positionName,
 			
-					a.allowance_amount as allowanceAmount,
-					de.deduction_amount as deductionAmount
+					IFNULL(a.allowance_amount, 0) as allowanceAmount,
+					IFNULL(de.deduction_amount, 0) as deductionAmount
 			FROM salary_payment s
 			JOIN employee e ON s.username = e.username
 			JOIN department d ON e.department_id = d.department_id
 			JOIN position p ON e.position_id = p.position_id
-			JOIN (
+			LEFT JOIN (
 					SELECT payment_id, SUM(allowance_amount) as allowance_amount
 					FROM allowance
 					GROUP BY payment_id
 			) a ON s.payment_id = a.payment_id
-			JOIN (
+			LEFT JOIN (
 					SELECT payment_id, SUM(deduction_amount) as deduction_amount
 					FROM deduction
 					GROUP BY payment_id

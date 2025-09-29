@@ -9,6 +9,8 @@ import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
+import com.goodee.corpdesk.vacation.entity.VacationType;
+import com.goodee.corpdesk.vacation.repository.VacationTypeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,13 +33,13 @@ public class ApprovalFormController {
     private ApprovalFormService approvalFormService;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    private EmployeeService employeeService;
 
 	@Value("${cat.approval}")
 	private String cat;
     @Autowired
-    private EmployeeRepository employeeRepository;
-    @Autowired
-    private EmployeeService employeeService;
+    private ApprovalService approvalService;
 
     @ModelAttribute("cat")
 	public String getCat() {
@@ -55,33 +57,44 @@ public class ApprovalFormController {
     public List<ResApprovalDTO> getDepartmentList() throws  Exception {
         return departmentService.getApprovalFormList();
     }
+
+    // 휴가 목록 데이터 뿌리기
+    @ModelAttribute("vacationTypeList")
+    public List<ResApprovalDTO> getVacationTypeList() throws  Exception {
+        log.warn("getVacationTypeList(): {}", approvalFormService.getVacationTypeList());
+        return approvalFormService.getVacationTypeList();
+    }
 	
     // TODO 유저의 부서 정보를 인증 정보에서 가져오도록 수정
     // 결재 폼 조회
     @GetMapping("{formId}")
-    public String getApproval(@PathVariable("formId") Long formId, @RequestParam("departmentId") Integer departmentId, @RequestParam("username") String username, Model model) throws Exception {
+    public String getApproval(@PathVariable("formId") Integer formId, @RequestParam("departmentId") Integer departmentId, @RequestParam("username") String username, Model model) throws Exception {
 
         System.err.println("getApproval()");
 
         // 0. 유저 정보 얻어오기
-        Employee employee = employeeRepository.findById(username).get();
-        ResApprovalDTO resApprovalDTO = new ResApprovalDTO();
+//        Employee employee = employeeRepository.findById(username).get();
+//        ResApprovalDTO resApprovalDTO = new ResApprovalDTO();
 //        resApprovalDTO.set
 
         // 0. 폼 정보 얻어오기
         ResApprovalDTO form = approvalFormService.getApprovalForm(formId);
 
         // 1. 유저 정보 얻어오기
-        ResEmployeeDTO userInfo = employeeService.getFulldetail(username);
+        ResEmployeeDTO userInfo = approvalService.getDetailWithDeptAndPosition(username);
 
         // 2. 결재 대상 부서의 정보 얻어오기
         ResApprovalDTO targetDept = departmentService.getDepartment(departmentId);
+
+        // 3. 결재 대상 부서의 직원 목록 얻어오기 - 직원id, 직원이름, 부서명, 직위명, 파일정보
+        List<ResApprovalDTO> employeeList = approvalService.getEmployeeWithDeptAndPositionAndFile(departmentId, true);
 
         // 3. model에 폼이랑 departmentId 바인딩
         model.addAttribute("form", form);
         model.addAttribute("userInfo", userInfo);
         model.addAttribute("targetDept", targetDept);
         model.addAttribute("today", LocalDate.now().toString());
+        model.addAttribute("employeeList", employeeList);
 
         return "approval/add";
 
