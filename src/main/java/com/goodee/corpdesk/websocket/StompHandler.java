@@ -11,24 +11,22 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
 import com.goodee.corpdesk.chat.entity.ChatParticipant;
-import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
 import com.goodee.corpdesk.chat.service.ChatParticipantService;
 import com.goodee.corpdesk.security.JwtTokenManager;
 
 @Component
 public class StompHandler implements ChannelInterceptor{
 
-    private final ChatParticipantRepository chatParticipantRepository;
 
 	@Autowired
 	private JwtTokenManager jwtTokenManager;
 	@Autowired
 	private ChatParticipantService chatParticipantService;
-
-    StompHandler(ChatParticipantRepository chatParticipantRepository) {
-        this.chatParticipantRepository = chatParticipantRepository;
-    }
+	@Autowired
+	private ChatSessionTracker chatSessionTracker;
+   
 	
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -51,9 +49,9 @@ public class StompHandler implements ChannelInterceptor{
 		}
 		if(StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
 			//stomp 헤더에서 principal을 꺼냄
-			Authentication auth = (Authentication)accessor.getUser();
-			String username = auth.getName();
+			String username = accessor.getUser().getName();
 			String destination = accessor.getDestination();
+			String sessionId = accessor.getSessionId();
 			//목적지 url을 가져와서 방번호를 추출함
 			if(destination.startsWith("/sub/chat/room/")) {
 				Long chatRoomId = Long.parseLong(destination.substring(destination.lastIndexOf("/")+1)); 
@@ -62,6 +60,9 @@ public class StompHandler implements ChannelInterceptor{
 				chatParticipant.setEmployeeUsername(username);	
 				if(!chatParticipantService.isRoomParticipant(chatParticipant)) {
 		        	throw new AccessDeniedException("");
+		        }else {
+		        	//해당방 구독한사람을 현재 채팅창을 열었다고 인식해서 알림을 안보내려고 추가함
+		        	chatSessionTracker.addUser(chatRoomId, username,sessionId);
 		        }
 			}else if(destination.equals("/user/queue/notifications")) {
 				
@@ -70,6 +71,12 @@ public class StompHandler implements ChannelInterceptor{
 			
 			
 			
+		}
+		//구독 취소나 끊겼을 때
+		if(StompCommand.UNSUBSCRIBE.equals(accessor.getCommand())||StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+            String sessionId = accessor.getSessionId();
+                chatSessionTracker.removeUserBySession(sessionId);
+
 		}
 		return message;
 	}

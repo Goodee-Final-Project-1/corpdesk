@@ -26,7 +26,7 @@
 				
 				<!-- 메신저, 메일, 전자결재, 캘린더, 게시판 -->
 				<li>
-					<a class="sidenav-item-link" href="chat.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/chat/room/list"> <!-- TODO href 수정 -->
 						<i class="mdi mdi-wechat"></i> <span class="nav-text">메신저</span>
 					</a>
 				</li>

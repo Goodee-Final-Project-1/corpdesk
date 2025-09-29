@@ -15,6 +15,10 @@ import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
+
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
 //    // 기간 내 모든 근태
@@ -143,4 +147,23 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     // ======================== A1ueo
     List<Attendance> findAllByUsernameAndCheckInDateTimeBetween(String username, LocalDateTime start, LocalDateTime end);
 
+
+
+
+
+	// 캘린더
+	@Query("""
+	SELECT a
+	FROM Attendance a
+	WHERE a.username = :username
+	AND (
+		a.checkInDateTime <= :end
+		AND (
+		a.checkOutDateTime IS NULL
+		OR
+		a.checkOutDateTime >= :start
+		)
+	)
+""")
+	List<Attendance> findAllByUsernameAndDateTime(String username, LocalDateTime start, LocalDateTime end);
 }

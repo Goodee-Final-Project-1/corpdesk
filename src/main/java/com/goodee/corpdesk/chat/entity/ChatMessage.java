@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -31,6 +32,10 @@ public class ChatMessage {
 	@CreationTimestamp
 	private LocalDateTime sent_at;
 	
+	@Transient
+	private String notificationType;
+	@Transient
+	private boolean focused;
 	
 	private LocalDateTime updated_at;
 	private LocalDateTime creates_at;
