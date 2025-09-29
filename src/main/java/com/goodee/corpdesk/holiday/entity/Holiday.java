@@ -3,16 +3,15 @@ package com.goodee.corpdesk.holiday.entity;
 import com.goodee.corpdesk.common.BaseEntity;
 import com.goodee.corpdesk.holiday.dto.HolidayDTO;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @ToString
 @Entity @Table(name = "holiday")
 @DynamicInsert

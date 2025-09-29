@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.holiday.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.goodee.corpdesk.holiday.dto.HolidayDTO;
@@ -40,60 +41,42 @@ public class HolidayService {
     @Value("${api.holiday.key}")
     private String key;
 
-//    private ObjectMapper objectMapper = new ObjectMapper();
-
     private XmlMapper xmlMapper = new XmlMapper();
-    /**
-     * Fetches holiday data for May 2025 from the external government API, parses the XML response into Holiday entities, and logs the resulting list.
-     *
-     * <p>If XML parsing fails, the parsing error is logged and no Holiday entities are produced. Persistence of the parsed holidays is intentionally disabled in the current implementation.</p>
-     */
-    public void getHoliday(){
+
+    public List<Holiday> fetchHoliday(Integer year) throws Exception {
 
         Mono<List<Holiday>> holidayListMono = webClient.get()
             .uri("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo" +
-                "?solYear=2025&solMonth=05&ServiceKey=" + key)
+                "?solYear=" + year + "&ServiceKey=" + key)
             .retrieve()
-            // bodyToMono를 사용하여 전체 응답 객체(HolidayResponseDTO)를 받습니다.
-            .bodyToMono(String.class)
-            // map 연산자를 사용해 HolidayItemDTO 리스트를 추출합니다.
-            .map(xmlString -> {
+            .bodyToMono(String.class) // bodyToMono를 사용하여 전체 응답 객체(HolidayResponseDTO)를 받아옴
+            .map(xmlString -> { // map 연산자를 사용해 HolidayItemDTO 리스트 추출
                 log.warn("{}", xmlString);
 
+                // String을 xmlMapper를 사용하여 HolidayResponseDTO로 변환
+                HolidayResponseDTO responseDTO = null;
                 try {
-                    // String을 xmlMapper를 사용하여 HolidayResponseDTO로 변환
-                    HolidayResponseDTO responseDTO = xmlMapper.readValue(xmlString , HolidayResponseDTO.class);
-                    return responseDTO.getBody().getItems().getItem();
-                } catch (Exception e) {
-                    log.error("xml 파싱 오류: {}", e.getMessage(), e);
-                    return null; // 파싱 실패 시 null 반환
+                    responseDTO = xmlMapper.readValue(xmlString, HolidayResponseDTO.class);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
                 }
+
+                return responseDTO.getBody().getItems().getItem();
             })
-            // 추출한 HolidayItemDTO 리스트를 Holiday 엔티티 리스트로 변환합니다.
-            .map(itemDTOs -> itemDTOs.stream()
+            .map(itemDTOs -> itemDTOs.stream() // 추출한 HolidayItemDTO 리스트를 Holiday 엔티티 리스트로 변환
                 .map(this::convertToEntity)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()
+            ));
 
-        // .block()을 사용하여 Mono가 완료될 때까지 기다리고 List<Holiday>를 반환받습니다.
-        List<Holiday> holidays = holidayListMono.block();
-
+        List<Holiday> holidays = holidayListMono.block(); // .block()을 사용하여 Mono가 완료될 때까지 기다리고 List<Holiday>를 반환받음
         log.warn("{}", holidays);
 
-        // 반환받은 List를 DB에 저장합니다.
-//        if (holidays != null && !holidays.isEmpty()) {
-//            holidayRepository.saveAll(holidays);
-//            log.info("Holiday data saved successfully.");
-//        }
+        return holidays;
 
     }
-
-    /**
-     * Convert a HolidayItemDTO into a Holiday entity.
-     *
-     * @param itemDTO the DTO containing holiday data; expects `locdate` as an integer in YYYYMMDD form, `dateName`, and `isHoliday`
-     * @return a Holiday populated with `dateName`, `locdate` parsed to a LocalDate, and `isHoliday` taken as the first character
-     */
-    private Holiday convertToEntity(HolidayItemDTO itemDTO) {
+    
+    // api로 응답받은 item을 Holiday로 변환
+    private Holiday convertToEntity(HolidayItemDTO itemDTO) throws RuntimeException {
         // 1. Integer(20250505)를 String으로 변환
         String dateString = String.valueOf(itemDTO.getLocdate());
 
@@ -106,5 +89,27 @@ public class HolidayService {
             .isHoliday(itemDTO.getIsHoliday().charAt(0))
             .build();
     }
+    
+    // 이미 존재하는 당해년도 공휴일 데이터를 삭제한 뒤, 당해년도 공휴일 데이터와 그 다음년도 공휴일 데이터를 저장
+    public void updateHolidaysForYear(Integer year) throws Exception {
+
+        // 기존 데이터 삭제
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+        holidayRepository.deleteByLocdateBetween(startDate, endDate);
+
+        // 새 데이터 저장
+        List<Holiday> holidays = fetchHoliday(year);
+        
+        // TODO 저장 로직
+        if (holidays.isEmpty()) return;
+
+        for (Holiday holiday : holidays) {
+            if (!holidayRepository.existsByLocdate(holiday.getLocdate())) holidayRepository.save(holiday);
+        }
+
+    }
+    
+    
 
 }
