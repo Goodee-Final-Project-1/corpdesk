@@ -124,35 +124,35 @@
             <div class="employeebox">
             	<div class="row">
             		<div class="col-md-2">
-	                	주민(외국인)번호: <form:input path="residentNumber" class="form-control"/>
+	                	주민(외국인)번호 <form:input path="residentNumber" class="form-control"/>
 	                </div>
 	                <div class="col-md-2">
-	                	국적: <form:input path="nationality" class="form-control"/>
+	                	국적 <form:input path="nationality" class="form-control"/>
 	                </div>
 	                <div class="col-md-2">
-	                	체류자격: <form:input path="visaStatus" class="form-control"/>
+	                	체류자격 <form:input path="visaStatus" class="form-control"/>
 	                </div>
                 </div>
                 <div class="row">
                 	<div class="col-md-2">
-	                	영문이름: <form:input path="englishName" class="form-control"/>
+	                	영문이름 <form:input path="englishName" class="form-control"/>
 	                </div>
 	                <div class="col-md-2">
-	                	성별: <form:select path="gender" class="form-control">
+	                	성별 <form:select path="gender" class="form-control">
 	                        <form:option value="M" label="남"/>
 	                        <form:option value="F" label="여"/>
 	                     </form:select>
 	                </div>
 	                <div class="col-md-2">
-	                	생년월일: <form:input path="birthDate" type="date" class="form-control"/>
+	                	생년월일 <form:input path="birthDate" type="date" class="form-control"/>
 	               	</div>
                 </div>
                <div class="row">
 	               <div class="col-md-2">
-	                	주소:<form:input path="address" class="form-control"/>
+	                	주소<form:input path="address" class="form-control"/>
 	                </div>
 	                <div class="col-md-3">
-	                	퇴사일자: <form:input path="lastWorkingDay" type="date" class="form-control"/>
+	                	퇴사일자 <form:input path="lastWorkingDay" type="date" class="form-control"/>
 	                </div>
                 </div>
             </div>

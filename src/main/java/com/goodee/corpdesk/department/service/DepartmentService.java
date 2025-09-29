@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.department.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.department.dto.DepartmentTreeDTO;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee;
@@ -68,6 +70,23 @@ public class DepartmentService {
         return department.map(Department::getDepartmentId).orElse(null);
     }
 
-    
+    public List<DepartmentTreeDTO> getDepartmentTree() {
+        List<Department> departments = departmentRepository.findAll();
+        List<DepartmentTreeDTO> tree = new ArrayList<>();
+
+        for (Department dept : departments) {
+            // parentDepartmentId 사용
+            String parent = (dept.getParentDepartmentId() == null) ? "#" : dept.getParentDepartmentId().toString();
+            tree.add(new DepartmentTreeDTO(dept.getDepartmentId(), dept.getDepartmentName(), parent));
+        }
+
+        return tree;
+    }
+
+
+
+    public Department getDepartmentDetail(Integer departmentId) {
+        return departmentRepository.findById(departmentId).orElse(null);
+    }
     
 }

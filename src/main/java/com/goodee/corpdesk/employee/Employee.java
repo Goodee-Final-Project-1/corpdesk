@@ -1,14 +1,9 @@
 package com.goodee.corpdesk.employee;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-import com.goodee.corpdesk.employee.validation.UpdateEmail;
-import com.goodee.corpdesk.employee.validation.UpdatePassword;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
@@ -18,10 +13,24 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.employee.validation.UpdateEmail;
+import com.goodee.corpdesk.employee.validation.UpdatePassword;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -38,13 +47,6 @@ public class Employee implements UserDetails {
 	public interface UpdateGroup {
 	} // 수정 시 검증 (비밀번호 제외)
 
-	//파일
-	@Column(name = "profile_image_save_name")
-	private String profileImageSaveName;
-	@Column(name = "profile_image_extension")
-	private String profileImageOriName;
-	@Column(name = "profile_image_ori_name")
-	private String profileImageExtension;
 
 
 	@Column(name = "position_id")
