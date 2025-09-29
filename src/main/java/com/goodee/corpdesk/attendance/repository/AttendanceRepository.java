@@ -90,8 +90,11 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	WHERE a.username = :username
 	AND (
 		a.checkInDateTime <= :end
-		AND
+		AND (
+		a.checkOutDateTime IS NULL
+		OR
 		a.checkOutDateTime >= :start
+		)
 	)
 """)
 	List<Attendance> findAllByUsernameAndDateTime(String username, LocalDateTime start, LocalDateTime end);
