@@ -16,12 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,12 +52,12 @@ public class SalaryService {
 	@Value("${allowance.work.hours}")
 	private Integer fixedWorkHours;
 
-	public Page<EmployeeSalaryDTO> getList(Pageable pageable) {
+	public PagedModel<EmployeeSalaryDTO> getList(Pageable pageable) {
 		Page<EmployeeSalaryDTO> page = salaryRepository.findAllEmployeeSalary(pageable);
 
 //		log.info("======================= {}", page.getContent());
 
-		return page;
+		return new PagedModel<>(page);
 	}
 
 	public Map<String, Object> getDetail(Long paymentId) {
@@ -86,7 +86,7 @@ public class SalaryService {
 			SalaryPayment result = salaryRepository.save(salaryPayment);
 
 			// 총 임금 : 기본급 + 수당
-			AtomicLong totalPayment = new AtomicLong(); // 포인터 쓰고 싶다..
+			AtomicLong totalPayment = new AtomicLong(); // 객체 안에 데이터를 저장
 
 			totalPayment.set(result.getBaseSalary());
 
@@ -97,16 +97,15 @@ public class SalaryService {
 			 * 휴일 근로 수당
 			 * 야간 근로 수당
 			 */
-
-			// FIXME: 참조 변수로 넘겨주면 바뀐 값이 유지 되는지 확인이 필요함
-			List<Allowance> allowanceList = this.getAllowanceList(salaryPayment, totalPayment);
+			List<Allowance> allowanceList = this.getWorkAllowanceList(salaryPayment, totalPayment);
 			allowanceRepository.saveAll(allowanceList);
-
 
 			// TODO: vacation 정보 가져오기
 			/* 1년 전의 기록을 순회하면서 연차 수당 정보 저장하기
 			 * 연차 수당
 			 */
+
+
 
 			// 공제
 			/* 총 임금 기준으로 계산
@@ -122,7 +121,7 @@ public class SalaryService {
 	}
 
 	// 근로수당
-	private List<Allowance> getAllowanceList(SalaryPayment salaryPayment, AtomicLong totalPayment) {
+	private List<Allowance> getWorkAllowanceList(SalaryPayment salaryPayment, AtomicLong totalPayment) {
 		List<Allowance> allowanceList = new ArrayList<>();
 		// TODO:
 		List<Attendance> attendanceList = attendanceRepository.findAllByUsernameAndMonth(salaryPayment.getUsername());
@@ -141,25 +140,60 @@ public class SalaryService {
 
 				allowance.setPaymentId(salaryPayment.getPaymentId());
 				allowance.setAllowanceName("연장근로수당");
-				allowance.setAllowanceAmount((long) Math.ceil(avgSalary * (workHours - fixedWorkHours) * 1.5));
+				allowance.setAllowanceAmount((long) Math.ceil(avgSalary * (workHours - fixedWorkHours) * 0.5));
 
 				totalPayment.set(totalPayment.get() + allowance.getAllowanceAmount());
 				allowanceList.add(allowance);
 			}
 
 			// 휴일근로
-//			if ("Y".equalsIgnoreCase(a.isHoliday())) {
-//
-//			}
+			if (a.getIsHoliday() == 'Y' ||  a.getIsHoliday() == 'y') {
+				Allowance allowance = new Allowance();
+
+				allowance.setPaymentId(salaryPayment.getPaymentId());
+				allowance.setAllowanceName("휴일근로수당");
+				allowance.setAllowanceAmount((long) Math.ceil(avgSalary * workHours * 0.5));
+
+				totalPayment.set(totalPayment.get() + allowance.getAllowanceAmount());
+				allowanceList.add(allowance);
+			}
+
 			// 야간근로
-			if (checkIn.toLocalTime().isAfter(LocalTime.parse("22:00:00"))
-					|| checkIn.toLocalTime().isBefore(LocalTime.parse("06:00:00"))
-					|| checkOut.toLocalTime().isAfter(LocalTime.parse("22:00:00"))
-					|| checkOut.toLocalTime().isBefore(LocalTime.parse("06:00:00")));
+			if (!checkIn.toLocalDate().isEqual(checkOut.toLocalDate())
+					|| checkIn.isBefore(checkIn.withHour(06).withMinute(00).withSecond(00))
+					|| checkOut.isAfter(checkOut.withHour(22).withMinute(00).withSecond(00))) {
+
+				LocalDateTime start = checkIn;
+				LocalDateTime end = checkOut;
+
+				if (checkIn.isBefore(checkIn.withHour(22).withMinute(00).withSecond(00))
+						&& checkIn.isAfter(checkIn.withHour(06).withMinute(00).withSecond(00))) {
+					start = checkIn.withHour(22).withMinute(00).withSecond(00);
+				}
+
+				if (checkOut.isAfter(checkOut.withHour(06).withMinute(00).withSecond(00))
+						&& checkOut.isBefore(checkOut.withHour(22).withMinute(00).withSecond(00))) {
+					end = checkOut.withHour(06).withMinute(00).withSecond(00);
+				}
+
+				Long minutes = Duration.between(start, end).toMinutes();
+
+				Allowance allowance = new Allowance();
+
+				allowance.setPaymentId(salaryPayment.getPaymentId());
+				allowance.setAllowanceName("야간근로수당");
+				allowance.setAllowanceAmount((long) Math.ceil(avgSalary * minutes / 60 * 0.5));
+
+				totalPayment.set(totalPayment.get() + allowance.getAllowanceAmount());
+				allowanceList.add(allowance);
+			}
 		}
 
 		return allowanceList;
 	}
+	
+	
+	// 연차 수당
 
 	// 공제 목록
 	private List<Deduction> getDeductionList(Long paymentId, AtomicLong totalPayment) {
