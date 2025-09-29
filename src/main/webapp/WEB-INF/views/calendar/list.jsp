@@ -8,6 +8,8 @@
 	<title>Insert title here</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 
+<%--	<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css' rel='stylesheet'>--%>
+<%--	<link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>--%>
 	<link rel="stylesheet" href="/css/calendar/list.css">
 
 	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
@@ -23,11 +25,18 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
+<div class="d-flex">
+	<div class="card card-default h-50">
+		<div class="card-body">
+			<jsp:include page="aside.jsp"/>
+		</div>
+	</div>
 
-<div class="card card-default">
-	<div class="card-header"></div>
-	<div class="card-body">
-		<div id='calendar'></div>
+	<div class="card card-default w-75">
+		<div class="card-header"></div>
+		<div class="card-body">
+			<div id='calendar'></div>
+		</div>
 	</div>
 </div>
 
