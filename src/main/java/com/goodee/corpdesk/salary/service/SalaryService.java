@@ -1,7 +1,7 @@
 package com.goodee.corpdesk.salary.service;
 
-import com.goodee.corpdesk.attendance.Attendance;
-import com.goodee.corpdesk.attendance.AttendanceRepository;
+import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
@@ -134,14 +134,14 @@ public class SalaryService {
 			LocalDateTime checkIn = a.getCheckInDateTime();
 			LocalDateTime checkOut = a.getCheckOutDateTime();
 
-			Long workHours = Duration.between(checkIn, checkOut).toHours();
+			Double workHours = (double) Duration.between(checkIn, checkOut).toMinutes() / 60;
 			// 연장근로
 			if (workHours > fixedWorkHours) {
 				Allowance allowance = new Allowance();
 
 				allowance.setPaymentId(salaryPayment.getPaymentId());
 				allowance.setAllowanceName("연장근로수당");
-				allowance.setAllowanceAmount(avgSalary * (workHours - fixedWorkHours));
+				allowance.setAllowanceAmount((long) Math.ceil(avgSalary * (workHours - fixedWorkHours) * 1.5));
 
 				totalPayment.set(totalPayment.get() + allowance.getAllowanceAmount());
 				allowanceList.add(allowance);

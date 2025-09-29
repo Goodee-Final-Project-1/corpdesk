@@ -76,6 +76,9 @@
         	    
         		 listChat.appendChild(li);
         		 messageContainer.scrollTop = messageContainer.scrollHeight;
+        		 if (document.hasFocus()) {
+        			    fetch("/chat/participant/lastMessage/" + roomId, { method: "POST" });
+        		}
         	})
         
     	},function(error){
@@ -177,11 +180,26 @@
 		if(last){
 			navigator.sendBeacon("/chat/participant/lastMessage/"+roomId);	
 		}
+	});
+	//해당 창이 포커스 되었을 때
+	window.addEventListener("focus", () => {
+  		const last = document.querySelector("#chat-list li:last-child");
+ 		 if (last) {
+  		  fetch("/chat/participant/lastMessage/" + roomId, { method: "POST" });
+ 	 }
+ 		 console.log("freafasdfadsf  "+roomId)
+ 		stompClient.send("/pub/chat/focus", {}, JSON.stringify({
+ 	        chatRoomId: roomId,
+ 	        focused: true
+ 	    }));
+	});
 		
-		
-		
-	})
-	
+	window.addEventListener("blur", () => {
+	    stompClient.send("/pub/chat/focus", {}, JSON.stringify({
+	    	chatRoomId: roomId,
+	        focused: false
+	    }));
+	});
 	</script>
 	
 			<!-- 내용 끝 -->
