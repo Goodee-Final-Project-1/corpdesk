@@ -72,7 +72,9 @@
             <form method="post" action="/attendance/${currAttd.attendanceId}">
               <input type="hidden" name="_method" value="PATCH">
               <button class="btn btn-info btn-lg btn-block"
-                ${currAttd.workStatus eq '휴가' or currAttd.workStatus eq '출근전' ? 'disabled' : ''}>퇴근
+                ${currAttd.workStatus eq '휴가'
+                  or currAttd.workStatus eq '출근전'
+                  or currAttd.workStatus eq '퇴근' ? 'disabled' : ''}>퇴근
               </button>
             </form>
           </div>
@@ -104,12 +106,26 @@
               <div class="form-group">
                 <div class="d-flex align-items-center">
                   <select class="form-control mr-2" id="yearSelect" name="year">
-                    <option value="0">전체</option>
-                    <c:forEach var="year" items="${yearRange}">
-                      <option value="${year}" ${year eq currentYear ? 'selected' : ''}>
-                        ${year}
-                      </option>
-                    </c:forEach>
+
+                    <c:choose>
+                      <c:when test="${selectedYear ne null}">
+                        <option value="" ${selectedYear eq '' ? 'selected' : ''}>전체</option>
+                        <c:forEach var="year" items="${yearRange}">
+                          <option value="${year}" ${selectedYear eq year ? 'selected' : ''}>
+                              ${year}
+                          </option>
+                        </c:forEach>
+                      </c:when>
+                      <c:otherwise>
+                        <option value="">전체</option>
+                        <c:forEach var="year" items="${yearRange}">
+                          <option value="${year}">
+                              ${year}
+                          </option>
+                        </c:forEach>
+                      </c:otherwise>
+                    </c:choose>
+
                   </select>
                   <span>년</span>
                 </div>
@@ -120,10 +136,23 @@
               <div class="form-group">
                 <div class="d-flex align-items-center">
                   <select class="form-control mr-2" id="monthSelect" name="month">
-                      <option value="0" selected>전체</option>
-                      <c:forEach begin="1" end="12" var="num">
-                        <option value="${num}" ${num eq currentMonth ? 'selected' : ''}>${num}</option>
-                      </c:forEach>
+
+                    <c:choose>
+                      <c:when test="${selectedMonth ne null}">
+                        <option value="" ${selectedMonth eq '' ? 'selected' : ''}>전체</option>
+                        <c:forEach begin="1" end="12" var="num">
+                          <option value="${num}" ${selectedMonth eq num ? 'selected' : ''}>${num}</option>
+                        </c:forEach>
+                      </c:when>
+
+                      <c:otherwise>
+                        <option value="">전체</option>
+                        <c:forEach begin="1" end="12" var="num">
+                          <option value="${num}">${num}</option>
+                        </c:forEach>
+                      </c:otherwise>
+                    </c:choose>
+
                   </select>
                   <span>월</span>
                 </div>
@@ -210,13 +239,6 @@
                   <td>${el.workStatus}</td>
                 </tr>
               </c:forEach>
-              <tr>
-                <td>2024-09-25</td>
-                <td>09:00</td>
-                <td>2024-09-25</td>
-                <td>18:00</td>
-                <td>정상출근</td>
-              </tr>
             </tbody>
           </table>
         </div>

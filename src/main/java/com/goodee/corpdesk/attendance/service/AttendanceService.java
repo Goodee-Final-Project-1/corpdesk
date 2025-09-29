@@ -162,18 +162,7 @@ public class AttendanceService {
             // a.출근일시 != 오늘날짜 & a.퇴근일시 != null
             if(!checkInDate.isEqual(today)) resAttendanceDTO.setWorkStatus("출근전");
             // 3. 퇴근, 출근 -> 가장 최근의 출퇴근 내역에 있는 workStatus값 사용
-            resAttendanceDTO.setWorkStatus(latestAttendance.getWorkStatus());
-
-            /*
-            // 2. 퇴근
-            // 가장 최근의 출퇴근 내역 조회(a)
-            // a.출근일시 != null & a.퇴근일시 != null & a.출근일시 == 오늘날짜
-            else if(checkOutDate != null && checkInDate.isEqual(today)) resAttendanceDTO.setWorkStatus("퇴근");
-            // 3. 출근
-            // 가장 최근의 출퇴근 내역 조회(a)
-            // a.출근일시 != null & a.퇴근일시 == null
-            else if(checkOutDate == null) resAttendanceDTO.setWorkStatus("출근");
-            */
+            else resAttendanceDTO.setWorkStatus(latestAttendance.getWorkStatus());
         }
 
         resAttendanceDTO.setAttendanceId(latestAttendance.getAttendanceId());

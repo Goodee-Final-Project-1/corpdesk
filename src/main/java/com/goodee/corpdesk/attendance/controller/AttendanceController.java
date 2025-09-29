@@ -44,13 +44,21 @@ public class AttendanceController {
                         , @RequestParam(value = "year", required = false) String year
                         , @RequestParam(value = "month", required = false) String month
                         , Model model) throws Exception {
+        String selectedYear = null;
+        String selectedMonth = null;
+
+        if(year != null) selectedYear =  year;
+        if(month != null) selectedMonth = month;
+
+        if("".equals(year)) year = null;
+        if("".equals(month)) month = null;
 
         // 1. 출퇴근 기록 중 출근 날짜가 가장 오래된 년도~현재년도
         List<Integer> yearRange = attendanceService.getYearRangeByEmployee(username);
         Integer currentYear = LocalDateTime.now().getYear();
         Integer currentMonth = LocalDateTime.now().getMonthValue();
-        String currentYearStr = LocalDateTime.now().getYear() + "";
-        String currentMonthStr = LocalDateTime.now().getMonthValue() + "";
+//        String currentYearStr = LocalDateTime.now().getYear() + "";
+//        String currentMonthStr = LocalDateTime.now().getMonthValue() + "";
 
         // 2. 현재 상태&출퇴근id&출퇴근일시 조회 - 출퇴근 상태, 출근시간, 퇴근시간
         ResAttendanceDTO currAttd = attendanceService.getCurrentAttendance(username);
@@ -58,21 +66,14 @@ public class AttendanceController {
         // 3. 통계 데이터 조회 (지각, 조퇴, 결근 횟수, 근무 시간, 근무일수)
         ResAttendanceDTO attCnts = new ResAttendanceDTO();
         ResAttendanceDTO workSummary = new ResAttendanceDTO();
-        if(year == null || month == null) {
-            attCnts = attendanceService.getAttendanceCounts(username, currentYearStr, currentMonthStr);
-            workSummary = attendanceService.getWorkSummary(username, currentYearStr, currentMonthStr);
-        } else {
-            attCnts = attendanceService.getAttendanceCounts(username, year, month);
-            workSummary = attendanceService.getWorkSummary(username, year, month);
-        }
+
+        attCnts = attendanceService.getAttendanceCounts(username, year, month);
+        workSummary = attendanceService.getWorkSummary(username, year, month);
 
         // 4. 상세 기록 목록 (기준: 현재 년도&월)
         List<ResAttendanceDTO> attDatilList = new ArrayList<>();
-        if(year == null || month == null) {
-            attDatilList = attendanceService.getAttendanceDetailList(username, currentYearStr, currentMonthStr);
-        } else {
-            attDatilList = attendanceService.getAttendanceDetailList(username, year, month);
-        }
+
+        attDatilList = attendanceService.getAttendanceDetailList(username, year, month);
 
         model.addAttribute("yearRange", yearRange);
         model.addAttribute("currentYear", currentYear);
@@ -81,6 +82,9 @@ public class AttendanceController {
         model.addAttribute("attCnts", attCnts);
         model.addAttribute("workSummary", workSummary);
         model.addAttribute("attDatilList", attDatilList);
+
+        if(selectedYear != null) model.addAttribute("selectedYear", selectedYear);
+        if(selectedMonth != null) model.addAttribute("selectedMonth", selectedMonth);
 
         return "attendance/list";
     }
