@@ -33,6 +33,12 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
     """)
     public VacationDetail findVacationDetailOnDate(@Param("username") String username, @Param("date")LocalDate date);
 
+    @NativeQuery("""
+        SELECT sum(used_days)
+        FROM vacation_detail
+        WHERE username = :username
+    """)
+    public Integer countUsedVacationDays(@Param("username") String username);
 
 
 

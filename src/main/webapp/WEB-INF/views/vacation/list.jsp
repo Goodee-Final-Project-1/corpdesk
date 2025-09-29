@@ -29,16 +29,22 @@
       <div class="card-body">
 
         <!-- 휴가 신청 버튼 -->
-        <button class="btn btn-info btn-lg btn-block mb-6">휴가 신청</button>
+        <form method="GET" action="/approval-form/1">
+          <%-- TODO 인증 붙이면 input hidden 삭제 --%>
+          <input type="hidden" name="departmentId" value="2">
+          <input type="hidden" name="username" value="jung_frontend">
+          <button class="btn btn-info btn-lg btn-block mb-6">휴가 신청</button>
+        </form>
 
         <!-- 메뉴 리스트 -->
         <div class="email-options">
           <ul class="text-center">
             <li class="d-block mb-4">
-              <a href="/leave/list?listType=status">휴가 신청 현황</a>
+              <%-- TODO 인증 붙이면 usernmae 파라미터 삭제 --%>
+              <a href="/vacation/list?listType=request&username=jung_frontend">휴가 신청 현황</a>
             </li>
             <li class="d-block mb-4">
-              <a href="/leave/list?listType=company">전사 휴가 현황</a>
+              <a href="/vacation/list?listType=company">전사 휴가 현황</a>
             </li>
           </ul>
         </div>

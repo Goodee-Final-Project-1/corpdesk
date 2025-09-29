@@ -1,9 +1,13 @@
 package com.goodee.corpdesk.approval.service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.ApprovalForm;
 import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
@@ -12,6 +16,10 @@ import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
+import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.entity.VacationDetail;
+import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +49,12 @@ public class ApprovalService {
     private EmployeeRepository employeeRepository;
     @Autowired
     private DepartmentRepository departmentRepository;
+    @Autowired
+    private VacationRepository vacationRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private VacationDetailRepository vacationDetailRepository;
 
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
@@ -51,6 +65,44 @@ public class ApprovalService {
 		Approval approval = reqApprovalDTO.toApprovalEntity();
 		approval.setModifiedBy(modifiedBy);
 		approval = approvalRepository.save(approval); // 조회 결과가 없다면 예외가 터지고 롤백됨
+
+        // TODO
+        // 만약 결재 유형이 휴가신청인 경우 (approvalFormId = 1) vacation과 vacation_detail 테이블에도 데이터 insert, update
+//        if(reqApprovalDTO.getApprovalFormId() == 1) {
+//            // ----------------- vacation
+//            // vacation 데이터를 username으로 select해서 가져와야 함
+//            // 가져올 데이터가 없으면 insert
+//            Vacation vacation = vacationRepository.findByUsername(reqApprovalDTO.getUsername());
+//            if(vacation == null) {
+//                vacation.setUsername(reqApprovalDTO.getUsername());
+//
+//                // 총 연차
+//                Integer totalVacation = calTotalVacation(reqApprovalDTO.getUsername());
+//                vacation.setTotalVacation(totalVacation);
+//
+//                // 사용 연차 - 휴가 사용내역에서 휴가일수 sum
+//                Integer totalUsed = vacationDetailRepository.countUsedVacationDays(reqApprovalDTO.getUsername());
+//                if(totalUsed == null) totalUsed = 0;
+//                vacation.setUsedVacation(totalUsed);
+//
+//                // 잔여 연차 (총 연차 - 사용 연차)
+//                vacation.setRemainingVacation(totalVacation - totalUsed);
+//            }
+//
+//            // ----------------- vacation_detail
+//            // JSON 문자열을 파싱해서 vacation_detail에 저장
+//            JsonNode contentNode = objectMapper.readTree(reqApprovalDTO.getApprovalContent());
+//
+//            VacationDetail vacationDetail = new VacationDetail();
+//            vacationDetail.setVacationTypeId(contentNode.get("vacation_type_id").asInt());
+//            vacationDetail.setStartDate(contentNode.get("start_date").asText());
+//            vacationDetail.setEndDate(contentNode.get("end_date").asText());
+//
+//            vacationDetailRepository.save(vacationDetail);
+//
+//            // vacation 테이블의 데이터 update
+//
+//        }
 
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
 
@@ -263,5 +315,44 @@ public class ApprovalService {
         if(approver == null)  return null;
 
         return approver.toResApprovalDTO();
+    }
+
+    private Integer calTotalVacation(String username) throws Exception {
+        // 특정 직원의 총 발생 연차 계산
+
+        // 1. 직원 정보 조회 (입사일)
+        Employee employee = employeeRepository.findByUsername(username).get();
+
+        LocalDate hireDate = employee.getHireDate(); // 입사일
+        LocalDate today = LocalDate.now();
+
+        // 2. 재직 기간 계산
+        Integer monthsWorked = (int) ChronoUnit.MONTHS.between(hireDate, today);
+        Integer yearsWorked = (int) ChronoUnit.YEARS.between(hireDate, today);
+
+        Integer totalVacation = 0;
+
+        // 3. 재직 기간 1년 미만인 경우
+        if (yearsWorked == 0) {
+            // 1개월마다 1일 부여 (최대 11일)
+            totalVacation = monthsWorked;
+        }
+        // 4. 재직 기간 1년 이상인 경우
+        else {
+            // 기본 15일 부여
+            totalVacation = yearsWorked * 15;
+
+            // 5. 가산 연차 계산 (3년 이상 근속 시)
+            if (yearsWorked >= 3) {
+                // 2년마다 1일씩 추가
+                int bonusVacation = (yearsWorked - 1) / 2;
+                totalVacation += bonusVacation;
+            }
+
+            // 6. 최대 25일 제한
+            totalVacation = Math.min(totalVacation, 25);
+        }
+
+        return totalVacation;
     }
 }

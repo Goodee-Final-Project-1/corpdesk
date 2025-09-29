@@ -28,9 +28,14 @@ public class VacationDetail extends BaseEntity {
     private Integer vacationTypeId;
 
     @Column(nullable = false)
+    private Long approvalId;
+
+    @Column(nullable = false)
     private LocalDate startDate;
 
     @Column(nullable = false)
     private LocalDate endDate;
+
+    private Integer usedDays;
 
 }
