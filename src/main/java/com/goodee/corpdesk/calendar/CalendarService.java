@@ -26,9 +26,9 @@ public class CalendarService {
 	}
 
 	public List<VacationDetailTypeDTO> getVacation(CalendarDTO calendarDTO, String username) {
-		Vacation vacation = vacationRepository.findByUsername(username).get();
+//		Vacation vacation = vacationRepository.findByUsername(username).get();
 
-		return vacationDetailRepository.findAllByVacationIdAndDate(vacation.getVacationId(), calendarDTO.getStartDate(), calendarDTO.getEndDate());
+		return vacationDetailRepository.findAllByVacationIdAndDate(username, calendarDTO.getStartDate(), calendarDTO.getEndDate());
 	}
 
 //	public List<PersonalSchedule> getSchedule(CalendarDTO calendarDTO, String username) {

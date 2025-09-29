@@ -37,23 +37,6 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
 
 
 	// 캘린더
-//	@NativeQuery("""
-//	SELECT
-//		vd.vacation_detail_id vacationDetailId,
-//		vd.vacation_id vacationId,
-//		vd.vacation_type_id vacationTypeId,
-//		vd.start_date startDate,
-//		vd.end_date endDate,
-//		vt.vacation_type_name vacationTypeName
-//	FROM vacation_detail vd
-//	JOIN vacation_type vt ON vd.vacation_type_id = vt.vacation_type_id
-//	WHERE vd.vacation_id = :vacationId
-//	AND (
-//	    vd.start_date BETWEEN :start AND :end
-//	    OR
-//	    vd.end_date BETWEEN :start AND :end
-//	)
-//""")
 	@Query("""
 	SELECT new com.goodee.corpdesk.vacation.dto.VacationDetailTypeDTO(
 		vd.vacationDetailId,
@@ -64,33 +47,18 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
 		vt.vacationTypeName
 	)
 	FROM VacationDetail vd
+	JOIN Vacation v ON v.vacationId = vd.vacationId
 	JOIN VacationType vt ON vd.vacationTypeId = vt.vacationTypeId
-	WHERE vd.vacationId = :vacationId
+	WHERE v.username = :username
 	AND (
-		vd.startDate BETWEEN :start AND :end
-		OR
-		vd.endDate BETWEEN :start AND :end
+		vd.startDate <= :end
+		AND
+		vd.endDate >= :start
 	)
 """)
-	List<VacationDetailTypeDTO> findAllByVacationIdAndDate(Integer vacationId, LocalDate start, LocalDate end);
+	List<VacationDetailTypeDTO> findAllByVacationIdAndDate(String username, LocalDate start, LocalDate end);
 
-//	@NativeQuery("""
-//	SELECT
-//		vd.vacation_detail_id vacationDetailId,
-//		vd.vacation_id vacationId,
-//		vd.vacation_type_id vacationTypeId,
-//		vd.start_date startDate,
-//		vd.end_date endDate,
-//		v.username
-//	FROM vacation_detail vd
-//	JOIN vacation v ON vd.vacation_id = v.vacation_id
-//	WHERE (
-//	    vd.start_date BETWEEN :start AND :end
-//	    OR
-//	    vd.end_date BETWEEN :start AND :end
-//	)
-//""")
-@Query("""
+	@Query("""
 	SELECT new com.goodee.corpdesk.vacation.dto.VacationDetailUsernameDTO(
 		vd.vacationDetailId,
 		vd.vacationId,
@@ -102,9 +70,9 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
 	FROM VacationDetail vd
 	JOIN Vacation v ON vd.vacationId = v.vacationId
 	WHERE (
-		vd.startDate BETWEEN :start AND :end
-		OR
-		vd.endDate BETWEEN :start AND :end
+		vd.startDate <= :end
+		AND
+		vd.endDate >= :start
 	)
 """)
 	List<VacationDetailUsernameDTO> findEveryByDate(LocalDate start, LocalDate end);

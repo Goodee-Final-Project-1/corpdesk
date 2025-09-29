@@ -84,14 +84,14 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
 
 	// 캘린더
-	@NativeQuery("""
-	SELECT *
-	FROM attendance
-	WHERE username = :username
+	@Query("""
+	SELECT a
+	FROM Attendance a
+	WHERE a.username = :username
 	AND (
-	    check_in_date_time BETWEEN :start AND :end
-	    OR
-	    check_out_date_time BETWEEN :start AND :end
+		a.checkInDateTime <= :end
+		AND
+		a.checkOutDateTime >= :start
 	)
 """)
 	List<Attendance> findAllByUsernameAndDateTime(String username, LocalDateTime start, LocalDateTime end);

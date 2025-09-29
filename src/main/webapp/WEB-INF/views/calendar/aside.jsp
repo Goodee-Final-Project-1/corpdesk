@@ -2,30 +2,30 @@
 
 <aside>
 	<div class="email-left-column email-options p-4 p-xl-5">
-		<a href="/email/sending" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">
+		<a href="#" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">
 			<i class="mdi mdi-calendar-plus mr-2"></i>
 			일정 추가하기
 		</a>
 		<ul class="pb-2">
-			<li id="received" class="d-block">
+			<li id="attendance" class="d-block">
 				<div class="custom-control custom-checkbox d-inline-block mr-3 mb-3">
 					<input type="checkbox" class="custom-control-input" id="customCheckPrimary">
 					<label class="custom-control-label text-primary" for="customCheckPrimary">출퇴근</label>
 				</div>
 			</li>
-			<li id="sent" class="d-block">
+			<li id="vacation" class="d-block">
 				<div class="custom-control custom-checkbox checkbox-secondary d-inline-block mr-3 mb-3">
 					<input type="checkbox" class="custom-control-input" id="customCheckSecondary">
 					<label class="custom-control-label text-secondary" for="customCheckSecondary">휴가</label>
 				</div>
 			</li>
-			<li id="sent" class="d-block">
+			<li id="schedule" class="d-block">
 				<div class="custom-control custom-checkbox checkbox-success d-inline-block mr-3 mb-3">
 					<input type="checkbox" class="custom-control-input" id="customCheckSuccess" checked="checked">
 					<label class="custom-control-label text-success" for="customCheckSuccess">개인 일정</label>
 				</div>
 			</li>
-			<li id="sent" class="d-block">
+			<li id="EveryVacation" class="d-block">
 				<div class="custom-control custom-checkbox checkbox-warning d-inline-block mr-3 mb-3">
 					<input type="checkbox" class="custom-control-input" id="customCheckWarning">
 					<label class="custom-control-label text-warning" for="customCheckWarning">전사 휴가</label>
