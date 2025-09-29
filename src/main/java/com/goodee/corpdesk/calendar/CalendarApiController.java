@@ -1,7 +1,8 @@
 package com.goodee.corpdesk.calendar;
 
 import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.vacation.entity.VacationDetail;
+import com.goodee.corpdesk.vacation.dto.VacationDetailTypeDTO;
+import com.goodee.corpdesk.vacation.dto.VacationDetailUsernameDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,11 +26,16 @@ public class CalendarApiController {
 	}
 
 	@PostMapping("vacation")
-	public List<VacationDetail> getVacation(@RequestBody CalendarDTO calendarDTO, Authentication authentication) {
+	public List<VacationDetailTypeDTO> getVacation(@RequestBody CalendarDTO calendarDTO, Authentication authentication) {
 		return calendarService.getVacation(calendarDTO, authentication.getName());
 	}
 
 //	public List<PersonalSchedule> getSchedule(@RequestBody CalendarDTO calendarDTO, Authentication authentication) {
 //		return calendarService.getSchedule(calendarDTO, authentication.getName());
 //	}
+
+	@PostMapping("everyVacation")
+	public List<VacationDetailUsernameDTO> getEveryVacation(@RequestBody CalendarDTO calendarDTO) {
+		return calendarService.getEveryVacation(calendarDTO);
+	}
 }

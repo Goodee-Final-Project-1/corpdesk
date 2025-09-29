@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			currentDateInfo = info;
 			if (checkAttendance.checked == true) getAttendance(info);
 			if (checkVacation.checked == true) getVacation(info);
+			if (checkEveryVacation.checked == true) getEveryVacation(info);
 		},
 		themeSystem: 'bootstrap5',
 	});
@@ -114,11 +115,55 @@ document.addEventListener('DOMContentLoaded', function () {
 			data.forEach(v => {
 				calendar.addEvent({
 					id: v.vacationId,
-					title: v.vacationTypeId,
+					title: v.vacationTypeName, // FIXME: 휴가 종류
 					start: v.startDate,
 					end: v.endDate,
 					groupId: 'vacation',
 					backgroundColor: '#fd5190'
+				});
+			});
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	checkEveryVacation.addEventListener('change', function () {
+		if (checkEveryVacation.checked == true) getEveryVacation(currentDateInfo);
+		else {
+			calendar.getEvents().forEach(event => {
+				if (event.groupId == 'everyVacation') {
+					event.remove();
+				}
+			})
+		}
+	})
+
+	async function getEveryVacation(info) {
+		console.log(info);
+		try {
+			const response = await fetch('/api/calendar/everyVacation', {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({
+					startDateTime: info.start,
+					endDateTime: info.end
+				})
+			});
+
+			if (!response.ok) throw new Error('수신 오류');
+			const data = await response.json();
+			console.log(data);
+
+			data.forEach(v => {
+				calendar.addEvent({
+					id: v.vacationId,
+					title: v.username, // FIXME: 사원 이름
+					start: v.startDate,
+					end: v.endDate,
+					groupId: 'everyVacation',
+					backgroundColor: '#fec400'
 				});
 			});
 		} catch (error) {

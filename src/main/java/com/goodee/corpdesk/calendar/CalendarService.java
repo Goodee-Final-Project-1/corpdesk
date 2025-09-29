@@ -2,8 +2,9 @@ package com.goodee.corpdesk.calendar;
 
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
+import com.goodee.corpdesk.vacation.dto.VacationDetailTypeDTO;
+import com.goodee.corpdesk.vacation.dto.VacationDetailUsernameDTO;
 import com.goodee.corpdesk.vacation.entity.Vacation;
-import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +25,19 @@ public class CalendarService {
 		return attendanceRepository.findAllByUsernameAndDateTime(username, calendarDTO.getStartDateTime(), calendarDTO.getEndDateTime());
 	}
 
-	public List<VacationDetail> getVacation(CalendarDTO calendarDTO, String username) {
+	public List<VacationDetailTypeDTO> getVacation(CalendarDTO calendarDTO, String username) {
 		Vacation vacation = vacationRepository.findByUsername(username).get();
 
-		return vacationDetailRepository.findAllByVacationIdAndDateTime(vacation.getVacationId(), calendarDTO.getStartDate(), calendarDTO.getEndDate());
+		return vacationDetailRepository.findAllByVacationIdAndDate(vacation.getVacationId(), calendarDTO.getStartDate(), calendarDTO.getEndDate());
 	}
 
 //	public List<PersonalSchedule> getSchedule(CalendarDTO calendarDTO, String username) {
 //		return personalScheduleRepository.findAllByUsernameAndUseYnTrueAndScheduleDateTimeGreaterThanEqualAndEndDateLessThanEqual(username, calendarDTO.getStartDate(), calendarDTO.getEndDate());
 //	}
+
+	public List<VacationDetailUsernameDTO> getEveryVacation(CalendarDTO calendarDTO) {
+//		Vacation vacation = vacationRepository.findByUsername(username).get();
+
+		return vacationDetailRepository.findEveryByDate(calendarDTO.getStartDate(), calendarDTO.getEndDate());
+	}
 }
