@@ -134,6 +134,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
         	AND username = :username
             AND (:year IS NULL OR YEAR(check_in_date_time) = :year)
             AND (:month IS NULL OR MONTH(check_in_date_time) = :month)
+        ORDER BY check_in_date_time DESC
     """)
     List<Attendance> findByUseYnAndUsernameAndYearMonth(@Param("username") String username,
                                                         @Param("year") String year,
