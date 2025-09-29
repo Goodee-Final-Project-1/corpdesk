@@ -26,7 +26,7 @@
 				
 				<!-- 메신저, 메일, 전자결재, 캘린더, 게시판 -->
 				<li>
-					<a class="sidenav-item-link" href="chat.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/chat/room/list"> <!-- TODO href 수정 -->
 						<i class="mdi mdi-wechat"></i> <span class="nav-text">메신저</span>
 					</a>
 				</li>
@@ -44,7 +44,7 @@
 				</li>
 				
 				<li>
-					<a class="sidenav-item-link" href="calendar.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/calendar/list"> <!-- TODO href 수정 -->
 					<i class="mdi mdi-calendar-check"></i> <span class="nav-text">캘린더</span>
 					</a>
 				</li>
@@ -60,7 +60,7 @@
 
 				<!-- 근태, 휴가, 일정 -->
 				<li>
-					<a class="sidenav-item-link" href="team.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/attendance/list">
 					<i class="mdi mdi-account-clock"></i> <span class="nav-text">근태</span>
 					</a>
 				</li>
@@ -109,8 +109,13 @@
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="calendar.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/employee/list"> <!-- TODO href 수정 -->
 						<i class="mdi mdi-account-details"></i> <span class="nav-text">인사관리</span>
+					</a>
+				</li>
+				<li>
+					<a class="sidenav-item-link" href="/salary/list"> <!-- TODO href 수정 -->
+						<i class="mdi mdi-currency-krw"></i> <span class="nav-text">급여 관리</span>
 					</a>
 				</li>
 
