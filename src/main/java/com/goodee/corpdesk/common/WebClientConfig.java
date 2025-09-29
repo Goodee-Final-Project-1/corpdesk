@@ -8,12 +8,12 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 @Configuration
 public class WebClientConfig {
     /**
-     * Creates a WebClient configured to use a URI builder that does not perform automatic URI encoding.
+     * URI 인코딩을 자동으로 수행하지 않도록 구성된 WebClient를 생성하여 반환합니다.
      *
-     * <p>The returned instance uses a DefaultUriBuilderFactory with EncodingMode.NONE so provided URIs
-     * are preserved as-is by the builder.</p>
+     * 반환되는 인스턴스는 EncodingMode.NONE으로 설정된 DefaultUriBuilderFactory를 사용하므로,
+     * 제공된 URI는 빌더에 의해 그대로 유지됩니다.
      *
-     * @return a WebClient instance that uses a DefaultUriBuilderFactory with encoding disabled
+     * @return 인코딩이 비활성화된 DefaultUriBuilderFactory를 사용하는 WebClient 인스턴스
      */
     @Bean
     public WebClient webClient(){

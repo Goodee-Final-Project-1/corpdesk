@@ -3,6 +3,7 @@ package com.goodee.corpdesk.attendance.entity;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,12 +14,16 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Getter
 @Setter
 @ToString
 @Entity
 @Table(name = "attendance")
+@DynamicInsert
+@DynamicUpdate
 public class Attendance extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,12 +39,8 @@ public class Attendance extends BaseEntity {
     private Character isHoliday; // 휴일 여부
 
     @Column(nullable = false)
-    private String workStatus; /**
-     * Get the check-in timestamp formatted as yyyy-MM-dd HH:mm:ss.
-     *
-     * @return {@code ""} if {@code checkInDateTime} is null, otherwise the check-in timestamp formatted as {@code "yyyy-MM-dd HH:mm:ss"}.
-     */
-    
+    private String workStatus;
+
     public String getFormattedCheckInDateTime() {
         if (checkInDateTime == null) return "";
         return checkInDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -61,4 +62,15 @@ public class Attendance extends BaseEntity {
             ? checkOutDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
             : "";
     }
+
+    public ResAttendanceDTO toDTO() {
+        return ResAttendanceDTO.builder()
+                                .attendanceId(attendanceId)
+                                .username(username)
+                                .checkInDateTime(checkInDateTime)
+                                .checkOutDateTime(checkOutDateTime)
+                                .workStatus(workStatus)
+                                .build();
+    }
+
 }
