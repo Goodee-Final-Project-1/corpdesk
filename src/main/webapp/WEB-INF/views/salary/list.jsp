@@ -45,8 +45,16 @@
 				<tbody id="tbody">
 				</tbody>
 			</table>
-
 		</main>
+	</div>
+
+	<div class="card card-default align-items-center border-0">
+		<div class="card-body">
+			<nav aria-label="Page navigation example" id="pagination">
+				<ul class="pagination">
+				</ul>
+			</nav>
+		</div>
 	</div>
 </div>
 

@@ -20,8 +20,6 @@ async function getDetail() {
 		if (!response.ok) throw new Error('수신 오류');
 		const data = await response.json();
 
-		console.log(data);
-
 		const name = document.createElement('li');
 		name.classList.add('row', 'mb-1');
 		name.innerHTML += `<h6 class="col-6">이름</h6>`
@@ -45,6 +43,28 @@ async function getDetail() {
 		date.innerHTML += `<h6 class="col-6">지급일</h6>`
 		date.innerHTML += `<span class="col-6">${data.salaryPayment.paymentDate.substring(0, 10)}</span>`;
 		info.appendChild(date);
+
+		let deductionTotal = 0;
+
+		data.deductionList.forEach(function (e) {
+			const li = document.createElement('li');
+			li.classList.add('row', 'mb-1');
+			li.innerHTML += `<h6 class="col-6">${e.deductionName}</h6>`
+			li.innerHTML += `<span class="col-6">${e.deductionAmount.toLocaleString('ko-KR')}</span>`;
+			deduction.appendChild(li);
+
+			if (['국민연금', '건강보험', '고용보험'].includes(e.deductionName)) {
+				deductionTotal += e.deductionAmount;
+			}
+		})
+
+		const deductionSum = document.createElement('li');
+		deductionSum.classList.add('col-6');
+		deductionSum.innerHTML += `<div class="row mb-1">
+			<h6 class="col-6">공제 합계</h6>
+			<span class="col-6">${deductionTotal.toLocaleString('ko-KR')}</span>
+		</div>`;
+		sum.appendChild(deductionSum);
 
 		let payTotal = 0;
 
@@ -72,29 +92,6 @@ async function getDetail() {
 			<span class="col-6">${payTotal.toLocaleString('ko-KR')}</span>
 		</div>`;
 		sum.appendChild(paySum);
-
-		let deductionTotal = 0;
-
-		data.deductionList.forEach(function (e) {
-			const li = document.createElement('li');
-			li.classList.add('row', 'mb-1');
-			li.innerHTML += `<h6 class="col-6">${e.deductionName}</h6>`
-			li.innerHTML += `<span class="col-6">${e.deductionAmount.toLocaleString('ko-KR')}</span>`;
-			deduction.appendChild(li);
-
-			if (['국민연금', '건강보험', '고용보험'].includes(e.deductionName)) {
-				console.log(e.deductionName, e.deductionAmount);
-				deductionTotal += e.deductionAmount;
-			}
-		})
-
-		const deductionSum = document.createElement('li');
-		deductionSum.classList.add('col-6');
-		deductionSum.innerHTML += `<div class="row mb-1">
-			<h6 class="col-6">공제 합계</h6>
-			<span class="col-6">${deductionTotal.toLocaleString('ko-KR')}</span>
-		</div>`;
-		sum.appendChild(deductionSum);
 
 		const totalSum = document.createElement('li');
 		totalSum.classList.add('col-6');

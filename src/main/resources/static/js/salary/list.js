@@ -39,6 +39,8 @@ async function getSalary() {
 
 			tbody.appendChild(tr);
 		});
+
+		paging(data.page);
 	} catch(e) {
 		console.log(e);
 	}
@@ -49,3 +51,56 @@ getSalary();
 function detail(e) {
 	location.href = '/salary/detail/' + e;
 }
+
+
+function paging(data) {
+
+	const div = document.getElementById('pagination');
+	const pagination = document.createElement('ul');
+	pagination.classList.add('pagination');
+
+	const totalPages = data.totalPages;
+	const currentPage = data.number;
+
+	const startPage = Math.floor(currentPage / 5) * 5;
+	const endPage = Math.min(startPage + 4, totalPages - 1);
+
+	const isFirst = startPage < 1;
+	const isLast = endPage >= totalPages - 1;
+
+	let page = `
+		<li class="page-item ${isFirst ? 'd-none' : ''}">
+			<a class="page-link d-inline" href="/salary/list/${startPage}" aria-label="Previous">
+				<span aria-hidden="true" class="mdi mdi-chevron-left"></span>
+				<span class="sr-only">Previous</span>
+			</a>
+		</li>
+	`
+
+	for (let i = startPage; i <= endPage; i++) {
+		page += `
+				<li class="page-item ${i == currentPage ? 'active' : ''}">
+					<a class="page-link d-inline" href="/salary/list/${i + 1}">${i + 1}</a>
+				</li>
+			`;
+	}
+
+	page += `
+				<li class="page-item ${isLast ? 'd-none' : ''}">
+					<a class="page-link d-inline" href="/salary/list/${startPage + 6}" aria-label="Next">
+						<span aria-hidden="true" class="mdi mdi-chevron-right"></span>
+						<span class="sr-only">Next</span>
+					</a>
+				</li>
+			</ul>
+		</nav>
+	</div>
+	`
+
+	pagination.innerHTML = page;
+	div.appendChild(pagination);
+}
+
+
+
+

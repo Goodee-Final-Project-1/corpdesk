@@ -21,7 +21,7 @@
 <!-- 내용 시작 -->
 <div class="card card-default col-xl-6">
 	<div class="card-header">
-		<div class="mb-5">
+		<div>
 			<h2>급여 상세</h2>
 		</div>
 	</div>
@@ -29,11 +29,18 @@
 		<main>
 			<div>
 				<nav class="row">
-					<div class="col-12 mb-5">
-						<ul id="info" class="col row row-cols-2"></ul>
+					<div class="col-12 py-3 mb-3 border rounded">
+						<ul id="info" class="col row row-cols-2 justify-content-center"></ul>
 					</div>
 				</nav>
 				<article class="row row-cols-2">
+					<div class="col-6">
+						<div class="text-center">
+							<h5>공제 항목</h5>
+							<hr/>
+						</div>
+						<ul id="deduction" class="text-right"></ul>
+					</div>
 					<div class="col-6">
 						<div class="text-center">
 							<h5>지급 항목</h5>
@@ -42,17 +49,10 @@
 						<ul id="salary" class="text-right"></ul>
 						<ul id="allowance" class="text-right"></ul>
 					</div>
-					<div class="col-6">
-						<div class="text-center">
-							<h5>공제 항목</h5>
-							<hr/>
-						</div>
-						<ul id="deduction" class="text-right"></ul>
-					</div>
 					<div class="col-12">
 						<div>
 							<ul id="sum" class="row text-right my-3"></ul>
-							<ul id="total" class="row text-right"></ul>
+							<ul id="total" class="row text-right justify-content-end"></ul>
 						</div>
 					</div>
 				</article>
