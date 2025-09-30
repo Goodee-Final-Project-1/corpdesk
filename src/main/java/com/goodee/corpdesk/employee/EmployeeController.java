@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
-import com.goodee.corpdesk.attendance.entity.Attendance;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -25,10 +23,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
+import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.department.service.DepartmentService;
@@ -281,24 +288,24 @@ public class EmployeeController {
             return null;
         }
 
-        // 하이픈을 제거하여 파싱
-        String cleanedDateString = dateString.trim().replace("-", "");
+        String trimmedDateString = dateString.trim();
 
-        // 여러 날짜 형식에 대응하기 위해 포맷터 배열 사용
+        // 구분자가 있는 포맷터들
         DateTimeFormatter[] formatters = {
             DateTimeFormatter.ofPattern("yyyy-MM-dd"),
             DateTimeFormatter.ofPattern("yyyy/MM/dd"),
-            DateTimeFormatter.ofPattern("yyyy.MM.dd")
+            DateTimeFormatter.ofPattern("yyyy.MM.dd"),
+            DateTimeFormatter.ofPattern("yyyyMMdd")  // 구분자 없는 포맷 추가
         };
 
         for (DateTimeFormatter f : formatters) {
             try {
-                // 날짜 문자열에 하이픈이 포함되어 있다면, 제거하고 파싱 시도
-                return LocalDate.parse(cleanedDateString, f);
+                return LocalDate.parse(trimmedDateString, f);
             } catch (DateTimeParseException ignored) {
                 // 다른 포맷으로 재시도
             }
         }
+        
         // 모든 포맷으로 실패하면 예외 발생
         throw new DateTimeParseException("Unsupported date format: " + dateString, dateString, 0);
     }

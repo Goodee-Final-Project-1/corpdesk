@@ -163,16 +163,14 @@
             </div>
         </div>
     </div>
-</div>
-</div>
+
 </form:form>
 
 <!-- 출퇴근 탭 -->
 <div class="tab-content" id="attendance">
 
 	<!-- 출퇴근 추가 폼 -->
-	<div class="card card-defalut"> 
-    <div class="card-body">
+
     <div class="mb-3">
         <label>구분</label>
         <select id="newWorkStatus" class="form-control" style="width:150px; display:inline-block;">
@@ -237,9 +235,10 @@
 			</tbody>
         </table>
     </form>
-</div>
-
-</div>
+   </div>
+  </div>
+ </div>
+ </div>
 </div>
 <div class="d-flex justify-content-center mt-4">
 <a href="/employee/list" class="btn btn-primary">목록으로</a>
