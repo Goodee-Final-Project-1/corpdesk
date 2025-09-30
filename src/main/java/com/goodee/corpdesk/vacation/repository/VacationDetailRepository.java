@@ -37,7 +37,9 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
 
     List<VacationDetail> findAllVacationDetailByUseYn(Boolean useYn);
 
+    List<VacationDetail> findAllVacationDetailByUseYnAndVacationIdAndVacationTypeId(Boolean useYn, Integer vacationId, Integer vacationTypeId);
 
+    List<VacationDetail> findAllVacationDetailByUseYnAndVacationTypeId(Boolean useYn, Integer vacationTypeId);
 
 	// 캘린더
 	@Query("""

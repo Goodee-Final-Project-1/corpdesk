@@ -77,4 +77,23 @@ public class VacationService {
     public ResVacationDTO getVacation(String username) throws Exception {
         return vacationRepository.findByUseYnAndUsername(true, username).toResVacationDTO();
     }
+
+    public List<ResVacationDTO> getVacationDetails(Integer vacationId, Integer vacationType) throws Exception {
+
+        List<VacationDetail> vacationDetails = new ArrayList<>();
+        List<ResVacationDTO> resVacationDTOList = new ArrayList<>();
+
+        if(vacationId == null) vacationDetails = vacationDetailRepository.findAllVacationDetailByUseYnAndVacationTypeId(true, vacationType);
+        else vacationDetails = vacationDetailRepository.findAllVacationDetailByUseYnAndVacationIdAndVacationTypeId(true, vacationId, vacationType);
+
+        resVacationDTOList = vacationDetails.stream().map(VacationDetail::toResVacationDTO).toList();
+
+        if(resVacationDTOList == null || resVacationDTOList.isEmpty()) return resVacationDTOList; // 조회 결과 없으면 값 없는 껍데기 객체 반환
+
+        return resVacationDTOList;
+    }
+
+    public ResVacationDTO getVacation(String username, Integer vacationType) throws Exception {
+        return vacationRepository.findByUseYnAndUsername(true, username).toResVacationDTO();
+    }
 }

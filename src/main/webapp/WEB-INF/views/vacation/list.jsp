@@ -59,40 +59,41 @@
 
       <div class="card-header d-flex justify-content-between align-items-center">
         <h2>휴가 현황</h2>
-        <div>
-          <span>남은 연차 : </span>
-          <span><strong>00</strong>일</span>
-        </div>
       </div>
 
       <div class="card-body">
 
         <!-- 휴가 종류 선택 필터 -->
         <div class="row mb-4 ml-0">
-          <form method="get" action="/leave/list">
 
-            <input type="hidden" name="username" value="jung_frontend">
 
-            <div class="mr-3">
-              <div class="form-group">
-                <div class="d-flex align-items-center">
-                  <select class="form-control mr-2" id="leaveTypeSelect" name="leaveType">
-                    <option value="">전체</option>
-                    <option value="연차">연차</option>
-                    <option value="반차">반차</option>
-                    <option value="병가">병가</option>
-                    <option value="경조사">경조사</option>
-                    <option value="기타">기타</option>
-                  </select>
+            <form method="GET" action="/vacation/list">
+
+              <c:if test="${username ne null}">
+                <input type="hidden" name="username" value="${username}">
+              </c:if>
+
+              <div class="mr-3">
+                <div class="form-group">
+                  <div class="d-flex align-items-center">
+                    <select class="form-control mr-2" id="leaveTypeSelect" name="vacationType">
+                      <option value="" ${vacationType eq null ? 'selected' : ''}>전체</option>
+                      <option value="1" ${vacationType ne null and vacationType eq 1 ? 'selected' : ''}>연차휴가</option>
+                      <option value="2" ${vacationType ne null and vacationType eq 2 ? 'selected' : ''}>병가</option>
+                      <option value="3" ${vacationType ne null and vacationType eq 3 ? 'selected' : ''}>경조사휴가</option>
+                      <option value="4" ${vacationType ne null and vacationType eq 4 ? 'selected' : ''}>출산휴가</option>
+                      <option value="5" ${vacationType ne null and vacationType eq 5 ? 'selected' : ''}>육아휴직</option>
+                      <option value="6" ${vacationType ne null and vacationType eq 6 ? 'selected' : ''}>공가</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div>
-              <button type="submit" class="btn btn-primary">조회</button>
-            </div>
+              <div>
+                <button type="submit" class="btn btn-primary">조회</button>
+              </div>
 
-          </form>
+            </form>
         </div>
 
         <%-- 휴가 집계 정보 --%>
