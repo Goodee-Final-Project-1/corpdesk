@@ -36,6 +36,7 @@ public interface SalaryRepository extends JpaRepository<SalaryPayment, Long> {
 			LEFT JOIN (
 					SELECT payment_id, SUM(deduction_amount) as deduction_amount
 					FROM deduction
+					WHERE deduction_name IN ("국민연금", "건강보험", "고용보험")
 					GROUP BY payment_id
 			) de ON s.payment_id = de.payment_id
 			ORDER BY s.payment_id DESC

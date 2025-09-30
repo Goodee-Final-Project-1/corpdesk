@@ -19,11 +19,12 @@ async function getSalary() {
 		data.content.forEach(function (e) {
 			const tr = document.createElement('tr');
 
-			// tr.setAttribute("onclick", "detail(${e.paymentId})")
+			tr.setAttribute("onclick", `detail(${e.paymentId})`)
+			tr.setAttribute("style", "cursor:pointer")
+			// tr.classList.add('pe-auto');
 
+			// <td onclick="detail(${e.paymentId})">조회</td>
 			tr.innerHTML = `
-			<tr>
-				<td onclick="detail(${e.paymentId})">조회</td>
 				<td>${e.name}</td>
 				<td>${e.paymentId}</td>
 				<td>${e.departmentName}</td>
@@ -34,7 +35,6 @@ async function getSalary() {
 				<td>${e.deductionAmount.toLocaleString('ko-KR')}</td>
 				<td>${(e.baseSalary + e.allowanceAmount - e.deductionAmount).toLocaleString('ko-KR')}</td>
 				<td>${e.paymentDate.substring(0, 10)}</td>
-			</tr>
 			`;
 
 			tbody.appendChild(tr);

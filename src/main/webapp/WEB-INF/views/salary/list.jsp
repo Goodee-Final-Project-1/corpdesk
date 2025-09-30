@@ -29,7 +29,7 @@
 						 class="table table-hover table-product <%--display--%> table-striped" style="width:100%">
 				<thead>
 				<tr>
-					<th>조회</th>
+<%--					<th>조회</th>--%>
 					<th>사원명</th>
 					<th>번호</th>
 					<th>부서</th>
