@@ -92,9 +92,6 @@ function paging(data) {
 						<span class="sr-only">Next</span>
 					</a>
 				</li>
-			</ul>
-		</nav>
-	</div>
 	`
 
 	pagination.innerHTML = page;
