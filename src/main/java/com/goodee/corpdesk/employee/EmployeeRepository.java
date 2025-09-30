@@ -3,12 +3,11 @@ package com.goodee.corpdesk.employee;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -60,4 +59,31 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	boolean existsByMobilePhone(String mobilePhone);
 
 	Optional<Employee> findByUsername(String username);
+
+
+
+
+
+
+
+
+
+
+
+
+
+	@Query("""
+	SELECT new com.goodee.corpdesk.employee.EmployeeInfoDTO (
+		e.username,
+		e.name,
+		e.hireDate,
+		d.departmentName,
+		p.positionName
+	)
+	FROM Employee e
+	JOIN Department d ON e.departmentId = d.departmentId
+	JOIN Position p ON e.positionId = p.positionId
+	WHERE e.username = :username
+""")
+	Optional<EmployeeInfoDTO> findByIdWithDept(String username);
 }
