@@ -38,5 +38,10 @@ public class ChatMessage extends BaseEntity {
 	private String notificationType;
 	@Transient
 	private boolean focused;
+	@Transient
+	private String imgPath;
+	@Transient
+	private String viewName;
+	
 	
 }

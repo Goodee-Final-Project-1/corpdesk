@@ -29,4 +29,6 @@ public class RoomData {
 	private LocalDateTime lastMessageTime;
 	private String chatRoomLastMessage;
 	private String notificationType;
+	private String imgPath;
+	private String viewName;
 }

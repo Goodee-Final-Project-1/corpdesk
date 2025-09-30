@@ -20,6 +20,7 @@ import com.goodee.corpdesk.chat.repository.ChatRoomRepository;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeService;
+import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.position.entity.Position;
 
 @Service
@@ -35,6 +36,18 @@ public class ChatRoomService {
 	@Autowired
 	ChatMessageRepository chatMessageRepository;
 
+	//유저이름으로 유저 이름 부서 직위 가져옴
+		public String getUserNameDepPos(String username) {
+			Map<String, Object> map = employeeService.detail(username);
+	        Employee emp = (Employee) map.get("employee");
+	        Department department = (Department) map.get("department");
+	        Position position = (Position) map.get("position");
+	        String userNameDepPos = department.getDepartmentName() + " " + position.getPositionName() + " " + emp.getName();
+	        return userNameDepPos;
+			
+		}
+	
+	
 	//해당 유저의 모든 채팅방 목록을 불러옴
 	public List<RoomData> getChatRoomList(String username) {
 		
@@ -72,32 +85,53 @@ public class ChatRoomService {
 			Long roomId = l.getChatRoomId();
 			ChatParticipant cp= chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(roomId, username);
 			
-			//1대1채팅일경우 채팅방 제목을 상대방 이름으로 설정
+			//1대1채팅일경우 채팅방 제목 및 프로필 이미지를 상대방으로 설정 
 			if(l.getChatRoomType().equals("direct")) {
 				List<ChatParticipant> cps = chatParticipantRepository.findAllByChatRoomId(roomId);
 				if(cps.size()==1) {
-					Map<String, Object> map;
-					map =employeeService.detail(username);
-					Employee emp = (Employee)map.get("employee");
-					Department department = (Department)map.get("department");
-					Position position = (Position)map.get("position");
-					String roomtitle = department.getDepartmentName()+" "+position.getPositionName()+" "+emp.getName();
+					//채팅방 이름 설정
+					
+					String roomtitle = getUserNameDepPos(username);
+					//프로필 이미지 설정
+					Optional <EmployeeFile> empFileOp= employeeService.getEmployeeFileByUsername(username);
+				        if(empFileOp.isPresent()) {
+				        	EmployeeFile empFile = empFileOp.get();
+				        	 if(empFile!=null && empFile.getUseYn()) {
+				 	        	l.setImgPath("/files/profile/"+empFile.getSaveName()+"."+empFile.getExtension());
+				 	        }else {
+				 	        	l.setImgPath("/images/default_profile.jpg");
+				 	        }
+				        }else {
+				        	l.setImgPath("/images/default_profile.jpg");
+				        }
+				       
 					l.setChatRoomTitle(roomtitle);
 				}else {
 					for(ChatParticipant c : cps) {
 						
 						if(!c.getEmployeeUsername().equals(username)) {
-							Map<String, Object> map;
-							map =employeeService.detail(c.getEmployeeUsername());
-							Employee emp = (Employee)map.get("employee");
-							Department department = (Department)map.get("department");
-							Position position = (Position)map.get("position");
-							String roomtitle = department.getDepartmentName()+" "+position.getPositionName()+" "+emp.getName();
+							//채팅방이름을 설정
+							String roomtitle = getUserNameDepPos(c.getEmployeeUsername());
+							//프로필 이미지 설정
+							Optional <EmployeeFile> empFileOp= employeeService.getEmployeeFileByUsername(c.getEmployeeUsername());
+					        if(empFileOp.isPresent()) {
+					        	EmployeeFile empFile = empFileOp.get();
+					        	 if(empFile!=null && empFile.getUseYn()) {
+					 	        	l.setImgPath("/files/profile/"+empFile.getSaveName()+"."+empFile.getExtension());
+					 	        }else {
+					 	        	l.setImgPath("/images/default_profile.jpg");
+					 	        }
+					        }else {
+					        	l.setImgPath("/images/default_profile.jpg");
+					        }
 							l.setChatRoomTitle(roomtitle);
 							break;
 						}
 					}
 				}
+			}else {
+				//그룹채팅일 경우 이미지를 동일하게 맞춤
+				l.setImgPath("/images/group_profile.png");
 			}
 			
 			if(cp.getLastCheckMessageId()==null) {

@@ -14,7 +14,9 @@ public interface ChatRoomRepository extends  JpaRepository<ChatRoom, Long> {
 
 	@Query("SELECT r FROM ChatRoom r JOIN ChatParticipant p "+
 			"ON r.chatRoomId = p.chatRoomId "+
-			"WHERE p.employeeUsername = :username And p.useYn = true")
+			"JOIN ChatMessage m ON r.chatRoomId = m.chatRoomId "+
+			"WHERE p.employeeUsername = :username And p.useYn = true "+
+			"ORDER BY m.messageId DESC")
 	List<ChatRoom> findAllByUsername(@Param("username") String username);
 	
 	//다른사람과 있는 1대1 채팅

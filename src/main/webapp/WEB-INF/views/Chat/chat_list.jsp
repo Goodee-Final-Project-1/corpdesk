@@ -50,9 +50,6 @@
 				<br>
 			<br><br><br>
 			
-						
-				<br>
-				<button type="button" id="createRoomBtn">채팅방 생성하기</button>
 
 <!-- 채팅방 목록 -->
 <div class="col-lg-7 col-xxl-5">
@@ -64,8 +61,8 @@
 					data-unreadCount="${room.unreadCount }">
 					<div class="media media-message">
 						<div class="position-relative mr-3">
-							<img class="rounded-circle" src="/images/default_profile.jpg"
-								alt="User Image" style="width: 70px;">
+							<img class="rounded-circle" src="${room.imgPath}"
+								alt="User Image" style="width: 70px; height:70px;">
 						</div>
 
 						<div class="media-body">
