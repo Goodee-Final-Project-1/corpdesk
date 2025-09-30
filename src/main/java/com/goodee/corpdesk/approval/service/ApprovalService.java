@@ -67,7 +67,7 @@ public class ApprovalService {
 		approval = approvalRepository.save(approval); // 조회 결과가 없다면 예외가 터지고 롤백됨
 
         // TODO
-        // 만약 결재 유형이 휴가신청인 경우 (approvalFormId = 1) vacation과 vacation_detail 테이블에도 데이터 insert, update
+//        // 만약 결재 유형이 휴가신청인 경우 (approvalFormId = 1) vacation과 vacation_detail 테이블에도 데이터 insert, update
 //        if(reqApprovalDTO.getApprovalFormId() == 1) {
 //            // ----------------- vacation
 //            // vacation 데이터를 username으로 select해서 가져와야 함
@@ -317,42 +317,42 @@ public class ApprovalService {
         return approver.toResApprovalDTO();
     }
 
-    private Integer calTotalVacation(String username) throws Exception {
-        // 특정 직원의 총 발생 연차 계산
-
-        // 1. 직원 정보 조회 (입사일)
-        Employee employee = employeeRepository.findByUsername(username).get();
-
-        LocalDate hireDate = employee.getHireDate(); // 입사일
-        LocalDate today = LocalDate.now();
-
-        // 2. 재직 기간 계산
-        Integer monthsWorked = (int) ChronoUnit.MONTHS.between(hireDate, today);
-        Integer yearsWorked = (int) ChronoUnit.YEARS.between(hireDate, today);
-
-        Integer totalVacation = 0;
-
-        // 3. 재직 기간 1년 미만인 경우
-        if (yearsWorked == 0) {
-            // 1개월마다 1일 부여 (최대 11일)
-            totalVacation = monthsWorked;
-        }
-        // 4. 재직 기간 1년 이상인 경우
-        else {
-            // 기본 15일 부여
-            totalVacation = yearsWorked * 15;
-
-            // 5. 가산 연차 계산 (3년 이상 근속 시)
-            if (yearsWorked >= 3) {
-                // 2년마다 1일씩 추가
-                int bonusVacation = (yearsWorked - 1) / 2;
-                totalVacation += bonusVacation;
-            }
-
-            // 6. 최대 25일 제한
-            totalVacation = Math.min(totalVacation, 25);
-        }
-
-        return totalVacation;
-    }
+//    private Integer calTotalVacation(String username) throws Exception {
+//        // 특정 직원의 총 발생 연차 계산
+//
+//        // 1. 직원 정보 조회 (입사일)
+//        Employee employee = employeeRepository.findByUsername(username).get();
+//
+//        LocalDate hireDate = employee.getHireDate(); // 입사일
+//        LocalDate today = LocalDate.now();
+//
+//        // 2. 재직 기간 계산
+//        Integer monthsWorked = (int) ChronoUnit.MONTHS.between(hireDate, today);
+//        Integer yearsWorked = (int) ChronoUnit.YEARS.between(hireDate, today);
+//
+//        Integer totalVacation = 0;
+//
+//        // 3. 재직 기간 1년 미만인 경우
+//        if (yearsWorked == 0) {
+//            // 1개월마다 1일 부여 (최대 11일)
+//            totalVacation = monthsWorked;
+//        }
+//        // 4. 재직 기간 1년 이상인 경우
+//        else {
+//            // 기본 15일 부여
+//            totalVacation = yearsWorked * 15;
+//
+//            // 5. 가산 연차 계산 (3년 이상 근속 시)
+//            if (yearsWorked >= 3) {
+//                // 2년마다 1일씩 추가
+//                int bonusVacation = (yearsWorked - 1) / 2;
+//                totalVacation += bonusVacation;
+//            }
+//
+//            // 6. 최대 25일 제한
+//            totalVacation = Math.min(totalVacation, 25);
+//        }
+//
+//        return totalVacation;
+//    }
 }

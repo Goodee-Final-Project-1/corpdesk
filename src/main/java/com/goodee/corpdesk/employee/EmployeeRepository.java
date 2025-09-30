@@ -53,6 +53,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     """)
     public List<ResApprovalDTO> findEmployeeWithDeptAndPositionAndFile(@Param("departmentId") Integer departmentId, @Param("useYn") Boolean useYn);
 
+    @NativeQuery("""
+        SELECT *
+        FROM employee
+        WHERE
+        	YEAR(hire_date) = :year
+        	AND MONTH(hire_date) = :month
+    """)
+    public List<Employee> findAllByHireDateYearMonth(@Param("year") Integer year, @Param("month") Integer month);
+
 	boolean existsByUsername(String username);
 
 	List<Employee> findAllByUseYnTrue();
