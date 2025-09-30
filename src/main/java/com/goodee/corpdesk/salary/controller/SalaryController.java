@@ -18,17 +18,17 @@ public class SalaryController {
 		return cat;
 	}
 
-	@RequestMapping("/list")
+	@RequestMapping
 	public String list() {
 		return "salary/list";
 	}
 
-	@RequestMapping("/list/{page}")
-	public String list(@PathVariable Integer page) {
-		return "salary/list";
-	}
+//	@RequestMapping("/{page}")
+//	public String list(@PathVariable Integer page) {
+//		return "salary/list";
+//	}
 
-	@RequestMapping("/detail/{paymentId}")
+	@RequestMapping("/{paymentId}")
 	public String detail(@PathVariable Long paymentId) {
 		return "salary/detail";
 	}

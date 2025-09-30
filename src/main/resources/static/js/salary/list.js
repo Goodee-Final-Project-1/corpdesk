@@ -2,20 +2,26 @@ const tbody = document.getElementById('tbody');
 const pathArr = location.pathname.split('/');
 if (pathArr.length <= 3) pathArr.push('1');
 
-let page = parseInt(pathArr[3]);
+// let page = parseInt(pathArr[3]);
 
-async function getSalary() {
-
+async function getSalary(page) {
 	try {
 
-		const response = await fetch('/api/salary/list/' + page, {
-			method: 'POST'
+		const response = await fetch('/api/salary', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				'page': page,
+			})
 		});
 		if (!response.ok) throw new Error('수신 오류');
 		const data = await response.json();
 
 		console.log(data);
 
+		tbody.innerHTML = '';
 		data.content.forEach(function (e) {
 			const tr = document.createElement('tr');
 
@@ -46,10 +52,10 @@ async function getSalary() {
 	}
 }
 
-getSalary();
+getSalary(1);
 
 function detail(e) {
-	location.href = '/salary/detail/' + e;
+	location.href = '/salary/' + e;
 }
 
 
@@ -70,7 +76,7 @@ function paging(data) {
 
 	let page = `
 		<li class="page-item ${isFirst ? 'd-none' : ''}">
-			<a class="page-link d-inline" href="/salary/list/${startPage}" aria-label="Previous">
+			<a class="page-link d-inline" href="#" onclick="getPage(event, ${startPage})" aria-label="Previous">
 				<span aria-hidden="true" class="mdi mdi-chevron-left"></span>
 				<span class="sr-only">Previous</span>
 			</a>
@@ -80,14 +86,14 @@ function paging(data) {
 	for (let i = startPage; i <= endPage; i++) {
 		page += `
 				<li class="page-item ${i == currentPage ? 'active' : ''}">
-					<a class="page-link d-inline" href="/salary/list/${i + 1}">${i + 1}</a>
+					<a class="page-link d-inline" href="#" onclick="getPage(event, ${i + 1})">${i + 1}</a>
 				</li>
 			`;
 	}
 
 	page += `
 				<li class="page-item ${isLast ? 'd-none' : ''}">
-					<a class="page-link d-inline" href="/salary/list/${startPage + 6}" aria-label="Next">
+					<a class="page-link d-inline" href="#" onclick="getPage(event, ${startPage + 6})" aria-label="Next">
 						<span aria-hidden="true" class="mdi mdi-chevron-right"></span>
 						<span class="sr-only">Next</span>
 					</a>
@@ -95,9 +101,13 @@ function paging(data) {
 	`
 
 	pagination.innerHTML = page;
+	div.innerHTML = '';
 	div.appendChild(pagination);
 }
 
-
+function getPage(e, page) {
+	e.preventDefault();
+	getSalary(page);
+}
 
 
