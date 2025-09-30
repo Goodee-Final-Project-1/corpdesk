@@ -1,6 +1,8 @@
 package com.goodee.corpdesk.vacation.controller;
 
 import com.goodee.corpdesk.approval.service.ApprovalService;
+import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
+import com.goodee.corpdesk.vacation.service.VacationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
@@ -9,19 +11,28 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/vacation/**")
 public class VacationController {
 
+    @Autowired
+    private VacationService vacationService;
+
     @GetMapping("list")
-    public String list(@RequestParam("listType") String listType
-                        , @RequestParam(value = "username", required = false) String username
-                        , Model model) {
+    public String list(@RequestParam(value = "username", required = false) String username, Model model) throws Exception {
 
-        // 유저의 휴가 신청 현황(status all)
-//        approvalService.getAllVacationList(listType, username);
+        ResVacationDTO vacation = new ResVacationDTO();
+        if(username != null) {
+            vacation = vacationService.getVacation(username);
 
-        // 전사 휴가 현황(status 승인)
+            model.addAttribute("vacation", vacation);
+        }
+
+        List<ResVacationDTO> details = vacationService.getVacationDetails(vacation.getVacationId());
+
+        model.addAttribute("details", details);
 
         return "vacation/list";
     }

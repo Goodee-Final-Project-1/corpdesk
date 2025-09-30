@@ -3,13 +3,17 @@ package com.goodee.corpdesk.vacation.service;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
+import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
 import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.entity.VacationDetail;
+import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,6 +22,8 @@ public class VacationService {
 
     @Autowired
     private VacationRepository vacationRepository;
+    @Autowired
+    private VacationDetailRepository vacationDetailRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
     @Autowired
@@ -37,7 +43,7 @@ public class VacationService {
         for (Employee employee : employeeList) {
             int newTotalVacation = vacationManager.calTotalVacation(employee.getHireDate());
 
-            Vacation vacation = vacationRepository.findByUsername(employee.getUsername());
+            Vacation vacation = vacationRepository.findByUseYnAndUsername(true, employee.getUsername());
             int oldTotalVacation = vacation.getTotalVacation();
 
             int increaseAmount = newTotalVacation - oldTotalVacation;
@@ -53,4 +59,22 @@ public class VacationService {
 
     }
 
+    public List<ResVacationDTO> getVacationDetails(Integer vacationId) throws Exception {
+
+        List<VacationDetail> vacationDetails = new ArrayList<>();
+        List<ResVacationDTO> resVacationDTOList = new ArrayList<>();
+
+        if(vacationId == null) vacationDetails = vacationDetailRepository.findAllVacationDetailByUseYn(true);
+        else vacationDetails = vacationDetailRepository.findAllVacationDetailByUseYnAndVacationId(true, vacationId);
+
+        resVacationDTOList = vacationDetails.stream().map(VacationDetail::toResVacationDTO).toList();
+
+        if(resVacationDTOList == null || resVacationDTOList.isEmpty()) return resVacationDTOList; // 조회 결과 없으면 값 없는 껍데기 객체 반환
+
+        return resVacationDTOList;
+    }
+
+    public ResVacationDTO getVacation(String username) throws Exception {
+        return vacationRepository.findByUseYnAndUsername(true, username).toResVacationDTO();
+    }
 }

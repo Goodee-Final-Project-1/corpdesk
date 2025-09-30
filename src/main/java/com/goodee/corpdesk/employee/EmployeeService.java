@@ -213,7 +213,7 @@ public class EmployeeService implements UserDetailsService {
         // 추가) 직원 정보 수정 성공시 휴가 테이블 update
         if(editedEmployee.getHireDate() != null) {
             // 직원의 휴가 테이블 조회
-            Vacation vacation = vacationRepository.findByUsername(editedEmployee.getUsername());
+            Vacation vacation = vacationRepository.findByUseYnAndUsername(true, editedEmployee.getUsername());
 
             // 총 연차 update
             int totalVacation = vacationManager.calTotalVacation(editedEmployee.getHireDate());

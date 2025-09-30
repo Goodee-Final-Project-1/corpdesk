@@ -1,10 +1,9 @@
 package com.goodee.corpdesk.vacation.entity;
 
 import com.goodee.corpdesk.common.BaseEntity;
+import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -37,5 +36,15 @@ public class VacationDetail extends BaseEntity {
     private LocalDate endDate;
 
     private Integer usedDays;
+
+    public ResVacationDTO toResVacationDTO() {
+        return ResVacationDTO.builder()
+            .vacationDetailId(vacationDetailId)
+            .vacationTypeId(vacationTypeId)
+            .startDate(startDate)
+            .endDate(endDate)
+            .usedDays(usedDays)
+            .build();
+    }
 
 }

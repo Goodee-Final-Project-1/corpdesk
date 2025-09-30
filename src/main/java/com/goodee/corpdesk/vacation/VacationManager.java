@@ -35,9 +35,6 @@ public class VacationManager {
                 int bonusVacation = (yearsWorked - 1) / 2;
                 totalVacation += bonusVacation;
             }
-
-            // 6. 최대 25일 제한
-            totalVacation = Math.min(totalVacation, 25);
         }
 
         return totalVacation;

@@ -41,10 +41,10 @@
           <ul class="text-center">
             <li class="d-block mb-4">
               <%-- TODO 인증 붙이면 usernmae 파라미터 삭제 --%>
-              <a href="/vacation/list?listType=request&username=jung_frontend">휴가 신청 현황</a>
+              <a href="/vacation/list?username=jung_frontend">휴가 현황</a>
             </li>
             <li class="d-block mb-4">
-              <a href="/vacation/list?listType=company">전사 휴가 현황</a>
+              <a href="/vacation/list">전사 휴가 현황</a>
             </li>
           </ul>
         </div>
@@ -58,7 +58,7 @@
     <div class="card card-default">
 
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h2>휴가 신청 현황</h2>
+        <h2>휴가 현황</h2>
         <div>
           <span>남은 연차 : </span>
           <span><strong>00</strong>일</span>
@@ -95,34 +95,65 @@
           </form>
         </div>
 
-        <!-- 휴가 신청 목록 테이블 -->
+        <%-- 휴가 집계 정보 --%>
+        <c:if test="${vacation ne null}">
+          <div class="row mb-4 col-11 m-auto">
+            <div class="col-xl-6 mx-auto">
+              <h5 class="mb-2">연차 현황</h5>
+              <div class="card card-default">
+                <div class="card-body p-4 d-flex justify-content-between flex-wrap">
+
+                  <div class="col-4 text-center">
+                    <h6>발생 연차</h6>
+                    <br>
+                    <b>${vacation.totalVacation}</b><span>일</span>
+                  </div>
+                  <div class="col-4 text-center">
+                    <h6>사용 연차</h6>
+                    <br>
+                    <b>${vacation.usedVacation}</b><span>일</span>
+                  </div>
+                  <div class="col-4 text-center">
+                    <h6>잔여 연차</h6>
+                    <br>
+                    <b>${vacation.remainingVacation}</b><span>일</span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </c:if>
+
+        <!-- 휴가 목록 테이블 -->
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>
-            <tr>
-              <th>상태</th>
-              <th>휴가 종류</th>
-              <th>휴가 일수</th>
-              <th>휴가 기간</th>
-            </tr>
+              <tr>
+                <th>휴가 종류</th>
+                <th>시작일</th>
+                <th>종료일</th>
+                <th>사용일수</th>
+              </tr>
             </thead>
             <tbody>
-            <tr>
-              <td>
-                <span class="badge badge-warning">승인 대기</span>
-              </td>
-              <td>연차</td>
-              <td>2</td>
-              <td>2025-09-11 ~ 2025-09-12</td>
-            </tr>
-            <tr>
-              <td>
-                <span class="badge badge-success">승인</span>
-              </td>
-              <td>연차</td>
-              <td>1</td>
-              <td>2025-08-11</td>
-            </tr>
+              <c:forEach items="${details}" var="el">
+                <tr data-vacation-detail-id="${el.vacationDetailId}">
+                  <td>
+                    <c:choose>
+                      <c:when test="${el.vacationTypeId eq 1}">연차휴가</c:when>
+                      <c:when test="${el.vacationTypeId eq 2}">병가</c:when>
+                      <c:when test="${el.vacationTypeId eq 3}">경조사휴가</c:when>
+                      <c:when test="${el.vacationTypeId eq 4}">출산휴가</c:when>
+                      <c:when test="${el.vacationTypeId eq 5}">육아휴직</c:when>
+                      <c:when test="${el.vacationTypeId eq 6}">공가</c:when>
+                    </c:choose>
+                  </td>
+                  <td>${el.startDate}</td>
+                  <td>${el.endDate}</td>
+                  <td>${el.usedDays}</td>
+                </tr>
+              </c:forEach>
             </tbody>
           </table>
         </div>

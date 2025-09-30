@@ -182,7 +182,7 @@ public class ApprovalService {
                 // 추가) 결재 유형이 휴가라면 vacation_datail에 데이터 insert & vacaion의 사용연차, 총연차 update
                 if(approval.getApprovalFormId() == 1) {
                     // 1) vacation을 username으로 가져옴
-                    Vacation vacation = vacationRepository.findByUsername(approval.getUsername());
+                    Vacation vacation = vacationRepository.findByUseYnAndUsername(true, approval.getUsername());
 
                     // 2) vacation_datail insert
                     // 휴가번호 = vacationId
