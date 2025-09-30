@@ -66,44 +66,6 @@ public class ApprovalService {
 		approval.setModifiedBy(modifiedBy);
 		approval = approvalRepository.save(approval); // 조회 결과가 없다면 예외가 터지고 롤백됨
 
-        // TODO
-//        // 만약 결재 유형이 휴가신청인 경우 (approvalFormId = 1) vacation과 vacation_detail 테이블에도 데이터 insert, update
-//        if(reqApprovalDTO.getApprovalFormId() == 1) {
-//            // ----------------- vacation
-//            // vacation 데이터를 username으로 select해서 가져와야 함
-//            // 가져올 데이터가 없으면 insert
-//            Vacation vacation = vacationRepository.findByUsername(reqApprovalDTO.getUsername());
-//            if(vacation == null) {
-//                vacation.setUsername(reqApprovalDTO.getUsername());
-//
-//                // 총 연차
-//                Integer totalVacation = calTotalVacation(reqApprovalDTO.getUsername());
-//                vacation.setTotalVacation(totalVacation);
-//
-//                // 사용 연차 - 휴가 사용내역에서 휴가일수 sum
-//                Integer totalUsed = vacationDetailRepository.countUsedVacationDays(reqApprovalDTO.getUsername());
-//                if(totalUsed == null) totalUsed = 0;
-//                vacation.setUsedVacation(totalUsed);
-//
-//                // 잔여 연차 (총 연차 - 사용 연차)
-//                vacation.setRemainingVacation(totalVacation - totalUsed);
-//            }
-//
-//            // ----------------- vacation_detail
-//            // JSON 문자열을 파싱해서 vacation_detail에 저장
-//            JsonNode contentNode = objectMapper.readTree(reqApprovalDTO.getApprovalContent());
-//
-//            VacationDetail vacationDetail = new VacationDetail();
-//            vacationDetail.setVacationTypeId(contentNode.get("vacation_type_id").asInt());
-//            vacationDetail.setStartDate(contentNode.get("start_date").asText());
-//            vacationDetail.setEndDate(contentNode.get("end_date").asText());
-//
-//            vacationDetailRepository.save(vacationDetail);
-//
-//            // vacation 테이블의 데이터 update
-//
-//        }
-
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
 
 		// 2. 결재자에 insert
@@ -216,6 +178,40 @@ public class ApprovalService {
 				
 				// 결재 상태 수정
 				approval.setStatus('Y');
+
+                // 추가) 결재 유형이 휴가라면 vacation_datail에 데이터 insert & vacaion의 사용연차, 총연차 update
+                if(approval.getApprovalFormId() == 1) {
+                    // 1) vacation을 username으로 가져옴
+                    Vacation vacation = vacationRepository.findByUsername(approval.getUsername());
+
+                    // 2) vacation_datail insert
+                    // 휴가번호 = vacationId
+                    // 결재번호 = approvalId
+                    // 휴가유형번호, 시작날짜, 종료날짜, 휴가일수 -> approvalContent에서 가져옴
+                    VacationDetail newVacationDetail = new VacationDetail();
+
+                    newVacationDetail.setVacationId(vacation.getVacationId());
+                    newVacationDetail.setApprovalId(approval.getApprovalId());
+
+                    // JSON 문자열을 파싱해서 vacation_detail에 저장
+                    JsonNode contentNode = objectMapper.readTree(approval.getApprovalContent());
+
+                    newVacationDetail.setVacationTypeId(contentNode.get("vacation_type_id").asInt());
+                    LocalDate startDate = LocalDate.parse(contentNode.get("start_date").asText());
+                    newVacationDetail.setStartDate(startDate);
+                    LocalDate endDate = LocalDate.parse(contentNode.get("end_date").asText());
+                    newVacationDetail.setEndDate(endDate);
+                    int usedDays = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
+                    newVacationDetail.setUsedDays(usedDays);
+                    vacationDetailRepository.save(newVacationDetail);
+
+                    // 3) vacation update
+                    // vacation_detail의 휴가일수만큼 사용연차 증가 & 잔여연차 감소
+                    vacation.setUsedVacation(vacation.getRemainingVacation() + usedDays);
+                    vacation.setRemainingVacation(vacation.getRemainingVacation() - usedDays);
+                    vacationRepository.save(vacation);
+                }
+
 			} else {
 				// 수정할 결재자 정보가 있으면 결재 상태의 값을 수정하지 않고 그 다음 승인 순서인 결재자 정보(만약 있다면)의 use_yn값을 true로 수정
 				nextApprover.setUseYn(true);
@@ -317,42 +313,4 @@ public class ApprovalService {
         return approver.toResApprovalDTO();
     }
 
-//    private Integer calTotalVacation(String username) throws Exception {
-//        // 특정 직원의 총 발생 연차 계산
-//
-//        // 1. 직원 정보 조회 (입사일)
-//        Employee employee = employeeRepository.findByUsername(username).get();
-//
-//        LocalDate hireDate = employee.getHireDate(); // 입사일
-//        LocalDate today = LocalDate.now();
-//
-//        // 2. 재직 기간 계산
-//        Integer monthsWorked = (int) ChronoUnit.MONTHS.between(hireDate, today);
-//        Integer yearsWorked = (int) ChronoUnit.YEARS.between(hireDate, today);
-//
-//        Integer totalVacation = 0;
-//
-//        // 3. 재직 기간 1년 미만인 경우
-//        if (yearsWorked == 0) {
-//            // 1개월마다 1일 부여 (최대 11일)
-//            totalVacation = monthsWorked;
-//        }
-//        // 4. 재직 기간 1년 이상인 경우
-//        else {
-//            // 기본 15일 부여
-//            totalVacation = yearsWorked * 15;
-//
-//            // 5. 가산 연차 계산 (3년 이상 근속 시)
-//            if (yearsWorked >= 3) {
-//                // 2년마다 1일씩 추가
-//                int bonusVacation = (yearsWorked - 1) / 2;
-//                totalVacation += bonusVacation;
-//            }
-//
-//            // 6. 최대 25일 제한
-//            totalVacation = Math.min(totalVacation, 25);
-//        }
-//
-//        return totalVacation;
-//    }
 }
