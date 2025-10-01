@@ -35,7 +35,7 @@
 
       <div style="margin-top:16px;">
         <a href="${pageContext.request.contextPath}/board/me">목록으로</a>
-      </div>
+      </div>      
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	
