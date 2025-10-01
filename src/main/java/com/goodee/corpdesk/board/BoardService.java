@@ -55,7 +55,7 @@ public class BoardService {
       board.setDepartmentId(getCurrentUserDepartmentIdOrThrow());
     }
     
-    // 공지 작성 제한 (필요 시)
+    // 공지 작성 제한
     if (Integer.valueOf(0).equals(board.getDepartmentId()) && !isAdmin()) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "공지 작성 권한이 없습니다.");
     }

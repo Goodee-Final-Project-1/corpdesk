@@ -10,7 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
 
 
 @Controller
@@ -19,19 +19,6 @@ public class BoardController {
 
   @Autowired
   private BoardService boardService;
-
-  // 내 부서 게시글
-  @GetMapping("/me")
-  public String myDepartmentList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-                                 Model model) {
-    Page<Board> page = boardService.getMyDepartmentBoards(pageable);
-    
-    model.addAttribute("page", page);
-    model.addAttribute("title", "부서 게시판");
-    model.addAttribute("post", page.getContent());
-    
-    return "board/boardList";
-  }
 
   // 공지 게시글 (departmentId = 0)
   @GetMapping("/notice")
@@ -43,27 +30,75 @@ public class BoardController {
     model.addAttribute("departmentId", 0);
     model.addAttribute("title", "공지 게시판");
     model.addAttribute("post", page.getContent());
+    model.addAttribute("writePath", "/board/notice/write");
     
     return "board/boardList";
   }
 
   // 공지 게시글 상세 페이지 (useYn = true)
-  @GetMapping("/detail/{boardId}")
+  @GetMapping("/notice/{boardId}")
   public String noticeDetail(@PathVariable("boardId") Long boardId, Model model) {
     Board post = boardService.getBoardsDetail(boardId);
 
     model.addAttribute("post", post);
-    model.addAttribute("title", "공지 상세");
+    model.addAttribute("title", "공지 게시글");
 
     return "board/noticeDetail";
   }
 
-  // 부서 게시글 상세 (useYn = true)
-  @GetMapping("/department/detail/{boardId}")
-  public String getMethodName(@RequestParam String param) {
-      return new String();
+  // 내 부서 게시글 (departmentId = {departmentId})
+  @GetMapping("/me")
+  public String myDepartmentList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                 Model model) {
+    Page<Board> page = boardService.getMyDepartmentBoards(pageable);
+    
+    model.addAttribute("page", page);
+    model.addAttribute("title", "부서 게시판");
+    model.addAttribute("post", page.getContent());
+    model.addAttribute("writePath", "/board/me/write");
+    
+    return "board/boardList";
   }
-  
-  
+
+  // 부서 게시글 상세 (useYn = true)
+  @GetMapping("/department/{boardId}")
+  public String departmentDetail(@PathVariable("boardId") Long boardId, Model model) {
+    Board post = boardService.getBoardsDetail(boardId);
+
+    model.addAttribute("post", post);
+    model.addAttribute("title", "부서 게시글");
+
+    return "board/departmentDetail";
+  }
+
+  // 공지 글쓰기 폼
+  @GetMapping("/notice/write")
+  public String noticeWriteForm(Model model) {
+    model.addAttribute("title", "공지글 쓰기");
+    return "board/noticeWrite";
+  }
+
+  // 공지 등록
+  @PostMapping("/notice")
+  public String createNotice(Board board) {
+    board.setDepartmentId(0);
+    Board saved = boardService.createPost(board);
+    return "redirect:/board/notice/" + saved.getBoardId();
+  }
+
+  // 부서 글쓰기 폼
+  @GetMapping("/me/write")
+  public String departmentWriteForm(Model model) {
+    model.addAttribute("title", "부서 글쓰기");
+    return "board/departmentWrite";
+  }
+
+  // 부서 등록
+  @PostMapping("/me")
+  public String createDepartmentPost(Board board) {
+    // departmentId가 null이면 Service에서 Authentication 기반으로 채움
+    Board saved = boardService.createPost(board);
+    return "redirect:/board/department/" + saved.getBoardId();
+  }
 
 }
