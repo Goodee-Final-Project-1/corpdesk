@@ -37,7 +37,7 @@ import lombok.ToString;
 @ToString
 @Builder
 @NoArgsConstructor @AllArgsConstructor
-@Entity @Table
+@Entity @Table(name = "employee")
 @DynamicInsert
 @DynamicUpdate
 public class Employee implements UserDetails {
@@ -57,6 +57,7 @@ public class Employee implements UserDetails {
 
 	private String departmentName;
 
+	@Transient
 	private String positionName;
 
 	@ColumnDefault("2")
