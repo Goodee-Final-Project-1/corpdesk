@@ -114,7 +114,7 @@
 					</a>
 				</li>
 				<li>
-					<a class="sidenav-item-link" href="/salary/list"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/salary"> <!-- TODO href 수정 -->
 						<i class="mdi mdi-currency-krw"></i> <span class="nav-text">급여 관리</span>
 					</a>
 				</li>
