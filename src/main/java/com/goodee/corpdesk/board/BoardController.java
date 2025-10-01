@@ -168,4 +168,22 @@ public class BoardController {
     return "redirect:/board/department/" + updated.getBoardId();
   }
 
+  // 공지 삭제
+  @PostMapping("/notice/{boardId}/delete")
+  public String deleteNotice(@PathVariable("boardId") Long boardId) {
+
+    boardService.deletePost(boardId);
+
+    return "redirect:/board/notice";
+  }
+
+  // 부서글 삭제
+  @PostMapping("/department/{boardId}/delete")
+  public String deleteDepartment(@PathVariable("boardId") Long boardId) {
+
+    boardService.deletePost(boardId);
+    
+    return "redirect:/board/me";
+  }
+
 }

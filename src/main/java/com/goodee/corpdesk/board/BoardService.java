@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -51,7 +49,8 @@ public class BoardService {
     Object principal = authentication.getPrincipal();
     if (principal instanceof com.goodee.corpdesk.employee.Employee) {
       com.goodee.corpdesk.employee.Employee emp = (com.goodee.corpdesk.employee.Employee) principal;
-      Integer roleId = emp.getRoleId(); // 1=ADMIN, 2=MANAGER 가정
+      // 1 = 관리자, 2 = 직원
+      Integer roleId = emp.getRoleId();
       return roleId != null && (roleId == 1 || roleId == 2);
     }
     return false;
@@ -111,6 +110,23 @@ public class BoardService {
 
     // 공지/부서 전환 금지: departmentId는 변경하지 않음
     return boardRepository.save(existing);
+  }
+
+  public void deletePost(Long boardId) {
+
+    Board existing = boardRepository.findByBoardIdAndUseYnTrue(boardId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다"));
+
+    // 인증 사용자명
+    String current = getCurrentUsername();
+    if (existing.getUsername() == null || !existing.getUsername().equals(current)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 삭제할 수 있습니다.");
+    }
+
+    // 소프트 삭제
+    existing.setUseYn(false);
+    existing.setUpdatedAt(LocalDateTime.now());
+    boardRepository.save(existing);
   }
 
 }
