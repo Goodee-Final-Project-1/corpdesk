@@ -158,7 +158,7 @@ public class ChatMessageController {
 	        	 list.forEach(l->{
 	        		if(!l.getEmployeeUsername().equals(username)) {
 	        		        chatRoomMe.setChatRoomTitle(getUserNameDepPos(l.getEmployeeUsername()));
-	        		        chatRoomMe.setImgPath((l.getEmployeeUsername()));
+	        		        chatRoomMe.setImgPath( getUserImgPath(l.getEmployeeUsername()));
 	        		}
 	        		
 	        	});

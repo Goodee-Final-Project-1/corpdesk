@@ -82,49 +82,30 @@ public class ChatMessageService {
 	// 방번호로 해당 방의 메세지를 조회해옴
 	public List<ChatMessage> chatMessageList(Long chatRoomId, Long lastMessageNo, int size, Principal principal) {
 		Pageable pageable = PageRequest.of(0, size);
-		
-		//방에 초대 되었을 시점을 기준까지 가져옴 (방을 나갔다 다시 들어온 경우 이전 내용을 볼 수 없음)
-		LocalDateTime enterTime = chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(chatRoomId, principal.getName()).getUpdatedAt();
-		List<ChatMessage> list=null;
-		if(lastMessageNo==0|| lastMessageNo==null) {
-			 list =  chatMessageRepository.findByChatRoomIdAndSentAtGreaterThanEqualOrderByMessageIdDesc(chatRoomId,enterTime , pageable);
-			list.forEach(l->{
-				if(l.getMessageType()==null) {
-					l.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
-					  Optional <EmployeeFile> empFileOp= employeeService.getEmployeeFileByUsername(l.getEmployeeUsername());
-				        if(empFileOp.isPresent()) {
-				        	EmployeeFile empFile = empFileOp.get();
-				        	 if(empFile!=null && empFile.getUseYn()) {
-				 	        	l.setImgPath("/files/profile/"+empFile.getSaveName()+"."+empFile.getExtension());
-				 	        }else {
-				 	        	l.setImgPath("/images/default_profile.jpg");
-				 	        }
-				        }	
-				}
-				
+
+		// 방에 초대 되었을 시점을 기준까지 가져옴 (방을 나갔다 다시 들어온 경우 이전 내용을 볼 수 없음)
+		LocalDateTime enterTime = chatParticipantRepository
+				.findByChatRoomIdAndEmployeeUsername(chatRoomId, principal.getName()).getUpdatedAt();
+		List<ChatMessage> list = null;
+		if (lastMessageNo == 0 || lastMessageNo == null) {
+			list = chatMessageRepository.findByChatRoomIdAndSentAtGreaterThanEqualOrderByMessageIdDesc(chatRoomId,
+					enterTime, pageable);
+			list.forEach(l -> {
+				l.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
+				l.setImgPath(getUserImgPath(l.getEmployeeUsername()));
 				
 
 			});
-			
-		}else {
-			 list =chatMessageRepository.findByChatRoomIdAndMessageIdLessThanAndSentAtGreaterThanEqualOrderByMessageIdDesc(chatRoomId,lastMessageNo, enterTime, pageable);
-			list.forEach(l->{
-				if(l.getMessageType()==null) {
-					l.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
-					 Optional <EmployeeFile> empFileOp= employeeService.getEmployeeFileByUsername(l.getEmployeeUsername());
-				        if(empFileOp.isPresent()) {
-				        	EmployeeFile empFile = empFileOp.get();
-				        	 if(empFile!=null && empFile.getUseYn()) {
-				 	        	l.setImgPath("/files/profile/"+empFile.getSaveName()+"."+empFile.getExtension());
-				 	        }else {
-				 	        	l.setImgPath("/images/default_profile.jpg");
-				 	        }
-				        }
-				}
-				
 
-		});
-	}
+		} else {
+			list = chatMessageRepository
+					.findByChatRoomIdAndMessageIdLessThanAndSentAtGreaterThanEqualOrderByMessageIdDesc(chatRoomId,
+							lastMessageNo, enterTime, pageable);
+			list.forEach(l -> {
+				l.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
+				l.setImgPath(getUserImgPath(l.getEmployeeUsername()));
+			});
+		}
 		return list;
 	}
 
