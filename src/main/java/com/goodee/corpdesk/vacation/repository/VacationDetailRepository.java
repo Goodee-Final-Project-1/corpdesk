@@ -13,13 +13,6 @@ import java.util.List;
 
 public interface VacationDetailRepository extends JpaRepository<VacationDetail, Long> {
 
-    /**
-     * Finds the vacation detail that applies to the given user's vacation on the specified date.
-     *
-     * @param username the user's username whose vacation is being queried
-     * @param date the date to check for an active vacation detail
-     * @return the VacationDetail covering the specified date for the user's vacation, or `null` if none exists
-     */
     @NativeQuery("""
         WITH vd AS (
         	SELECT *
@@ -31,10 +24,22 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
         FROM vd
         WHERE :date <= end_date
     """)
-    public VacationDetail findVacationDetailOnDate(@Param("username") String username, @Param("date")LocalDate date);
+    VacationDetail findVacationDetailOnDate(@Param("username") String username, @Param("date")LocalDate date);
 
+    @NativeQuery("""
+        SELECT sum(used_days)
+        FROM vacation_detail
+        WHERE username = :username
+    """)
+    Integer countUsedVacationDays(@Param("username") String username);
 
+    List<VacationDetail> findAllVacationDetailByUseYnAndVacationId(Boolean useYn, Integer vacationId);
 
+    List<VacationDetail> findAllVacationDetailByUseYn(Boolean useYn);
+
+    List<VacationDetail> findAllVacationDetailByUseYnAndVacationIdAndVacationTypeId(Boolean useYn, Integer vacationId, Integer vacationTypeId);
+
+    List<VacationDetail> findAllVacationDetailByUseYnAndVacationTypeId(Boolean useYn, Integer vacationTypeId);
 
 	// 캘린더
 	@Query("""
