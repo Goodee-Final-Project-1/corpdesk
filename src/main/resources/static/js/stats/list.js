@@ -1,142 +1,93 @@
+document.addEventListener('DOMContentLoaded', function () {
 
-const options = {
-	series: [{
-		name: 'Income',
-		type: 'column',
-		data: [1.4, 2, 2.5, 1.5, 2.5, 2.8, 3.8, 4.6]
-	}, {
-		name: 'Cashflow',
-		type: 'column',
-		data: [1.1, 3, 3.1, 4, 4.1, 4.9, 6.5, 8.5]
-	}, {
-		name: 'Revenue',
-		type: 'line',
-		data: [20, 29, 37, 36, 44, 45, 50, 58]
-	}],
-	chart: {
-		height: 350,
-		type: 'line',
-		stacked: false
-	},
-	dataLabels: {
-		enabled: false
-	},
-	stroke: {
-		width: [1, 1, 4]
-	},
-	title: {
-		text: 'XYZ - Stock Analysis (2009 - 2016)',
-		align: 'left',
-		offsetX: 110
-	},
-	xaxis: {
-		categories: [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
-	},
-	yaxis: [
-		{
-			seriesName: 'Income',
-			axisTicks: {
-				show: true,
-			},
-			axisBorder: {
-				show: true,
-				color: '#008FFB'
-			},
-			labels: {
-				style: {
-					colors: '#008FFB',
-				}
-			},
-			title: {
-				text: "Income (thousand crores)",
-				style: {
-					color: '#008FFB',
-				}
-			},
-			tooltip: {
-				enabled: true
+	const data1 = [];
+	const cat = [];
+
+	const searchForm = document.getElementById('searchForm');
+
+	const options = {
+		title: {
+			text: '입퇴사자 및 재직자 통계',
+			align: 'center',
+			style: {
+				fontSize: '22px',
 			}
 		},
-		{
-			seriesName: 'Cashflow',
-			opposite: true,
-			axisTicks: {
-				show: true,
-			},
-			axisBorder: {
-				show: true,
-				color: '#00E396'
-			},
-			labels: {
-				style: {
-					colors: '#00E396',
-				}
-			},
-			title: {
-				text: "Operating Cashflow (thousand crores)",
-				style: {
-					color: '#00E396',
-				}
-			},
+		series: [{
+			name: 'default',
+			type: 'column',
+			data: []
+		}],
+		chart: {
+			height: 350,
+			type: 'line',
+			stacked: false
 		},
-		{
-			seriesName: 'Revenue',
-			opposite: true,
-			axisTicks: {
-				show: true,
-			},
-			axisBorder: {
-				show: true,
-				color: '#FEB019'
-			},
-			labels: {
-				style: {
-					colors: '#FEB019',
+		legend: {
+			horizontalAlign: 'left',
+			offsetX: 40
+		}
+	};
+
+	const chart = new ApexCharts(document.querySelector("#chart"), options);
+	chart.render();
+
+	async function getChart(start, end, department, position) {
+		try {
+			const response = await fetch('/api/stats', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			},
-			title: {
-				text: "Revenue (thousand crores)",
-				style: {
-					color: '#FEB019',
+				body: JSON.stringify({
+					'start': start,
+					'end': end,
+					'department': department,
+					'position': position
+				})
+			});
+			if (!response.ok) throw new Error('수신 오류');
+			const data = await response.json();
+
+			console.log(data);
+
+			chart.updateOptions({
+				xaxis: {
+					categories: data.months,
 				}
-			}
-		},
-	],
-	tooltip: {
-		fixed: {
-			enabled: true,
-			position: 'topLeft', // topRight, topLeft, bottomRight, bottomLeft
-			offsetY: 30,
-			offsetX: 60
-		},
-	},
-	legend: {
-		horizontalAlign: 'left',
-		offsetX: 40
-	}
-};
-
-const chart = new ApexCharts(document.querySelector("#chart"), options);
-chart.render();
-
-
-async function getChart() {
-	try {
-		const response = await fetch('/api/stats', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-
 			})
-		});
-		if (!response.ok) throw new Error('수신 오류');
-		const data = await response.json();
 
-		console.log(data);
+			chart.updateSeries([{
+				name: '입사',
+				type: 'column',
+				data: data.joiner
+			}, {
+				name: '퇴사',
+				type: 'column',
+				data: data.resigner
+			}, {
+				name: '재직',
+				type: 'line',
+				data: data.resider
+			}]);
 
-	} catch (e) {
-		console.error(e);
+		} catch (e) {
+			console.error(e);
+		}
 	}
-}
+
+	getChart();
+
+
+	searchForm.addEventListener('submit', function (e) {
+		e.preventDefault();
+
+		const start = document.getElementById('start').value;
+		const end = document.getElementById('end').value;
+		const department = document.getElementById('department').value;
+		const position = document.getElementById('position').value;
+
+		getChart(start, end, department, position);
+	});
+
+});
