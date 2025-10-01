@@ -1,13 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<!DOCTYPE html>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Insert title here</title>
+	<title>부서글 쓰기</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 
@@ -21,22 +19,20 @@
 	
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
-			<h2><c:out value="${post.title}"/></h2>
-
-      <div style="color:#666; margin-bottom:8px;">
-        작성자: <c:out value="${post.username}"/> |
-        작성일:
-        <spring:eval expression="T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd HH:mm').format(post.createdAt)"/>
-        <c:if test="${not empty post.departmentId}"> | 부서ID: <c:out value="${post.departmentId}"/></c:if>
-      </div>
-
-      <div style="white-space:pre-wrap; line-height:1.6;">
-        <c:out value="${post.content}"/>
-      </div>
-
-      <div style="margin-top:16px;">
-        <a href="${pageContext.request.contextPath}/board/me">목록으로</a>
-      </div>
+			<h2>부서 글쓰기</h2>
+      <form method="post" action="${pageContext.request.contextPath}/board/me">
+        <!-- departmentId는 비워두면 Service에서 Authentication 부서ID로 채움 -->
+        <div style="margin-bottom:8px;">
+          <label>제목</label><br/>
+          <input type="text" name="title" style="width:100%;" required />
+        </div>
+        <div style="margin-bottom:8px;">
+          <label>내용</label><br/>
+          <textarea name="content" rows="10" style="width:100%;" required></textarea>
+        </div>
+        <button type="submit">등록</button>
+        <a href="${pageContext.request.contextPath}/board/me">취소</a>
+      </form>
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	

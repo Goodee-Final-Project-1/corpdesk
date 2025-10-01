@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 
 @Controller
@@ -29,6 +30,7 @@ public class BoardController {
     model.addAttribute("departmentId", 0);
     model.addAttribute("title", "공지 게시판");
     model.addAttribute("post", page.getContent());
+    model.addAttribute("writePath", "/board/notice/write");
     
     return "board/boardList";
   }
@@ -53,6 +55,7 @@ public class BoardController {
     model.addAttribute("page", page);
     model.addAttribute("title", "부서 게시판");
     model.addAttribute("post", page.getContent());
+    model.addAttribute("writePath", "/board/me/write");
     
     return "board/boardList";
   }
@@ -65,13 +68,37 @@ public class BoardController {
     model.addAttribute("post", post);
     model.addAttribute("title", "부서 게시글");
 
-    return "board/boardDetail";
+    return "board/departmentDetail";
   }
 
+  // 공지 글쓰기 폼
+  @GetMapping("/notice/write")
+  public String noticeWriteForm(Model model) {
+    model.addAttribute("title", "공지글 쓰기");
+    return "board/noticeWrite";
+  }
 
+  // 공지 등록
+  @PostMapping("/notice")
+  public String createNotice(Board board) {
+    board.setDepartmentId(0);
+    Board saved = boardService.createPost(board);
+    return "redirect:/board/notice/" + saved.getBoardId();
+  }
 
+  // 부서 글쓰기 폼
+  @GetMapping("/me/write")
+  public String departmentWriteForm(Model model) {
+    model.addAttribute("title", "부서 글쓰기");
+    return "board/departmentWrite";
+  }
 
-  
-  
+  // 부서 등록
+  @PostMapping("/me")
+  public String createDepartmentPost(Board board) {
+    // departmentId가 null이면 Service에서 Authentication 기반으로 채움
+    Board saved = boardService.createPost(board);
+    return "redirect:/board/department/" + saved.getBoardId();
+  }
 
 }

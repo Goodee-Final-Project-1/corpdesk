@@ -29,10 +29,12 @@
       <!-- 게시판 제목 -->
       <h2><c:out value="${title != null ? title : '게시판'}"/></h2>
 
+      <a class="btn" href="${pageContext.request.contextPath}${writePath}">글쓰기</a>
+      
       <!-- 빈 목록 처리 -->
       <c:if test="${empty post}">
         <div>게시글이 없습니다.</div>
-      </c:if>
+      </c:if>      
 
       <!-- 목록 -->
       <c:if test="${not empty post}">
