@@ -1,14 +1,13 @@
 package com.goodee.corpdesk.schedule.repository;
 
-import com.goodee.corpdesk.approval.entity.ApprovalForm;
-import com.goodee.corpdesk.schedule.dto.ReqPersonalScheduleDTO;
 import com.goodee.corpdesk.schedule.dto.ResPersonalScheduleDTO;
 import com.goodee.corpdesk.schedule.entity.PersonalSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PersonalScheduleRepository extends JpaRepository<PersonalSchedule, Long> {
@@ -38,4 +37,9 @@ public interface PersonalScheduleRepository extends JpaRepository<PersonalSchedu
             AND ps.username = :username
     """)
     Integer findOldestScheduleYearByUsername(@Param("useYn") Boolean useYn, @Param("username") String username);
+
+
+
+	// 캘린더
+	List<PersonalSchedule> findAllByUsernameAndScheduleDateTimeBetween(String username, LocalDateTime startDate, LocalDateTime endDate);
 }

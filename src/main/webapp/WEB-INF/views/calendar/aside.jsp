@@ -2,10 +2,9 @@
 
 <aside>
 	<div class="email-left-column email-options p-4 p-xl-5">
-		<a href="#" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">
-			<i class="mdi mdi-calendar-plus mr-2"></i>
-			일정 추가하기
-		</a>
+		<button href="#" class="btn btn-block btn-primary mb-4 mb-xl-5" data-toggle="modal" data-target="#scheduleModal">
+			<i class="mdi mdi-calendar-plus mr-2"></i> 일정 추가하기
+		</button>
 		<ul class="pb-2">
 			<li id="attendance" class="d-block">
 				<div class="custom-control custom-checkbox d-inline-block mr-3 mb-3">
@@ -34,4 +33,3 @@
 		</ul>
 	</div>
 </aside>
-<script src="/js/email/aside.js"></script>
