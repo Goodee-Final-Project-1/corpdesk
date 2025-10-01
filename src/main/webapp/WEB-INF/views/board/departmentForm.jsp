@@ -19,30 +19,32 @@
 	
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
-			<!-- 부서 목록 없는 경우 안내 문구 -->
-      <c:if test="${empty department}">
-      <div class="empty">부서가 없습니다</div>
-      </c:if>
+			<div>
+        <h2>부서게시판 생성</h2>
 
-      <!-- 부서 목록이 있는 경우 출력 -->
-      <c:if test="${not empty department}">
-        <ul>
-					<c:forEach var="department" items="${department}">
-						<li><a href="${pageContext.request.contextPath}/board/department/${department.departmentId}">
-							<span>#${department.departmentId}</span>
-							<c:choose>
-								<c:when test="${not empty department.title}">
-									${department.title}
-								</c:when>
-								<c:otherwise>
-									${department.departmentId}부서
-								</c:otherwise>
-							</c:choose>
-						</a>
-						</li>
-					</c:forEach>
-				</ul>
-      </c:if>
+        <form method="post" action="${pageContext.request.contextPath}/board/department">
+          <div>
+            <label for="">부서 ID (1부터 가능)</label>
+            <input type="number" id="departmentId" name="departmentId" min="1" required />
+          </div>
+
+          <div>
+            <label for="title">부서명</label>
+            <input type="text" id="title" name="title" maxlength="255" required />
+          </div>
+
+          <div>
+            <button type="submit">생성</button>
+            <a href="${pageContext.request.contextPath}/board/department">목록으로 이동</a>
+          </div>
+          
+        </form>
+
+        <c:if test="${not empty error}">
+          <p><c:out value="${error}"></c:out></p>
+        </c:if>
+
+      </div>
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	
