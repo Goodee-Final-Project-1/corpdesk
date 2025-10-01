@@ -75,8 +75,7 @@ public class BoardService {
 
   // 공지게시판 불러오기
   public Page<Board> getNoticeBoards(Pageable pageable) {
-    // departmentId = 0
-    return boardRepository.findNoticePosts(pageable);
+    return boardRepository.findByDepartmentIdAndUseYnTrue(0, pageable);
   }
 
   // 게시글 상세 조회

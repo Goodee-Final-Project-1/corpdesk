@@ -24,7 +24,7 @@ public class BoardController {
     Page<Board> page = boardService.getMyDepartmentBoards(pageable);
     
     model.addAttribute("page", page);
-    model.addAttribute("title", "내 부서 게시판");
+    model.addAttribute("title", "부서 게시판");
     model.addAttribute("post", page.getContent());
     
     return "board/departmentList";
