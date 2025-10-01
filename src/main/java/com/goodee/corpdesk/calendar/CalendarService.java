@@ -33,7 +33,7 @@ public class CalendarService {
 	}
 
 	public List<PersonalSchedule> getSchedule(CalendarDTO calendarDTO, String username) {
-		return personalScheduleRepository.findAllByUsernameAndScheduleDateTimeBetween(username, calendarDTO.getStartDateTime(), calendarDTO.getEndDateTime());
+		return personalScheduleRepository.findAllByUsernameAndUseYnTrueAndScheduleDateTimeBetween(username, calendarDTO.getStartDateTime(), calendarDTO.getEndDateTime());
 	}
 
 	public List<VacationDetailUsernameDTO> getEveryVacation(CalendarDTO calendarDTO) {
