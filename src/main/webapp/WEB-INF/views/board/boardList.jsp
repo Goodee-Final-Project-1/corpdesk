@@ -20,7 +20,7 @@
 	
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
-			<h2>부서 게시판</h2>
+			<h2><c:out value="${title != null ? title : '게시판'}"/></h2>
 
       <!-- 탭/네비게이션 -->
       <div style="margin-bottom:12px;">

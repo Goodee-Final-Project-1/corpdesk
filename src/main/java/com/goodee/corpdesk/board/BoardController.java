@@ -9,6 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 @RequestMapping("/board")
@@ -27,7 +30,7 @@ public class BoardController {
     model.addAttribute("title", "부서 게시판");
     model.addAttribute("post", page.getContent());
     
-    return "board/departmentList";
+    return "board/boardList";
   }
 
   // 공지 게시글 (departmentId = 0)
@@ -38,12 +41,22 @@ public class BoardController {
     
     model.addAttribute("page", page);
     model.addAttribute("departmentId", 0);
-    model.addAttribute("title", "공지사항");
+    model.addAttribute("title", "공지 게시판");
     model.addAttribute("post", page.getContent());
     
-    return "board/departmentList";
+    return "board/boardList";
   }
 
+  // 공지 게시글 상세 페이지 (useYn = true)
+  @GetMapping("/detail/{boardId}")
+  public String noticeDetail(@PathVariable("boardId") Long boardId, Model model) {
+    Board post = boardService.getBoardsDetail(boardId);
 
+    model.addAttribute("post", post);
+    model.addAttribute("title", "공지 상세");
+
+    return "board/noticeDetail";
+  }
+  
 
 }
