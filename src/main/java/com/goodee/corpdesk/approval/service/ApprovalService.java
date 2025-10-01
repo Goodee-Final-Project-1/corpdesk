@@ -1,9 +1,13 @@
 package com.goodee.corpdesk.approval.service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.entity.ApprovalForm;
 import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
@@ -12,6 +16,10 @@ import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
+import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.entity.VacationDetail;
+import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +49,12 @@ public class ApprovalService {
     private EmployeeRepository employeeRepository;
     @Autowired
     private DepartmentRepository departmentRepository;
+    @Autowired
+    private VacationRepository vacationRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private VacationDetailRepository vacationDetailRepository;
 
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
@@ -164,6 +178,40 @@ public class ApprovalService {
 				
 				// 결재 상태 수정
 				approval.setStatus('Y');
+
+                // 추가) 결재 유형이 휴가라면 vacation_datail에 데이터 insert & vacaion의 사용연차, 총연차 update
+                if(approval.getApprovalFormId() == 1) {
+                    // 1) vacation을 username으로 가져옴
+                    Vacation vacation = vacationRepository.findByUseYnAndUsername(true, approval.getUsername());
+
+                    // 2) vacation_datail insert
+                    // 휴가번호 = vacationId
+                    // 결재번호 = approvalId
+                    // 휴가유형번호, 시작날짜, 종료날짜, 휴가일수 -> approvalContent에서 가져옴
+                    VacationDetail newVacationDetail = new VacationDetail();
+
+                    newVacationDetail.setVacationId(vacation.getVacationId());
+                    newVacationDetail.setApprovalId(approval.getApprovalId());
+
+                    // JSON 문자열을 파싱해서 vacation_detail에 저장
+                    JsonNode contentNode = objectMapper.readTree(approval.getApprovalContent());
+
+                    newVacationDetail.setVacationTypeId(contentNode.get("vacationTypeId").asInt());
+                    LocalDate startDate = LocalDate.parse(contentNode.get("startDate").asText());
+                    newVacationDetail.setStartDate(startDate);
+                    LocalDate endDate = LocalDate.parse(contentNode.get("endDate").asText());
+                    newVacationDetail.setEndDate(endDate);
+                    int usedDays = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
+                    newVacationDetail.setUsedDays(usedDays);
+                    vacationDetailRepository.save(newVacationDetail);
+
+                    // 3) vacation update
+                    // vacation_detail의 휴가일수만큼 사용연차 증가 & 잔여연차 감소
+                    vacation.setUsedVacation(vacation.getUsedVacation() + usedDays);
+                    vacation.setRemainingVacation(vacation.getRemainingVacation() - usedDays);
+                    vacationRepository.save(vacation);
+                }
+
 			} else {
 				// 수정할 결재자 정보가 있으면 결재 상태의 값을 수정하지 않고 그 다음 승인 순서인 결재자 정보(만약 있다면)의 use_yn값을 true로 수정
 				nextApprover.setUseYn(true);
@@ -264,4 +312,5 @@ public class ApprovalService {
 
         return approver.toResApprovalDTO();
     }
+
 }

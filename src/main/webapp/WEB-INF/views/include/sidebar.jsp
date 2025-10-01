@@ -60,7 +60,7 @@
 
 				<!-- 근태, 휴가, 일정 -->
 				<li>
-					<a class="sidenav-item-link" href="/attendance/list">
+					<a class="sidenav-item-link" href="/attendance/list?username=jung_frontend"> <%-- TODO 쿼리스트링 제거 --%>
 					<i class="mdi mdi-account-clock"></i> <span class="nav-text">근태</span>
 					</a>
 				</li>
@@ -72,7 +72,7 @@
 				</li>
 				
 				<li>
-					<a class="sidenav-item-link" href="calendar.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/personal-schedule/list?username=jung_frontend"> <%-- TODO 쿼리스트링 제거 --%>
 						<i class="mdi mdi-alarm-check"></i> <span class="nav-text">일정</span>
 					</a>
 				</li>

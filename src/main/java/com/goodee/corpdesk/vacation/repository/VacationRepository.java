@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface VacationRepository extends JpaRepository<Vacation, Integer> {
 
-	Optional<Vacation> findByUsername(String username);
+	Vacation findByUseYnAndUsername(Boolean useYn, String username);
+
 }
