@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	const searchForm = document.getElementById('searchForm');
 
-	const options = {
+	const options1 = {
 		title: {
 			text: '입퇴사자 및 재직자 통계',
 			align: 'center',
@@ -29,12 +29,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	};
 
-	const chart = new ApexCharts(document.querySelector("#chart"), options);
+	const chart = new ApexCharts(document.querySelector("#chart1"), options1);
 	chart.render();
 
 	async function getChart(start, end, department, position) {
 		try {
-			const response = await fetch('/api/stats', {
+			const response = await fetch('/api/stats/chart1', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

@@ -67,4 +67,33 @@ public interface StatsRepository extends JpaRepository<Employee, String> {
 	GROUP BY YEAR(am.month_start), MONTH(am.month_start)
 """)
 	List<Long> countAllResider(LocalDate start, LocalDate end);
+
+
+	@NativeQuery("""
+	WITH sub AS (
+		SELECT username, TIMESTAMPDIFF(YEAR, IFNULL(hire_date, NOW()), IFNULL(last_working_day, NOW())) AS diff
+		FROM employee
+	)
+	SELECT COUNT(e.username) AS count
+	FROM employee e
+	JOIN sub s ON e.username = s.username
+	GROUP BY diff
+	ORDER BY diff ASC
+""")
+	List<Long> countAllServicePeriod();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

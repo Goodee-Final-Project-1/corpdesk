@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -16,7 +17,7 @@ public class StatsApiController {
 
 	private final StatsService statsService;
 
-	@PostMapping
+	@PostMapping("/chart1")
 	public Map<String, Object> list(@RequestBody Map<String, Object> payload) {
 		LocalDate end = LocalDate.now();
 		LocalDate start = end.minusYears(1);
@@ -31,5 +32,10 @@ public class StatsApiController {
 		Integer positionId = (Integer) payload.get("positionId");
 
 		return statsService.list(start, end, departmentId, positionId);
+	}
+
+	@PostMapping("/chart2")
+	public List<Long> list2() {
+		return statsService.list2();
 	}
 }

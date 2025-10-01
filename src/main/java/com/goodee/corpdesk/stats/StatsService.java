@@ -46,4 +46,8 @@ public class StatsService {
 
 		return map;
 	}
+
+	public List<Long> list2() {
+		return statsRepository.countAllServicePeriod();
+	}
 }

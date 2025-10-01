@@ -62,7 +62,10 @@
 		</form>
 	</div>
 	<div class="card-body">
-		<div id="chart"></div>
+		<div id="chart1"></div>
+		<div>
+			<div id="chart2"></div>
+		</div>
 	</div>
 </div>
 <!-- 내용 끝 -->
@@ -70,7 +73,8 @@
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
-<script src="/js/stats/list.js"></script>
+<script src="/js/stats/chart1.js"></script>
+<script src="/js/stats/chart2.js"></script>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>
