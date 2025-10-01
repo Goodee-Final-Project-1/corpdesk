@@ -133,6 +133,7 @@
           <c:forEach items="${employeeList}" var="employee">
           <c:if test="${employee.username ne user }">
             <li class="list-group-item d-flex align-items-cent er">
+             <!-- 추후 사진 바꿔주면됨  -->
               <img src="/images/default_profile.jpg" class="rounded-circle mr-3" style="width:40px; height:40px;">
               <div class="flex-fill">
                 <strong class="employeeName">${employee.name}</strong><br>
