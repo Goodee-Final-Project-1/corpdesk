@@ -1,6 +1,8 @@
 package com.goodee.corpdesk.board;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import com.goodee.corpdesk.common.BaseEntity;
 
@@ -13,12 +15,12 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+// 실제 데이터베이스 테이블 이름
 @Getter
 @Setter
-// 실제 데이터베이스 테이블 이름
+@Entity
 @Table(name = "board")
-
+@DynamicInsert @DynamicUpdate
 public class Board extends BaseEntity {
 
   // 게시글 번호

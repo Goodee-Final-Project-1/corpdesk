@@ -57,6 +57,13 @@ public class BoardController {
 
     return "board/noticeDetail";
   }
+
+  // 부서 게시글 상세 (useYn = true)
+  @GetMapping("/department/detail/{boardId}")
+  public String getMethodName(@RequestParam String param) {
+      return new String();
+  }
+  
   
 
 }
