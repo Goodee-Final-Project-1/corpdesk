@@ -8,6 +8,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional
 public class PersonalScheduleService {
@@ -21,6 +25,35 @@ public class PersonalScheduleService {
 
         return personalScheduleRepository.save(newSchedule).toResPersonalScheduleDTO();
 
+    }
+
+    // username, useYn, (year, month)로 일정 데이터들 조회
+    public List<ResPersonalScheduleDTO> getPersonalSchedules(ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+
+        return personalScheduleRepository.findPersonalScheduleByUsernameAndYearMonth(true
+                                                                                    , reqPersonalScheduleDTO.getUsername()
+                                                                                    , reqPersonalScheduleDTO.getYear()
+                                                                                    , reqPersonalScheduleDTO.getMonth());
+        
+    }
+
+    public List<Integer> getYearRangeByUsername(String username) {
+
+        // 유저의 가장 오래된 일정 year 반환
+        Integer oldestYear = personalScheduleRepository.findOldestScheduleYearByUsername(true, username);
+
+        // year ~ 오늘로 List 생성 (유저의 가장 오래된 일정 year가 없다면 오늘 날짜만 있는 List 리턴
+        int currentYear = LocalDate.now().getYear();
+
+        if(oldestYear == null) return List.of(currentYear);
+
+        List<Integer> years = new ArrayList<>();
+        for(int year = oldestYear; year <= currentYear; year++){
+            years.add(year);
+        }
+
+        return years;
+        
     }
 
 }

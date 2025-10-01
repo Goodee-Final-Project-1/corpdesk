@@ -9,9 +9,21 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Builder
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
 public class ResPersonalScheduleDTO {
 
     private Long personalScheduleId;
+    private String scheduleName;
+    private LocalDateTime scheduleDateTime;
+    private String content;
+    private String address;
 
+    public ResPersonalScheduleDTO(Long personalScheduleId, String scheduleName
+        , LocalDateTime scheduleDateTime, String content, String address) {
+        this.personalScheduleId = personalScheduleId;
+        this.scheduleName = scheduleName;
+        this.scheduleDateTime = scheduleDateTime;
+        this.content = content;
+        this.address = address;
+    }
 }

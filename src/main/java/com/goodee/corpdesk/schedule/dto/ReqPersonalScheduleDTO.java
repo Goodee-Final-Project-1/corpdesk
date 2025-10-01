@@ -18,6 +18,9 @@ public class ReqPersonalScheduleDTO {
     private String address;
     private String content;
 
+    private Integer year;
+    private Integer month;
+
     public PersonalSchedule toEntity() {
         return PersonalSchedule.builder()
             .username(username)

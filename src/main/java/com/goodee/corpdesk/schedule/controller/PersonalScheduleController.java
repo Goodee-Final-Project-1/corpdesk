@@ -8,10 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/personal-schedule/**")
@@ -30,7 +33,19 @@ public class PersonalScheduleController {
     private PersonalScheduleService personalScheduleService;
 
     @GetMapping("list")
-    public String list() {
+    public String list(ReqPersonalScheduleDTO reqPersonalScheduleDTO, Model model) {
+
+        // username, useYn, (year, month)로 일정 데이터들 조회
+        List<ResPersonalScheduleDTO> schedules = personalScheduleService.getPersonalSchedules(reqPersonalScheduleDTO);
+
+        // yearRange 생성
+        List<Integer> yearRange = personalScheduleService.getYearRangeByUsername(reqPersonalScheduleDTO.getUsername());
+
+        model.addAttribute("schedules", schedules);
+        model.addAttribute("yearRange", yearRange);
+        model.addAttribute("selectedYear", reqPersonalScheduleDTO.getYear());
+        model.addAttribute("selectedMonth", reqPersonalScheduleDTO.getMonth());
+
         return "schedule/list";
     }
 

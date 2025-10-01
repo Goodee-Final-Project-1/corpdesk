@@ -112,7 +112,7 @@
         <div class="row mb-4 ml-0">
 
           <%-- TODO 추후 인증정보를 사용하게 되면 username 삭제 --%>
-          <form method="get" action="/attendance/list">
+          <form method="get" action="/personal-schedule/list">
 
             <input type="hidden" name="username" value="jung_frontend">
 
@@ -193,20 +193,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>2025-09-08</td>
-              <td>09:00</td>
-              <td>일정명</td>
-              <td>주소</td>
-              <td>내용</td>
-            </tr>
-            <tr>
-              <td>2025-09-08</td>
-              <td>09:00</td>
-              <td>일정명</td>
-              <td>주소</td>
-              <td>내용</td>
-            </tr>
+            <c:forEach items="${schedules}" var="el">
+              <tr data-personal-schedule-id="${el.personalScheduleId}">
+                <td>${fn: substring(el.scheduleDateTime, 0, 10)}</td>
+                <td>${fn: substring(el.scheduleDateTime, 11, 16)}</td>
+                <td>${el.scheduleName}</td>
+                <td>${el.address}</td>
+                <td>${el.content}</td>
+              </tr>
+            </c:forEach>
           </tbody>
         </table>
       </div>
