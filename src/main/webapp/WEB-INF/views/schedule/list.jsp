@@ -185,16 +185,16 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>날짜</th>
-              <th>시간</th>
-              <th>일정명</th>
-              <th>주소</th>
-              <th>내용</th>
+              <th class="col-2">날짜</th>
+              <th class="col-1">시간</th>
+              <th class="col-3">일정명</th>
+              <th class="col-3">주소</th>
+              <th class="col-3">내용</th>
             </tr>
           </thead>
           <tbody>
             <c:forEach items="${schedules}" var="el">
-              <tr data-personal-schedule-id="${el.personalScheduleId}">
+              <tr data-personal-schedule-id="${el.personalScheduleId}" style="cursor: pointer;">
                 <td>${fn: substring(el.scheduleDateTime, 0, 10)}</td>
                 <td>${fn: substring(el.scheduleDateTime, 11, 16)}</td>
                 <td>${el.scheduleName}</td>
