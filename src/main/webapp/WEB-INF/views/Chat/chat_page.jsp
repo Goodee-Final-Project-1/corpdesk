@@ -31,7 +31,38 @@ height:50px;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 25px !important;
 }
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 화면 꽉 차게 */
+}
 
+.messageContainer {
+  flex: 1;             /* 남은 공간 다 채움 */
+  overflow-y: auto;    /* 스크롤 가능 */
+}
+
+.chat-footer {
+  flex-shrink: 0;      /* footer가 절대 줄지 않음 */
+  background: #fff;
+  padding: 10px;
+}.input-group-chat {
+  padding : 0;
+}
+.card-header{
+	border-bottom: 1px solid #ddd !important;
+	
+}
+.hidden {
+		display: none !important;
+	}
+.system-message {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;       /* 흐리게 */
+  margin: 10px 0;
+  font-style: italic;
+}
 
 </style>
 </head>
@@ -39,18 +70,25 @@ height:50px;
 	<sec:authentication property="principal.username" var="user" />
 
 	<input type="hidden" class="username" value="${user}">
-	<input type="hidden" class="roomId" value="${roomId}">
+	<input type="hidden" class="roomData" value='${roomData }'>
+	<div class="card card-default chat-right-sidebar">
+	 <div class="card-header">
+        <h2 class="roomTitle"></h2>
 
+        <div class="dropdown">
+          <div class="dropdown">
+            <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            </a>
 
-	<!-- <div class = "messageContainer">
-		<div id="chat-list">
-			
-			
-		</div>
-	</div> -->
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+              <a class="dropdown-item invite"data-toggle="modal" data-target="#inviteRoomStep1" href="javascript:void(0)">초대하기</a>
+              <a class="dropdown-item participant-list" data-toggle="modal" data-target="#participantModal" href="javascript:void(0)">참여자목록</a>
+            </div>
+          </div>
+        </div>
+      </div>
 
-	<div class="card-body pb-0 messageContainer" 
-		>
+	<div class="card-body pb-0 messageContainer">
 		<div id="chat-list">
 			
 
@@ -70,6 +108,100 @@ height:50px;
 			</div>
 		</form>
 	</div>
+	</div>
+	
+	
+	<!-- 참여자 목록 모달 -->
+<div class="modal fade" id="participantModal" tabindex="-1" role="dialog" aria-labelledby="participantModal"
+  aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalSmallTitle">참여자 목록</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body participant-content">
+       <ul class="list-group">
+       </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 1: 초대자 선택 모달 -->
+<div class="modal fade" id="inviteRoomStep1" tabindex="-1" role="dialog" aria-labelledby="step1Label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="step1Label">초대대상 선택</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- 검색창 -->
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="searchUserInput" placeholder="이름 검색">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary namesearchBtn" type="button">검색</button>
+          </div>
+        </div>
+
+        <!-- 사원 목록 (스크롤 가능) -->
+        <ul class="list-group" id="participantList" style="max-height: 300px; overflow-y: auto;">
+          <c:forEach items="${employeeList}" var="employee">
+            <li class="list-group-item d-flex align-items-cent er" data-username="${employee.username}">
+             <!-- 추후 사진 바꿔주면됨  -->
+              <img src="/images/default_profile.jpg" class="rounded-circle mr-3" style="width:40px; height:40px;">
+              <div class="flex-fill">
+                <strong class="employeeName">${employee.name}</strong><br>
+                <small>${employee.departmentName} ${employee.positionName}</small>
+              </div>
+              <input type="checkbox" value="${employee.username}" class="participant-checkbox">
+            </li>
+          </c:forEach>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary" id="nextStepBtn">초대 하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: 현재 방이 1대1인데 초대할 경우 제목을 설정해줘야함-->
+<div class="modal fade" id="inviteRoomStep2" tabindex="-1" role="dialog" aria-labelledby="step2Label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="step2Label">채팅방 제목 설정</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label for="roomTitle">채팅방 제목</label>
+        <input type="text" id="roomTitle" class="form-control" placeholder="채팅방 이름 입력">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-success" id="inviteRoomConfirmBtn">초대</button>
+      </div>
+    </div>
+  </div>
+</div>
+	
+	
+	
+	
+	
+	
 
 	<script type="text/javascript" src="/js/chat/chatPage.js"></script>
 	<!-- 내용 끝 -->

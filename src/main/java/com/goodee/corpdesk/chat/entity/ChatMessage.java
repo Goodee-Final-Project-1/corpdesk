@@ -31,6 +31,7 @@ public class ChatMessage extends BaseEntity {
 	private String messageContent;
 	private String messageType;
 	
+	
 	@CreationTimestamp
 	private LocalDateTime sentAt;
 	

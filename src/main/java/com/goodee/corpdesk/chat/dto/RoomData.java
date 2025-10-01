@@ -31,4 +31,5 @@ public class RoomData {
 	private String notificationType;
 	private String imgPath;
 	private String viewName;
+	private List<String> viewNameList;
 }

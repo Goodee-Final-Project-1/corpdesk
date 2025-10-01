@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatRoom;
 import com.goodee.corpdesk.chat.service.ChatRoomService;
@@ -47,9 +49,17 @@ public class ChatRoomController {
 	
 	
 	@GetMapping("detail/{roomId}")
-	public String chatRoomDetail(@PathVariable(value = "roomId") Long roomId , Model model) {
-		model.addAttribute("roomId",roomId);
+	public String chatRoomDetail(@PathVariable(value = "roomId") Long roomId , Model model , Principal principal) throws JsonProcessingException {
+		RoomData roomData = new RoomData();
+		roomData = chatRoomService.chatRoomDetail(roomId,principal);
 		
+		//json으로 변환
+		ObjectMapper mapper = new ObjectMapper();
+		String JsonRoomData = mapper.writeValueAsString(roomData);
+		List<Employee> employeeList = employeeService.getActiveEmployees();
+		model.addAttribute("roomData",JsonRoomData);
+		model.addAttribute("employeeList",employeeList);
+		model.addAttribute("roomDataEl",roomData);
 		return "Chat/chat_page";
 	}
 	
@@ -67,6 +77,13 @@ public class ChatRoomController {
 	@ResponseBody
 	public boolean chatRoomOut(@PathVariable(value = "roomId") Long roomId,Principal principal) {
 		boolean result = chatRoomService.outRoom(roomId,principal);
+		return result;
+	}
+	
+	@PostMapping("inviteRoom")
+	@ResponseBody
+	public boolean inviteRoom(@RequestBody RoomData roomData) {
+		boolean result = chatRoomService.inviteRoom(roomData);
 		return result;
 	}
 }
