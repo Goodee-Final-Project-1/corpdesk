@@ -5,7 +5,6 @@ import com.goodee.corpdesk.salary.service.SalaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -15,7 +14,6 @@ public class SalaryScheduler {
 	private final SalaryService salaryService;
 
 	@Scheduled(cron = "${salary.cron.payday}")
-	@Transactional
 	public void pay() {
 		salaryService.saveSalaries();
 	}
