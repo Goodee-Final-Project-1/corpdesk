@@ -20,13 +20,14 @@
 	
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
-			<h2><c:out value="${title != null ? title : '게시판'}"/></h2>
-
       <!-- 탭/네비게이션 -->
       <div style="margin-bottom:12px;">
         <a href="${pageContext.request.contextPath}/board/notice">공지 게시판</a> |
         <a href="${pageContext.request.contextPath}/board/me">부서 게시판</a>
       </div>
+
+      <!-- 게시판 제목 -->
+      <h2><c:out value="${title != null ? title : '게시판'}"/></h2>
 
       <!-- 빈 목록 처리 -->
       <c:if test="${empty post}">
@@ -47,9 +48,21 @@
           <tbody>
             <c:forEach items="${post}" var="post">
               <tr>
-                <td style="text-align:left; cursor:pointer;"
-                    onclick="location.href='${pageContext.request.contextPath}/board/detail/${post.boardId}'">
-                  <c:out value="${post.title}"/>
+                <td style="text-align:left;">
+                  <c:choose>
+
+                    <c:when test="${title eq '공지 게시판'}">
+                      <a href="${pageContext.request.contextPath}/board/notice/${post.boardId}">
+                        <c:out value="${post.title}"/>
+                      </a>
+                    </c:when>
+
+                    <c:otherwise>
+                      <a href="${pageContext.request.contextPath}/board/department/${post.boardId}">
+                        <c:out value="${post.title}"/>
+                      </a>
+                    </c:otherwise>
+                  </c:choose>
                 </td>
                 <td><c:out value="${post.username}"/></td>
                 <td>

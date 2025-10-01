@@ -50,7 +50,7 @@
 				</li>
 				
 				<li>
-					<a class="sidenav-item-link" href="calendar.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/board/notice"> <!-- TODO href 수정 -->
 					<i class="mdi mdi-clipboard-text-outline"></i> <span class="nav-text">게시판</span>
 					</a>
 				</li>

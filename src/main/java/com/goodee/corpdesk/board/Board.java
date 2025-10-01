@@ -15,11 +15,11 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-// 실제 데이터베이스 테이블 이름
 @Getter
 @Setter
-@Entity
+// 실제 데이터베이스 테이블 이름
 @Table(name = "board")
+@Entity
 @DynamicInsert @DynamicUpdate
 public class Board extends BaseEntity {
 
