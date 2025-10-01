@@ -33,10 +33,10 @@ public class VacationService {
     public void updateVacationsByHireDate(LocalDate currDate) throws Exception {
 
         // 월, 일로 입사자들 데이터를 가져옴
-        int year = currDate.getYear();
         int month = currDate.getMonthValue();
+        int day = currDate.getDayOfMonth();
 
-        List<Employee> employeeList = employeeRepository.findAllByHireDateYearMonth(year, month);
+        List<Employee> employeeList = employeeRepository.findAllByHireDateMonthDay(true, month, day);
 
         // 모든 입사자들에 대해 현재 총발생연차를 계산하고, DB상 총발생연차를 계산된 총발생연차로 대체
         // (계산된 총발생연차 - DB상 총발생연차)만큼 잔여연차를 증가시킴

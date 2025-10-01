@@ -3,6 +3,7 @@ package com.goodee.corpdesk.employee;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -53,14 +54,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     """)
     public List<ResApprovalDTO> findEmployeeWithDeptAndPositionAndFile(@Param("departmentId") Integer departmentId, @Param("useYn") Boolean useYn);
 
-    @NativeQuery("""
-        SELECT *
-        FROM employee
+    @Query("""
+        SELECT e
+        FROM Employee e
         WHERE
-        	YEAR(hire_date) = :year
-        	AND MONTH(hire_date) = :month
+            e.useYn = :useYn
+        	AND MONTH(e.hireDate) = :month
+        	AND DAY(e.hireDate) = :day
     """)
-    public List<Employee> findAllByHireDateYearMonth(@Param("year") Integer year, @Param("month") Integer month);
+    public List<Employee> findAllByHireDateMonthDay(@Param("useYn") Boolean useYn, @Param("month") Integer month, @Param("day") Integer day);
 
 	boolean existsByUsername(String username);
 
