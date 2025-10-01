@@ -1,11 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Insert title here</title>
+	<title><c:out value="${post.title}" /></title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 
@@ -19,7 +20,20 @@
 	
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
-			<p>여기에 내용 추가</p>
+			<h2><c:out value="${post.title}"/></h2>
+
+      <div style="color:#666; margin-bottom:8px;">
+        작성자: <c:out value="${post.username}"/> |
+        작성일: <spring:eval expression="T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd HH:mm').format(post.createdAt)"/>
+      </div>
+
+      <div style="white-space:pre-wrap; line-height:1.6;">
+        <c:out value="${post.content}"/>
+      </div>
+
+      <div style="margin-top:16px;">
+        <a href="${pageContext.request.contextPath}/board/notice">목록으로</a>
+      </div>
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	

@@ -30,7 +30,9 @@ import lombok.experimental.SuperBuilder;
 @DynamicUpdate
 public class Department extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // DataInitializer에서 데이터 넣어서 테스트하기 위해 임시로 닫아둠
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Integer departmentId;
 
     private Integer parentDepartmentId;
@@ -50,4 +52,5 @@ public class Department extends BaseEntity {
         this.parentDepartmentId = parentDepartmentId;
         this.departmentName = departmentName;
     }
+
 }

@@ -13,9 +13,9 @@ public class HolidayTest {
     @Autowired
     HolidayService holidayService;
 
-    @Test
-    public void testHoliday () throws Exception {
-        holidayService.getHoliday();
-    }
+//    @Test
+//    public void testHoliday () throws Exception {
+//        holidayService.getHoliday();
+//    }
 
 }

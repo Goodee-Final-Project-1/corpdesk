@@ -5,12 +5,14 @@ import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -283,4 +285,38 @@ class AttendanceRepositoryTest {
         }
     }
 
+
+	@Test
+	void findAllByUsernameAndMonth() {
+		List<Attendance> list = attendanceRepository.findAllByUsernameAndMonth("choi-sales");
+		int count = 0;
+
+		for (Attendance a : list) {
+			LocalDateTime checkIn = a.getCheckInDateTime();
+			LocalDateTime checkOut = a.getCheckOutDateTime();
+
+			System.out.println("=======================================");
+			if (!checkIn.toLocalDate().isEqual(checkOut.toLocalDate())
+					|| checkIn.isBefore(checkIn.withHour(06).withMinute(00).withSecond(00))
+					|| checkOut.isAfter(checkOut.withHour(22).withMinute(00).withSecond(00))) {
+				System.out.println(a);
+				System.out.println(Duration.between(checkIn, checkOut).toMinutes() + " minutes");
+				count++;
+			}
+		}
+
+		Assertions.assertNotEquals(0, count);
+	}
+
+	@Test
+	void isAfter() {
+		System.out.println(LocalTime.parse("10:00:00") == LocalTime.parse("10:00:00"));
+		Assertions.assertTrue(LocalTime.parse("10:00:00") == LocalTime.parse("10:00:00"));
+	}
+
+	@Test
+	void between() {
+		System.out.println("=======================================");
+		System.out.println(Duration.between(LocalTime.parse("22:00:00"), LocalTime.parse("06:00:00")).toMinutes());
+	}
 }

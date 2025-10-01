@@ -1,12 +1,17 @@
 package com.goodee.corpdesk.employee;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.goodee.corpdesk.vacation.VacationManager;
+import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -59,6 +64,11 @@ public class EmployeeService implements UserDetailsService {
     @Value("${app.upload}")
     private String uploadPath;
 
+    @Autowired
+    private VacationRepository vacationRepository;
+    @Autowired
+    private VacationManager vacationManager;
+
     // ---------------------- Controller용 Service 메서드 ----------------------
 
     // 모든 부서 조회
@@ -98,10 +108,32 @@ public class EmployeeService implements UserDetailsService {
     }
 
     // 직원 등록
-    public Employee addEmployee(Employee employee) {
-    	employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+    public Employee addEmployee(Employee employee) throws Exception {
+    	// 직원 등록
+        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         employee.setUseYn(true);
-        return employeeRepository.save(employee);
+
+        Employee newEmployee = employeeRepository.save(employee);
+
+        // 추가) 직원 등록 성공시 휴가 테이블에 insert
+        Vacation newVacation = new Vacation();
+        newVacation.setUsername(employee.getUsername());
+
+        // 직원 등록시 입사일 정보도 같이 입력됐다면 그 기준으로 총발생연차 계산
+        // 입력되지 않았다면 총발생연차 0으로 설정
+        int totalVacation = 0;
+        LocalDate hireDate = employee.getHireDate();
+        if(hireDate != null) {
+            totalVacation = vacationManager.calTotalVacation(hireDate);
+        }
+        newVacation.setTotalVacation(totalVacation);
+
+        newVacation.setRemainingVacation(totalVacation);
+        newVacation.setUsedVacation(0);
+
+        vacationRepository.save(newVacation);
+
+        return newEmployee;
     }
 
     // 직원 목록 조회 (활성만)
@@ -121,7 +153,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
  // 직원 정보 수정 (파일 포함)
-    public void updateEmployee(Employee employeeFromForm, MultipartFile profileImageFile) {
+    public void updateEmployee(Employee employeeFromForm, MultipartFile profileImageFile) throws Exception {
         Employee persisted = employeeRepository.findById(employeeFromForm.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + employeeFromForm.getUsername()));
 
@@ -151,7 +183,7 @@ public class EmployeeService implements UserDetailsService {
         persisted.setLastWorkingDay(employeeFromForm.getLastWorkingDay());
         persisted.setDirectPhone(employeeFromForm.getDirectPhone());
 
-        employeeRepository.save(persisted);
+        Employee editedEmployee = employeeRepository.save(persisted);
 
         // ---------------- 프로필 이미지 처리 ----------------
         if (profileImageFile != null && !profileImageFile.isEmpty()) {
@@ -175,6 +207,21 @@ public class EmployeeService implements UserDetailsService {
                 newFile.setUseYn(true);
                 employeeFileRepository.save(newFile);
             }
+        }
+
+        // 추가) 직원 정보 수정 성공시 휴가 테이블 update
+        if(editedEmployee.getHireDate() != null) {
+            // 직원의 휴가 테이블 조회
+            Vacation vacation = vacationRepository.findByUseYnAndUsername(true, editedEmployee.getUsername());
+
+            // 총 연차 update
+            int totalVacation = vacationManager.calTotalVacation(editedEmployee.getHireDate());
+            vacation.setTotalVacation(totalVacation);
+            // 잔여 연차 update (update된 총 연차 - 사용 연차)
+            int usedVacation = vacation.getUsedVacation();
+            vacation.setRemainingVacation(totalVacation - usedVacation);
+
+            vacationRepository.save(vacation);
         }
     }
 

@@ -103,7 +103,7 @@ public class EmployeeController {
     // 직원 등록
     @PostMapping("/add")
     public String addEmployee(@Validated(CreateGroup.class) @ModelAttribute Employee employee,
-                              BindingResult bindingResult, Model model) {
+                              BindingResult bindingResult, Model model) throws Exception {
         if (bindingResult.hasErrors()) {
             model.addAttribute("departments", employeeService.getAllDepartments());
             model.addAttribute("positions", employeeService.getAllPositions());
@@ -336,7 +336,8 @@ public class EmployeeController {
     @PostMapping("/edit")
     public String editEmployee(@Validated(UpdateGroup.class) @ModelAttribute Employee employeeFromForm,
                                BindingResult bindingResult, Model model,
-                               @RequestParam(value = "profileImageFile", required = false) MultipartFile profileImageFile) {
+                               @RequestParam(value = "profileImageFile", required = false) MultipartFile profileImageFile)
+                               throws Exception {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("departments", employeeService.getAllDepartments());
