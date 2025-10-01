@@ -28,6 +28,8 @@ import com.goodee.corpdesk.position.entity.Position;
 @Service
 public class ChatRoomService {
 
+    private final ChatParticipantService chatParticipantService;
+
 	@Autowired
 	private ChatRoomRepository chatRoomRepository;
 	
@@ -40,6 +42,10 @@ public class ChatRoomService {
 	
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
+
+    ChatRoomService(ChatParticipantService chatParticipantService) {
+        this.chatParticipantService = chatParticipantService;
+    }
 
 	//유저이름으로 유저 이름 부서 직위 가져옴
 		public String getUserNameDepPos(String username) {
@@ -247,6 +253,20 @@ public class ChatRoomService {
 		boolean result =false;
 		if(chatParticipantRepository.existsByChatRoomIdAndEmployeeUsernameAndUseYnTrue(roomId, principal.getName())) {
 			chatParticipantRepository.updateRoomUseYnFalse(principal.getName(), roomId);
+			chatParticipantService.updateLastMessage(principal.getName(), roomId);
+			
+			if(chatRoomRepository.findByChatRoomId(roomId).get().getChatRoomType().equals("room")) {
+				//퇴장 메세지 저장
+		    	ChatMessage msg = new ChatMessage();
+			    msg.setChatRoomId(roomId);
+			    msg.setMessageType("out");
+			    msg.setMessageContent(getUserNameDepPos(principal.getName())+"님이 퇴장하였습니다.");
+			    msg.setUseYn(true);
+			    msg = chatMessageRepository.save(msg);
+			    msg.setEmployeeUsername(principal.getName());
+			    msg.setViewName(getUserNameDepPos(principal.getName()));
+			    messagingTemplate.convertAndSend("/sub/chat/room/"+roomId,msg);
+			}
 			result =true;
 		}
 		return result;
@@ -354,35 +374,43 @@ public class ChatRoomService {
 	    chatRoom.setChatRoomType("room");
 	    
 	    //해당방의 모든 사람 불러옴 전에 초대된적이있으면 useYn만 바꿔주면 되기때문에
-	    
+	   
 	    roomData.getUsernames().forEach(u->{
+	    	 Long beforeInviteMessageId = chatMessageRepository.findTopByChatRoomIdOrderByMessageIdDesc(roomData.getChatRoomId()).getMessageId();
 	    	// 해당 유저 정보에 방정보 저장
-	    	ChatParticipant cp = chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(roomData.getChatRoomId(), u);
-	    	if(cp!=null) {
-	    		cp.setChatRoomId(roomData.getChatRoomId());
-		    	cp.setEmployeeUsername(u);
-		    	cp.setLastCheckMessageId(null);
-		    	cp.setUseYn(true);
-	    	}else {
-	    		cp = new ChatParticipant();
-	    		cp.setChatRoomId(roomData.getChatRoomId());
-		    	cp.setEmployeeUsername(u);
-		    	cp.setLastCheckMessageId(null);
-		    	cp.setUseYn(true);
-	    	}
-	    	
-	    	chatParticipantRepository.save(cp);
-	    	
-	    	
-	    	//초대 메세지 저장
+		    	ChatParticipant cp = chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(roomData.getChatRoomId(), u);
+		    	if(cp!=null) {
+		    		cp.setChatRoomId(roomData.getChatRoomId());
+			    	cp.setEmployeeUsername(u);
+			    	cp.setLastCheckMessageId(beforeInviteMessageId);
+			    	cp.setUseYn(true);
+		    	}else {
+		    		cp = new ChatParticipant();
+		    		cp.setChatRoomId(roomData.getChatRoomId());
+			    	cp.setEmployeeUsername(u);
+			    	cp.setLastCheckMessageId(beforeInviteMessageId);
+			    	cp.setUseYn(true);
+		    	}
+		    	
+		    	chatParticipantRepository.save(cp);
+		    	chatParticipantRepository.flush();
+	    	 //초대 메세지 저장
 	    	ChatMessage msg = new ChatMessage();
 		    msg.setChatRoomId(roomData.getChatRoomId());
 		    msg.setMessageType("enter");
 		    msg.setMessageContent(getUserNameDepPos(u)+"님이 참가하였습니다.");
 		    msg.setUseYn(true);
-		    msg = 	chatMessageRepository.save(msg);
+		    msg = chatMessageRepository.save(msg);
+		    msg.setEmployeeUsername(u);
+		    msg.setViewName(getUserNameDepPos(u));
 		    messagingTemplate.convertAndSend("/sub/chat/room/"+roomData.getChatRoomId(),msg);
-		    
+
+	    	
+	    	
+	    	
+	    	
+	    	
+	    			    
 	    });
 	    
 	    return true; 

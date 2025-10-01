@@ -23,12 +23,15 @@ roomtitle.textContent = roomData.chatRoomTitle
 const participantContent = document.querySelector(".participant-content");
 const ul = participantContent.querySelector("ul");
 
-roomData.viewNameList.forEach(name => {
+//참여자 목록 
+for (let i = 0; i < roomData.viewNameList.length; i++) {
 	const li = document.createElement("li");
 	li.className = "list-group-item";
-	li.textContent = name;
+	li.setAttribute("data-name", roomData.usernames[i]);
+	li.textContent = roomData.viewNameList[i];
 	ul.appendChild(li);
-});
+}
+
 
 
 
@@ -42,7 +45,7 @@ const participantListLi = participantList.querySelectorAll("#participantList li"
 participantListLi.forEach(l => {
 	const username = l.getAttribute("data-username");
 	if (currentMembers.has(username)) {
-		l.remove();
+		l.classList.add("hidden");
 	}
 
 })
@@ -56,10 +59,10 @@ namesearchBtn.addEventListener("click", () => {
 	participantLi.forEach(li => {
 		const employeeName = li.querySelector(".employeeName").textContent.trim();
 		if (searchUserInputValue == "" || employeeName == searchUserInputValue) {
-			li.classList.remove("hidden");
+			li.classList.remove("hiddenSearch");
 
 		} else {
-			li.classList.add("hidden");
+			li.classList.add("hiddenSearch");
 		}
 
 	})
@@ -94,7 +97,7 @@ document.getElementById("nextStepBtn").addEventListener("click", () => {
 		})
 			.then(res => {
 				if (res) {
-					//window.location.reload();
+					window.location.reload();
 				}
 			});
 	}
@@ -119,7 +122,7 @@ document.getElementById("inviteRoomConfirmBtn").addEventListener("click", () => 
 	})
 		.then(res => {
 			if (res) {
-				//window.location.reload();
+				window.location.reload();
 			}
 		});
 });
@@ -178,37 +181,6 @@ window.addEventListener("keydown", (e) => {
 
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //메세지 연결 송수신
 // 메세지 수신 박스
 
@@ -234,7 +206,7 @@ function timeformat(lastMessageTime) {
 }
 
 function appendMessage(msg, prepend = false, isSameSender = null) {
-	if (msg.messageType == "enter") {
+	if (msg.messageType == "enter" || msg.messageType == "out") {
 		const sysdiv = document.createElement("div");
 		sysdiv.className = "system-message";
 		sysdiv.textContent = msg.messageContent;
@@ -384,8 +356,40 @@ stompClient.connect({}, function(frame) {
 	stompClient.subscribe("/sub/chat/room/" + chatRoomId, (message) => {
 		const msg = JSON.parse(message.body);
 		const isSameSender = msg.employeeUsername == lastSender;
-
+		
 		appendMessage(msg, false, isSameSender);
+		if (msg.messageType == "enter") {
+			 document.querySelectorAll("#participantList li").forEach(l => {
+				const username = msg.employeeUsername
+				if (l.getAttribute("data-username") == username) {
+					l.classList.add("hidden");
+				}
+			})
+			const ul =document.querySelector(".participant-content").querySelector("ul");
+			const li = document.createElement("li");
+			li.className = "list-group-item";
+			li.textContent = msg.viewName; // 서버에서 내려주는 이름 or 조립된 문자열
+			li.setAttribute("data-name",msg.employeeUsername);
+			ul.appendChild(li);
+			
+		}
+		if (msg.messageType == "out") {
+			document.querySelectorAll("#participantList li").forEach(l => {
+				
+				const username = msg.employeeUsername
+				if (l.getAttribute("data-username") == username) {
+					l.classList.remove("hidden");
+				}
+			})
+			document.querySelectorAll(".participant-content ul li").forEach(l => {
+			    if (l.getAttribute("data-name") == msg.employeeUsername) {
+			      l.remove();
+			    }
+			  });
+			
+		}
+		
+
 		lastSender = msg.employeeUsername;
 		if (document.hasFocus()) {
 			fetch("/chat/participant/lastMessage/" + chatRoomId, { method: "POST" });

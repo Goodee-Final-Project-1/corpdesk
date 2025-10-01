@@ -1,6 +1,7 @@
 const socket = new SockJS("/ws");
 stompClient = Stomp.over(socket);
 const lastMsgTime = document.querySelectorAll(".last-msg-time");
+const popup = new Map();
 lastMsgTime.forEach(t => {
 
 
@@ -297,11 +298,10 @@ document.querySelector(".chatList").addEventListener("click", (e) => {
 		}).then(res => res.json())
 			.then(res => {
 				if (res) {
-					console.log("삭제 성공");
 					li.remove();
+					
 				}
 				else {
-					console.log("삭제 실패");
 				}
 			})
 

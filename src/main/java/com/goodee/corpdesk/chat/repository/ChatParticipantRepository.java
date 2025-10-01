@@ -45,7 +45,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 		void updateRoomUseYnFalse(@Param("username") String username, @Param("roomId") Long roomId);
 		
 		
-		boolean existsByChatRoomIdAndEmployeeUsername(Long chatRoomId, String employeeUsername);
+		//boolean existsByChatRoomIdAndEmployeeUsername(Long chatRoomId, String employeeUsername);
 		
 		//그룹채팅 첫 메세지 일경우 모든 user 활성화 시킴
 		@Transactional

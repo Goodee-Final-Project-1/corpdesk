@@ -91,10 +91,10 @@ public class ChatMessageService {
 			list = chatMessageRepository.findByChatRoomIdAndSentAtGreaterThanEqualOrderByMessageIdDesc(chatRoomId,
 					enterTime, pageable);
 			list.forEach(l -> {
-				l.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
-				l.setImgPath(getUserImgPath(l.getEmployeeUsername()));
-				
-
+				if(l.getMessageType()==null) {
+					l.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
+					l.setImgPath(getUserImgPath(l.getEmployeeUsername()));
+				}
 			});
 
 		} else {
@@ -102,8 +102,11 @@ public class ChatMessageService {
 					.findByChatRoomIdAndMessageIdLessThanAndSentAtGreaterThanEqualOrderByMessageIdDesc(chatRoomId,
 							lastMessageNo, enterTime, pageable);
 			list.forEach(l -> {
-				l.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
-				l.setImgPath(getUserImgPath(l.getEmployeeUsername()));
+				if(l.getMessageType()==null) {
+					l.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
+					l.setImgPath(getUserImgPath(l.getEmployeeUsername()));
+				}
+
 			});
 		}
 		return list;

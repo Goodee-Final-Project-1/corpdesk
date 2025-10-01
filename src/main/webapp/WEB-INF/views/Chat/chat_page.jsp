@@ -56,6 +56,9 @@ height:50px;
 .hidden {
 		display: none !important;
 	}
+.hiddenSearch{
+		display: none !important;
+	}
 .system-message {
   text-align: center;
   font-size: 0.85rem;
