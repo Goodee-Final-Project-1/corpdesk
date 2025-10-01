@@ -118,6 +118,11 @@
 						<i class="mdi mdi-currency-krw"></i> <span class="nav-text">급여 관리</span>
 					</a>
 				</li>
+				<li>
+					<a class="sidenav-item-link" href="/stats"> <!-- TODO href 수정 -->
+						<i class="mdi mdi-chart-areaspline"></i> <span class="nav-text">통계</span>
+					</a>
+				</li>
 
 			</ul>
 		</div>
