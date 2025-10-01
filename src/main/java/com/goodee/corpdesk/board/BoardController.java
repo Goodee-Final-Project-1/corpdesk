@@ -1,15 +1,14 @@
 package com.goodee.corpdesk.board;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
 
 @Controller
 @RequestMapping("/board")
@@ -18,29 +17,33 @@ public class BoardController {
   @Autowired
   private BoardService boardService;
 
-  // 전체 부서 게시판 목록
-  @GetMapping("/department/list")
-  public String departmentBoardList(Model model) {
-    List<Board> department = boardService.getAllDepartmentBoards();
-    model.addAttribute("department", department);
+  // 내 부서 게시글
+  @GetMapping("/me")
+  public String myDepartmentList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                 Model model) {
+    Page<Board> page = boardService.getMyDepartmentBoards(pageable);
+    
+    model.addAttribute("page", page);
+    model.addAttribute("title", "내 부서 게시판");
+    model.addAttribute("post", page.getContent());
+    
     return "board/departmentList";
   }
 
-  // 특정 부서 게시판 상세
-  @GetMapping("/department/{departmentId}")
-  public String departmentBoard(@PathVariable("departmentId") Long departmentId, Model model) {
-    List<Board> department = boardService.getDepartmentBoard(departmentId);
-    model.addAttribute("department", department);
-    return "board/departmentDetail";
+  // 공지 게시글 (departmentId = 0)
+  @GetMapping("/notice")
+  public String noticeList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                           Model model) {
+    Page<Board> page = boardService.getNoticeBoards(pageable);
+    
+    model.addAttribute("page", page);
+    model.addAttribute("departmentId", 0);
+    model.addAttribute("title", "공지사항");
+    model.addAttribute("post", page.getContent());
+    
+    return "board/departmentList";
   }
 
-  // 공용 게시판 목록
-  @GetMapping("/common/list")
-  public String commonBoardList(Model model) {
-    List<Board> commonBoard = boardService.getCommonBoard();
-    model.addAttribute("commonBoard", commonBoard);
-    return "board/commonList";
-  }
 
 
 }

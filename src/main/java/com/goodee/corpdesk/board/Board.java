@@ -21,7 +21,7 @@ import lombok.Setter;
 
 public class Board extends BaseEntity {
 
-  // 게시판 번호
+  // 게시글 번호
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long boardId;
