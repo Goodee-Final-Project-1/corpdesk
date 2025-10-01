@@ -57,7 +57,6 @@ public class Employee implements UserDetails {
 
 	private String departmentName;
 
-	@Transient
 	private String positionName;
 
 	@ColumnDefault("2")
