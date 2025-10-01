@@ -105,107 +105,77 @@
   <div class="col-lg-9">
     <div class="card card-default">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h2 class="mb-0">일정 목록</h2>
+        <h2 class="mb-0">일정 상세</h2>
       </div>
 
       <div class="card-body">
 
-        <!-- 년, 월 선택 - 한 줄 배치 -->
-        <div class="row mb-4 ml-0">
-
-          <%-- TODO 추후 인증정보를 사용하게 되면 username 삭제 --%>
-          <form method="get" action="/personal-schedule/list">
-
-            <input type="hidden" name="username" value="jung_frontend">
-
-            <div class="mr-3">
+        <%-- TODO 여기에 일정 상세조회 정보 뿌림 --%>
+          <%-- 일정 상세조회 정보 --%>
+          <div class="row">
+            <div class="col-12">
               <div class="form-group">
-                <div class="d-flex align-items-center">
-                  <select class="form-control mr-2" id="yearSelect" name="year">
+                <label class="font-weight-bold">일정명</label>
+                <p class="form-control-plaintext border-bottom pb-2">
+                  ${schedule.scheduleName}
+                </p>
+              </div>
+            </div>
+          </div>
 
-                    <c:choose>
-                      <c:when test="${selectedYear ne null}">
-                        <option value="" ${selectedYear eq '' ? 'selected' : ''}>전체</option>
-                        <c:forEach var="year" items="${yearRange}">
-                          <option value="${year}" ${selectedYear eq year ? 'selected' : ''}>
-                              ${year}
-                          </option>
-                        </c:forEach>
-                      </c:when>
-                      <c:otherwise>
-                        <option value="">전체</option>
-                        <c:forEach var="year" items="${yearRange}">
-                          <option value="${year}">
-                              ${year}
-                          </option>
-                        </c:forEach>
-                      </c:otherwise>
-                    </c:choose>
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label class="font-weight-bold">날짜 및 시간</label>
+                <p class="form-control-plaintext border-bottom pb-2">
+                  <c:choose>
+                    <c:when test="${schedule.scheduleDateTime != null}">
+                      ${fn:substring(schedule.scheduleDateTime, 0, 10)} · ${fn:substring(schedule.scheduleDateTime, 11, 16)}
+                    </c:when>
+                    <c:otherwise>
+                      -
+                    </c:otherwise>
+                  </c:choose>
+                </p>
+              </div>
+            </div>
+          </div>
 
-                  </select>
-                  <span>년</span>
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label class="font-weight-bold">주소</label>
+                <p class="form-control-plaintext border-bottom pb-2">
+                  ${schedule.address != null ? schedule.address : '-'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label class="font-weight-bold">내용</label>
+                <div class="border rounded p-3 bg-light" style="min-height: 150px;">
+                  ${schedule.content != null ? schedule.content : '-'}
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="mr-6">
-              <div class="form-group">
-                <div class="d-flex align-items-center">
-                  <select class="form-control mr-2" id="monthSelect" name="month">
-
-                    <c:choose>
-                      <c:when test="${selectedMonth ne null}">
-                        <option value="" ${selectedMonth eq '' ? 'selected' : ''}>전체</option>
-                        <c:forEach begin="1" end="12" var="num">
-                          <option value="${num}" ${selectedMonth eq num ? 'selected' : ''}>${num}</option>
-                        </c:forEach>
-                      </c:when>
-
-                      <c:otherwise>
-                        <option value="">전체</option>
-                        <c:forEach begin="1" end="12" var="num">
-                          <option value="${num}">${num}</option>
-                        </c:forEach>
-                      </c:otherwise>
-                    </c:choose>
-
-                  </select>
-                  <span>월</span>
-                </div>
-              </div>
+          <div class="row mt-4">
+            <div class="col-12 text-right">
+              <form method="GET" action="/personal-schedule/${schedule.personalScheduleId}/edit">
+                <button class="btn btn-primary">수정</button>
+              </form>
+              <form method="POST" action="/personal-schedule/${schedule.personalScheduleId}">
+                <input type="hidden" name="_method" value="DELETE">
+                <button class="btn btn-danger">삭제</button>
+              </form>
+              <button type="button" class="btn btn-secondary" onclick="location.href='/personal-schedule/list'">목록</button>
             </div>
+          </div>
 
-            <div>
-              <%-- TODO 조회 버튼 클릭시 년, 월 데이터로 페이지 다시 조회 --%>
-              <button class="btn btn-primary">조회</button>
-            </div>
-
-          </form>
-        </div>
-
-        <%-- 테이블 --%>
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th class="col-2">날짜</th>
-              <th class="col-1">시간</th>
-              <th class="col-3">일정명</th>
-              <th class="col-3">주소</th>
-              <th class="col-3">내용</th>
-            </tr>
-          </thead>
-          <tbody>
-            <c:forEach items="${schedules}" var="el">
-              <tr class="schedule-row" data-personal-schedule-id="${el.personalScheduleId}" style="cursor: pointer;">
-                <td>${fn: substring(el.scheduleDateTime, 0, 10)}</td>
-                <td>${fn: substring(el.scheduleDateTime, 11, 16)}</td>
-                <td>${el.scheduleName}</td>
-                <td>${el.address}</td>
-                <td>${el.content}</td>
-              </tr>
-            </c:forEach>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
