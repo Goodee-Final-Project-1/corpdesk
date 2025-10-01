@@ -39,7 +39,7 @@ public class VacationController {
             details = vacationService.getVacationDetails(vacation.getVacationId());
         } else {
             if(reqVacationDTO.getUsername() != null) {
-                vacation = vacationService.getVacation(reqVacationDTO.getUsername(), reqVacationDTO.getVacationType());
+                vacation = vacationService.getVacation(reqVacationDTO.getUsername());
 
                 model.addAttribute("vacation", vacation);
             }
