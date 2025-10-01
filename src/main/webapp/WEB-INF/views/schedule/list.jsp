@@ -22,30 +22,33 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <form>
+      <form method="POST" action="/personal-schedule">
+        <div class="modal-body">
+          <%-- TODO 인증 붙이면 input hidden 삭제 --%>
+          <input type="hidden" name="username" value="jung_frontend">
+
           <div class="form-group">
             <label for="scheduleName">일정명</label>
-            <input type="text" class="form-control" id="scheduleName" placeholder="일정명을 입력하세요">
+            <input type="text" class="form-control" id="scheduleName" name="scheduleName" placeholder="일정명을 입력하세요">
           </div>
           <div class="form-group">
             <label for="scheduleDateTime">일시</label>
-            <input type="datetime-local" class="form-control" id="scheduleDateTime">
+            <input type="datetime-local" class="form-control" id="scheduleDateTime" name="scheduleDateTime">
           </div>
           <div class="form-group">
             <label for="scheduleLocation">주소</label>
-            <input type="text" class="form-control" id="scheduleLocation" placeholder="주소를 입력하세요">
+            <input type="text" class="form-control" id="scheduleLocation" name="address" placeholder="주소를 입력하세요">
           </div>
           <div class="form-group">
             <label for="scheduleContent">내용</label>
-            <textarea class="form-control" id="scheduleContent" rows="3" placeholder="내용을 입력하세요"></textarea>
+            <textarea class="form-control" id="scheduleContent" name="content" rows="3" placeholder="내용을 입력하세요"></textarea>
           </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary">등록</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary">등록</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

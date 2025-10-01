@@ -1,13 +1,21 @@
 package com.goodee.corpdesk.schedule.controller;
 
+import com.goodee.corpdesk.schedule.dto.ReqPersonalScheduleDTO;
+import com.goodee.corpdesk.schedule.dto.ResPersonalScheduleDTO;
+import com.goodee.corpdesk.schedule.repository.PersonalScheduleRepository;
+import com.goodee.corpdesk.schedule.service.PersonalScheduleService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/personal-schedule/**")
+@Slf4j
 public class PersonalScheduleController {
 
     @Value("${cat.schedule}")
@@ -18,9 +26,25 @@ public class PersonalScheduleController {
         return cat;
     }
 
+    @Autowired
+    private PersonalScheduleService personalScheduleService;
+
     @GetMapping("list")
     public String list() {
         return "schedule/list";
     }
 
+    @PostMapping("")
+    public void add(ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+
+        System.err.println("/personal-schedule/add");
+
+        ResPersonalScheduleDTO newSchedule = personalScheduleService.createSchedule(reqPersonalScheduleDTO);
+
+        // redirect 상세정보 페이지
+        // TODO 반환타입을 void->String으로 변경 후, 상세정보 페이지를 return하는 코드 추가
+
+        log.warn("ResPersonalScheduleDTO:{}", newSchedule);
+
+    }
 }
