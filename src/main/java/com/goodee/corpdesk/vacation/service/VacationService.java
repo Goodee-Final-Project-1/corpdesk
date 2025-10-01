@@ -78,13 +78,13 @@ public class VacationService {
         return vacationRepository.findByUseYnAndUsername(true, username).toResVacationDTO();
     }
 
-    public List<ResVacationDTO> getVacationDetails(Integer vacationId, Integer vacationType) throws Exception {
+    public List<ResVacationDTO> getVacationDetails(Integer vacationId, Integer vacationTypeId) throws Exception {
 
         List<VacationDetail> vacationDetails = new ArrayList<>();
         List<ResVacationDTO> resVacationDTOList = new ArrayList<>();
 
-        if(vacationId == null) vacationDetails = vacationDetailRepository.findAllVacationDetailByUseYnAndVacationTypeId(true, vacationType);
-        else vacationDetails = vacationDetailRepository.findAllVacationDetailByUseYnAndVacationIdAndVacationTypeId(true, vacationId, vacationType);
+        if(vacationId == null) vacationDetails = vacationDetailRepository.findAllVacationDetailByUseYnAndVacationTypeId(true, vacationTypeId);
+        else vacationDetails = vacationDetailRepository.findAllVacationDetailByUseYnAndVacationIdAndVacationTypeId(true, vacationId, vacationTypeId);
 
         resVacationDTOList = vacationDetails.stream().map(VacationDetail::toResVacationDTO).toList();
 
@@ -93,7 +93,7 @@ public class VacationService {
         return resVacationDTOList;
     }
 
-    public ResVacationDTO getVacation(String username, Integer vacationType) throws Exception {
-        return vacationRepository.findByUseYnAndUsername(true, username).toResVacationDTO();
+    public ResVacationDTO getVacation(String username, Integer vacationTypeId) throws Exception {
+        return vacationRepository.findByUseYnAndUsernameAndVacationTypeId(true, username, vacationTypeId).toResVacationDTO();
     }
 }

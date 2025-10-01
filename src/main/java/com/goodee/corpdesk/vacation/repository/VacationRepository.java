@@ -9,4 +9,6 @@ public interface VacationRepository extends JpaRepository<Vacation, Integer> {
 
 	Vacation findByUseYnAndUsername(Boolean useYn, String username);
 
+    Vacation findByUseYnAndUsernameAndVacationTypeId(Boolean useYn, String username, Integer vacationTypeId);
+
 }
