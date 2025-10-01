@@ -196,10 +196,10 @@ public class ApprovalService {
                     // JSON 문자열을 파싱해서 vacation_detail에 저장
                     JsonNode contentNode = objectMapper.readTree(approval.getApprovalContent());
 
-                    newVacationDetail.setVacationTypeId(contentNode.get("vacation_type_id").asInt());
-                    LocalDate startDate = LocalDate.parse(contentNode.get("start_date").asText());
+                    newVacationDetail.setVacationTypeId(contentNode.get("vacationTypeId").asInt());
+                    LocalDate startDate = LocalDate.parse(contentNode.get("startDate").asText());
                     newVacationDetail.setStartDate(startDate);
-                    LocalDate endDate = LocalDate.parse(contentNode.get("end_date").asText());
+                    LocalDate endDate = LocalDate.parse(contentNode.get("endDate").asText());
                     newVacationDetail.setEndDate(endDate);
                     int usedDays = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
                     newVacationDetail.setUsedDays(usedDays);
@@ -207,7 +207,7 @@ public class ApprovalService {
 
                     // 3) vacation update
                     // vacation_detail의 휴가일수만큼 사용연차 증가 & 잔여연차 감소
-                    vacation.setUsedVacation(vacation.getRemainingVacation() + usedDays);
+                    vacation.setUsedVacation(vacation.getUsedVacation() + usedDays);
                     vacation.setRemainingVacation(vacation.getRemainingVacation() - usedDays);
                     vacationRepository.save(vacation);
                 }
