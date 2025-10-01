@@ -35,6 +35,9 @@
 
       <div style="margin-top:16px;">
         <a href="${pageContext.request.contextPath}/board/me">목록으로</a>
+      <c:if test="${isOwner}">
+        <a href="${pageContext.request.contextPath}/board/department/${post.boardId}/edit" style="margin-left:8px;">수정</a>
+      </c:if>
       </div>      
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>

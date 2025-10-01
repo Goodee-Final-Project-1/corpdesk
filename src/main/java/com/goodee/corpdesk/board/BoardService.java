@@ -94,4 +94,23 @@ public class BoardService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다"));
   }
 
+  // 게시글 수정 (본인글만 가능)
+  public Board updatePost(Long boardId, Board request) {
+    Board existing = boardRepository.findByBoardIdAndUseYnTrue(boardId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다"));
+
+    String current = getCurrentUsername();
+    if (existing.getUsername() == null || !existing.getUsername().equals(current)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 수정할 수 있습니다.");
+    }
+
+    // 수정 가능 필드만 반영
+    if (request.getTitle() != null) existing.setTitle(request.getTitle());
+    if (request.getContent() != null) existing.setContent(request.getContent());
+    existing.setUpdatedAt(LocalDateTime.now());
+
+    // 공지/부서 전환 금지: departmentId는 변경하지 않음
+    return boardRepository.save(existing);
+  }
+
 }
