@@ -59,7 +59,7 @@ public class Employee implements UserDetails {
 
 	private String positionName;
 
-	@ColumnDefault("2")
+	@ColumnDefault("3")
 	private Integer roleId;
 
 	@ColumnDefault("1")
@@ -80,7 +80,7 @@ public class Employee implements UserDetails {
 	@Size(min = 5, max = 20, message = "아이디는 5~20자여야 합니다.")
 	@Id
 	private String username;
-	@Column(nullable = false)
+//	@Column(nullable = false)
 	@NotBlank(groups = UpdatePassword.class)
 	private String password;
 	@Transient
