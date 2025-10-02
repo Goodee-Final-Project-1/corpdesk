@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -65,7 +66,7 @@ public class BoardService {
       board.setDepartmentId(getCurrentUserDepartmentIdOrThrow());
     }
 
-    // 공지(0) 작성 권한 체크
+    // 공지 작성 권한 체크
     if (Integer.valueOf(0).equals(board.getDepartmentId()) && !isAdmin()) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "공지 작성 권한이 없습니다.");
     }
@@ -127,6 +128,17 @@ public class BoardService {
     existing.setUseYn(false);
     existing.setUpdatedAt(LocalDateTime.now());
     boardRepository.save(existing);
+  }
+
+  // 조회수 증가
+  @Transactional
+  public Board getBoardsDetailWithViewUp(Long boardId) {
+    int updated = boardRepository.increaseViewCount(boardId);
+    if (updated == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다");
+    }
+    return boardRepository.findByBoardIdAndUseYnTrue(boardId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다"));
   }
 
 }

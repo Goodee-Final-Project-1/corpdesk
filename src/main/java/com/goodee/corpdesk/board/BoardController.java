@@ -38,11 +38,11 @@ public class BoardController {
     return "board/boardList";
   }
 
-  // 공지 게시글 상세 페이지 (useYn = true)
+  // 공지 게시글 상세 페이지
   @GetMapping("/notice/{boardId}")
   public String noticeDetail(@PathVariable("boardId") Long boardId, Model model) {
     
-    Board post = boardService.getBoardsDetail(boardId);
+    Board post = boardService.getBoardsDetailWithViewUp(boardId);
     model.addAttribute("post", post);
     
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -55,7 +55,7 @@ public class BoardController {
     return "board/noticeDetail";
   }
 
-  // 내 부서 게시글 (departmentId = {departmentId})
+  // 내 부서 게시글
   @GetMapping("/department")
   public String myDepartmentList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
                                  Model model) {
@@ -70,11 +70,11 @@ public class BoardController {
     return "board/boardList";
   }
 
-  // 부서 게시글 상세 (useYn = true)
+  // 부서 게시글 상세
   @GetMapping("/department/{boardId}")
   public String departmentDetail(@PathVariable("boardId") Long boardId, Model model) {
     
-    Board post = boardService.getBoardsDetail(boardId);
+    Board post = boardService.getBoardsDetailWithViewUp(boardId);
     model.addAttribute("post", post);
     
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
