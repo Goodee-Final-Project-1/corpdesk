@@ -23,13 +23,13 @@
       <!-- 탭/네비게이션 -->
       <div style="margin-bottom:12px;">
         <a href="${pageContext.request.contextPath}/board/notice">공지 게시판</a> |
-        <a href="${pageContext.request.contextPath}/board/me">부서 게시판</a>
+        <a href="${pageContext.request.contextPath}/board/department">부서 게시판</a>
       </div>
 
       <!-- 게시판 제목 -->
       <h2><c:out value="${title != null ? title : '게시판'}"/></h2>
 
-      <a class="btn" href="${pageContext.request.contextPath}${writePath}">글쓰기</a>
+      <a class="btn" href="${writePath}">글쓰기</a>
       
       <!-- 빈 목록 처리 -->
       <c:if test="${empty post}">
