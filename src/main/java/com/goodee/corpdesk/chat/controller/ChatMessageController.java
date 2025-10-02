@@ -35,9 +35,6 @@ public class ChatMessageController {
 	@Autowired
 	private ChatSessionTracker chatSessionTracker;
 	
-	@Autowired
-	private EmployeeService employeeService;
-	
 
   
   

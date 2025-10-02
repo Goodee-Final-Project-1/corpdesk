@@ -180,10 +180,42 @@ stompClient.connect({}, function(frame) {
 				const lastMsgTime = chat.querySelector(".last-msg-time");
 
 
+
 				if (chatRoomId == notification.chatRoomId) {
 					//중복임을 flag로 저장
 					existing = true;
+
+					//구독일 경우
 					if (notification.notificationType == "room") {
+
+
+					}
+					//초대할 경우
+					if (notification.notificationType == "invite") {
+						const chatRoomTitle = chat.querySelector(".username");
+						const img = chat.querySelector("img");
+						if (notification.focused) {
+							lastMsg.textContent = notification.messageContent;
+							lastMsgTime.textContent = timeformat(notification.sentAt);
+							if (notification.viewName != null) {
+								chatRoomTitle.textContent = notification.viewName;
+							}
+							img.src = notification.imgPath;
+
+						} else {
+
+							if (count == 0) {
+								unreadCount.className = "badge badge-secondary unreadCount";
+							}
+							unreadCount.textContent = (count + 1);
+							chat.setAttribute("data-unreadCount", count + 1);
+							lastMsg.textContent = notification.messageContent;
+							lastMsgTime.textContent = timeformat(notification.sentAt);
+							if (notification.viewName != null) {
+								chatRoomTitle.textContent = notification.viewName;
+							}
+							img.src = notification.imgPath;
+						}
 
 
 					}
@@ -208,19 +240,22 @@ stompClient.connect({}, function(frame) {
 					}
 					//포커스할 때 목록에서 숫자를 0 을 바꾸기위한 알림이 옴 
 					if (notification.notificationType == "read") {
-						unreadCount.className = "unreadCount";
-						unreadCount.textContent = "";
+
+						if (unreadCount) {
+							unreadCount.className = "unreadCount";
+							unreadCount.textContent = "";
+						}
 						chat.setAttribute("data-unreadCount", 0);
-					}else{
+					} else {
 						const chatListContainer = document.querySelector(".chatList .simplebar-content");
-											chatListContainer.insertBefore(chat, chatListContainer.firstChild);
+						chatListContainer.insertBefore(chat, chatListContainer.firstChild);
 					}
 
-					
+
 
 				}
 
-				
+
 			})
 
 			//채팅방을 연락처 목록에서 열 때 DB를 조회해서 해당 채팅방 번호가 있으면 열지 않는데 
@@ -299,7 +334,7 @@ document.querySelector(".chatList").addEventListener("click", (e) => {
 			.then(res => {
 				if (res) {
 					li.remove();
-					
+
 				}
 				else {
 				}

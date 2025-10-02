@@ -11,7 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.goodee.corpdesk.chat.dto.ChatMessageDto;
 import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
 import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatMessage;
@@ -163,7 +165,7 @@ public class ChatMessageService {
 	    }
 	    
 	    //  메시지 저장
-	  		ChatMessage saveMsg = messageSave(msg);
+	  		ChatMessageDto saveMsg = messageSave(msg).toChatMessageDto();
 	  	    saveMsg.setNotificationType("message");
 
 	  	    

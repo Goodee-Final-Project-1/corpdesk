@@ -2,6 +2,7 @@ package com.goodee.corpdesk.chat.entity;
 
 import java.time.LocalDateTime;
 
+import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.common.BaseEntity;
 
 import jakarta.persistence.Entity;
@@ -35,5 +36,12 @@ public class ChatRoom extends BaseEntity {
 	@Transient
 	private Long unreadCount;
 	
-	
+	public RoomData changeToRoomData() {
+		return RoomData.builder()
+				.chatRoomId(chatRoomId)
+				.chatRoomTitle(chatRoomTitle)
+				.chatRoomType(chatRoomType)
+				.build();	
+		}
 }
+

@@ -13,6 +13,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.goodee.corpdesk.chat.dto.ChatMessageDto;
+import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
 import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatMessage;
 import com.goodee.corpdesk.chat.entity.ChatParticipant;
@@ -28,25 +30,21 @@ import com.goodee.corpdesk.position.entity.Position;
 
 @Service
 public class ChatRoomService {
-
-    private final ChatParticipantService chatParticipantService;
-
 	@Autowired
-	private ChatRoomRepository chatRoomRepository;
-	
-	@Autowired
-	private ChatParticipantRepository chatParticipantRepository;
+    private ChatParticipantService chatParticipantService;
 	@Autowired
 	EmployeeService employeeService;
 	@Autowired
+	private ChatRoomRepository chatRoomRepository;
+	@Autowired
+	private ChatParticipantRepository chatParticipantRepository;
+	@Autowired
 	ChatMessageRepository chatMessageRepository;
-	
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
+	@Autowired
+	private ChatSessionTracker chatSessionTracker;
 
-    ChatRoomService(ChatParticipantService chatParticipantService) {
-        this.chatParticipantService = chatParticipantService;
-    }
 
 	//유저이름으로 유저 이름 부서 직위 가져옴
 		public String getUserNameDepPos(String username) {
@@ -365,7 +363,6 @@ public class ChatRoomService {
 
 	@Transactional
 	public boolean inviteRoom(RoomData roomData) {
-		System.out.println(roomData.getChatRoomId());
 	    Optional<ChatRoom> optionalRoom = chatRoomRepository.findByChatRoomId(roomData.getChatRoomId());
 	    
 	    if (optionalRoom.isEmpty()) {
@@ -379,6 +376,10 @@ public class ChatRoomService {
 	        chatRoom.setChatRoomTitle(roomData.getChatRoomTitle());
 	    }
 	    chatRoom.setChatRoomType("room");
+	    
+	    chatRoomRepository.flush();
+	    RoomData chatRoomDto = chatRoom.changeToRoomData();
+	   
 	    
 	    //해당방의 모든 사람 불러옴 전에 초대된적이있으면 useYn만 바꿔주면 되기때문에
 	   
@@ -398,7 +399,6 @@ public class ChatRoomService {
 			    	cp.setLastCheckMessageId(beforeInviteMessageId);
 			    	cp.setUseYn(true);
 		    	}
-		    	
 		    	chatParticipantRepository.save(cp);
 		    	chatParticipantRepository.flush();
 	    	 //초대 메세지 저장
@@ -407,18 +407,33 @@ public class ChatRoomService {
 		    msg.setMessageType("enter");
 		    msg.setMessageContent(getUserNameDepPos(u)+"님이 참가하였습니다.");
 		    msg.setUseYn(true);
-		    msg = chatMessageRepository.save(msg);
-		    msg.setEmployeeUsername(u);
-		    msg.setViewName(getUserNameDepPos(u));
-		    messagingTemplate.convertAndSend("/sub/chat/room/"+roomData.getChatRoomId(),msg);
-
-	    	
-	    	
-	    	
-	    	
-	    	
+		    ChatMessageDto saveMsg = chatMessageRepository.save(msg).toChatMessageDto();
+		    saveMsg.setEmployeeUsername(u);
+		    saveMsg.setViewName(roomData.getChatRoomTitle());
+		    saveMsg.setNotificationType("invite");
+		    saveMsg.setImgPath("/images/group_profile.png");
+		   
+		    messagingTemplate.convertAndSend("/sub/chat/room/"+roomData.getChatRoomId(),saveMsg);
+		    
+		    
+		    List<ChatParticipant> participant =chatParticipantRepository.findAllByChatRoomIdAndUseYnTrue(roomData.getChatRoomId());
+			  //개인 채팅목록에 알림을 보내줌
+			    participant.forEach(p->{
+			    	  if (!chatSessionTracker.isUserFocused(roomData.getChatRoomId(), p.getEmployeeUsername())) {
+			    		  saveMsg.setFocused(false);
+			          } else {
+			        	  saveMsg.setFocused(true);
+			          }
+			  	    
+			          messagingTemplate.convertAndSendToUser(p.getEmployeeUsername(), "/queue/notifications", saveMsg);
+			    });
 	    			    
 	    });
+	    
+	   
+	  
+	    
+	  
 	    
 	    return true; 
 	}
