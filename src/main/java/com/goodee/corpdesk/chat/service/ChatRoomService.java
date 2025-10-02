@@ -409,7 +409,7 @@ public class ChatRoomService {
 		    msg.setUseYn(true);
 		    ChatMessageDto saveMsg = chatMessageRepository.save(msg).toChatMessageDto();
 		    saveMsg.setEmployeeUsername(u);
-		    saveMsg.setViewName(roomData.getChatRoomTitle());
+		    saveMsg.setViewName(chatRoom.getChatRoomTitle());
 		    saveMsg.setNotificationType("invite");
 		    saveMsg.setImgPath("/images/group_profile.png");
 		   

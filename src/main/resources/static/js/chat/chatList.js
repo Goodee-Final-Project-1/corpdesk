@@ -80,7 +80,7 @@ function createLi(chatRoom) {
 	// time
 	const stateSpan = document.createElement("span");
 	stateSpan.className = "state text-smoke last-msg-time";
-
+	stateSpan.textContent=timeformat(chatRoom.sentAt);
 	rightSpan.appendChild(stateSpan);
 
 	// dropdown-item
