@@ -56,17 +56,14 @@
 								<span>${emp.lastWorkingDay}</span>
 							</c:if></td>
 						<td><c:choose>
-								<c:when test="${emp.status == '출근'}">
+								<c:when test="${emp.workStatus == '출근'}">
 									<span style="color: green">출근</span>
 								</c:when>
-								<c:when test="${emp.status == '퇴근'}">
+								<c:when test="${emp.workStatus == '퇴근'}">
 									<span style="color: purple">퇴근</span>
 								</c:when>
-								<c:when test="${emp.status == '휴가'}">
-									<span style="color: pink">휴가</span>
-								</c:when>
 								<c:otherwise>
-									<span style="color: orange">출근전</span>
+									<span>-</span>
 								</c:otherwise>
 							</c:choose></td>
 						<td><c:choose>

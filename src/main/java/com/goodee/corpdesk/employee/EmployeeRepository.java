@@ -1,15 +1,17 @@
 package com.goodee.corpdesk.employee;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -75,8 +77,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	List<Employee> findByDepartmentId(Integer departmentId);
 	
 	@Modifying
-	@Query("UPDATE Employee e SET e.departmentId = NULL, e.departmentName = NULL WHERE e.departmentId = :deptId")
-	void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
+    @Transactional
+    @Query("UPDATE Employee e SET e.departmentId = null WHERE e.departmentId = :deptId")
+    void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
 
 	List<Employee> findByDepartmentIdAndUseYnTrue(Integer departmentId);
 

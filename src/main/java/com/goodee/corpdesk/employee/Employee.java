@@ -55,9 +55,9 @@ public class Employee implements UserDetails {
 	@Column(name = "department_id")
 	private Integer departmentId;
 
-	private String departmentName;
-
-	private String positionName;
+//	private String departmentName;
+//
+//	private String positionName;
 
 	@ColumnDefault("3")
 	private Integer roleId;
@@ -124,6 +124,7 @@ public class Employee implements UserDetails {
 	@Transient
 	private Role role;
 
+	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();
