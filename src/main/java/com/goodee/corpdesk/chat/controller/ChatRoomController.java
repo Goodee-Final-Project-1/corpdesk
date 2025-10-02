@@ -53,6 +53,13 @@ public class ChatRoomController {
 		RoomData roomData = new RoomData();
 		roomData = chatRoomService.chatRoomDetail(roomId,principal);
 		
+		//없는 방 조회시
+		if(roomData==null) {
+			//TODO
+			//에러 창으로 이동
+			return "Chat/chat_page";
+		}
+		
 		//json으로 변환
 		ObjectMapper mapper = new ObjectMapper();
 		String JsonRoomData = mapper.writeValueAsString(roomData);

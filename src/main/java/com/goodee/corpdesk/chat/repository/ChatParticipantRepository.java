@@ -14,6 +14,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 
 	List<ChatParticipant> findAllByChatRoomId(Long chatRoomId);
 	boolean existsByChatRoomIdAndEmployeeUsernameAndUseYnTrue(Long chatRoomId , String username);
+	boolean existsByChatRoomIdAndEmployeeUsername(Long chatRoomId , String username);
 	@Modifying
 	@Query("UPDATE ChatParticipant c SET lastCheckMessageId = :lastMessage "+
 			   "WHERE c.employeeUsername = :username AND c.chatRoomId =:roomId")

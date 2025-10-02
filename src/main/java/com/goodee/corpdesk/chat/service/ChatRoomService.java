@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -309,6 +310,12 @@ public class ChatRoomService {
 
 
 	public RoomData chatRoomDetail(Long roomId, Principal principal) {
+		if(chatRoomRepository.findByChatRoomId(roomId).isEmpty()) {
+			return null;
+		}
+		if(getChatRoomType(roomId)==null) {
+			return null;
+		}
 		RoomData roomData = new RoomData();
 		String roomType = getChatRoomType(roomId);
 		String username = principal.getName();
