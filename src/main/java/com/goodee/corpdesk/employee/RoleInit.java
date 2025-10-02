@@ -16,14 +16,14 @@ public class RoleInit implements InitializingBean {
 	}
 
 	private void init() {
-		Role admin = new Role();
-		admin.setRoleId(1);
-		admin.setRoleName("ROLE_ADMIN");
-		roleRepository.save(admin);
-
-		Role user = new Role();
-		user.setRoleId(2);
-		user.setRoleName("ROLE_USER");
-		roleRepository.save(user);
+//		Role admin = new Role();
+//		admin.setRoleId(1);
+//		admin.setRoleName("ROLE_ADMIN");
+//		roleRepository.save(admin);
+//
+//		Role user = new Role();
+//		user.setRoleId(2);
+//		user.setRoleName("ROLE_USER");
+//		roleRepository.save(user);
 	}
 }
