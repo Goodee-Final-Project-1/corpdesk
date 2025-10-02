@@ -3,7 +3,7 @@ CREATE DATABASE corpdesk;
 SHOW DATABASES;
 
 -- 2. 유저 생성
-CREATE USER 'corpdesk'@'%' IDENTIFIED BY '1234';
+CREATE USER 'corpdesk'@'%' IDENTIFIED BY 'corpdesk';
 SELECT USER, host FROM mysql.user;
 
 -- 3. 유저에게 권한 부여

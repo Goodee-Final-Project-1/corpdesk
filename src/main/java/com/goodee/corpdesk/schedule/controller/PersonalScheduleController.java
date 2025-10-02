@@ -9,11 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -29,6 +27,27 @@ public class PersonalScheduleController {
         return cat;
     }
 
+//    @ModelAttribute("todaySchedules")
+//    public List<ResPersonalScheduleDTO> getTodaySchedules(
+//        @RequestParam(value = "username", required = false) String username) {
+//
+//        String finalUsername;
+//
+//        // 💡 테스트를 위해, username 파라미터가 없으면 'jung_frontend'로 대체
+//        if (username == null || username.isEmpty()) {
+//            finalUsername = "jung_frontend";
+//        } else {
+//            finalUsername = username;
+//        }
+//
+//        // 오늘의 일정을 구하는 service 로직 호출
+//        // List<ResPersonalScheduleDTO> todaySchedules = personalScheduleService.getTodaySchedules(finalUsername);
+//
+//        // TODO: 실제 서비스 로직으로 변경
+//        // return todaySchedules;
+//        return Collections.emptyList(); // 임시 반환
+//    }
+
     @Autowired
     private PersonalScheduleService personalScheduleService;
 
@@ -36,7 +55,7 @@ public class PersonalScheduleController {
     public String list(ReqPersonalScheduleDTO reqPersonalScheduleDTO, Model model) {
 
         // username, useYn, (year, month)로 일정 데이터들 조회
-        List<ResPersonalScheduleDTO> schedules = personalScheduleService.getPersonalSchedules(reqPersonalScheduleDTO);
+        List<ResPersonalScheduleDTO> schedules = personalScheduleService.getSchedules(reqPersonalScheduleDTO);
 
         // yearRange 생성
         List<Integer> yearRange = personalScheduleService.getYearRangeByUsername(reqPersonalScheduleDTO.getUsername());
@@ -52,8 +71,6 @@ public class PersonalScheduleController {
     @PostMapping("")
     public void add(ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
 
-        System.err.println("/personal-schedule/add");
-
         ResPersonalScheduleDTO newSchedule = personalScheduleService.createSchedule(reqPersonalScheduleDTO);
 
         // redirect 상세정보 페이지
@@ -62,4 +79,51 @@ public class PersonalScheduleController {
         log.warn("ResPersonalScheduleDTO:{}", newSchedule);
 
     }
+
+//    @GetMapping("{personalScheduleId}")
+//    public String detail(@PathVariable("personalScheduleId") Long personalScheduleId, Model model) {
+//
+//        // id로 상세정보 조회해옴
+//        ResPersonalScheduleDTO schedule = personalScheduleService.getScheduleById(personalScheduleId);
+//
+//        model.addAttribute("schedule", schedule);
+//
+//        return "schedule/detail";
+//    }
+//
+//    @GetMapping("{personalScheduleId}/edit")
+//    public String edit(@PathVariable("personalScheduleId") Long personalScheduleId, Model model) {
+//
+//        // id로 조회
+//        ResPersonalScheduleDTO schedule = personalScheduleService.getScheduleById(personalScheduleId);
+//
+//        // 조회해온 데이터를 model에 바인딩한 후 수정 폼으로 이동
+//        model.addAttribute("schedule", schedule);
+//
+//        return "schedule/edit";
+//
+//    }
+//
+//    @PutMapping("{personalScheduleId}")
+//    public String update(@PathVariable("personalScheduleId") Long personalScheduleId
+//                        , ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+//
+//        // service의 수정 로직 (id로 조회 -> save)
+//        personalScheduleService.updateSchedule(personalScheduleId, reqPersonalScheduleDTO);
+//
+//        // 상세정보 페이지로 redirect
+//        return "redirect:/personal-schedule/" + personalScheduleId;
+//
+//    }
+//
+//    @DeleteMapping("{personalScheduleId}")
+//    public String delete(@PathVariable("personalScheduleId") Long personalScheduleId) {
+//
+//        // service의 삭제 로직
+//        personalScheduleService.deleteSchedule(personalScheduleId);
+//
+//        // list 페이지로 redirect
+//        return "redirect:/personal-schedule/list";
+//
+//    }
 }
