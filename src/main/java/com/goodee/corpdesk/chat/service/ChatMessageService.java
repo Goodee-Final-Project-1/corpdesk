@@ -140,17 +140,11 @@ public class ChatMessageService {
 
 	    //  방 참가자 처리
 	    List<ChatParticipant> participants;
-	    RoomData chatRoom = new RoomData();
 	  
         //참가자 활성화
 	    if (chatRoomType.equals("direct")) {
 	        // 1대1이면 나간 사람도 다시 참여 처리
 	        participants = participantOnetoOneByRoom(msg.getChatRoomId());
-
-	        // 상대방 이름으로 방제목 세팅
-	        chatRoom.setChatRoomTitle(getUserNameDepPos(principal.getName()));
-	        chatRoom.setImgPath(getUserImgPath(principal.getName()));
-	        
 
 	    } else {
 	        // 그룹 채팅은 나간 사람한테 안보냄
@@ -159,34 +153,30 @@ public class ChatMessageService {
 	    		
 	    	}
 	        participants = participantListByRoom(msg.getChatRoomId());
-	        chatRoom.setChatRoomTitle(chatRoomService.getRoomTitle(msg.getChatRoomId()));
-	        chatRoom.setNotificationType("room");
-	        chatRoom.setImgPath("/images/group_profile.png");
 	    }
 	    
 	    //  메시지 저장
 	  		ChatMessageDto saveMsg = messageSave(msg).toChatMessageDto();
 	  	    saveMsg.setNotificationType("message");
-
 	  	    
-	  	    chatRoom.setChatRoomId(msg.getChatRoomId());
-	        chatRoom.setChatRoomLastMessage(saveMsg.getMessageContent());
-	        chatRoom.setLastMessageTime(saveMsg.getSentAt());
-	        chatRoom.setNotificationType("room");
-	        chatRoom.setUnreadCount(0L);
 	    //  방 전체 브로드캐스트
 	      
 	        //메세지 전송자 이름, 이미지 
 	        String viewName = getUserNameDepPos(principal.getName());
-	        saveMsg.setImgPath(getUserImgPath(principal.getName()));
+	        String senderImg = getUserImgPath(principal.getName());
+	        
+	        
 	        saveMsg.setViewName(viewName);
+	        saveMsg.setImgPath(senderImg);
 	        messagingTemplate.convertAndSend("/sub/chat/room/" + msg.getChatRoomId(), saveMsg);
 
 	    //  개인 알림 전송
 	    // 그룹 , 개인 전부 여기서 보내줌
-	    for (ChatParticipant p : participants) {
-	        String username = p.getEmployeeUsername();
+	   participants.forEach(p->{
+		   String username = p.getEmployeeUsername();
 	        Long chatRoomId = p.getChatRoomId();
+	        saveMsg.setViewName(viewName);
+	        saveMsg.setImgPath(senderImg);
 
 	        if (!chatSessionTracker.isUserFocused(chatRoomId, username)) {
 	        	saveMsg.setFocused(false);
@@ -198,34 +188,18 @@ public class ChatMessageService {
 	        if(chatRoomType.equals("direct") && username.equals(saveMsg.getEmployeeUsername())) {
 	        	//기본은 내가보낸 메세지를 그대로 보내는데(방에 나만 있으면 이렇게 보내짐)
 	        	List<ChatParticipant> list = participantOnetoOneByRoom(chatRoomId);
-	        	 RoomData chatRoomMe = new RoomData();
-	        	 chatRoomMe.setChatRoomId(msg.getChatRoomId());
-	        	 chatRoomMe.setChatRoomLastMessage(saveMsg.getMessageContent());
-	        	 chatRoomMe.setLastMessageTime(saveMsg.getSentAt());
-	        	 chatRoomMe.setNotificationType("room");
-	        	 chatRoomMe.setUnreadCount(0L);
-	        	 chatRoomMe.setChatRoomTitle(chatRoom.getChatRoomTitle());
-	        	 chatRoomMe.setImgPath(chatRoom.getImgPath());
 	        	 
 	        	 //상대방이 있다면 나한테는 상대방에 대한 이름이랑 이미지가 채팅방 목록에 표시되야함
 	        	 list.forEach(l->{
 	        		if(!l.getEmployeeUsername().equals(username)) {
-	        		        chatRoomMe.setChatRoomTitle(getUserNameDepPos(l.getEmployeeUsername()));
-	        		        chatRoomMe.setImgPath( getUserImgPath(l.getEmployeeUsername()));
+	        		        saveMsg.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
+	        		        saveMsg.setImgPath( getUserImgPath(l.getEmployeeUsername()));
 	        		}
-	        		
 	        	});
-	        	
-	        	
-	        	messagingTemplate.convertAndSendToUser(username, "/queue/notifications", chatRoomMe);
-	 	        messagingTemplate.convertAndSendToUser(username, "/queue/notifications", saveMsg);
-	        	
-	        		continue;
 	        }
-	    
-	        messagingTemplate.convertAndSendToUser(username, "/queue/notifications", chatRoom);
 	        messagingTemplate.convertAndSendToUser(username, "/queue/notifications", saveMsg);
-	    }
+		   
+	   });
 	}
 
 }

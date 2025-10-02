@@ -388,6 +388,9 @@ stompClient.connect({}, function(frame) {
 			  });
 			
 		}
+		if(msg.notificationType=="invite"){
+			roomtitle.textContent=msg.viewName;
+		}
 		
 
 		lastSender = msg.employeeUsername;

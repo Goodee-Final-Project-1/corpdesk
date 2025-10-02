@@ -247,13 +247,16 @@ public class ChatRoomService {
 	}
 
 
-
+@Transactional
 	public boolean outRoom(Long roomId, Principal principal) {
 		boolean result =false;
 		if(chatParticipantRepository.existsByChatRoomIdAndEmployeeUsernameAndUseYnTrue(roomId, principal.getName())) {
 			chatParticipantRepository.updateRoomUseYnFalse(principal.getName(), roomId);
 			chatParticipantService.updateLastMessage(principal.getName(), roomId);
 			
+			chatParticipantRepository.flush();
+			
+			//그룹 채팅방 일때만 퇴장 메세지를 보내줌
 			if(chatRoomRepository.findByChatRoomId(roomId).get().getChatRoomType().equals("room")) {
 				//퇴장 메세지 저장
 		    	ChatMessage msg = new ChatMessage();
@@ -261,12 +264,26 @@ public class ChatRoomService {
 			    msg.setMessageType("out");
 			    msg.setMessageContent(getUserNameDepPos(principal.getName())+"님이 퇴장하였습니다.");
 			    msg.setUseYn(true);
-			    msg = chatMessageRepository.save(msg);
-			    msg.setEmployeeUsername(principal.getName());
-			    msg.setViewName(getUserNameDepPos(principal.getName()));
-			    messagingTemplate.convertAndSend("/sub/chat/room/"+roomId,msg);
+			    ChatMessageDto saveMsg = chatMessageRepository.save(msg).toChatMessageDto();
+			    saveMsg.setEmployeeUsername(principal.getName());
+			    saveMsg.setViewName(getUserNameDepPos(principal.getName()));
+			    saveMsg.setNotificationType("out");
+			    messagingTemplate.convertAndSend("/sub/chat/room/"+roomId,saveMsg);
+			    
+			    List<ChatParticipant> participant =chatParticipantRepository.findAllByChatRoomIdAndUseYnTrue(roomId);
+				 //개인 채팅목록에 알림을 보내줌
+			    participant.forEach(p->{
+			    	  if (!chatSessionTracker.isUserFocused(roomId, p.getEmployeeUsername())) {
+			    		  saveMsg.setFocused(false);
+			          } else {
+			        	  saveMsg.setFocused(true);
+			          }
+			  	    
+			          messagingTemplate.convertAndSendToUser(p.getEmployeeUsername(), "/queue/notifications", saveMsg);
+			    });
 			}
 			result =true;
+			
 		}
 		return result;
 	}

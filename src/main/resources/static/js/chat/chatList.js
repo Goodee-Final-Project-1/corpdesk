@@ -59,6 +59,7 @@ function createLi(chatRoom) {
 	const msgContents = document.createElement("div");
 	msgContents.className = "message-contents";
 
+
 	//사람이름+읽음표시+최근메세지 시간
 
 	const topSpan = document.createElement("span");
@@ -66,7 +67,8 @@ function createLi(chatRoom) {
 
 	const usernameSpan = document.createElement("span");
 	usernameSpan.className = "username text-dark";
-	usernameSpan.textContent = chatRoom.chatRoomTitle;
+
+
 
 
 	const rightSpan = document.createElement("span");
@@ -80,7 +82,7 @@ function createLi(chatRoom) {
 	// time
 	const stateSpan = document.createElement("span");
 	stateSpan.className = "state text-smoke last-msg-time";
-	stateSpan.textContent=timeformat(chatRoom.sentAt);
+	stateSpan.textContent = timeformat(chatRoom.sentAt);
 	rightSpan.appendChild(stateSpan);
 
 	// dropdown-item
@@ -185,11 +187,7 @@ stompClient.connect({}, function(frame) {
 					//중복임을 flag로 저장
 					existing = true;
 
-					//구독일 경우
-					if (notification.notificationType == "room") {
-
-
-					}
+					
 					//초대할 경우
 					if (notification.notificationType == "invite") {
 						const chatRoomTitle = chat.querySelector(".username");
@@ -219,7 +217,9 @@ stompClient.connect({}, function(frame) {
 
 
 					}
-					if (notification.notificationType == "message") {
+
+					// 메세지나 퇴장 일경우 
+					if (notification.notificationType == "message" ||notification.notificationType == "out")  {
 						//그 창을 보고 있을때
 						if (notification.focused) {
 							lastMsg.textContent = notification.messageContent;
@@ -241,12 +241,14 @@ stompClient.connect({}, function(frame) {
 					//포커스할 때 목록에서 숫자를 0 을 바꾸기위한 알림이 옴 
 					if (notification.notificationType == "read") {
 
-						if (unreadCount) {
+						if (unreadCount) {	
 							unreadCount.className = "unreadCount";
 							unreadCount.textContent = "";
 						}
 						chat.setAttribute("data-unreadCount", 0);
-					} else {
+					} 
+					//다른 알림일경우 리스트에서 제일 위로 올림
+					else {
 						const chatListContainer = document.querySelector(".chatList .simplebar-content");
 						chatListContainer.insertBefore(chat, chatListContainer.firstChild);
 					}
@@ -260,19 +262,47 @@ stompClient.connect({}, function(frame) {
 
 			//채팅방을 연락처 목록에서 열 때 DB를 조회해서 해당 채팅방 번호가 있으면 열지 않는데 
 			//이때 서버에서 상대에게 채팅방 구독 알림이 날라와서 중복 체크를 함		
-			if (!existing) {
+			if (!existing&& notification.notificationType !== "read") {
 				createLi(notification);
+				// 방금 만든 li 가져오기
+				const chatList = document.querySelector(".chatList .simplebar-content");
+				const newChat = chatList.querySelector(`.chatListOne[data-roomId="${notification.chatRoomId}"]`);
+
+				if (newChat) {
+					const lastMsg = newChat.querySelector(".last-msg");
+					const lastMsgTime = newChat.querySelector(".last-msg-time");
+					const chatRoomTitle = newChat.querySelector(".username");
+					const img = newChat.querySelector("img");
+					const unreadCount = newChat.querySelector(".unreadCount");
+
+					// 미리보기 채우기
+					lastMsg.textContent = notification.messageContent || "";
+					lastMsgTime.textContent = timeformat(notification.sentAt);
+					if (notification.viewName) {
+						chatRoomTitle.textContent = notification.viewName;
+					}
+					if (notification.imgPath) {
+						img.src = notification.imgPath;
+					}
+
+					// 안읽음 숫자
+					if (!notification.focused) {
+						unreadCount.className = "badge badge-secondary unreadCount";
+						unreadCount.textContent = 1;
+						newChat.setAttribute("data-unreadCount", 1);
+					}
+
+				}
+
+
 			}
-
-
 		}
 
 
+			/////알림이 결재 일경우
 
-		/////알림이 결재 일경우
 
-
-	});
+		});
 });
 //1대1 채팅 생성
 const employeeListOne = document.querySelectorAll(".employeeListOne");
