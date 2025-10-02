@@ -42,7 +42,11 @@
 					<tr>
 						<td>${emp.name}</td>
 						<td>${emp.username}</td>
-						<td>${emp.departmentName}</td>
+						<td><c:if test="${emp.departmentName == null}">
+								<span>-</span>
+							</c:if> <c:if test="${emp.departmentName != null}">
+								<span>${emp.departmentName}</span>
+							</c:if></td>
 						<td>${emp.positionName}</td>
 						<td>${emp.mobilePhone}</td>
 						<td>${emp.hireDate}</td>

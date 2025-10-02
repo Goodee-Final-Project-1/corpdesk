@@ -2,16 +2,12 @@ package com.goodee.corpdesk.employee;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.goodee.corpdesk.vacation.VacationManager;
-import com.goodee.corpdesk.vacation.entity.Vacation;
-import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +31,9 @@ import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
 import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
+import com.goodee.corpdesk.vacation.VacationManager;
+import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
 
 @Service
 @Transactional
@@ -58,12 +57,16 @@ public class EmployeeService implements UserDetailsService {
     private PositionRepository positionRepository;
 
     @Autowired
+    private RoleService roleService;
+    @Autowired
     private EmployeeFileRepository employeeFileRepository;
     @Autowired
     private FileManager fileManager;
     @Value("${app.upload}")
     private String uploadPath;
 
+    
+    
     @Autowired
     private VacationRepository vacationRepository;
     @Autowired
@@ -73,7 +76,7 @@ public class EmployeeService implements UserDetailsService {
 
     // 모든 부서 조회
     public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
+    	return departmentRepository.findByUseYnTrue();
     }
 
     // 모든 직위 조회
@@ -112,7 +115,7 @@ public class EmployeeService implements UserDetailsService {
     	// 직원 등록
         employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         employee.setUseYn(true);
-
+        roleService.assignRole(employee);
         Employee newEmployee = employeeRepository.save(employee);
 
         // 추가) 직원 등록 성공시 휴가 테이블에 insert
@@ -184,7 +187,9 @@ public class EmployeeService implements UserDetailsService {
         persisted.setDirectPhone(employeeFromForm.getDirectPhone());
 
         Employee editedEmployee = employeeRepository.save(persisted);
-
+        
+        roleService.assignRole(editedEmployee);
+        employeeRepository.save(editedEmployee);
         // ---------------- 프로필 이미지 처리 ----------------
         if (profileImageFile != null && !profileImageFile.isEmpty()) {
             Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(persisted.getUsername());
@@ -212,16 +217,16 @@ public class EmployeeService implements UserDetailsService {
         // 추가) 직원 정보 수정 성공시 휴가 테이블 update
         if(editedEmployee.getHireDate() != null) {
             // 직원의 휴가 테이블 조회
-            Vacation vacation = vacationRepository.findByUseYnAndUsername(true, editedEmployee.getUsername());
-
-            // 총 연차 update
-            int totalVacation = vacationManager.calTotalVacation(editedEmployee.getHireDate());
-            vacation.setTotalVacation(totalVacation);
-            // 잔여 연차 update (update된 총 연차 - 사용 연차)
-            int usedVacation = vacation.getUsedVacation();
-            vacation.setRemainingVacation(totalVacation - usedVacation);
-
-            vacationRepository.save(vacation);
+//            Vacation vacation = vacationRepository.findByUseYnAndUsername(true, editedEmployee.getUsername());
+//
+//            // 총 연차 update
+//            int totalVacation = vacationManager.calTotalVacation(editedEmployee.getHireDate());
+//            vacation.setTotalVacation(totalVacation);
+//            // 잔여 연차 update (update된 총 연차 - 사용 연차)
+//            int usedVacation = vacation.getUsedVacation();
+//            vacation.setRemainingVacation(totalVacation - usedVacation);
+//
+//            vacationRepository.save(vacation);
         }
     }
 

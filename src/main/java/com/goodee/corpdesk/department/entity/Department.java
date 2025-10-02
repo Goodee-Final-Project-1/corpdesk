@@ -31,7 +31,7 @@ import lombok.experimental.SuperBuilder;
 public class Department extends BaseEntity {
 
     // DataInitializer에서 데이터 넣어서 테스트하기 위해 임시로 닫아둠
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Integer departmentId;
 
