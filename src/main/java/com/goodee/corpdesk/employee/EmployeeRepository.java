@@ -2,20 +2,14 @@ package com.goodee.corpdesk.employee;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.NativeQuery;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -113,4 +107,20 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	WHERE e.username = :username
 """)
 	Optional<EmployeeInfoDTO> findByIdWithDept(String username);
+
+
+	@NativeQuery("""
+	SELECT
+	    e.username AS username,
+	    e.name AS name,
+	    d.department_name AS departmentName,
+	    p.position_name AS positionName,
+	    r.role_name AS roleName
+	FROM employee e
+	LEFT JOIN department d ON e.department_id = d.department_id
+	LEFT JOIN position p ON p.position_id = e.position_id
+	LEFT JOIN role r ON e.role_id = r.role_id
+	WHERE e.use_yn = 1
+""")
+	List<Map<String, Object>> findAllWithDepartmentAndPosition();
 }
