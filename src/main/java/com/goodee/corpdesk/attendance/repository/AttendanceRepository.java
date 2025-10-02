@@ -155,6 +155,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	SELECT a
 	FROM Attendance a
 	WHERE a.username = :username
+	AND a.useYn = true
 	AND (
 		a.checkInDateTime <= :end
 		AND (
