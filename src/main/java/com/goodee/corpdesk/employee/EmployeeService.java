@@ -153,7 +153,6 @@ public class EmployeeService implements UserDetailsService {
     }
 
  // 직원 정보 수정 (파일 포함)
-    @Transactional
     public void updateEmployee(Employee employeeFromForm, MultipartFile profileImageFile) throws Exception {
         Employee persisted = employeeRepository.findById(employeeFromForm.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + employeeFromForm.getUsername()));
@@ -167,7 +166,6 @@ public class EmployeeService implements UserDetailsService {
         persisted.setPositionId(employeeFromForm.getPositionId());
         persisted.setHireDate(employeeFromForm.getHireDate());
         persisted.setAddress(employeeFromForm.getAddress());
-        persisted.setStatus(employeeFromForm.getStatus());
         persisted.setBirthDate(employeeFromForm.getBirthDate());
         persisted.setEnglishName(employeeFromForm.getEnglishName());
         persisted.setVisaStatus(employeeFromForm.getVisaStatus());
@@ -228,7 +226,6 @@ public class EmployeeService implements UserDetailsService {
 
 
     // 프로필 이미지 삭제
-    @Transactional
     public void deleteProfileImage(String username) {
         Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(username);
         if (fileOptional.isPresent()) {
@@ -242,7 +239,6 @@ public class EmployeeService implements UserDetailsService {
     }
 
     // 직원 삭제(비활성화)
-    @Transactional
     public void deactivateEmployee(String username) {
         Employee employee = employeeRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));

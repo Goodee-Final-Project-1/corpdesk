@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.goodee.corpdesk.common.BaseEntity;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,7 +21,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table
-public class ChatMessage {
+public class ChatMessage extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long messageId;
@@ -29,16 +31,18 @@ public class ChatMessage {
 	private String messageContent;
 	private String messageType;
 	
+	
 	@CreationTimestamp
-	private LocalDateTime sent_at;
+	private LocalDateTime sentAt;
 	
 	@Transient
 	private String notificationType;
 	@Transient
 	private boolean focused;
+	@Transient
+	private String imgPath;
+	@Transient
+	private String viewName;
 	
-	private LocalDateTime updated_at;
-	private LocalDateTime creates_at;
-	private String modifed_by;
-	private boolean use_yn;
+	
 }

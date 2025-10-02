@@ -1,211 +1,214 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="sec" uri= "http://www.springframework.org/security/tags"%> 
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
 
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Chat Page</title>
-	<c:import url="/WEB-INF/views/include/head.jsp"/>
-	<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
-	<style>
-	.messageContainer{
-	height:400px;
-	width:90%;
+<meta charset="UTF-8">
+<title>Chat Page</title>
+<c:import url="/WEB-INF/views/include/head.jsp" />
+<script
+	src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+<style>
+ .messageContainer{
+	height:75vh;
+
 	overflow-y:scroll; 
+	} 
+html, body {
+	overflow: hidden; /* 내부 스크롤도 완전히 제거 */
+	height: 100%;
+}
+.profileImg{
+width:50px;
+height:50px;
+}
+.media-chat:not(.media-chat-right) .text-content {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 25px !important;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 화면 꽉 차게 */
+}
+
+.messageContainer {
+  flex: 1;             /* 남은 공간 다 채움 */
+  overflow-y: auto;    /* 스크롤 가능 */
+}
+
+.chat-footer {
+  flex-shrink: 0;      /* footer가 절대 줄지 않음 */
+  background: #fff;
+  padding: 10px;
+}.input-group-chat {
+  padding : 0;
+}
+.card-header{
+	border-bottom: 1px solid #ddd !important;
+	
+}
+.hidden {
+		display: none !important;
 	}
-	
-	</style>
+.hiddenSearch{
+		display: none !important;
+	}
+.system-message {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;       /* 흐리게 */
+  margin: 10px 0;
+  font-style: italic;
+}
+
+</style>
 </head>
+<body>
+	<sec:authentication property="principal.username" var="user" />
 
+	<input type="hidden" class="username" value="${user}">
+	<input type="hidden" class="roomData" value='${roomData }'>
+	<div class="card card-default chat-right-sidebar">
+	 <div class="card-header">
+        <h2 class="roomTitle"></h2>
 
-<c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
+        <div class="dropdown">
+          <div class="dropdown">
+            <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            </a>
 
-	<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+              <a class="dropdown-item invite"data-toggle="modal" data-target="#inviteRoomStep1" href="javascript:void(0)">초대하기</a>
+              <a class="dropdown-item participant-list" data-toggle="modal" data-target="#participantModal" href="javascript:void(0)">참여자목록</a>
+            </div>
+          </div>
+        </div>
+      </div>
 
-	<c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
-
-		<c:import url="/WEB-INF/views/include/header.jsp"/>
-	
-		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
-			<!-- 내용 시작 -->
-			
-		<sec:authentication property="principal.username" var="user"/>
-<script>
-    const user = "${user}";   // 현재 로그인한 사용자
-</script>
-			
-			<h2>${roomId}방</h2>
-	<div class = "messageContainer">
+	<div class="card-body pb-0 messageContainer">
 		<div id="chat-list">
 			
+
 			
 		</div>
 	</div>
+	<!-- Chat Footer -->
+	<div class="chat-footer">
+		<form id="chatForm">
+			<div class="input-group input-group-chat">
+				<textarea class="form-control messageInput" id="messageInput"
+					style="height: 100px;" aria-label="Text input with dropdown button"></textarea>
+				<div class="input-group-append">
+					<button type="button" id="sendBtn" class="btn btn-primary">
+						메시지 전송</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	</div>
 	
 	
-			
-    <input type="text" id="messageInput">
-    <button type= "button" id="sendBtn">메시지 전송</button>
+	<!-- 참여자 목록 모달 -->
+<div class="modal fade" id="participantModal" tabindex="-1" role="dialog" aria-labelledby="participantModal"
+  aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalSmallTitle">참여자 목록</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body participant-content">
+       <ul class="list-group">
+       </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 1: 초대자 선택 모달 -->
+<div class="modal fade" id="inviteRoomStep1" tabindex="-1" role="dialog" aria-labelledby="step1Label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="step1Label">초대대상 선택</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- 검색창 -->
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="searchUserInput" placeholder="이름 검색">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary namesearchBtn" type="button">검색</button>
+          </div>
+        </div>
+
+        <!-- 사원 목록 (스크롤 가능) -->
+        <ul class="list-group" id="participantList" style="max-height: 300px; overflow-y: auto;">
+          <c:forEach items="${employeeList}" var="employee">
+            <li class="list-group-item d-flex align-items-cent er" data-username="${employee.username}">
+             <!-- 추후 사진 바꿔주면됨  -->
+              <img src="/images/default_profile.jpg" class="rounded-circle mr-3" style="width:40px; height:40px;">
+              <div class="flex-fill">
+                <strong class="employeeName">${employee.name}</strong><br>
+                <small>${employee.departmentName} ${employee.positionName}</small>
+              </div>
+              <input type="checkbox" value="${employee.username}" class="participant-checkbox">
+            </li>
+          </c:forEach>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary" id="nextStepBtn">초대 하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: 현재 방이 1대1인데 초대할 경우 제목을 설정해줘야함-->
+<div class="modal fade" id="inviteRoomStep2" tabindex="-1" role="dialog" aria-labelledby="step2Label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="step2Label">채팅방 제목 설정</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label for="roomTitle">채팅방 제목</label>
+        <input type="text" id="roomTitle" class="form-control" placeholder="채팅방 이름 입력">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-success" id="inviteRoomConfirmBtn">초대</button>
+      </div>
+    </div>
+  </div>
+</div>
 	
-    
-	
-	<!-- 메시지 연결 송수신-->
-    <script>
-    // 메세지 수신 박스
-	const messageContainer = document.querySelector(".messageContainer")
-	const listChat= document.getElementById('chat-list');
-    
-    
-    	const roomId = ${roomId}
-        const socket = new SockJS("/ws");
-    	const stompClient = Stomp.over(socket);
-    	const sendBtn = document.getElementById("sendBtn");
-    	// 에러메세지가 두번 호출되는걸 막음 
-    	let errorHandled=false;
-    	// 메세지 수신
-    	stompClient.connect({},function(frame){
-    		stompClient.subscribe("/sub/chat/room/"+${roomId},(message)=>{
-    			 const li = document.createElement("li");
-    			 const msg = JSON.parse(message.body);
-        	     li.innerText =  "["+msg.employeeUsername+"]"+msg.messageContent;
-        	     li.setAttribute('data-no',msg.messageId);
-        	    
-        		 listChat.appendChild(li);
-        		 messageContainer.scrollTop = messageContainer.scrollHeight;
-        		 if (document.hasFocus()) {
-        			    fetch("/chat/participant/lastMessage/" + roomId, { method: "POST" });
-        		}
-        	})
-        
-    	},function(error){
-    		if(errorHandled)return;
-    		errorHandled=true;
-    		
-			alert("참여되지 않은 사용자입니다.");
-			location.href="/chat/room/list";
-    	}
-    	)
-    	
-    	//메세지 전송
-    	sendBtn.addEventListener("click",()=>{
-    		const inputText = document.getElementById("messageInput");
-    		const msg = {
-    				chatRoomId: roomId,
-    				employeeUsername : user ,
-    				messageContent : inputText.value
-    		};
-    		stompClient.send("/pub/chat/message",{},JSON.stringify(msg));
-    		inputText.value="";
-    
-    	});
-    	
-    </script>
 	
 	
-	<!-- 메세지 스크롤 이벤트 처리 -->
-	<script>
-	// 이전 기록을 가져오기전에 스크롤을 상단으로 올릴 경우 채팅내역 로딩을 기다리게함 
-		let isScrolled = false;
-		let lastMessageId = null;
-		let isEnd= false;
 	
-		
-		fetchList();
-		
-		//스크롤 이벤트 발생 시 호출 
-		messageContainer.addEventListener("scroll", ()=>{
-			if(messageContainer.scrollTop<1 && isScrolled===false){
-				isScrolled=true;
-				fetchList();
-			}
-		});
-		
-	//서버에서 이전 메시지 가져오기
-	    function fetchList(){
-		//처음 데이터까지 다 가져온 경우면 db접근안하고 리턴
-		if(isEnd == true){
-			return;
-		}
-		//채팅 리스트를 가져올 시작 번호
-		const firstLi = document.querySelector("#chat-list li");
-		const endNo = firstLi ? Number(firstLi.getAttribute("data-no")) : 0;
-		
-		//채팅 리스트 가져오기
-		fetch("/chat/message/list/"+roomId+"/"+endNo+"/"+20,{
-			method:"GET"
-		}).then(res=>res.json())
-		  .then(res=>{
-			const messages = res.messages;
-			const size = res.size;
-			
-			if(size<20){
-				isEnd=true;
-			}
-			// 리스트를 가져오기전 스크롤 높이를 저장
-			const oldScrollHeight = messageContainer.scrollHeight;
-			//메세지를 화면에 뿌려줌
-			messages.forEach(msg=>{
-				console.log(msg.messageId)
-				const li = document.createElement('li');
-				li.setAttribute('data-no',msg.messageId);
-				li.textContent = "["+msg.employeeUsername+"]"+msg.messageContent;
-				console.log(li.getAttribute("data-no"));
-				listChat.insertBefore(li,listChat.firstChild);
-				
-				
-			});
-			// 스크롤 위치 보정
-		      const newScrollHeight = messageContainer.scrollHeight;
-		      messageContainer.scrollTop = newScrollHeight - oldScrollHeight;
-			
-			
-		  })
-		  .finally(()=>{
-			  isScrolled=false;
-		  });
-		const li = document.querySelectorAll("#chat-list li");
-		li.forEach(l=>{
-			console.log(l.getAttribute("data-no"));
-			})
-	}
-	    const last = document.querySelector("#chat-list li:last-child");
 	
-	//마지막으로 확인한 메세지 저장
-	window.addEventListener("beforeunload",()=>{
-		const last = document.querySelector("#chat-list li:last-child").getAttribute("data-no");
-		if(last){
-			navigator.sendBeacon("/chat/participant/lastMessage/"+roomId);	
-		}
-	});
-	//해당 창이 포커스 되었을 때
-	window.addEventListener("focus", () => {
-  		const last = document.querySelector("#chat-list li:last-child");
- 		 if (last) {
-  		  fetch("/chat/participant/lastMessage/" + roomId, { method: "POST" });
- 	 }
- 		 console.log("freafasdfadsf  "+roomId)
- 		stompClient.send("/pub/chat/focus", {}, JSON.stringify({
- 	        chatRoomId: roomId,
- 	        focused: true
- 	    }));
-	});
-		
-	window.addEventListener("blur", () => {
-	    stompClient.send("/pub/chat/focus", {}, JSON.stringify({
-	    	chatRoomId: roomId,
-	        focused: false
-	    }));
-	});
-	</script>
 	
-			<!-- 내용 끝 -->
-		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
-	
-	<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
-	
-<c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
+
+	<script type="text/javascript" src="/js/chat/chatPage.js"></script>
+	<!-- 내용 끝 -->
+
+
+	<c:import url="/WEB-INF/views/include/body_wrapper_end.jsp" />
 </html>

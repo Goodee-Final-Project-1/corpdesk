@@ -55,6 +55,7 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
 	JOIN Vacation v ON v.vacationId = vd.vacationId
 	JOIN VacationType vt ON vd.vacationTypeId = vt.vacationTypeId
 	WHERE v.username = :username
+	AND v.useYn = true
 	AND (
 		vd.startDate <= :end
 		AND
@@ -74,7 +75,8 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
 	)
 	FROM VacationDetail vd
 	JOIN Vacation v ON vd.vacationId = v.vacationId
-	WHERE (
+	WHERE vd.useYn = true
+	AND (
 		vd.startDate <= :end
 		AND
 		vd.endDate >= :start

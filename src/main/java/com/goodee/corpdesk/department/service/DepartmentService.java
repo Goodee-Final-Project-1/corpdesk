@@ -1,19 +1,24 @@
 package com.goodee.corpdesk.department.service;
 
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-import com.goodee.corpdesk.approval.entity.ApprovalForm;
-import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
+import com.goodee.corpdesk.department.dto.DepartmentDetailDTO;
+import com.goodee.corpdesk.department.dto.DepartmentTreeDTO;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
+import com.goodee.corpdesk.position.repository.PositionRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -24,6 +29,9 @@ public class DepartmentService {
 	private DepartmentRepository departmentRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
+    
+    @Autowired
+    private PositionRepository positionRepository;
 
     public List<ResApprovalDTO> getApprovalFormList() throws Exception {
         List<Department> result = departmentRepository.findAll();
@@ -63,4 +71,108 @@ public class DepartmentService {
         return resApprovalDTO;
     }
 
+    public Integer getDepartmentIdByName(String departmentName) {
+        Optional<Department> department = departmentRepository.findByDepartmentName(departmentName);
+        return department.map(Department::getDepartmentId).orElse(null);
+    }
+
+    public List<DepartmentTreeDTO> getDepartmentTree() {
+        List<Department> departments = departmentRepository.findAll();
+        List<DepartmentTreeDTO> tree = new ArrayList<>();
+
+        for (Department dept : departments) {
+            // parentDepartmentId 사용
+            String parent = (dept.getParentDepartmentId() == null) ? "#" : dept.getParentDepartmentId().toString();
+            tree.add(new DepartmentTreeDTO(dept.getDepartmentId(), dept.getDepartmentName(), parent));
+        }
+
+        return tree;
+    }
+
+
+
+    public DepartmentDetailDTO getDepartmentDetail(Integer id) {
+        Department dept = departmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("부서 없음"));
+
+        // 상위 부서명
+        String parentName = null;
+        if (dept.getParentDepartmentId() != null) {
+            parentName = departmentRepository.findById(dept.getParentDepartmentId())
+                    .map(Department::getDepartmentName)
+                    .orElse(null);
+        }
+
+        // 하위 부서들
+        List<String> childDepartments = departmentRepository.findByParentDepartmentId(dept.getDepartmentId())
+                .stream()
+                .map(Department::getDepartmentName)
+                .toList();
+
+        // 직원 목록 (PositionRepository 통해 직위명 가져오기)
+        List<DepartmentDetailDTO.MemberDTO> members = employeeRepository.findByDepartmentIdAndUseYnTrue(dept.getDepartmentId())
+        	    .stream()
+        	    .map(emp -> new DepartmentDetailDTO.MemberDTO(
+        	        emp.getUsername(), 
+        	        emp.getName(),
+        	        positionRepository.findById(emp.getPositionId())
+        	                          .map(p -> p.getPositionName())
+        	                          .orElse("정보 없음")
+        	    ))
+        	    .toList();
+
+        return DepartmentDetailDTO.builder()
+                .departmentId(dept.getDepartmentId())
+                .departmentName(dept.getDepartmentName())
+                .employeeCount(members.size())
+                .createdDate(
+                    dept.getCreatedAt() != null
+                        ? dept.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                        : "정보 없음"
+                )
+                .parentDepartmentName(parentName != null ? parentName : "미지정")
+                .childDepartments(
+                    childDepartments.isEmpty() ? List.of("정보 없음") : childDepartments
+                )
+                .members(members)
+                .build();
+    }
+
+    @Transactional
+    public void moveEmployees(List<String> usernames, Integer newDeptId) {
+        for (String username : usernames) {
+            Employee emp = employeeRepository.findById(username)
+                    .orElseThrow(() -> new RuntimeException("직원 없음: " + username));
+            emp.setDepartmentId(newDeptId);
+            employeeRepository.save(emp);
+        }
+    }
+
+    @Transactional
+    public void deleteDepartment(Integer deptId) {
+        // 직원들 departmentId, departmentName NULL 처리
+        employeeRepository.clearDepartmentByDeptId(deptId);
+
+        // 하위 부서 재귀 삭제
+        List<Department> children = departmentRepository.findByParentDepartmentId(deptId);
+        for (Department child : children) {
+            deleteDepartment(child.getDepartmentId());
+        }
+
+        // 최종 부서 삭제
+        departmentRepository.deleteById(deptId);
+    }
+    
+    @Transactional
+    public void excludeEmployees(List<String> usernames) {
+        for (String username : usernames) {
+            Employee emp = employeeRepository.findById(username)
+                    .orElseThrow(() -> new RuntimeException("직원 없음: " + username));
+            emp.setUseYn(false);
+            emp.setDepartmentId(null);      // 부서 ID null 처리
+            emp.setDepartmentName(null);
+            employeeRepository.save(emp);
+        }
+    }
+    
 }
