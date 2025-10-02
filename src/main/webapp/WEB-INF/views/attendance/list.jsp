@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,24 +31,52 @@
         <!-- 출퇴근 시간 표시 -->
         <div class="card card-default mb-3">
           <div class="card-body d-flex justify-content-around p-3">
-            <div class="text-center">
-              <p class="card-text mb-1">출근</p>
-              <p class="card-text mb-0">0000-00-00 00:00</p>
-            </div>
-            <div class="text-center">
-              <p class="card-text mb-1">퇴근</p>
-              <p class="card-text mb-0">0000-00-00 00:00</p>
-            </div>
+
+            <c:choose>
+              <c:when test="${currAttd.workStatus eq '출근전' or (currAttd.workStatus eq '퇴근' and !currAttd.today)}">
+                <div class="text-center">
+                  <p class="card-text mb-1">출근</p>
+                  <p class="card-text mb-0">00:00:00</p>
+                </div>
+                <div class="text-center">
+                  <p class="card-text mb-1">퇴근</p>
+                  <p class="card-text mb-0">00:00:00</p>
+                </div>
+              </c:when>
+              <c:otherwise>
+                <div class="text-center">
+                  <p class="card-text mb-1">출근</p>
+                  <p class="card-text mb-0">${fn:substring(currAttd.checkInTime, 0, 8)}</p>
+                </div>
+                <div class="text-center">
+                  <p class="card-text mb-1">퇴근</p>
+                  <p class="card-text mb-0">${currAttd.checkOutTime eq null ? '00:00:00' : fn:substring(currAttd.checkOutTime, 0, 8)}</p>
+                </div>
+              </c:otherwise>
+            </c:choose>
+
           </div>
         </div>
 
         <!-- 출근/퇴근 버튼 -->
         <div class="row no-gutters">
           <div class="col-6 pr-2">
-            <button type="button" class="btn btn-info btn-lg btn-block">출근</button>
+            <form method="POST" action="/attendance">
+              <button class="btn btn-info btn-lg btn-block"
+                ${currAttd.workStatus eq '휴가' or currAttd.workStatus eq '출근' ? 'disabled' : ''}>출근
+              </button>
+            </form>
           </div>
+
           <div class="col-6 pl-2">
-            <button type="button" class="btn btn-info btn-lg btn-block" disabled>퇴근</button>
+            <form method="post" action="/attendance/${currAttd.attendanceId}">
+              <input type="hidden" name="_method" value="PATCH">
+              <button class="btn btn-info btn-lg btn-block"
+                ${currAttd.workStatus eq '휴가'
+                  or currAttd.workStatus eq '출근전'
+                  or currAttd.workStatus eq '퇴근' ? 'disabled' : ''}>퇴근
+              </button>
+            </form>
           </div>
         </div>
 
@@ -67,37 +96,75 @@
 
         <!-- 년, 월 선택 - 한 줄 배치 -->
         <div class="row mb-4 ml-0">
-          <div class="mr-4">
-            <div class="form-group">
-              <div class="d-flex align-items-center">
-                <select class="form-control mr-2" id="yearSelect">
-                  <option>2024</option>
-                  <option>2023</option>
-                  <option>2022</option>
-                  <option>2021</option>
-                  <option>2020</option>
-                </select>
-                <span>년</span>
+
+          <%-- TODO 추후 인증정보를 사용하게 되면 username 삭제 --%>
+          <form method="get" action="/attendance/list">
+
+            <input type="hidden" name="username" value="jung_frontend">
+
+            <div class="mr-3">
+              <div class="form-group">
+                <div class="d-flex align-items-center">
+                  <select class="form-control mr-2" id="yearSelect" name="year">
+
+                    <c:choose>
+                      <c:when test="${selectedYear ne null}">
+                        <option value="" ${selectedYear eq '' ? 'selected' : ''}>전체</option>
+                        <c:forEach var="year" items="${yearRange}">
+                          <option value="${year}" ${selectedYear eq year ? 'selected' : ''}>
+                              ${year}
+                          </option>
+                        </c:forEach>
+                      </c:when>
+                      <c:otherwise>
+                        <option value="">전체</option>
+                        <c:forEach var="year" items="${yearRange}">
+                          <option value="${year}">
+                              ${year}
+                          </option>
+                        </c:forEach>
+                      </c:otherwise>
+                    </c:choose>
+
+                  </select>
+                  <span>년</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div>
-            <div class="form-group">
-              <div class="d-flex align-items-center">
-                <select class="form-control mr-2" id="monthSelect">
-                  <option>1</option>
-                  <option>2</option>
-                  <option>3</option>
-                  <option>4</option>
-                  <option selected>9</option>
-                  <option>10</option>
-                  <option>11</option>
-                  <option>12</option>
-                </select>
-                <span>월</span>
+
+            <div class="mr-6">
+              <div class="form-group">
+                <div class="d-flex align-items-center">
+                  <select class="form-control mr-2" id="monthSelect" name="month">
+
+                    <c:choose>
+                      <c:when test="${selectedMonth ne null}">
+                        <option value="" ${selectedMonth eq '' ? 'selected' : ''}>전체</option>
+                        <c:forEach begin="1" end="12" var="num">
+                          <option value="${num}" ${selectedMonth eq num ? 'selected' : ''}>${num}</option>
+                        </c:forEach>
+                      </c:when>
+
+                      <c:otherwise>
+                        <option value="">전체</option>
+                        <c:forEach begin="1" end="12" var="num">
+                          <option value="${num}">${num}</option>
+                        </c:forEach>
+                      </c:otherwise>
+                    </c:choose>
+
+                  </select>
+                  <span>월</span>
+                </div>
               </div>
             </div>
-          </div>
+
+            <div>
+              <%-- TODO 조회 버튼 클릭시 년, 월 데이터로 페이지 다시 조회 --%>
+              <button class="btn btn-primary">조회</button>
+            </div>
+
+          </form>
         </div>
 
         <!-- 근태현황, 근무시간 - 한 줄 배치 -->
@@ -111,17 +178,17 @@
                 <div class="col-4 text-center">
                   <h6>지각</h6>
                   <br>
-                  <b>2</b><span>회</span>
+                  <b>${attCnts.lateArrivalsCnt}</b><span>회</span>
                 </div>
                 <div class="col-4 text-center">
                   <h6>조퇴</h6>
                   <br>
-                  <b>2</b><span>회</span>
+                  <b>${attCnts.earlyLeavingsCnt}</b><span>회</span>
                 </div>
                 <div class="col-4 text-center">
                   <h6>결근</h6>
                   <br>
-                  <b>2</b><span>회</span>
+                  <b>${attCnts.absentDaysCnt}</b><span>회</span>
                 </div>
 
               </div>
@@ -136,12 +203,12 @@
                 <div class="col-4 text-center">
                   <h6>근무 일수</h6>
                   <br>
-                  <b>2</b><span>일</span>
+                  <b>${workSummary.totalWorkDays}</b><span>일</span>
                 </div>
                 <div class="col-4 text-center">
                   <h6>근무 시간</h6>
                   <br>
-                  <b>2</b><span>시간</span>
+                  <b>${workSummary.totalWorkHours}</b><span>시간</span>
                 </div>
 
               </div>
@@ -154,22 +221,24 @@
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>
-            <tr>
-              <th>출근일</th>
-              <th>출근 시간</th>
-              <th>퇴근일</th>
-              <th>퇴근 시간</th>
-              <th>근무 상태</th>
-            </tr>
+              <tr>
+                <th>출근일</th>
+                <th>출근 시간</th>
+                <th>퇴근일</th>
+                <th>퇴근 시간</th>
+                <th>근무 상태</th>
+              </tr>
             </thead>
             <tbody>
-            <tr>
-              <td>2024-09-25</td>
-              <td>09:00</td>
-              <td>2024-09-25</td>
-              <td>18:00</td>
-              <td>정상출근</td>
-            </tr>
+              <c:forEach items="${attDatilList}" var="el">
+                <tr>
+                  <td>${el.checkInDateTime ne null ? fn:substring(el.checkInDateTime, 0, 10) : '-'}</td>
+                  <td>${el.checkInDateTime ne null ? fn:substring(el.checkInDateTime, 11, 16) : '-'}</td>
+                  <td>${el.checkOutDateTime ne null ? fn:substring(el.checkOutDateTime, 0, 10) : '-'}</td>
+                  <td>${el.checkOutDateTime ne null ? fn:substring(el.checkOutDateTime, 11, 16) : '-'}</td>
+                  <td>${el.workStatus}</td>
+                </tr>
+              </c:forEach>
             </tbody>
           </table>
         </div>

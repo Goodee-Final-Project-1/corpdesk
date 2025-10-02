@@ -1,12 +1,24 @@
 package com.goodee.corpdesk.department.entity;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-import com.goodee.corpdesk.common.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.common.BaseEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Setter
 @Getter
@@ -38,4 +50,5 @@ public class Department extends BaseEntity {
         this.parentDepartmentId = parentDepartmentId;
         this.departmentName = departmentName;
     }
+
 }

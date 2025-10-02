@@ -3,12 +3,19 @@ package com.goodee.corpdesk.employee;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -53,6 +60,16 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     """)
     public List<ResApprovalDTO> findEmployeeWithDeptAndPositionAndFile(@Param("departmentId") Integer departmentId, @Param("useYn") Boolean useYn);
 
+    @Query("""
+        SELECT e
+        FROM Employee e
+        WHERE
+            e.useYn = :useYn
+        	AND MONTH(e.hireDate) = :month
+        	AND DAY(e.hireDate) = :day
+    """)
+    public List<Employee> findAllByHireDateMonthDay(@Param("useYn") Boolean useYn, @Param("month") Integer month, @Param("day") Integer day);
+
 	boolean existsByUsername(String username);
 
 	List<Employee> findAllByUseYnTrue();
@@ -60,4 +77,40 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	boolean existsByMobilePhone(String mobilePhone);
 
 	Optional<Employee> findByUsername(String username);
+	
+	List<Employee> findByDepartmentId(Integer departmentId);
+	
+	@Modifying
+	@Query("UPDATE Employee e SET e.departmentId = NULL, e.departmentName = NULL WHERE e.departmentId = :deptId")
+	void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
+
+	List<Employee> findByDepartmentIdAndUseYnTrue(Integer departmentId);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	@Query("""
+	SELECT new com.goodee.corpdesk.employee.EmployeeInfoDTO (
+		e.username,
+		e.name,
+		e.hireDate,
+		d.departmentName,
+		p.positionName
+	)
+	FROM Employee e
+	JOIN Department d ON e.departmentId = d.departmentId
+	JOIN Position p ON e.positionId = p.positionId
+	WHERE e.username = :username
+""")
+	Optional<EmployeeInfoDTO> findByIdWithDept(String username);
 }

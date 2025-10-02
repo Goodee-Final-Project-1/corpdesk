@@ -5,7 +5,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Insert title here</title>
+	<title>부서글 쓰기</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 
@@ -19,7 +19,20 @@
 	
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
-			<p>여기에 내용 추가</p>
+			<h2>부서 글쓰기</h2>
+      <form method="post" action="${pageContext.request.contextPath}/board/me">
+        <!-- departmentId는 비워두면 Service에서 Authentication 부서ID로 채움 -->
+        <div style="margin-bottom:8px;">
+          <label>제목</label><br/>
+          <input type="text" name="title" style="width:100%;" required />
+        </div>
+        <div style="margin-bottom:8px;">
+          <label>내용</label><br/>
+          <textarea name="content" rows="10" style="width:100%;" required></textarea>
+        </div>
+        <button type="submit">등록</button>
+        <a href="${pageContext.request.contextPath}/board/me">취소</a>
+      </form>
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	

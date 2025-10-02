@@ -5,7 +5,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Insert title here</title>
+	<title>사원목록</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 
@@ -32,7 +32,7 @@
 					<th>퇴사일</th>
 					<th>현재상태</th>
 					<th>계정상태</th>
-					<th>수정</th>
+					<th>상세</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -94,7 +94,8 @@
 		
 		<c:if test="${not empty message}">
 		    <script>
-		        alert("${message}");
+		    let msg = `${message}`.replace(/\\n/g, "\n");
+	        alert(msg);
 		    </script>
 		</c:if>
 
