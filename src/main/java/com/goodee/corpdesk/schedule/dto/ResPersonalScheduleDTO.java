@@ -26,4 +26,5 @@ public class ResPersonalScheduleDTO {
         this.content = content;
         this.address = address;
     }
+
 }
