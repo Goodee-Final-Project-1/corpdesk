@@ -1,6 +1,7 @@
 package com.goodee.corpdesk.calendar;
 
 import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.schedule.entity.PersonalSchedule;
 import com.goodee.corpdesk.vacation.dto.VacationDetailTypeDTO;
 import com.goodee.corpdesk.vacation.dto.VacationDetailUsernameDTO;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +31,10 @@ public class CalendarApiController {
 		return calendarService.getVacation(calendarDTO, authentication.getName());
 	}
 
-//	public List<PersonalSchedule> getSchedule(@RequestBody CalendarDTO calendarDTO, Authentication authentication) {
-//		return calendarService.getSchedule(calendarDTO, authentication.getName());
-//	}
+	@PostMapping("schedule")
+	public List<PersonalSchedule> getSchedule(@RequestBody CalendarDTO calendarDTO, Authentication authentication) {
+		return calendarService.getSchedule(calendarDTO, authentication.getName());
+	}
 
 	@PostMapping("everyVacation")
 	public List<VacationDetailUsernameDTO> getEveryVacation(@RequestBody CalendarDTO calendarDTO) {

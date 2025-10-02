@@ -17,9 +17,9 @@ public class DataInitializer {
 	    CommandLineRunner initData(DepartmentRepository departmentRepository,
                                    PositionRepository positionRepository) {
 	        return args -> {
-	            // Department 초기 데이터
-	            if (departmentRepository.count() == 0) {
-	                // root (level 0)
+//	            // Department 초기 데이터
+//	            if (departmentRepository.count() == 0) {
+//	                // root (level 0)
 //                    departmentRepository.save(new Department(1, null, "인피니티오토"));
 //
 //                    // (level 1)
@@ -37,16 +37,16 @@ public class DataInitializer {
 //                    // (level 3)
 //                    departmentRepository.save(new Department(9, 8, "서비스기획1파트"));
 //                    departmentRepository.save(new Department(10, 8, "서비스기획2파트"));
-	            }
-
-	            // Position 초기 데이터
-	            if (positionRepository.count() == 0) {
-	                positionRepository.save(new Position(null, "부장"));
-	                positionRepository.save(new Position(1, "차장"));
-	                positionRepository.save(new Position(2, "과장"));
-	                positionRepository.save(new Position(3, "대리"));
-	                positionRepository.save(new Position(4, "사원"));
-	            }
+//	            }
+//
+//	            // Position 초기 데이터
+//	            if (positionRepository.count() == 0) {
+//	                positionRepository.save(new Position(null, "부장"));
+//	                positionRepository.save(new Position(1, "차장"));
+//	                positionRepository.save(new Position(2, "과장"));
+//	                positionRepository.save(new Position(3, "대리"));
+//	                positionRepository.save(new Position(4, "사원"));
+//	            }
 	        };
 	    }
 }

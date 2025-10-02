@@ -8,6 +8,8 @@
   <meta charset="UTF-8">
   <title>Insert title here</title>
   <c:import url="/WEB-INF/views/include/head.jsp"/>
+
+  <script defer src="/js/schedule/list.js"></script>
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/>
@@ -194,7 +196,7 @@
           </thead>
           <tbody>
             <c:forEach items="${schedules}" var="el">
-              <tr data-personal-schedule-id="${el.personalScheduleId}" style="cursor: pointer;">
+              <tr class="schedule-row" data-personal-schedule-id="${el.personalScheduleId}" style="cursor: pointer;">
                 <td>${fn: substring(el.scheduleDateTime, 0, 10)}</td>
                 <td>${fn: substring(el.scheduleDateTime, 11, 16)}</td>
                 <td>${el.scheduleName}</td>

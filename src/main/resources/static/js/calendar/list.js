@@ -1,11 +1,12 @@
-const checkAttendance = document.getElementById('customCheckPrimary');
-const checkVacation = document.getElementById('customCheckSecondary');
-const checkSchedule = document.getElementById('customCheckSuccess');
-const checkEveryVacation = document.getElementById('customCheckWarning');
-
-let currentDateInfo = null;
-
 document.addEventListener('DOMContentLoaded', function () {
+
+	const checkAttendance = document.getElementById('customCheckPrimary');
+	const checkVacation = document.getElementById('customCheckSecondary');
+	const checkSchedule = document.getElementById('customCheckSuccess');
+	const checkEveryVacation = document.getElementById('customCheckWarning');
+
+	let currentDateInfo = null;
+
 	const calendarEl = document.getElementById('calendar');
 	const calendar = new FullCalendar.Calendar(calendarEl, {
 		initialView: 'dayGridMonth',
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			currentDateInfo = info;
 			if (checkAttendance.checked == true) getAttendance(info);
 			if (checkVacation.checked == true) getVacation(info);
+			if (checkSchedule.checked == true) getSchedule(info);
 			if (checkEveryVacation.checked == true) getEveryVacation(info);
 		},
 		themeSystem: 'bootstrap5',
@@ -70,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			data.forEach(a => {
 				calendar.addEvent({
-					id: a.attendanceId,
+					id: 'attendance' + a.attendanceId,
 					title: a.workStatus,
 					start: a.checkInDateTime,
 					end: a.checkOutDateTime,
@@ -114,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			data.forEach(v => {
 				calendar.addEvent({
-					id: v.vacationId,
+					id: 'vacation' + v.vacationId,
 					title: v.vacationTypeName, // FIXME: 휴가 종류
 					start: v.startDate,
 					end: v.endDate,
@@ -158,12 +160,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			data.forEach(v => {
 				calendar.addEvent({
-					id: v.vacationId,
+					id: 'everyVacation' + v.vacationId,
 					title: v.username, // FIXME: 사원 이름
 					start: v.startDate,
 					end: v.endDate,
 					groupId: 'everyVacation',
 					backgroundColor: '#fec400'
+				});
+			});
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	checkSchedule.addEventListener('change', function () {
+		if (checkSchedule.checked == true) getSchedule(currentDateInfo);
+		else {
+			calendar.getEvents().forEach(event => {
+				if (event.groupId == 'schedule') {
+					event.remove();
+				}
+			})
+		}
+	})
+
+	async function getSchedule(info) {
+		console.log(info);
+		try {
+			const response = await fetch('/api/calendar/schedule', {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({
+					startDateTime: info.start,
+					endDateTime: info.end
+				})
+			});
+
+			if (!response.ok) throw new Error('수신 오류');
+			const data = await response.json();
+			console.log(data);
+
+			data.forEach(s => {
+				calendar.addEvent({
+					id: 'schedule' + s.personalScheduleId,
+					title: s.scheduleName,
+					start: s.scheduleDateTime,
+					end: s.scheduleDateTime,
+					groupId: 'schedule',
+					backgroundColor: '#0acb8e'
 				});
 			});
 		} catch (error) {

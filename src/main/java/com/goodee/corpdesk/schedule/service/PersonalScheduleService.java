@@ -28,7 +28,7 @@ public class PersonalScheduleService {
     }
 
     // username, useYn, (year, month)로 일정 데이터들 조회
-    public List<ResPersonalScheduleDTO> getPersonalSchedules(ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+    public List<ResPersonalScheduleDTO> getSchedules(ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
 
         return personalScheduleRepository.findPersonalScheduleByUsernameAndYearMonth(true
                                                                                     , reqPersonalScheduleDTO.getUsername()
@@ -55,5 +55,40 @@ public class PersonalScheduleService {
         return years;
         
     }
+
+//    public ResPersonalScheduleDTO getScheduleById(Long personalScheduleId) {
+//
+//        return personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId).toResPersonalScheduleDTO();
+//
+//    }
+//
+//    public ResPersonalScheduleDTO updateSchedule(Long personalScheduleId, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+//
+//        // id로 조회
+//        PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
+//
+//        // save
+//        oldSchedule.setScheduleName(reqPersonalScheduleDTO.getScheduleName());
+//        oldSchedule.setScheduleDateTime(reqPersonalScheduleDTO.getScheduleDateTime());
+//        oldSchedule.setContent(reqPersonalScheduleDTO.getContent());
+//        oldSchedule.setAddress(reqPersonalScheduleDTO.getAddress());
+//
+//        return oldSchedule.toResPersonalScheduleDTO();
+//
+//    }
+//
+//    public ResPersonalScheduleDTO deleteSchedule(Long personalScheduleId) {
+//
+//        // id로 조회
+//        PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
+//
+//        // delete
+//        oldSchedule.setUseYn(false);
+//
+//        return oldSchedule.toResPersonalScheduleDTO();
+//
+//    }
+
+//    public List<ResPersonalScheduleDTO> getTodaySchedules()
 
 }
