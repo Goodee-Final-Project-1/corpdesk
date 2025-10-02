@@ -487,9 +487,20 @@ document.getElementById("createRoomConfirmBtn").addEventListener("click", () => 
 		.then(res => res.json())
 		.then(chatRoom => {
 			$("#createRoomStep2").modal("hide");
-			chatRoom.chatRoomTitle = data.chatRoomTitle;
 			chatRoom.imgPath = "/images/group_profile.png";
-			createLi(chatRoom);
+			console.log("방아이디"+chatRoom.chatRoomId);
+			//createLi(chatRoom);
+			
+				console.log("방아이디"+chatRoom.chatRoomId);
+			// 방금 만든 li 가져오기  제목 설정 해줌
+			/*	const chatList = document.querySelector(".chatList .simplebar-content");
+				const newChat = chatList.querySelector(`.chatListOne[data-roomId="${chatRoom.chatRoomId}"]`);
+
+				if (newChat) {
+				 newChat.querySelector(".username").textContent=data.chatRoomTitle;
+				}
+*/
+
 			const pop = window.open("/chat/room/detail/" + chatRoom.chatRoomId, "room_no_" + chatRoom.chatRoomId, "width=700,height=650 ,left=600, top=100");
 			if (pop) {
 				pop.focus();

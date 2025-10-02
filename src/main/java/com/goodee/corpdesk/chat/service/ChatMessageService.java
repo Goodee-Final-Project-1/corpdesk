@@ -162,21 +162,29 @@ public class ChatMessageService {
 	    //  방 전체 브로드캐스트
 	      
 	        //메세지 전송자 이름, 이미지 
-	        String viewName = getUserNameDepPos(principal.getName());
-	        String senderImg = getUserImgPath(principal.getName());
+	        String baseViewName = getUserNameDepPos(principal.getName());
+	        String baseImg = getUserImgPath(principal.getName());
 	        
 	        
-	        saveMsg.setViewName(viewName);
-	        saveMsg.setImgPath(senderImg);
+	        saveMsg.setViewName(baseViewName);
+	        saveMsg.setImgPath(baseImg);
 	        messagingTemplate.convertAndSend("/sub/chat/room/" + msg.getChatRoomId(), saveMsg);
+	        
+	        if(chatRoomType.equals("room")) {
+	        	baseViewName = chatRoomService.getRoomTitle(saveMsg.getChatRoomId());
+	        	baseImg="/images/group_profile.png";
+	        }
 
+	        //람다식 안에서는 재할당된 변수를 사용할수 없어서 초기화한 변수만 사용하기위함
+	        String viewName= baseViewName;
+	        String img = baseImg;
 	    //  개인 알림 전송
 	    // 그룹 , 개인 전부 여기서 보내줌
 	   participants.forEach(p->{
 		   String username = p.getEmployeeUsername();
 	        Long chatRoomId = p.getChatRoomId();
 	        saveMsg.setViewName(viewName);
-	        saveMsg.setImgPath(senderImg);
+	        saveMsg.setImgPath(img);
 
 	        if (!chatSessionTracker.isUserFocused(chatRoomId, username)) {
 	        	saveMsg.setFocused(false);
