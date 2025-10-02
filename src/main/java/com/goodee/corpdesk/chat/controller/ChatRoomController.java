@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatRoom;
 import com.goodee.corpdesk.chat.service.ChatRoomService;
@@ -47,9 +49,17 @@ public class ChatRoomController {
 	
 	
 	@GetMapping("detail/{roomId}")
-	public String chatRoomDetail(@PathVariable(value = "roomId") Long roomId , Model model) {
-		model.addAttribute("roomId",roomId);
+	public String chatRoomDetail(@PathVariable(value = "roomId") Long roomId , Model model , Principal principal) throws JsonProcessingException {
+		RoomData roomData = new RoomData();
+		roomData = chatRoomService.chatRoomDetail(roomId,principal);
 		
+		//json으로 변환
+		ObjectMapper mapper = new ObjectMapper();
+		String JsonRoomData = mapper.writeValueAsString(roomData);
+		List<Employee> employeeList = employeeService.getActiveEmployees();
+		model.addAttribute("roomData",JsonRoomData);
+		model.addAttribute("employeeList",employeeList);
+		model.addAttribute("roomDataEl",roomData);
 		return "Chat/chat_page";
 	}
 	
@@ -60,39 +70,20 @@ public class ChatRoomController {
 		Long roomId =chatRoomService.createRoom(roomdata, principal);
 		RoomData chatRoom = new RoomData();
 		chatRoom.setChatRoomId(roomId);
-		chatRoom.setNotificationType("room");
-		//1대1 채팅일경우 채팅방 이름을 상대 이름으로 설정
-		if(roomdata.getChatRoomTitle()==null) {
-			//부서 직위 이름 꺼내오기
-			Map<String, Object> map;
-			map =employeeService.detail(principal.getName());
-			Employee emp = (Employee)map.get("employee");
-			Department department = (Department)map.get("department");
-			Position position = (Position)map.get("position");
-			String roomtitle = department.getDepartmentName()+" "+position.getPositionName()+" "+emp.getName();
-			
-			chatRoom.setChatRoomTitle(roomtitle);
-			chatRoom.setUnreadCount(0L);
-
-		}
-		
-		//상대방 구독 알림 보냄
-		for(int i = 0; i <roomdata.getUsernames().size();i++) {
-			simpMessagingTemplate.convertAndSendToUser(roomdata.getUsernames().get(i),"/queue/notifications" , chatRoom);
-		}
-		
-		//본인한테 구독 알림 보냄
-		if(roomdata.getUsernames().size()==1) {
-			Map<String, Object> map;
-			map =employeeService.detail(roomdata.getUsernames().getFirst());
-			Employee emp = (Employee)map.get("employee");
-			Department department = (Department)map.get("department");
-			Position position = (Position)map.get("position");
-			String roomtitle = department.getDepartmentName()+" "+position.getPositionName()+" "+emp.getName();
-			chatRoom.setChatRoomTitle(roomtitle);
-			simpMessagingTemplate.convertAndSendToUser(principal.getName(),"/queue/notifications" , chatRoom);
-		}
 
 		return chatRoom;
+	}
+	@GetMapping("out/{roomId}")
+	@ResponseBody
+	public boolean chatRoomOut(@PathVariable(value = "roomId") Long roomId,Principal principal) {
+		boolean result = chatRoomService.outRoom(roomId,principal);
+		return result;
+	}
+	
+	@PostMapping("inviteRoom")
+	@ResponseBody
+	public boolean inviteRoom(@RequestBody RoomData roomData) {
+		boolean result = chatRoomService.inviteRoom(roomData);
+		return result;
 	}
 }
