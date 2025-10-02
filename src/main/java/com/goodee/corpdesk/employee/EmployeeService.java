@@ -166,7 +166,6 @@ public class EmployeeService implements UserDetailsService {
         persisted.setPositionId(employeeFromForm.getPositionId());
         persisted.setHireDate(employeeFromForm.getHireDate());
         persisted.setAddress(employeeFromForm.getAddress());
-        persisted.setStatus(employeeFromForm.getStatus());
         persisted.setBirthDate(employeeFromForm.getBirthDate());
         persisted.setEnglishName(employeeFromForm.getEnglishName());
         persisted.setVisaStatus(employeeFromForm.getVisaStatus());

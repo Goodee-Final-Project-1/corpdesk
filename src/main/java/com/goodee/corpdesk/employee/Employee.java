@@ -115,7 +115,6 @@ public class Employee implements UserDetails {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 	private String address;
-	private String status; // 출근,퇴근,휴가,출근전
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate lastWorkingDay;
 
