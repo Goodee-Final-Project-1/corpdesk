@@ -22,7 +22,7 @@ public class BoardController {
   @Autowired
   private BoardService boardService;
 
-  // 공지 게시글 (departmentId = 0)
+  // 공지 게시글
   @GetMapping("/notice")
   public String noticeList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
                            Model model) {
@@ -56,16 +56,16 @@ public class BoardController {
   }
 
   // 내 부서 게시글 (departmentId = {departmentId})
-  @GetMapping("/me")
+  @GetMapping("/department")
   public String myDepartmentList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
                                  Model model) {
-    
+
     Page<Board> page = boardService.getMyDepartmentBoards(pageable);
     
     model.addAttribute("page", page);
     model.addAttribute("title", "부서 게시판");
     model.addAttribute("post", page.getContent());
-    model.addAttribute("writePath", "/board/me/write");
+    model.addAttribute("writePath", "/board/department/write");
     
     return "board/boardList";
   }
@@ -108,7 +108,7 @@ public class BoardController {
   }
 
   // 부서 글쓰기 폼
-  @GetMapping("/me/write")
+  @GetMapping("/department/write")
   public String departmentWriteForm(Model model) {
     
     model.addAttribute("title", "부서 글쓰기");
@@ -117,7 +117,7 @@ public class BoardController {
   }
 
   // 부서글 등록
-  @PostMapping("/me")
+  @PostMapping("/department")
   public String createDepartmentPost(Board board) {
     
     // departmentId가 null이면 Service에서 Authentication 기반으로 채움
@@ -183,7 +183,7 @@ public class BoardController {
 
     boardService.deletePost(boardId);
     
-    return "redirect:/board/me";
+    return "redirect:/board/department";
   }
 
 }

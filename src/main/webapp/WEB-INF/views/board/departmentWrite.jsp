@@ -20,7 +20,7 @@
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
 			<h2>부서 글쓰기</h2>
-      <form method="post" action="${pageContext.request.contextPath}/board/me">
+      <form method="post" action="${pageContext.request.contextPath}/board/department">
         <!-- departmentId는 비워두면 Service에서 Authentication 부서ID로 채움 -->
         <div style="margin-bottom:8px;">
           <label>제목</label><br/>
@@ -31,7 +31,7 @@
           <textarea name="content" rows="10" style="width:100%;" required></textarea>
         </div>
         <button type="submit">등록</button>
-        <a href="${pageContext.request.contextPath}/board/me">취소</a>
+        <a href="${pageContext.request.contextPath}/board/department">취소</a>
       </form>
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>

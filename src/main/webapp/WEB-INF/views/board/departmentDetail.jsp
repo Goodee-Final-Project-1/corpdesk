@@ -34,7 +34,7 @@
       </div>
 
       <div style="margin-top:16px;">
-        <a href="${pageContext.request.contextPath}/board/me">목록으로</a>
+        <a href="${pageContext.request.contextPath}/board/department">목록으로</a>
         <c:if test="${isOwner}">
           <a href="${pageContext.request.contextPath}/board/department/${post.boardId}/edit">수정</a>
           <form method="post" action="${pageContext.request.contextPath}/board/department/${post.boardId}/delete" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');">
