@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,14 +41,14 @@ public class BoardController {
 
   // 공지 게시글 상세 페이지
   @GetMapping("/notice/{boardId}")
-  public String noticeDetail(@PathVariable("boardId") Long boardId, Model model) {
+  public String noticeDetail(@PathVariable("boardId") Long boardId,
+                             @AuthenticationPrincipal(expression = "username") String currentUsername,
+                             Model model) {
     
     Board post = boardService.getBoardsDetailWithViewUp(boardId);
     model.addAttribute("post", post);
-    
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    boolean isOwner = auth != null && auth.isAuthenticated() && post.getUsername() != null
-                      && post.getUsername().equals(auth.getName());
+                      
+    boolean isOwner = currentUsername != null && currentUsername.equals(post.getUsername());
     
     model.addAttribute("isOwner", isOwner);
     model.addAttribute("title", "공지 게시글");
@@ -72,14 +73,14 @@ public class BoardController {
 
   // 부서 게시글 상세
   @GetMapping("/department/{boardId}")
-  public String departmentDetail(@PathVariable("boardId") Long boardId, Model model) {
+  public String departmentDetail(@PathVariable("boardId") Long boardId,
+                                 @AuthenticationPrincipal(expression = "username") String currentUsername,
+                                 Model model) {
     
     Board post = boardService.getBoardsDetailWithViewUp(boardId);
     model.addAttribute("post", post);
-    
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    boolean isOwner = auth != null && auth.isAuthenticated() && post.getUsername() != null
-                      && post.getUsername().equals(auth.getName());
+
+    boolean isOwner = currentUsername != null && currentUsername.equals(post.getUsername());
     
     model.addAttribute("isOwner", isOwner);
     model.addAttribute("title", "부서 게시글");
