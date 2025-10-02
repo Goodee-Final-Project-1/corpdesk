@@ -41,6 +41,10 @@ public class PersonalSchedule extends BaseEntity {
     public ResPersonalScheduleDTO toResPersonalScheduleDTO() {
         return ResPersonalScheduleDTO.builder()
             .personalScheduleId(personalScheduleId)
+            .scheduleName(scheduleName)
+            .scheduleDateTime(scheduleDateTime)
+            .content(content)
+            .address(address)
             .build();
     }
 
