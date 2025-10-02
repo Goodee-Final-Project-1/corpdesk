@@ -59,7 +59,7 @@ public class Employee implements UserDetails {
 
 	private String positionName;
 
-	@ColumnDefault("2")
+	@ColumnDefault("3")
 	private Integer roleId;
 
 	@ColumnDefault("1")

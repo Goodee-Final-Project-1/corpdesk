@@ -113,8 +113,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	SELECT
 	    e.username AS username,
 	    e.name AS name,
-	    d.department_name AS departmentName,
-	    p.position_name AS positionName,
+	    IFNULL(d.department_name, '-') AS departmentName,
+	    IFNULL(p.position_name, '-') AS positionName,
 	    r.role_name AS roleName
 	FROM employee e
 	LEFT JOIN department d ON e.department_id = d.department_id
