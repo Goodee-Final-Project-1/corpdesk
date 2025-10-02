@@ -33,6 +33,13 @@
 
       <div style="margin-top:16px;">
         <a href="${pageContext.request.contextPath}/board/notice">목록으로</a>
+        <c:if test="${isOwner}">
+          <a href="${pageContext.request.contextPath}/board/notice/${post.boardId}/edit">수정</a>
+          <form method="post" action="${pageContext.request.contextPath}/board/notice/${post.boardId}/delete" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <button type="submit">삭제</button>
+          </form>
+        </c:if>
       </div>
 			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
