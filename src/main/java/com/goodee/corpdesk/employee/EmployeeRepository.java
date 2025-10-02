@@ -9,6 +9,14 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
     @NativeQuery("""
@@ -69,6 +77,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	boolean existsByMobilePhone(String mobilePhone);
 
 	Optional<Employee> findByUsername(String username);
+	
+	List<Employee> findByDepartmentId(Integer departmentId);
+	
+	@Modifying
+	@Query("UPDATE Employee e SET e.departmentId = NULL, e.departmentName = NULL WHERE e.departmentId = :deptId")
+	void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
+
+	List<Employee> findByDepartmentIdAndUseYnTrue(Integer departmentId);
+
 
 
 
