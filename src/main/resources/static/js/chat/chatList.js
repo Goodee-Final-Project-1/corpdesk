@@ -388,7 +388,7 @@ document.getElementById("nextStepBtn").addEventListener("click", () => {
 
 });
 
-//이름으로 검색
+//초대 목록 이름으로 검색
 const namesearchBtn = document.querySelector(".namesearchBtn")
 namesearchBtn.addEventListener("click", () => {
 	const searchUserInputValue = document.getElementById("searchUserInput").value.trim();
@@ -406,7 +406,24 @@ namesearchBtn.addEventListener("click", () => {
 
 	})
 })
+//연락처 목록 이름으로 검색
+const contactBtn = document.querySelector(".contactBtn")
+contactBtn.addEventListener("click", () => {
+	const searchUserInputValue = document.getElementById("searchContactList").value.trim();
+	const participantList = document.getElementById("contactList")
+	const participantLi = participantList.querySelectorAll("li");
 
+	participantLi.forEach(li => {
+		const employeeName = li.querySelector(".employeeName").textContent.trim();
+		if (searchUserInputValue == "" || employeeName == searchUserInputValue) {
+			li.classList.remove("hidden");
+
+		} else {
+			li.classList.add("hidden");
+		}
+
+	})
+})
 
 
 //모달 닫힐때 원래 상태로 돌림

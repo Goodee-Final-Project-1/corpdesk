@@ -12,7 +12,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.goodee.corpdesk.chat.controller.ChatParticipantController;
+import com.goodee.corpdesk.chat.dto.ChatContact;
 import com.goodee.corpdesk.chat.dto.ChatMessageDto;
 import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
 import com.goodee.corpdesk.chat.dto.RoomData;
@@ -24,12 +25,14 @@ import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
 import com.goodee.corpdesk.chat.repository.ChatRoomRepository;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.position.entity.Position;
 
 @Service
 public class ChatRoomService {
+
 	@Autowired
     private ChatParticipantService chatParticipantService;
 	@Autowired
@@ -45,6 +48,9 @@ public class ChatRoomService {
 	@Autowired
 	private ChatSessionTracker chatSessionTracker;
 
+  
+	
+	
 
 	//유저이름으로 유저 이름 부서 직위 가져옴
 		public String getUserNameDepPos(String username) {
@@ -379,7 +385,7 @@ public class ChatRoomService {
 	}
 
 	@Transactional
-	public boolean inviteRoom(RoomData roomData) {
+	public boolean inviteRoom(RoomData roomData , Principal principal) {
 	    Optional<ChatRoom> optionalRoom = chatRoomRepository.findByChatRoomId(roomData.getChatRoomId());
 	    
 	    if (optionalRoom.isEmpty()) {
@@ -391,17 +397,21 @@ public class ChatRoomService {
 	    // 1대1 → room 전환
 	    if (chatRoom.getChatRoomTitle() == null) {
 	        chatRoom.setChatRoomTitle(roomData.getChatRoomTitle());
+	        chatParticipantRepository.updateAllRoomUseYnTrue(roomData.getChatRoomId());
 	    }
 	    chatRoom.setChatRoomType("room");
 	    
 	    chatRoomRepository.flush();
-	    RoomData chatRoomDto = chatRoom.changeToRoomData();
-	   
 	    
 	    //해당방의 모든 사람 불러옴 전에 초대된적이있으면 useYn만 바꿔주면 되기때문에
 	   
 	    roomData.getUsernames().forEach(u->{
-	    	 Long beforeInviteMessageId = chatMessageRepository.findTopByChatRoomIdOrderByMessageIdDesc(roomData.getChatRoomId()).getMessageId();
+	    	ChatMessage lastMsg = chatMessageRepository.findTopByChatRoomIdOrderByMessageIdDesc(roomData.getChatRoomId());
+	    	Long beforeInviteMessageId= null;
+	    	//1대1 개설후 아무 메세지 안보내고 바로 초대할경
+	    	if(lastMsg !=null) {
+	    		beforeInviteMessageId=lastMsg.getMessageId();
+	    	}
 	    	// 해당 유저 정보에 방정보 저장
 		    	ChatParticipant cp = chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(roomData.getChatRoomId(), u);
 		    	if(cp!=null) {
@@ -429,7 +439,7 @@ public class ChatRoomService {
 		    saveMsg.setViewName(chatRoom.getChatRoomTitle());
 		    saveMsg.setNotificationType("invite");
 		    saveMsg.setImgPath("/images/group_profile.png");
-		   
+		    saveMsg.setRoomName(getUserNameDepPos(u));
 		    messagingTemplate.convertAndSend("/sub/chat/room/"+roomData.getChatRoomId(),saveMsg);
 		    
 		    
@@ -453,6 +463,34 @@ public class ChatRoomService {
 	  
 	    
 	    return true; 
+	}
+
+
+	public List<ChatContact> getContactList() {
+		
+		List<ChatContact> contactList= new ArrayList<>();
+		List<Employee> emp = employeeService.getActiveEmployees();		
+		emp.forEach(e->{
+			if(!e.getUsername().equals("admin")) {
+				ChatContact contact = new ChatContact();
+				contact.setName(e.getName());
+				contact.setDepartmentName(e.getDepartmentName());
+				contact.setPositionName(e.getPositionName());
+				contact.setUsername(e.getUsername());
+				Optional<EmployeeFile> empF = employeeService.getEmployeeFileByUsername(e.getUsername());
+				if(empF.isPresent()) {
+					contact.setImgPath(empF.get().getSaveName()+"."+empF.get().getExtension());				
+				}else {
+					contact.setImgPath("/images/default_profile.jpg");
+				}
+				contactList.add(contact);
+			}
+			
+			
+			
+		});
+		
+		return contactList;
 	}
 
 	

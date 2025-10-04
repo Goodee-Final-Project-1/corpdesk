@@ -168,6 +168,7 @@ public class ChatMessageService {
 	        
 	        saveMsg.setViewName(baseViewName);
 	        saveMsg.setImgPath(baseImg);
+	        
 	        messagingTemplate.convertAndSend("/sub/chat/room/" + msg.getChatRoomId(), saveMsg);
 	        
 	        if(chatRoomType.equals("room")) {
