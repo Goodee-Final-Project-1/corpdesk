@@ -28,6 +28,8 @@ import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.notification.dto.NotificationDto;
+import com.goodee.corpdesk.notification.service.NotificationService;
 import com.goodee.corpdesk.position.entity.Position;
 
 @Service
@@ -47,7 +49,8 @@ public class ChatRoomService {
 	private SimpMessagingTemplate messagingTemplate;
 	@Autowired
 	private ChatSessionTracker chatSessionTracker;
-
+	@Autowired
+	private NotificationService notificationService;
   
 	
 	
@@ -62,7 +65,20 @@ public class ChatRoomService {
 	        return userNameDepPos;
 			
 		}
-	
+	//개인 이미지
+		public String getUserImgPath(String username) {
+			Optional<EmployeeFile> empFileOp = employeeService.getEmployeeFileByUsername(username);
+			if (empFileOp.isPresent()) {
+				EmployeeFile empFile = empFileOp.get();
+				if (empFile != null && empFile.getUseYn()) {
+					return "/files/profile/" + empFile.getSaveName() + "." + empFile.getExtension();
+				} else {
+					return "/images/default_profile.jpg";
+				}
+			} else {
+				return "/images/default_profile.jpg";
+			}
+		}
 	
 	//해당 유저의 모든 채팅방 목록을 불러옴
 	public List<RoomData> getChatRoomList(String username) {
@@ -281,6 +297,7 @@ public class ChatRoomService {
 			    participant.forEach(p->{
 			    	  if (!chatSessionTracker.isUserFocused(roomId, p.getEmployeeUsername())) {
 			    		  saveMsg.setFocused(false);
+			    		  notificationService.saveNotification(saveMsg.getMessageId(),"message",p.getEmployeeUsername());
 			          } else {
 			        	  saveMsg.setFocused(true);
 			          }
@@ -447,6 +464,7 @@ public class ChatRoomService {
 			  //개인 채팅목록에 알림을 보내줌
 			    participant.forEach(p->{
 			    	  if (!chatSessionTracker.isUserFocused(roomData.getChatRoomId(), p.getEmployeeUsername())) {
+			    		  notificationService.saveNotification(saveMsg.getMessageId(),"message",p.getEmployeeUsername());
 			    		  saveMsg.setFocused(false);
 			          } else {
 			        	  saveMsg.setFocused(true);
@@ -491,6 +509,30 @@ public class ChatRoomService {
 		});
 		
 		return contactList;
+	}
+
+	//읽지 않은 메세지의 세부 정보들 가져옴 
+	public List<ChatMessageDto> getChatNotificationList(String username) {
+		List<ChatMessageDto> list =new ArrayList<>();
+		List<NotificationDto> notificationList=notificationService.getMessageNotification(username);
+		
+		notificationList.forEach(nl->{
+		ChatMessageDto msg =chatMessageRepository.findByMessageId(nl.getRelatedId()).toChatMessageDto();
+		
+		String roomTitle=null;
+		if(getChatRoomType(msg.getChatRoomId()).equals("room")) {
+			roomTitle = getRoomTitle(msg.getChatRoomId());
+			msg.setImgPath("/images/group_profile.png");
+		}else {
+			roomTitle = getUserNameDepPos(msg.getEmployeeUsername());
+			msg.setImgPath(getUserImgPath(msg.getEmployeeUsername()));
+			
+		}
+		msg.setChatRoomId(msg.getChatRoomId());
+		msg.setViewName(roomTitle);
+		list.add(msg);
+		});
+		return list;
 	}
 
 	

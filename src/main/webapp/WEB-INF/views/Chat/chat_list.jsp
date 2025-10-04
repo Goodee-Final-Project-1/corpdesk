@@ -134,6 +134,16 @@
 </div>
 </div>
 
+<c:forEach items ="${notificationList}" var="notification">
+
+	<p>${notification.imgPath}</p>
+	<p>${notification.viewName}</p>
+	<p>${notification.messageContent}</p>
+	<p>${notification.sentAt}</p>
+	<p>${notification.chatRoomId}</p>
+
+
+</c:forEach>
 
 
 <!-- Step 1: 참여자 선택 모달 -->
@@ -179,6 +189,8 @@
     </div>
   </div>
 </div>
+
+
 
 <!-- Step 2: 방 제목 입력 모달 -->
 <div class="modal fade" id="createRoomStep2" tabindex="-1" role="dialog" aria-labelledby="step2Label" aria-hidden="true">

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goodee.corpdesk.chat.dto.ChatContact;
+import com.goodee.corpdesk.chat.dto.ChatMessageDto;
 import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatRoom;
 import com.goodee.corpdesk.chat.service.ChatRoomService;
@@ -41,14 +42,12 @@ public class ChatRoomController {
 	public String chatRoomList(Principal principal ,Model model) {
 			String username= principal.getName();
 			List<RoomData> roomList= chatRoomService.getChatRoomList(username);
-			
 			List<ChatContact> contactList = chatRoomService.getContactList();
 			contactList.sort((o1, o2) ->{
 				return o1.getName().compareTo(o2.getName());
 			});
 			model.addAttribute("roomList", roomList);
 			model.addAttribute("contactList",contactList);
-		
 		return "Chat/chat_list";
 	}
 	

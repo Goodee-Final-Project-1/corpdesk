@@ -11,11 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.goodee.corpdesk.chat.dto.ChatMessageDto;
 import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
-import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatMessage;
 import com.goodee.corpdesk.chat.entity.ChatParticipant;
 import com.goodee.corpdesk.chat.repository.ChatMessageRepository;
@@ -24,10 +22,12 @@ import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.notification.service.NotificationService;
 import com.goodee.corpdesk.position.entity.Position;
 
 @Service
 public class ChatMessageService {
+
 
 	@Autowired
 	private ChatMessageRepository chatMessageRepository;
@@ -42,7 +42,8 @@ public class ChatMessageService {
 	private SimpMessagingTemplate messagingTemplate;
 	@Autowired
 	private ChatSessionTracker chatSessionTracker;
-
+	@Autowired
+	private NotificationService notificationService;
 	// 유저이름으로 유저 이름 부서 직위 가져옴
 	public String getUserNameDepPos(String username) {
 		Map<String, Object> map = employeeService.detail(username);
@@ -188,7 +189,9 @@ public class ChatMessageService {
 	        saveMsg.setImgPath(img);
 
 	        if (!chatSessionTracker.isUserFocused(chatRoomId, username)) {
+	        	//보고있지 않으면 DB 에도 알림을 저장함
 	        	saveMsg.setFocused(false);
+	        	notificationService.saveNotification(saveMsg.getMessageId(),"message",username);
 	        } else {
 	        	saveMsg.setFocused(true);
 	        }
