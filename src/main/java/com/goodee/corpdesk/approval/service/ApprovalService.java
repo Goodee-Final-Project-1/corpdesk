@@ -21,6 +21,8 @@ import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.goodee.corpdesk.approval.dto.ApprovalDTO;
@@ -95,27 +97,27 @@ public class ApprovalService {
     // PROCESSED: 결재가 승인됨
     // NOT_FOUND: approvalId에 해당하는 Approval이 없음
     // Exception: update 실패
-	public String deleteApproval(Long approvalId) throws Exception {
-		
+	public ResponseEntity<String> deleteApproval(Long approvalId) throws Exception {
+
 		// 1. 결재 use_yn false로 update
 		Optional<Approval> result = approvalRepository.findById(approvalId); // id로 결재 정보를 조회해 옴
 
         // 삭제할 결재 정보가 없으면 이후의 삭제 로직을 수행할 필요 없으므로 바로 return
-		if (result.isEmpty()) return "NOT_FOUND";
-		
+		if (result.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);;
+
 		// 삭제할 결재 정보가 있으면 삭제 로직 진행...
 		// 결재가 완료되었는가? (결재 상태가 y/n인가?)
 		// -> true -> 결재 취소 거부
 		// -> false -> 결재 취소 진행
 		Approval approval = result.get();
-		if (approval.getStatus() == 'Y' || approval.getStatus() == 'N') return "DENIED";
+		if (approval.getStatus() == 'Y' || approval.getStatus() == 'N') return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		else approval.setUseYn(false);
 		
 		// 2. 결재자들 use_yn false로 update
 		List<Approver> approverList = approverRepository.findAllByApprovalId(approvalId);
         approverList.forEach(approver -> approver.setUseYn(false));
 		
-		return "PROCESSED";
+		return new ResponseEntity<>(HttpStatus.OK);
 	} 
 	
     // 해당 결재의 결재자 정보의 approve_yn 정보를 approveYn값으로 수정한 다음,
