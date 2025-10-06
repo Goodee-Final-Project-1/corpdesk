@@ -2,6 +2,8 @@ package com.goodee.corpdesk.file.dto;
 
 import java.io.File;
 
+import com.goodee.corpdesk.common.BaseEntity;
+import com.goodee.corpdesk.file.entity.ApprovalFile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,4 +28,14 @@ public class FileDTO {
 		this.saveName = saveName;
 		this.extension = extension;
 	}
+
+    public ApprovalFile toApprovalFile() {
+        return ApprovalFile.builder()
+            .fileId(fileId)
+            .oriName(oriName)
+            .saveName(saveName)
+            .extension(extension)
+            .build();
+    }
+
 }
