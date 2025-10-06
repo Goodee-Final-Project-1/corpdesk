@@ -8,6 +8,7 @@
 	<meta charset="UTF-8">
 	<title>Insert title here</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
+    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script defer type="text/javascript" src="/js/approval/approval.js"></script>
@@ -207,7 +208,7 @@
               <div>
 						  	<button type="button" class="btn btn-info mr-1 btn-submit" id="requestApproval">결재 요청</button>
 						  	<button type="button" class="btn btn-outline-info mr-1 btn-submit" id="tempSave">임시저장</button>
-							  <button type="button" class="btn btn-light" id="btnCancel">취소</button>
+							  <button type="button" class="btn btn-light" id="btnCancel" onclick="location.href='/approval/list'">취소</button>
               </div>
               <div>
                 <button data-bs-toggle="modal" data-bs-target="#selectApproverModal" id="selectApprover" type="button" class="btn btn-block btn-primary"><i class="mdi mdi-plus mr-1"></i>결재선 지정</button>
@@ -302,6 +303,14 @@
               </c:choose>
             </form>
             <%--  --%>
+
+            <%-- 첨부파일 --%>
+            <div class="form-group">
+                <label for="file" class="form-label mt-4">첨부파일</label>
+                <%-- multiple 속성: 태그 하나로 여러 파일을 업로드할 수 있도록 함 --%>
+                <input type="file" class="filepond" name="file" id="file" multiple>
+            </div>
+
 						<!--  -->
             </div>
 					
@@ -317,5 +326,8 @@
 	<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 	
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
+
+<script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+
 </html>
 

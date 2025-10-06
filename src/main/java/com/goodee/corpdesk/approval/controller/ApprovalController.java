@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.approval.controller;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
 import com.goodee.corpdesk.approval.service.ApprovalService;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Controller
@@ -77,11 +79,14 @@ public class ApprovalController {
 	// 결재 요청 
 	@PostMapping("")
     @ResponseBody
-	public ResApprovalDTO submit(ReqApprovalDTO reqApprovalDTO, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
+	public ResApprovalDTO submit(ReqApprovalDTO reqApprovalDTO
+                                 , MultipartFile[] files
+                                 , @AuthenticationPrincipal UserDetails userDetails) throws Exception {
 
 		String modifiedBy = userDetails.getUsername();
+        log.warn("files: {}", Arrays.stream(files).toList());
 
-		return approvalService.createApproval(reqApprovalDTO, modifiedBy);
+		return approvalService.createApproval(reqApprovalDTO, files, modifiedBy);
 		
 	}
 	
