@@ -267,8 +267,10 @@ public class EmployeeService implements UserDetailsService {
 
     public Map<String, Object> detail(String username) {
         Employee employee = employeeRepository.findById(username).orElseThrow();
-        Department department = departmentRepository.findById(employee.getDepartmentId()).orElse(null);
-        Position position = positionRepository.findById(employee.getPositionId()).orElse(null);
+		Department department = null;
+		if(employee.getDepartmentId() != null) department = departmentRepository.findById(employee.getDepartmentId()).orElse(null);
+        Position position = null;
+		if(employee.getPositionId() != null) position = positionRepository.findById(employee.getPositionId()).orElse(null);
 
         Map<String, Object> map = new HashMap<>();
         map.put("employee", employee);
