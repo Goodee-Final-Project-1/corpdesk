@@ -3,6 +3,7 @@ package com.goodee.corpdesk.approval.service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,11 +17,16 @@ import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
+import com.goodee.corpdesk.file.FileManager;
+import com.goodee.corpdesk.file.dto.FileDTO;
+import com.goodee.corpdesk.file.entity.ApprovalFile;
+import com.goodee.corpdesk.file.repository.ApprovalFileRepository;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,12 +41,19 @@ import com.goodee.corpdesk.approval.repository.ApproverRepository;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
 @Transactional
 public class ApprovalService {
-	
+
+    @Value("${app.upload}")
+    private String upload;
+
+    @Value("${app.upload.approval}")
+    private String approvalPath;
+
 	@Autowired
 	private ApprovalRepository approvalRepository;
 	@Autowired
@@ -57,11 +70,15 @@ public class ApprovalService {
     private ObjectMapper objectMapper;
     @Autowired
     private VacationDetailRepository vacationDetailRepository;
+    @Autowired
+    private FileManager fileManager;
+    @Autowired
+    private ApprovalFileRepository approvalFileRepository;
 
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
 	// Exception: approval 혹은 approval의 조회 결과가 없거나 insert 실패
-	public ResApprovalDTO createApproval(ReqApprovalDTO reqApprovalDTO, String modifiedBy) throws Exception {
+	public ResApprovalDTO createApproval(ReqApprovalDTO reqApprovalDTO, MultipartFile[] files, String modifiedBy) throws Exception {
 		
 		// 1. 결재 내용에 insert
 		Approval approval = reqApprovalDTO.toApprovalEntity();
@@ -70,9 +87,26 @@ public class ApprovalService {
 
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
 
-		// 2. 결재자에 insert
-		log.warn("{}", reqApprovalDTO.getApproverDTOList());
+        // 2. 파일 저장
+        if (files != null && files.length > 0) {
+            for (MultipartFile a : files) {
+                log.warn("file: {}", a.getName());
 
+                // a에 실질적으로 파일이 들어있지 않다면 파일 저장 로직을 진행하지 않음
+                if (a.getSize() <= 0) continue;
+
+                // 1. file을 HDD에 저장하고 saveName을 받아옴
+                FileDTO fileDTO = fileManager.saveFile(upload + approvalPath, a);
+                ApprovalFile approvalFile = fileDTO.toApprovalFile();
+                approvalFile.setApprovalId(approval.getApprovalId());
+                approvalFile.setModifiedBy(modifiedBy);
+
+                // 2. DB에 데이터 저장
+                approvalFileRepository.save(approvalFile);
+            }
+        }
+
+		// 3. 결재자에 insert
         // 결재자 정보가 없다면 바로 return
         if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) return resApprovalDTO;
 
@@ -84,10 +118,10 @@ public class ApprovalService {
 			// 만약 승인 순서가 1이 아니면 use_yn값을 false로 하여 insert
 			if(approver.getApprovalOrder() != 1) approver.setUseYn(false);
 
-			approver = approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
+			approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
 		
-		// 3. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
+		// 4. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
         return resApprovalDTO;
 		
 	}
