@@ -11,11 +11,14 @@
 <c:import url="/WEB-INF/views/include/head.jsp"/>
 <style>
 /* 기존 스타일 그대로 유지 */
-.headProfile{margin-top:70px;margin-bottom:70px;border:1px solid gray;padding:20px;flex-direction:row;display:flex;justify-content:flex-start;align-items:flex-start;gap:50px;}
+.headProfile{margin-top:70px;margin-bottom:70px;border:1px solid gray;padding:20px;align-items:stretch;gap:50px;}
 .headProfile .d-flex { flex-direction: column; }
-.info-container { display:flex; flex-direction:row; gap:50px; }
+.info-container { flex:1; width:100%;}
 .employeeInformation{flex-direction: column; flex-wrap: wrap; jusify-content: space-evenly; margin-bottom:90px; margin-top:20px;}
-.buttonBox{margin-top:50px; margin-left:600px;}
+.buttonBox{margin-top: 50px; 
+    display: flex; 
+    justify-content: center; 
+    gap: 10px;}
 .tabs{margin-bottom:30px;}
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -28,7 +31,7 @@
 <meta name="_csrf_header" content="${_csrf.headerName}" />
 
 </head>
-<body>
+
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
 <c:import url="/WEB-INF/views/include/sidebar.jsp"/>
 <c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
@@ -36,6 +39,8 @@
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 
 <!-- 사원 정보 폼 -->
+<div class="card card-default">
+<div class="card-body">
 <form:form method="post" modelAttribute="employee" action="/employee/edit" enctype="multipart/form-data">
 <form:hidden path="username" />
 
@@ -47,43 +52,65 @@
             <c:if test="${employeeFile != null and employeeFile.useYn}">
                 <c:set var="profileImageUrl" value="/files/profile/${employeeFile.saveName}.${employeeFile.extension}" />
             </c:if>
-            <img id="profileImage" src="${profileImageUrl}" alt="Profile Image" style="width:150px; height:150px; border-radius:50%; object-fit: cover;">
+            <img id="profileImage" src="${profileImageUrl}" alt="Profile Image" style="width:150px; height:150px; border-radius:50%; object-fit: cover; margin-left:25px;">
             <input type="file" id="profileImageInput" name="profileImageFile" style="display:none;" accept="image/*">
-            <div class="image-buttons" style="margin-top: 10px;">
+            <div class="image-buttons" style="margin-top: 50px;">
                 <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('profileImageInput').click()">사진 변경</button>
                 <button type="button" class="btn btn-danger btn-sm" onclick="deleteProfileImage()">사진 삭제</button>
             </div>
         </div>
         <div class="info-container d-flex">
-            <div>
-                이름: &nbsp;<form:input path="name" />
-                직원구분: &nbsp;<form:select path="employeeType">
-							    <form:option value="" label="선택하세요"/>
-							    <form:option value="정규" label="정규"/>
-							    <form:option value="계약" label="계약"/>
-							    <form:option value="외주" label="외주"/>
-							    <form:option value="파견" label="파견"/>
-							    <form:option value="파트" label="파트"/>
-							    <form:option value="기타" label="기타"/>
-							</form:select>
-                부서: &nbsp;<form:select path="departmentId">
-                        <form:option value="" label="부서를 선택하세요"/>
-                        <form:options items="${departments}" itemValue="departmentId" itemLabel="departmentName"/>
-                      </form:select><br/>
-             </div>
-             <div>
-                입사일: <form:input path="hireDate" type="date"/>
-                휴대전화: <form:input path="mobilePhone" />
-                직통번호: <form:input path="directPhone" /><br>
-                외부이메일: <form:input path="externalEmail"/>
-                직위: &nbsp;&nbsp;&nbsp;&nbsp;<form:select path="positionId">
-                    <form:option value="" label="직위를 선택하세요"/>
-                    <form:options items="${positions}" itemValue="positionId" itemLabel="positionName"/>
-                  </form:select><br/>
+	 		<div class="row">
+	 			<div class="col-md-3">
+				    이름<form:input path="name" class="form-control"/>
+				  </div>
+				  <div class="col-md-3">
+				    직원구분<form:select path="employeeType" class="form-control">
+				    		 <form:option value="" label="선택하세요"/>
+								<form:option value="정규" label="정규"/>
+								<form:option value="계약" label="계약"/>
+								<form:option value="외주" label="외주"/>
+								<form:option value="파견" label="파견"/>
+								<form:option value="파트" label="파트"/>
+								<form:option value="기타" label="기타"/>
+				    		</form:select>
+				  </div>
+				  <div class="col-md-3">
+				    부서<form:select path="departmentId" class="form-control">
+				    	<form:option value="" label="부서를 선택하세요"/>
+				          <form:options items="${departments}" itemValue="departmentId" itemLabel="departmentName"/>
+				    	</form:select>
+				  </div>
+			</div>	
+             <div class="row">
+             	<div class="col-md-3">
+                	입사일<form:input path="hireDate" type="date" class="form-control"/>
+                </div>
+                <div class="col-md-3">
+                	휴대전화<form:input path="mobilePhone" class="form-control"/>
+                </div>
+                <div class="col-md-3">
+                	직통번호<form:input path="directPhone" class="form-control"/>
+                </div>
               </div>
+              <div class="row">
+              	<div class="col-md-3">
+                외부이메일<form:input path="externalEmail" class="form-control"/>
+                </div>
+                  <div class="col-md-3">
+	                직위<form:select path="positionId" class="form-control">
+	                    <form:option value="" label="직위를 선택하세요"/>
+	                    <form:options items="${positions}" itemValue="positionId" itemLabel="positionName"/>
+	                  </form:select>
+                  </div>
+               </div>   
         </div>
-    </div>
-    
+     </div>
+    </div> 
+   </div> 
+  </div>  
+   <div class="card card-defalut"> 
+    <div class="card-body">
     <div class="tabs">
         <button type="button" class="tab-button active" data-tab="info">정보</button>
         <span>&nbsp;|&nbsp;</span>
@@ -95,34 +122,55 @@
         <span class="badge badge-dark">직원정보</span>
         <div class="employeeInformation d-flex">
             <div class="employeebox">
-                주민(외국인)번호: <form:input path="residentNumber"/>
-                국적: <form:input path="nationality"/>
-                체류자격: <form:input path="visaStatus"/><br/>
-                
-                영문이름: <form:input path="englishName"/>
-                성별: <form:select path="gender">
-                        <form:option value="M" label="남"/>
-                        <form:option value="F" label="여"/>
-                     </form:select>
-                생년월일: <form:input path="birthDate" type="date"/><br/>
-               
-                주소:<form:input path="address"/>
-                퇴사일자: <form:input path="lastWorkingDay" type="date"/>
+            	<div class="row">
+            		<div class="col-md-2">
+	                	주민(외국인)번호 <form:input path="residentNumber" class="form-control"/>
+	                </div>
+	                <div class="col-md-2">
+	                	국적 <form:input path="nationality" class="form-control"/>
+	                </div>
+	                <div class="col-md-2">
+	                	체류자격 <form:input path="visaStatus" class="form-control"/>
+	                </div>
+                </div>
+                <div class="row">
+                	<div class="col-md-2">
+	                	영문이름 <form:input path="englishName" class="form-control"/>
+	                </div>
+	                <div class="col-md-2">
+	                	성별 <form:select path="gender" class="form-control">
+	                        <form:option value="M" label="남"/>
+	                        <form:option value="F" label="여"/>
+	                     </form:select>
+	                </div>
+	                <div class="col-md-2">
+	                	생년월일 <form:input path="birthDate" type="date" class="form-control"/>
+	               	</div>
+                </div>
+               <div class="row">
+	               <div class="col-md-2">
+	                	주소<form:input path="address" class="form-control"/>
+	                </div>
+	                <div class="col-md-3">
+	                	퇴사일자 <form:input path="lastWorkingDay" type="date" class="form-control"/>
+	                </div>
+                </div>
             </div>
             
             <div class="buttonBox">
-                <input type="submit" value="수정" class="btn btn-info">
-                <button type="button" onclick="deleteEmployee('${employee.username}')" class="btn btn-info">삭제</button>
+                <input type="submit" value="수정" class="btn btn-primary">
+                <button type="button" onclick="deleteEmployee('${employee.username}')" class="btn btn-danger">삭제</button>
             </div>
         </div>
     </div>
-</div>
+
 </form:form>
 
 <!-- 출퇴근 탭 -->
 <div class="tab-content" id="attendance">
 
 	<!-- 출퇴근 추가 폼 -->
+
     <div class="mb-3">
         <label>구분</label>
         <select id="newWorkStatus" class="form-control" style="width:150px; display:inline-block;">
@@ -187,10 +235,14 @@
 			</tbody>
         </table>
     </form>
+   </div>
+  </div>
+ </div>
+ </div>
 </div>
-
-<a href="/employee/list" class="btn btn-info">목록으로</a>
-
+<div class="d-flex justify-content-center mt-4">
+<a href="/employee/list" class="btn btn-primary">목록으로</a>
+</div>
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
@@ -461,6 +513,4 @@ document.querySelectorAll(".updateAttendanceBtn").forEach(btn => attachUpdateEve
 
 </script>
 
-
-</body>
 </html>

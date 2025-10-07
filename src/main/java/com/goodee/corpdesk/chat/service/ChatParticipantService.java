@@ -20,7 +20,7 @@ public class ChatParticipantService {
 	private ChatMessageRepository chatMessageRepository;
 	
 	public List<ChatParticipant> participantList(Long chatRoomId) {
-		List<ChatParticipant> list = chatParticipantRepository.findAllByChatRoomId(chatRoomId);
+		List<ChatParticipant> list = chatParticipantRepository.findAllByChatRoomIdAndUseYnTrue(chatRoomId);
 		return list;
 	}
 
