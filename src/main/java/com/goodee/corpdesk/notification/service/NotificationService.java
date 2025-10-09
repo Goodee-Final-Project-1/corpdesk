@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.notification.dto.NotificationDto;
 import com.goodee.corpdesk.notification.entity.Notification;
 import com.goodee.corpdesk.notification.repository.NotificationRepository;
@@ -30,7 +31,12 @@ public class NotificationService {
 		
 		return notificationDto;
 	}
-	
+	// 읽지 않은 '결재' 알림 조회
+	public List<ResApprovalDTO> getApprovalNotificationList(String username) {
+		List<Notification> notification =  notificationRepository.findByNotificationTypeAndUsernameAndIsReadFalseOrderByRelatedIdDesc("approval",username);
+		
+		return null;
+	}
 	
 	// 특정 알림 읽음 처리 및 정보
 	public NotificationDto notificationSelect(Long relatedId ,String notificationType , String username) {
@@ -47,6 +53,12 @@ public class NotificationService {
 		return result;
 	
 	}
+	//채팅방 하나의 메세지 전부 읽음 처리
+	public int setNotificationOneRoomReadAll(Long chatRoomId , String username) {
+		int result= notificationRepository.updateOneRoomAllReadTrue(chatRoomId,username);
+		return result;
+	
+	}
 	//알림 저장
 	public Notification saveNotification(Long relatedId ,String notificationType , String username) {
 		Notification notification = Notification.builder()
@@ -56,4 +68,7 @@ public class NotificationService {
 				.build();
 		return notificationRepository.save(notification);
 	}
+
+
+	
 }
