@@ -63,8 +63,13 @@
 	</div>
 	<div class="card-body">
 		<div id="chart1"></div>
-		<div>
-			<div id="chart2"></div>
+		<div class="row">
+			<div class="col-3">
+				<div id="chart2"></div>
+			</div>
+			<div class="col-3">
+				<div id="chart3"></div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -75,6 +80,7 @@
 
 <script src="/js/stats/chart1.js"></script>
 <script src="/js/stats/chart2.js"></script>
+<script src="/js/stats/chart3.js"></script>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>

@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-	const options2 = {
+	const options3 = {
 		title: {
-			text: '근속기간 통계',
+			text: '나이 통계',
 			align: 'center',
 			style: {
 				fontSize: '22px',
@@ -17,21 +17,21 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	};
 
-	const chart2 = new ApexCharts(document.querySelector("#chart2"), options2);
-	chart2.render();
+	const chart3 = new ApexCharts(document.querySelector("#chart3"), options3);
+	chart3.render();
 
-	async function getChart2() {
+	async function getChart3() {
 		try {
-			const response = await fetch('/api/stats/chart2', {
+			const response = await fetch('/api/stats/chart3', {
 				method: 'POST',
 			});
 			if (!response.ok) throw new Error('수신 오류');
 			const data = await response.json();
 
-			// console.log(data);
+			console.log(data);
 
-			chart2.updateSeries(data.count);
-			chart2.updateOptions({
+			chart3.updateSeries(data.count);
+			chart3.updateOptions({
 				labels: data.diff,
 			})
 
@@ -40,6 +40,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	}
 
-	getChart2();
+	getChart3();
 
 });

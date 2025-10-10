@@ -35,7 +35,12 @@ public class StatsApiController {
 	}
 
 	@PostMapping("/chart2")
-	public List<Long> list2() {
+	public Map<String, List> list2() {
 		return statsService.list2();
+	}
+
+	@PostMapping("/chart3")
+	public Map<String, List> list3() {
+		return statsService.list3();
 	}
 }

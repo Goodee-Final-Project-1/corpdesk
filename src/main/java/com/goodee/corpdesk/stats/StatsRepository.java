@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.NativeQuery;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface StatsRepository extends JpaRepository<Employee, String> {
 
@@ -71,16 +72,32 @@ public interface StatsRepository extends JpaRepository<Employee, String> {
 
 	@NativeQuery("""
 	WITH sub AS (
-		SELECT username, TIMESTAMPDIFF(YEAR, IFNULL(hire_date, NOW()), IFNULL(last_working_day, NOW())) AS diff
+		SELECT username, TIMESTAMPDIFF(YEAR, hire_date, IFNULL(last_working_day, NOW())) AS diff
 		FROM employee
 	)
-	SELECT COUNT(e.username) AS count
+	SELECT diff, COUNT(diff) AS count
 	FROM employee e
 	JOIN sub s ON e.username = s.username
 	GROUP BY diff
+	HAVING diff IS NOT NULL
 	ORDER BY diff ASC
 """)
-	List<Long> countAllServicePeriod();
+	List<Map<String, Long>> countAllServicePeriod();
+
+
+	@NativeQuery("""
+	WITH sub AS (
+		SELECT username, TIMESTAMPDIFF(YEAR, birth_date, NOW()) AS diff
+		FROM employee
+	)
+	SELECT diff, COUNT(diff) AS count
+	FROM employee e
+	JOIN sub s ON e.username = s.username
+	GROUP BY diff
+	HAVING diff IS NOT NULL
+	ORDER BY diff ASC
+""")
+	List<Map<String, Long>> countAllAge();
 }
 
 
