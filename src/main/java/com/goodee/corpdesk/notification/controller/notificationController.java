@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.chat.dto.ChatMessageDto;
 import com.goodee.corpdesk.chat.service.ChatRoomService;
+import com.goodee.corpdesk.notification.dto.NotificationDto;
 import com.goodee.corpdesk.notification.service.NotificationService;
 
 
@@ -28,9 +29,9 @@ public class notificationController {
 			return;
 		}
 		List<ChatMessageDto> msgNotificationList=  chatRoomService.getChatNotificationList(principal.getName());
-		List<ResApprovalDTO> approvalNotificationList = notificationService.getApprovalNotificationList(principal.getName());
+		List<NotificationDto> approvalNotificationList = notificationService.getApprovalNotificationList(principal.getName());
 		model.addAttribute("msgNotificationList",msgNotificationList);
 		model.addAttribute("approvalNotificationList",approvalNotificationList);
-		
+//		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~`"+approvalNotificationList.getFirst());
 	}
 }

@@ -16,11 +16,16 @@ import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
+import com.goodee.corpdesk.notification.entity.Notification;
+import com.goodee.corpdesk.notification.service.NotificationService;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
+
+import org.apache.logging.log4j.message.SimpleMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.goodee.corpdesk.approval.dto.ApprovalDTO;
@@ -55,6 +60,10 @@ public class ApprovalService {
     private ObjectMapper objectMapper;
     @Autowired
     private VacationDetailRepository vacationDetailRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private NotificationService notificationService;
 
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
@@ -80,8 +89,13 @@ public class ApprovalService {
 			approver.setModifiedBy(modifiedBy);
 			
 			// 만약 승인 순서가 1이 아니면 use_yn값을 false로 하여 insert
-			if(approver.getApprovalOrder() != 1) approver.setUseYn(false);
-
+			if(approver.getApprovalOrder() != 1) {approver.setUseYn(false);
+			}else {
+				Notification n = notificationService.saveApprovalNotification(approval.getApprovalId(),
+						"approval", "새로운 결재 요청이 있습니다.",approver.getUsername());
+				messagingTemplate.convertAndSendToUser(approver.getUsername(), "/queue/notifications",n );
+			}
+			
 			approver = approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
 		
@@ -108,13 +122,33 @@ public class ApprovalService {
 		// -> true -> 결재 취소 거부
 		// -> false -> 결재 취소 진행
 		Approval approval = result.get();
-		if (approval.getStatus() == 'Y' || approval.getStatus() == 'N') return "DENIED";
+		if (approval.getStatus() == 'Y' || approval.getStatus() == 'N') {
+			
+			return "DENIED";
+		}
 		else approval.setUseYn(false);
 		
 		// 2. 결재자들 use_yn false로 update
 		List<Approver> approverList = approverRepository.findAllByApprovalId(approvalId);
+	     
+	     // (추가) 현재 결재중인 결재자에게 알림 전송
+	        if (approval.getStatus() == 'W') {
+	        	approverList.forEach(approver->{
+	        		if(approver.getUseYn()) {
+	        			 // DB 알림 저장
+		                Notification n=  notificationService.saveApprovalNotification(approvalId, "approval",approver.getUsername(),
+		                       "결재 문서가 기안자에 의해 취소되었습니다.");
+		                   // WebSocket 실시간 전송
+		                   messagingTemplate.convertAndSendToUser(approver.getUsername(),"/queue/notifications",n);
+	        		}
+	        	});
+	        }
         approverList.forEach(approver -> approver.setUseYn(false));
 		
+        
+    
+        
+        
 		return "PROCESSED";
 	} 
 	
@@ -156,6 +190,7 @@ public class ApprovalService {
 			
 			// 결재 상태 수정
 			approval.setStatus('N');
+			//알림전송
 		}
 		// 결재자가 승인을 했다면 (approveYn = y) 아래 2번 로직 진행
 		if(approveYn.equalsIgnoreCase("Y")) {

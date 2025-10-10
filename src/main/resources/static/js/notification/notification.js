@@ -20,7 +20,7 @@ stompClient.connect({}, function(frame) {
 
 
 
-//메세지 알림 시간 
+//알림 시간 
 const notificationTime = document.querySelectorAll(".notificationTime");
 notificationTime.forEach(t=>{
 	t.textContent=formatTime(t.getAttribute("data-notificationTime"));

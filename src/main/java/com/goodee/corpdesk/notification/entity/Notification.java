@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.notification.entity;
 
+import org.springframework.data.annotation.CreatedBy;
+
 import com.goodee.corpdesk.common.BaseEntity;
 import com.goodee.corpdesk.notification.dto.NotificationDto;
 
@@ -36,6 +38,7 @@ public class Notification extends BaseEntity{
 	    @Builder.Default()
 	    @Column(nullable = false)
 	    private Boolean isRead = false;
+	    private String content;
 	    
 	 public NotificationDto ChangeToDto() {
 		 return NotificationDto.builder()
@@ -44,6 +47,8 @@ public class Notification extends BaseEntity{
 		 			 .isRead(isRead)
 		 			 .username(username)
 		 			 .relatedId(relatedId)
+		 			 .content(content)
+		 			 .createdAt(getCreatedAt())
 		 			 .build();
 		 
 	 }

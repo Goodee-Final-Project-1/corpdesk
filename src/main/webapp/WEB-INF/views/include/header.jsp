@@ -122,25 +122,27 @@
                 </div>
                 <!--  -->
                 
-                <!-- 기타 알림 -->
+                <!-- 결재 알림 -->
                 <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="contact-tab">
-
-                  <div class="media media-sm p-4 mb-0 notification ">
+                  <c:forEach items="${approvalNotificationList}" var="notification">
+                    <div class="media media-sm p-4 mb-0 notification approvalNotification" data-approvalId="${notification.relatedId}" style="cursor: pointer;">
                     <div class="media-sm-wrapper bg-info-dark">
-                      <a href="/employee/detail">
-                        <i class="mdi mdi-account-multiple-check"></i>
-                      </a>
+                        <i class="mdi mdi-bell"></i>
                     </div>
                     <div class="media-body">
-                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
+                    
                         <span class="title mb-0">Add request</span>
-                        <span class="discribe">Add Dany Jones as your contact.</span>
+                        <span class="discribe">${notification.content}</span>
                         <span class="time">
-                          <time>6 hrs ago</time>...
+                          <time class="notificationTime" data-notificationTime="${notification.createdAt}"></time>...
                         </span>
-                      </a>
+                   
                     </div>
                   </div>
+
+
+                  </c:forEach>
+                  
 
                 </div>
               	<!--  -->
