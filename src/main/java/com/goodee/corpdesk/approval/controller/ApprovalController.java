@@ -33,24 +33,29 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "/approval/**")
 public class ApprovalController {
 
+	@Value("${cat.approval}")
+	private String cat;
+    @Value("${app.upload.approval}")
+    private String approvalPath;
+
+    @ModelAttribute("cat")
+	public String getCat() {
+		return cat;
+	}
+    @ModelAttribute("approvalPath")
+    public String getApprovalPath() {
+        return approvalPath;
+    }
+
     @Autowired
     private ApprovalService approvalService;
     @Autowired
     private ApprovalFormService approvalFormService;
     @Autowired
     private DepartmentService departmentService;
-
-	@Value("${cat.approval}")
-	private String cat;
     @Autowired
     private EmployeeService employeeService;
 
-    @ModelAttribute("cat")
-	public String getCat() {
-
-		return cat;
-
-	}
 
     // 결재 양식 데이터 뿌리기
     @ModelAttribute("formList")
@@ -157,6 +162,7 @@ public class ApprovalController {
         String username = userDetails.getUsername();
 
         ResApprovalDTO detail = approvalService.getApproval(approvalId);
+//        System.err.println(detail.getFiles());
 
         // approvalContent는 JSON 파싱해서 별도로 전달
         if (detail != null && detail.getApprovalContent() != null) {

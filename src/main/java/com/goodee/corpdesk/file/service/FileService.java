@@ -20,7 +20,13 @@ import com.goodee.corpdesk.file.repository.MessageFileRepository;
 public class FileService {
 	@Value("${app.upload}")
 	private String path;
-	
+	@Value("${app.upload.approval}")
+    private String approvalPath;
+    @Value("${app.upload.board}")
+    private String boardPath;
+    @Value("${app.upload.message}")
+    private String messagePath;
+
 	@Autowired
 	private ApprovalFileRepository approvalFileRepository;
 	@Autowired
@@ -50,6 +56,7 @@ public class FileService {
 		// 3. 파일 정보를 fileDTO에 담아서 보냄
 		FileDTO fileDTO = new FileDTO();
 		fileDTO.setOriName(fileName);
+        fileDTO.setExtension(fileBase.getExtension());
 		fileDTO.setFile(file);
 		
 		return fileDTO;

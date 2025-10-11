@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.approval.dto.*;
 import com.goodee.corpdesk.approval.entity.ApprovalForm;
 import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
 import com.goodee.corpdesk.department.entity.Department;
@@ -31,9 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.goodee.corpdesk.approval.dto.ApprovalDTO;
-import com.goodee.corpdesk.approval.dto.ApproverDTO;
-import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
 import com.goodee.corpdesk.approval.entity.Approval;
 import com.goodee.corpdesk.approval.entity.Approver;
 import com.goodee.corpdesk.approval.repository.ApprovalRepository;
@@ -296,7 +293,7 @@ public class ApprovalService {
     }
 
     public ResApprovalDTO getApproval(Long approvalId) throws Exception {
-        // 1. 결재 + 결재 양식 + 부서 + 기안자 조회
+        // 1. 결재 + 첨무파일 + 결재 양식 + 부서 + 기안자 조회
         // 결재 조회
         Optional<Approval> result = approvalRepository.findById(approvalId);
 
@@ -304,6 +301,11 @@ public class ApprovalService {
 
         Approval approval = result.get();
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
+
+        // 첨부파일 조회
+        List<ApprovalFileDTO> files = approvalFileRepository.findAllByApprovalIdAndUseYn(approval.getApprovalId(), true)
+                                                            .stream().map(ApprovalFile::toApprovalFileDTO).toList();
+        resApprovalDTO.setFiles(files);
 
         // 결재 양식 조회
         ApprovalForm result3 = approvalFormRepository.findById(approval.getApprovalFormId()).get();
