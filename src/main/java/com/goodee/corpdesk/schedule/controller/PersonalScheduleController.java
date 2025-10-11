@@ -14,6 +14,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Controller
@@ -37,12 +39,16 @@ public class PersonalScheduleController {
 
         String username = userDetails.getUsername();
 
-        // 오늘의 일정을 구하는 service 로직 호출
         LocalDate today = LocalDate.now();
-        List<ResPersonalScheduleDTO> todaySchedules = personalScheduleService.getSchedulesByDate(username, today);
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
 
-        // TODO: 실제 서비스 로직으로 변경
-         return todaySchedules;
+        List<ResPersonalScheduleDTO> list = personalScheduleService.getSchedulesByDate(username, startOfDay, endOfDay);
+        log.warn("todaySchedules: {}", list);
+
+        return list;
+
+
     }
 
     @GetMapping("list")
@@ -63,14 +69,17 @@ public class PersonalScheduleController {
     }
 
     @PostMapping("")
-    public void add(ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+    public String add(@AuthenticationPrincipal UserDetails userDetails, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
 
-        ResPersonalScheduleDTO newSchedule = personalScheduleService.createSchedule(reqPersonalScheduleDTO);
+        String username = userDetails.getUsername();
+        ResPersonalScheduleDTO newSchedule = personalScheduleService.createSchedule(username, reqPersonalScheduleDTO);
 
         // redirect 상세정보 페이지
         // TODO 반환타입을 void->String으로 변경 후, 상세정보 페이지를 return하는 코드 추가
 
         log.warn("ResPersonalScheduleDTO:{}", newSchedule);
+
+        return "schedule/list";
 
     }
 

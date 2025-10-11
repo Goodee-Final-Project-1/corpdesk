@@ -26,9 +26,6 @@
       </div>
       <form method="POST" action="/personal-schedule">
         <div class="modal-body">
-          <%-- TODO 인증 붙이면 input hidden 삭제 --%>
-          <input type="hidden" name="username" value="jung_frontend">
-
           <div class="form-group">
             <label for="scheduleName">일정명</label>
             <input type="text" class="form-control" id="scheduleName" name="scheduleName" placeholder="일정명을 입력하세요">
@@ -73,29 +70,8 @@
           일정 등록
         </button>
 
-
         <h5  class="mb-4">오늘의 일정</h5>
-        <div class="list-group list-group-flush">
-          <a href="#" class="list-group-item list-group-item-action border-0 px-0 py-2">
-            <div class="d-flex align-items-start">
-              <i class="mdi mdi-checkbox-blank-circle text-primary mr-3"></i>
-              <div>
-                <div class="font-weight-semibold text-dark">제목</div>
-                <small class="text-muted">주소</small>
-              </div>
-            </div>
-          </a>
-
-          <a href="#" class="list-group-item list-group-item-action border-0 px-0 py-2">
-            <div class="d-flex align-items-start">
-              <i class="mdi mdi-checkbox-blank-circle text-success mr-3"></i>
-              <div>
-                <div class="font-weight-semibold text-dark">10:00&nbsp;&nbsp;제목</div>
-                <small class="text-muted">주소</small>
-              </div>
-            </div>
-          </a>
-        </div>
+        <c:import url="today_schedules.jsp"/>
 
         </div>
       </div>

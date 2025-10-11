@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +20,9 @@ public class PersonalScheduleService {
     @Autowired
     private PersonalScheduleRepository personalScheduleRepository;
 
-    public ResPersonalScheduleDTO createSchedule(ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+    public ResPersonalScheduleDTO createSchedule(String username, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
 
+        reqPersonalScheduleDTO.setUsername(username);
         PersonalSchedule newSchedule = reqPersonalScheduleDTO.toEntity();
 
         return personalScheduleRepository.save(newSchedule).toResPersonalScheduleDTO();
@@ -89,8 +91,14 @@ public class PersonalScheduleService {
 
     }
 
-    public List<ResPersonalScheduleDTO> getSchedulesByDate(String username, LocalDate date) {
-        return null;
+    public List<ResPersonalScheduleDTO> getSchedulesByDate(String username, LocalDateTime startOfDay, LocalDateTime endOfDay) {
+
+        List<PersonalSchedule> schedules = personalScheduleRepository.findAllByUseYnAndUsernameAndScheduleDateTimeBetween(true,  username, startOfDay, endOfDay);
+
+        if(schedules == null) return List.of();
+
+        return schedules.stream().map(PersonalSchedule::toResPersonalScheduleDTO).toList();
+
     }
 
 }
