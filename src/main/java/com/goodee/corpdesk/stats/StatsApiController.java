@@ -43,4 +43,32 @@ public class StatsApiController {
 	public Map<String, List> list3() {
 		return statsService.list3();
 	}
+
+	@PostMapping("/chart4")
+	public Map<String, List> list4(@RequestBody Map<String, Object> payload) {
+		LocalDate end = LocalDate.now();
+		LocalDate start = end.minusYears(1);
+		if (payload.get("start") != null && !payload.get("start").equals("")) {
+			start = LocalDate.parse((String) payload.get("start"));
+		}
+		if (payload.get("end") != null && !payload.get("end").equals("")) {
+			end = LocalDate.parse((String) payload.get("end"));
+		}
+
+		return statsService.list4(start, end);
+	}
+
+	@PostMapping("/chart5")
+	public Map<String, List> list5(@RequestBody Map<String, Object> payload) {
+		LocalDate end = LocalDate.now();
+		LocalDate start = end.minusYears(1);
+		if (payload.get("start") != null && !payload.get("start").equals("")) {
+			start = LocalDate.parse((String) payload.get("start"));
+		}
+		if (payload.get("end") != null && !payload.get("end").equals("")) {
+			end = LocalDate.parse((String) payload.get("end"));
+		}
+
+		return statsService.list5(start, end);
+	}
 }

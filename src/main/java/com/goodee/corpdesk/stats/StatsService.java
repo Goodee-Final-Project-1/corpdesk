@@ -107,4 +107,53 @@ public class StatsService {
 			put("count", count);
 		}};
 	}
+
+	public Map<String, List> list4(LocalDate start, LocalDate end) {
+		List<Map<String, Object>> list = statsRepository.countAllAttendance(start, end);
+
+		List<String> months = new ArrayList<>();
+
+		List<Long> attended = new ArrayList<>();
+		List<Long> late = new ArrayList<>();
+		List<Long> absent = new ArrayList<>();
+
+		list.forEach(map -> {
+			months.add((String) map.get("month"));
+
+			attended.add((Long) map.get("attended_count"));
+			late.add((Long) map.get("late_count"));
+			absent.add((Long) map.get("absent_count"));
+		});
+
+		return new HashMap<String, List>() {{
+			put("months", months);
+
+			put("attended", attended);
+			put("late", late);
+			put("absent", absent);
+		}};
+	}
+
+	public Map<String, List> list5(LocalDate start, LocalDate end) {
+		List<Map<String, Object>> list = statsRepository.countAllWorkHours(start, end);
+
+		List<String> months = new ArrayList<>();
+
+		List<Long> fixed = new ArrayList<>();
+		List<Long> overtime = new ArrayList<>();
+
+		list.forEach(map -> {
+			months.add((String) map.get("month"));
+
+			fixed.add((Long) map.get("fixed"));
+			overtime.add((Long) map.get("overtime"));
+		});
+
+		return new HashMap<String, List>() {{
+			put("months", months);
+
+			put("fixed", fixed);
+			put("overtime", overtime);
+		}};
+	}
 }

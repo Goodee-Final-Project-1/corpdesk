@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	const options2 = {
 		title: {
 			text: '근속기간 통계',
-			align: 'center',
+			align: 'left',
 			style: {
 				fontSize: '22px',
 			}
@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', function () {
 		},
 		legend: {
 			position: 'bottom',
+			markers: {
+				width: 24,
+				height: 12,
+				radius: 0
+			}
 		}
 	};
 

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	const options3 = {
 		title: {
 			text: '나이 통계',
-			align: 'center',
+			align: 'left',
 			style: {
 				fontSize: '22px',
 			}
@@ -14,6 +14,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		},
 		legend: {
 			position: 'bottom',
+			markers: {
+				width: 24,
+				height: 12,
+				radius: 0
+			}
+		},
+		theme: {
+			palette: 'palette2'
 		}
 	};
 
@@ -28,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (!response.ok) throw new Error('수신 오류');
 			const data = await response.json();
 
-			console.log(data);
+			// console.log(data);
 
 			chart3.updateSeries(data.count);
 			chart3.updateOptions({
