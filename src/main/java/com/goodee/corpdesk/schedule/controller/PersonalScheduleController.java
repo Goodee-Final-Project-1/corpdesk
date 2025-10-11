@@ -52,10 +52,13 @@ public class PersonalScheduleController {
     }
 
     @GetMapping("list")
-    public String list(ReqPersonalScheduleDTO reqPersonalScheduleDTO, Model model) {
+    public String list(@AuthenticationPrincipal UserDetails userDetails
+                       , ReqPersonalScheduleDTO reqPersonalScheduleDTO
+                       , Model model) {
 
         // username, useYn, (year, month)로 일정 데이터들 조회
-        List<ResPersonalScheduleDTO> schedules = personalScheduleService.getSchedules(reqPersonalScheduleDTO);
+        String username = userDetails.getUsername();
+        List<ResPersonalScheduleDTO> schedules = personalScheduleService.getSchedules(username, reqPersonalScheduleDTO);
 
         // yearRange 생성
         List<Integer> yearRange = personalScheduleService.getYearRangeByUsername(reqPersonalScheduleDTO.getUsername());
@@ -79,7 +82,7 @@ public class PersonalScheduleController {
 
         log.warn("ResPersonalScheduleDTO:{}", newSchedule);
 
-        return "schedule/list";
+        return "redirect:/personal-schedule/list";
 
     }
 
@@ -108,11 +111,13 @@ public class PersonalScheduleController {
     }
 
     @PutMapping("{personalScheduleId}")
-    public String update(@PathVariable("personalScheduleId") Long personalScheduleId
+    public String update(@AuthenticationPrincipal UserDetails userDetails
+                        , @PathVariable("personalScheduleId") Long personalScheduleId
                         , ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
 
         // service의 수정 로직 (id로 조회 -> save)
-        personalScheduleService.updateSchedule(personalScheduleId, reqPersonalScheduleDTO);
+        String modifiedBy = userDetails.getUsername();
+        personalScheduleService.updateSchedule(modifiedBy, personalScheduleId, reqPersonalScheduleDTO);
 
         // 상세정보 페이지로 redirect
         return "redirect:/personal-schedule/" + personalScheduleId;
@@ -120,10 +125,12 @@ public class PersonalScheduleController {
     }
 
     @DeleteMapping("{personalScheduleId}")
-    public String delete(@PathVariable("personalScheduleId") Long personalScheduleId) {
+    public String delete(@AuthenticationPrincipal UserDetails userDetails
+                         , @PathVariable("personalScheduleId") Long personalScheduleId) {
 
         // service의 삭제 로직
-        personalScheduleService.deleteSchedule(personalScheduleId);
+        String modifiedBy = userDetails.getUsername();
+        personalScheduleService.deleteSchedule(modifiedBy, personalScheduleId);
 
         // list 페이지로 redirect
         return "redirect:/personal-schedule/list";

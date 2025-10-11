@@ -22,18 +22,19 @@ public class PersonalScheduleService {
 
     public ResPersonalScheduleDTO createSchedule(String username, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
 
-        reqPersonalScheduleDTO.setUsername(username);
         PersonalSchedule newSchedule = reqPersonalScheduleDTO.toEntity();
+        newSchedule.setUsername(username);
+        newSchedule.setModifiedBy(username);
 
         return personalScheduleRepository.save(newSchedule).toResPersonalScheduleDTO();
 
     }
 
     // username, useYn, (year, month)로 일정 데이터들 조회
-    public List<ResPersonalScheduleDTO> getSchedules(ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+    public List<ResPersonalScheduleDTO> getSchedules(String username, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
 
         return personalScheduleRepository.findPersonalScheduleByUsernameAndYearMonth(true
-                                                                                    , reqPersonalScheduleDTO.getUsername()
+                                                                                    , username
                                                                                     , reqPersonalScheduleDTO.getYear()
                                                                                     , reqPersonalScheduleDTO.getMonth());
         
@@ -64,12 +65,13 @@ public class PersonalScheduleService {
 
     }
 
-    public ResPersonalScheduleDTO updateSchedule(Long personalScheduleId, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+    public ResPersonalScheduleDTO updateSchedule(String modifiedBy, Long personalScheduleId, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
 
         // id로 조회
         PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
 
         // save
+        oldSchedule.setModifiedBy(modifiedBy);
         oldSchedule.setScheduleName(reqPersonalScheduleDTO.getScheduleName());
         oldSchedule.setScheduleDateTime(reqPersonalScheduleDTO.getScheduleDateTime());
         oldSchedule.setContent(reqPersonalScheduleDTO.getContent());
@@ -79,12 +81,13 @@ public class PersonalScheduleService {
 
     }
 
-    public ResPersonalScheduleDTO deleteSchedule(Long personalScheduleId) {
+    public ResPersonalScheduleDTO deleteSchedule(String modifiedBy, Long personalScheduleId) {
 
         // id로 조회
         PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
 
         // delete
+        oldSchedule.setModifiedBy(modifiedBy);
         oldSchedule.setUseYn(false);
 
         return oldSchedule.toResPersonalScheduleDTO();

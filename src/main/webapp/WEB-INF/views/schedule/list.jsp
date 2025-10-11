@@ -26,9 +26,6 @@
       </div>
       <form method="POST" action="/personal-schedule">
         <div class="modal-body">
-          <%-- TODO 인증 붙이면 input hidden 삭제 --%>
-          <input type="hidden" name="username" value="jung_frontend">
-
           <div class="form-group">
             <label for="scheduleName">일정명</label>
             <input type="text" class="form-control" id="scheduleName" name="scheduleName" placeholder="일정명을 입력하세요">
@@ -92,10 +89,7 @@
         <!-- 년, 월 선택 - 한 줄 배치 -->
         <div class="row mb-4 ml-0">
 
-          <%-- TODO 추후 인증정보를 사용하게 되면 username 삭제 --%>
           <form method="get" action="/personal-schedule/list">
-
-            <input type="hidden" name="username" value="jung_frontend">
 
             <div class="mr-3">
               <div class="form-group">
