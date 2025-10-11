@@ -56,39 +56,41 @@ public class PersonalScheduleService {
         
     }
 
-//    public ResPersonalScheduleDTO getScheduleById(Long personalScheduleId) {
-//
-//        return personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId).toResPersonalScheduleDTO();
-//
-//    }
-//
-//    public ResPersonalScheduleDTO updateSchedule(Long personalScheduleId, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
-//
-//        // id로 조회
-//        PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
-//
-//        // save
-//        oldSchedule.setScheduleName(reqPersonalScheduleDTO.getScheduleName());
-//        oldSchedule.setScheduleDateTime(reqPersonalScheduleDTO.getScheduleDateTime());
-//        oldSchedule.setContent(reqPersonalScheduleDTO.getContent());
-//        oldSchedule.setAddress(reqPersonalScheduleDTO.getAddress());
-//
-//        return oldSchedule.toResPersonalScheduleDTO();
-//
-//    }
-//
-//    public ResPersonalScheduleDTO deleteSchedule(Long personalScheduleId) {
-//
-//        // id로 조회
-//        PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
-//
-//        // delete
-//        oldSchedule.setUseYn(false);
-//
-//        return oldSchedule.toResPersonalScheduleDTO();
-//
-//    }
+    public ResPersonalScheduleDTO getScheduleById(Long personalScheduleId) {
 
-//    public List<ResPersonalScheduleDTO> getTodaySchedules()
+        return personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId).toResPersonalScheduleDTO();
+
+    }
+
+    public ResPersonalScheduleDTO updateSchedule(Long personalScheduleId, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {
+
+        // id로 조회
+        PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
+
+        // save
+        oldSchedule.setScheduleName(reqPersonalScheduleDTO.getScheduleName());
+        oldSchedule.setScheduleDateTime(reqPersonalScheduleDTO.getScheduleDateTime());
+        oldSchedule.setContent(reqPersonalScheduleDTO.getContent());
+        oldSchedule.setAddress(reqPersonalScheduleDTO.getAddress());
+
+        return oldSchedule.toResPersonalScheduleDTO();
+
+    }
+
+    public ResPersonalScheduleDTO deleteSchedule(Long personalScheduleId) {
+
+        // id로 조회
+        PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
+
+        // delete
+        oldSchedule.setUseYn(false);
+
+        return oldSchedule.toResPersonalScheduleDTO();
+
+    }
+
+    public List<ResPersonalScheduleDTO> getSchedulesByDate(String username, LocalDate date) {
+        return null;
+    }
 
 }
