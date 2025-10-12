@@ -272,7 +272,7 @@ public class ApprovalService {
 
     public List<ResApprovalDTO> getApprovalList(String listType, String username) throws Exception {
 
-        List<ResApprovalDTO> result = new ArrayList<>();
+        List<ResApprovalDTO> result = null;
         switch (listType) {
             case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(
                                                     true, username, List.of("T"), 10L
@@ -287,6 +287,8 @@ public class ApprovalService {
                                                     true, username, List.of("Y", "N"), List.of("W", "Y", "N"), 10L
                                                         ); // 내가 결재한 목록
         }
+
+        if(result == null) return List.of();
 
         return result;
 
@@ -332,7 +334,7 @@ public class ApprovalService {
     }
 
     public ResEmployeeDTO getDetailWithDeptAndPosition(String username) {
-        return employeeRepository.findEmployeeWithDeptAndPosition(username);
+        return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
 
     public List<ResApprovalDTO> getEmployeeWithDeptAndPositionAndFile(Integer departmentId, Boolean useYn) {

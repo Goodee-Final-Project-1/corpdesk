@@ -29,28 +29,38 @@
           <div class="card card-default mb-4">
             <div class="card-body text-center p-4">
               <div class="mb-3">
-                <img src="https://via.placeholder.com/80" class="rounded-circle" alt="프로필">
+                <c:choose>
+                  <c:when test="${employee.saveName eq null}">
+                    <img src="/images/default_profile.jpg" class="rounded-circle" alt="프로필">
+                  </c:when>
+                  <c:otherwise>
+                    <img src="/files/employee/${employee.saveName}.${employee.extension}" class="rounded-circle" alt="프로필">
+                  </c:otherwise>
+                </c:choose>
               </div>
-              <h5 class="mb-1">고투현 사원</h5>
-              <p class="text-muted mb-4">경영부</p>
+              <h5 class="mb-1">${employee.name} ${employee.positionName}</h5>
+              <p class="text-muted mb-4">${employee.departmentName}</p>
               <hr>
-              <div class="mb-3">
-                <h6 class="mb-2">오늘의 일정</h6>
-                <h3 class="mb-0">1</h3>
+              <div class="mb-3 d-flex justify-content-center">
+                <div onclick="location.href='/personal-schedule/list'" style="cursor: pointer">
+                  <h6 class="mb-2">오늘의 일정</h6>
+                  <h3 class="mb-0">${todayScheduleCnt}</h3>
+                </div>
               </div>
               <hr>
               <div class="text-left">
-                <div class="d-flex justify-content-between mb-2">
-                  <span>게시판 새 글</span>
-                  <span>1</span>
-                </div>
+                <%-- TODO 아래 주석처리한 기능은 추가할 수 있으면 추가... --%>
+<%--                <div class="d-flex justify-content-between mb-2">--%>
+<%--                  <span>게시판 새 글</span>--%>
+<%--                  <span>1</span>--%>
+<%--                </div>--%>
                 <div class="d-flex justify-content-between mb-2">
                   <span>결재 대기 문서</span>
-                  <span>1</span>
+                  <span>${reqApprovalCnt}</span>
                 </div>
                 <div class="d-flex justify-content-between">
                   <span>진여 연차</span>
-                  <span>1일</span>
+                  <span>${remainingVacation eq null ? 0 : remainingVacation}일</span>
                 </div>
               </div>
             </div>

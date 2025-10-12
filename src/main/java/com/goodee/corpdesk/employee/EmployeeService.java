@@ -317,7 +317,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     public ResEmployeeDTO getFulldetail(String username) {
-        return employeeRepository.findEmployeeWithDeptAndPosition(username);
+        return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
 
 }
