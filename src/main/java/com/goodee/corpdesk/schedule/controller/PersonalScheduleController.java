@@ -34,22 +34,23 @@ public class PersonalScheduleController {
     @Autowired
     private PersonalScheduleService personalScheduleService;
 
-    @ModelAttribute("todaySchedules")
-    public List<ResPersonalScheduleDTO> getTodaySchedules(@AuthenticationPrincipal UserDetails userDetails) {
-
-        String username = userDetails.getUsername();
-
-        LocalDate today = LocalDate.now();
-        LocalDateTime startOfDay = today.atStartOfDay();
-        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-
-        List<ResPersonalScheduleDTO> list = personalScheduleService.getSchedulesByDate(username, startOfDay, endOfDay);
-        log.warn("todaySchedules: {}", list);
-
-        return list;
-
-
-    }
+//    @ModelAttribute("todaySchedules")
+//    @GetMapping("today")
+//    @ResponseBody
+//    public List<ResPersonalScheduleDTO> getTodaySchedules(@AuthenticationPrincipal UserDetails userDetails) {
+//
+//        String username = userDetails.getUsername();
+//
+//        LocalDate today = LocalDate.now();
+//        LocalDateTime startOfDay = today.atStartOfDay();
+//        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+//
+//        List<ResPersonalScheduleDTO> list = personalScheduleService.getSchedulesByDate(username, startOfDay, endOfDay);
+//        log.warn("todaySchedules: {}", list);
+//
+//        return list;
+//
+//    }
 
     @GetMapping("list")
     public String list(@AuthenticationPrincipal UserDetails userDetails
@@ -136,4 +137,30 @@ public class PersonalScheduleController {
         return "redirect:/personal-schedule/list";
 
     }
+
+    // 공통 로직
+    private List<ResPersonalScheduleDTO> fetchTodaySchedules(String username) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        return personalScheduleService.getSchedulesByDate(username, startOfDay, endOfDay);
+    }
+
+    // @ModelAttribute용
+    @ModelAttribute("todaySchedules")
+    public List<ResPersonalScheduleDTO> addTodaySchedulesToModel(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return List.of();
+        }
+        return fetchTodaySchedules(userDetails.getUsername());
+    }
+
+    // API용
+    @GetMapping("today")
+    @ResponseBody
+    public List<ResPersonalScheduleDTO> getTodaySchedulesApi(@AuthenticationPrincipal UserDetails userDetails) {
+        return fetchTodaySchedules(userDetails.getUsername());
+    }
+
 }

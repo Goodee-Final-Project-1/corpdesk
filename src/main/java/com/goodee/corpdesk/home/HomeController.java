@@ -2,6 +2,8 @@ package com.goodee.corpdesk.home;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.service.ApprovalService;
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
+import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
@@ -36,6 +38,8 @@ public class HomeController {
     private ApprovalService approvalService;
     @Autowired
     private VacationService vacationService;
+    @Autowired
+    private AttendanceService attendanceService;
 
     @GetMapping("/")
 	public String home() {
@@ -70,17 +74,24 @@ public class HomeController {
         // TODO 외부 일정
 
         // 3. 결재 정보
-        // 결재 대기 문서 갯수
         List<ResApprovalDTO> reqApprovals =  approvalService.getApprovalList("request", username);
-        model.addAttribute("reqApprovalCnt", reqApprovals.size());
-
-        // TODO 결재 대기 문서
+        model.addAttribute("reqApprovalCnt", reqApprovals.size()); // 결재 대기 문서 갯수
+        model.addAttribute("waitList", reqApprovals);// 결재 대기 문서
 
         // 4. 연차
         // 잔여 연차
         ResVacationDTO vacation = vacationService.getVacation(username);
         model.addAttribute("remainingVacation", vacation.getRemainingVacation());
 
+        // TODO 휴가
+        model.addAttribute("vacation", vacation);
+
+        // 5. 근태
+        ResAttendanceDTO currAttd = attendanceService.getCurrentAttendance(username);
+        model.addAttribute("currAttd", currAttd);
+
+        // TODO 게시판 기능 완성되면 아래 항목도 추가 구현
+        // 6. 공지사항
 
         return "dashboard";
 

@@ -1,12 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
 	<title>Insert title here</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
+
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e8170148d86f9c8fb1da017867a75935"></script>
+  <script type="text/javascript" src="/js/dashboard/map.js"></script>
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
@@ -69,31 +73,11 @@
           <!-- 근태 카드 -->
           <div class="card card-default">
             <div class="card-body">
+
               <h5 class="mb-3">근태</h5>
 
-              <!-- 출퇴근 시간 표시 -->
-              <div class="card card-default mb-3">
-                <div class="card-body d-flex justify-content-around p-3">
-                  <div class="text-center">
-                    <p class="card-text mb-1">출근</p>
-                    <p class="card-text mb-0">00:00:00</p>
-                  </div>
-                  <div class="text-center">
-                    <p class="card-text mb-1">퇴근</p>
-                    <p class="card-text mb-0">00:00:00</p>
-                  </div>
-                </div>
-              </div>
+              <c:import url="/WEB-INF/views/attendance/attendance_widget.jsp"/>
 
-              <!-- 출근/퇴근 버튼 -->
-              <div class="row no-gutters">
-                <div class="col-6 pr-2">
-                  <button class="btn btn-info btn-lg btn-block">출근</button>
-                </div>
-                <div class="col-6 pl-2">
-                  <button class="btn btn-info btn-lg btn-block">퇴근</button>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -111,9 +95,33 @@
                   <h2>결재 대기 문서</h2>
                 </div>
                 <div class="card-body">
-                  <div class="p-5 text-center">
-                    <p class="text-muted">(결재 대기 문서 목록)</p>
+
+                  <div class="email-details-content pl-0 pr-0 pt-0">
+                    <table class="table">
+
+                      <thead>
+                      <tr>
+                        <th class="col-2">기안일</th>
+                        <th class="col-4">제목</th>
+                        <th class="col-2">기안부서</th>
+                        <th class="col-2">기안자</th>
+                      </tr>
+                      </thead>
+
+                      <tbody>
+                      <c:forEach items="${waitList }" var="el">
+                        <tr class="approval-row" onclick="location.href='/approval/${el.approvalId}'" style="cursor: pointer;">
+                          <td>${fn:substring(el.createdAt, 0, 10) }</td>
+                          <td>${el.formTitle }</td>
+                          <td>${el.departmentName }</td>
+                          <td>${el.username }</td>
+                        </tr>
+                      </c:forEach>
+                      </tbody>
+
+                    </table>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -149,19 +157,19 @@
                     <div class="row text-center">
                       <div class="col-4">
                         <p class="mb-1 text-warning">잔여 연차</p>
-                        <h5 class="text-warning mb-0">-20d</h5>
+                        <h5 class="text-warning mb-0">${vacation.remainingVacation eq null ? 0 : vacation.remainingVacation}일</h5>
                       </div>
                       <div class="col-4">
                         <p class="mb-1">사용 연차</p>
-                        <h5 class="mb-0">39d</h5>
+                        <h5 class="mb-0">${vacation.usedVacation eq null ? 0 : vacation.usedVacation}일</h5>
                       </div>
                       <div class="col-4">
                         <p class="mb-1">총 연차</p>
-                        <h5 class="mb-0">19d</h5>
+                        <h5 class="mb-0">${vacation.totalVacation eq null ? 0 : vacation.totalVacation}일</h5>
                       </div>
                     </div>
                     <br>
-                    <p class="text-center text-muted mb-0">(예정된 휴가 목록)</p>
+<%--                    <p class="text-center text-muted mb-0">(예정된 휴가 목록)</p>--%>
                   </div>
                 </div>
               </div>
@@ -171,12 +179,10 @@
             <div class="col-lg-6">
               <div class="card card-default">
                 <div class="card-header">
-                  <h2>외부일정</h2>
+                  <h2>외부일정 장소</h2>
                 </div>
                 <div class="card-body">
-                  <div class="p-5 text-center">
-                    <p class="text-muted">(캘린더)</p>
-                  </div>
+                  <div id="map" style="width:100%;height:400px;"></div>
                 </div>
               </div>
             </div>
