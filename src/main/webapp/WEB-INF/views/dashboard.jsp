@@ -26,22 +26,20 @@
         <div class="col-lg-3">
 
           <!-- 고투현 사원 카드 -->
-          <div class="card card-default mb-3">
-            <div class="card-body text-center">
+          <div class="card card-default mb-4">
+            <div class="card-body text-center p-4">
               <div class="mb-3">
                 <img src="https://via.placeholder.com/80" class="rounded-circle" alt="프로필">
               </div>
               <h5 class="mb-1">고투현 사원</h5>
-              <p class="text-muted mb-3">경영부</p>
+              <p class="text-muted mb-4">경영부</p>
               <hr>
-              <div class="d-flex justify-content-around mb-2">
-                <div>
-                  <h6 class="mb-0">오늘의 일정</h6>
-                  <h4 class="mb-0">1</h4>
-                </div>
+              <div class="mb-3">
+                <h6 class="mb-2">오늘의 일정</h6>
+                <h3 class="mb-0">1</h3>
               </div>
               <hr>
-              <div class="text-left small">
+              <div class="text-left">
                 <div class="d-flex justify-content-between mb-2">
                   <span>게시판 새 글</span>
                   <span>1</span>
@@ -61,23 +59,29 @@
           <!-- 근태 카드 -->
           <div class="card card-default">
             <div class="card-body">
-              <h6 class="mb-3">근태</h6>
-              <div class="d-flex justify-content-around mb-3">
-                <div class="text-center">
-                  <p class="mb-1 small">출근</p>
-                  <p class="mb-0 font-weight-bold">00:00</p>
-                </div>
-                <div class="text-center">
-                  <p class="mb-1 small">퇴근</p>
-                  <p class="mb-0 font-weight-bold">00:00</p>
+              <h5 class="mb-3">근태</h5>
+
+              <!-- 출퇴근 시간 표시 -->
+              <div class="card card-default mb-3">
+                <div class="card-body d-flex justify-content-around p-3">
+                  <div class="text-center">
+                    <p class="card-text mb-1">출근</p>
+                    <p class="card-text mb-0">00:00:00</p>
+                  </div>
+                  <div class="text-center">
+                    <p class="card-text mb-1">퇴근</p>
+                    <p class="card-text mb-0">00:00:00</p>
+                  </div>
                 </div>
               </div>
+
+              <!-- 출근/퇴근 버튼 -->
               <div class="row no-gutters">
-                <div class="col-6 pr-1">
-                  <button class="btn btn-dark btn-block">출근</button>
+                <div class="col-6 pr-2">
+                  <button class="btn btn-info btn-lg btn-block">출근</button>
                 </div>
-                <div class="col-6 pl-1">
-                  <button class="btn btn-dark btn-block">퇴근</button>
+                <div class="col-6 pl-2">
+                  <button class="btn btn-info btn-lg btn-block">퇴근</button>
                 </div>
               </div>
             </div>
@@ -88,14 +92,16 @@
         <!-- 메인 콘텐츠 영역 -->
         <div class="col-lg-9">
 
-          <div class="row mb-3">
+          <div class="row">
 
             <!-- 결재 대기 문서 -->
-            <div class="col-lg-6 mb-3">
-              <div class="card card-default h-100">
+            <div class="col-lg-6">
+              <div class="card card-default">
+                <div class="card-header">
+                  <h2>결재 대기 문서</h2>
+                </div>
                 <div class="card-body">
-                  <h5 class="mb-4">결재 대기 문서</h5>
-                  <div class="bg-light p-5 text-center">
+                  <div class="p-5 text-center">
                     <p class="text-muted">(결재 대기 문서 목록)</p>
                   </div>
                 </div>
@@ -103,11 +109,13 @@
             </div>
 
             <!-- 공지사항 -->
-            <div class="col-lg-6 mb-3">
-              <div class="card card-default h-100">
+            <div class="col-lg-6">
+              <div class="card card-default">
+                <div class="card-header">
+                  <h2>공지사항</h2>
+                </div>
                 <div class="card-body">
-                  <h5 class="mb-4">공지사항</h5>
-                  <div class="bg-light p-5 text-center">
+                  <div class="p-5 text-center">
                     <p class="text-muted">(공지사항 목록)</p>
                   </div>
                 </div>
@@ -116,40 +124,47 @@
 
           </div>
 
+          <br>
+
           <div class="row">
 
             <!-- 휴가 -->
-            <div class="col-lg-6 mb-3">
-              <div class="card card-default h-100">
+            <div class="col-lg-6">
+              <div class="card card-default">
+                <div class="card-header">
+                  <h2>휴가</h2>
+                </div>
                 <div class="card-body">
-                  <h5 class="mb-4">휴가</h5>
-                  <div class="bg-light p-4">
+                  <div class="p-4">
                     <div class="row text-center">
                       <div class="col-4">
-                        <p class="small mb-1 text-warning">잔여 연차</p>
+                        <p class="mb-1 text-warning">잔여 연차</p>
                         <h5 class="text-warning mb-0">-20d</h5>
                       </div>
                       <div class="col-4">
-                        <p class="small mb-1">사용 연차</p>
+                        <p class="mb-1">사용 연차</p>
                         <h5 class="mb-0">39d</h5>
                       </div>
                       <div class="col-4">
-                        <p class="small mb-1">총 연차</p>
+                        <p class="mb-1">총 연차</p>
                         <h5 class="mb-0">19d</h5>
                       </div>
                     </div>
-                    <p class="text-center text-muted small mt-3 mb-0">(예정된 휴가 목록)</p>
+                    <br>
+                    <p class="text-center text-muted mb-0">(예정된 휴가 목록)</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- 외부일정 -->
-            <div class="col-lg-6 mb-3">
-              <div class="card card-default h-100">
+            <div class="col-lg-6">
+              <div class="card card-default">
+                <div class="card-header">
+                  <h2>외부일정</h2>
+                </div>
                 <div class="card-body">
-                  <h5 class="mb-4">외부일정</h5>
-                  <div class="bg-light p-5 text-center">
+                  <div class="p-5 text-center">
                     <p class="text-muted">(캘린더)</p>
                   </div>
                 </div>
