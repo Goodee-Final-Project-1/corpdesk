@@ -19,7 +19,7 @@ public class BoardService {
   private BoardRepository boardRepository;
 
   // 현재 직원의 부서번호 가져오기
-  private Integer getCurrentUserDepartmentIdOrThrow() {
+  private Integer getCurrentUserDepartmentId() {
     org.springframework.security.core.Authentication auth =
         org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
     Object principal = (auth != null ? auth.getPrincipal() : null);
@@ -63,7 +63,7 @@ public class BoardService {
       board.setUsername(getCurrentUsername());
     }
     if (board.getDepartmentId() == null) {
-      board.setDepartmentId(getCurrentUserDepartmentIdOrThrow());
+      board.setDepartmentId(getCurrentUserDepartmentId());
     }
 
     // 공지 작성 권한 체크
@@ -79,7 +79,7 @@ public class BoardService {
 
   // 부서게시판 불러오기 (Authentication에서 부서ID 사용)
   public Page<Board> getMyDepartmentBoards(Pageable pageable) {
-    Integer departmentId = getCurrentUserDepartmentIdOrThrow();
+    Integer departmentId = getCurrentUserDepartmentId();
     return boardRepository.findByDepartmentIdAndUseYnTrue(departmentId, pageable);
   }
 
