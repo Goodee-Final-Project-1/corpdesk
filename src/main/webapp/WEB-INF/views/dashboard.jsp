@@ -71,7 +71,7 @@
                   <span>${approval.approvalCnt}</span>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <span>진여 연차</span>
+                  <span>잔여 연차</span>
                   <span>${remainingVacation eq null ? 0 : remainingVacation}일</span>
                 </div>
               </div>
