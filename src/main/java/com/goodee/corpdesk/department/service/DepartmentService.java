@@ -149,18 +149,19 @@ public class DepartmentService {
     }
 
     @Transactional
-    public void deleteDepartment(Integer deptId) {
-        // 직원들 departmentId, departmentName NULL 처리
-        employeeRepository.clearDepartmentByDeptId(deptId);
+    public void deactivateDepartment(Integer id) {
+        Department dept = departmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("부서를 찾을 수 없습니다."));
 
-        // 하위 부서 재귀 삭제
-        List<Department> children = departmentRepository.findByParentDepartmentId(deptId);
+        // 현재 부서 useYn false
+        dept.setUseYn(false);
+        departmentRepository.save(dept);
+
+        // 하위 부서들도 같이 useYn false
+        List<Department> children = departmentRepository.findByParentDepartmentId(id);
         for (Department child : children) {
-            deleteDepartment(child.getDepartmentId());
+            deactivateDepartment(child.getDepartmentId());
         }
-
-        // 최종 부서 삭제
-        departmentRepository.deleteById(deptId);
     }
     
     @Transactional
@@ -168,7 +169,6 @@ public class DepartmentService {
         for (String username : usernames) {
             Employee emp = employeeRepository.findById(username)
                     .orElseThrow(() -> new RuntimeException("직원 없음: " + username));
-            emp.setUseYn(false);
             emp.setDepartmentId(null);      // 부서 ID null 처리
             emp.setDepartmentName(null);
             employeeRepository.save(emp);

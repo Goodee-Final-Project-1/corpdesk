@@ -3,12 +3,13 @@ package com.goodee.corpdesk.approval.service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.approval.dto.*;
 import com.goodee.corpdesk.approval.entity.ApprovalForm;
 import com.goodee.corpdesk.approval.repository.ApprovalFormRepository;
 import com.goodee.corpdesk.department.entity.Department;
@@ -16,16 +17,20 @@ import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
+import com.goodee.corpdesk.file.FileManager;
+import com.goodee.corpdesk.file.dto.FileDTO;
+import com.goodee.corpdesk.file.entity.ApprovalFile;
+import com.goodee.corpdesk.file.repository.ApprovalFileRepository;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.goodee.corpdesk.approval.dto.ApprovalDTO;
-import com.goodee.corpdesk.approval.dto.ApproverDTO;
-import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
 import com.goodee.corpdesk.approval.entity.Approval;
 import com.goodee.corpdesk.approval.entity.Approver;
 import com.goodee.corpdesk.approval.repository.ApprovalRepository;
@@ -33,12 +38,19 @@ import com.goodee.corpdesk.approval.repository.ApproverRepository;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
 @Transactional
 public class ApprovalService {
-	
+
+    @Value("${app.upload}")
+    private String upload;
+
+    @Value("${app.upload.approval}")
+    private String approvalPath;
+
 	@Autowired
 	private ApprovalRepository approvalRepository;
 	@Autowired
@@ -55,11 +67,15 @@ public class ApprovalService {
     private ObjectMapper objectMapper;
     @Autowired
     private VacationDetailRepository vacationDetailRepository;
+    @Autowired
+    private FileManager fileManager;
+    @Autowired
+    private ApprovalFileRepository approvalFileRepository;
 
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
 	// Exception: approval 혹은 approval의 조회 결과가 없거나 insert 실패
-	public ResApprovalDTO createApproval(ReqApprovalDTO reqApprovalDTO, String modifiedBy) throws Exception {
+	public ResApprovalDTO createApproval(ReqApprovalDTO reqApprovalDTO, MultipartFile[] files, String modifiedBy) throws Exception {
 		
 		// 1. 결재 내용에 insert
 		Approval approval = reqApprovalDTO.toApprovalEntity();
@@ -68,9 +84,26 @@ public class ApprovalService {
 
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
 
-		// 2. 결재자에 insert
-		log.warn("{}", reqApprovalDTO.getApproverDTOList());
+        // 2. 파일 저장
+        if (files != null && files.length > 0) {
+            for (MultipartFile a : files) {
+                log.warn("file: {}", a.getName());
 
+                // a에 실질적으로 파일이 들어있지 않다면 파일 저장 로직을 진행하지 않음
+                if (a.getSize() <= 0) continue;
+
+                // 1. file을 HDD에 저장하고 saveName을 받아옴
+                FileDTO fileDTO = fileManager.saveFile(upload + approvalPath, a);
+                ApprovalFile approvalFile = fileDTO.toApprovalFile();
+                approvalFile.setApprovalId(approval.getApprovalId());
+                approvalFile.setModifiedBy(modifiedBy);
+
+                // 2. DB에 데이터 저장
+                approvalFileRepository.save(approvalFile);
+            }
+        }
+
+		// 3. 결재자에 insert
         // 결재자 정보가 없다면 바로 return
         if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) return resApprovalDTO;
 
@@ -82,10 +115,10 @@ public class ApprovalService {
 			// 만약 승인 순서가 1이 아니면 use_yn값을 false로 하여 insert
 			if(approver.getApprovalOrder() != 1) approver.setUseYn(false);
 
-			approver = approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
+			approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
 		
-		// 3. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
+		// 4. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
         return resApprovalDTO;
 		
 	}
@@ -95,27 +128,27 @@ public class ApprovalService {
     // PROCESSED: 결재가 승인됨
     // NOT_FOUND: approvalId에 해당하는 Approval이 없음
     // Exception: update 실패
-	public String deleteApproval(Long approvalId) throws Exception {
-		
+	public ResponseEntity<String> deleteApproval(Long approvalId) throws Exception {
+
 		// 1. 결재 use_yn false로 update
 		Optional<Approval> result = approvalRepository.findById(approvalId); // id로 결재 정보를 조회해 옴
 
         // 삭제할 결재 정보가 없으면 이후의 삭제 로직을 수행할 필요 없으므로 바로 return
-		if (result.isEmpty()) return "NOT_FOUND";
-		
+		if (result.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);;
+
 		// 삭제할 결재 정보가 있으면 삭제 로직 진행...
 		// 결재가 완료되었는가? (결재 상태가 y/n인가?)
 		// -> true -> 결재 취소 거부
 		// -> false -> 결재 취소 진행
 		Approval approval = result.get();
-		if (approval.getStatus() == 'Y' || approval.getStatus() == 'N') return "DENIED";
+		if (approval.getStatus() == 'Y' || approval.getStatus() == 'N') return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		else approval.setUseYn(false);
 		
 		// 2. 결재자들 use_yn false로 update
 		List<Approver> approverList = approverRepository.findAllByApprovalId(approvalId);
         approverList.forEach(approver -> approver.setUseYn(false));
 		
-		return "PROCESSED";
+		return new ResponseEntity<>(HttpStatus.OK);
 	} 
 	
     // 해당 결재의 결재자 정보의 approve_yn 정보를 approveYn값으로 수정한 다음,
@@ -239,7 +272,7 @@ public class ApprovalService {
 
     public List<ResApprovalDTO> getApprovalList(String listType, String username) throws Exception {
 
-        List<ResApprovalDTO> result = new ArrayList<>();
+        List<ResApprovalDTO> result = null;
         switch (listType) {
             case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(
                                                     true, username, List.of("T"), 10L
@@ -255,12 +288,14 @@ public class ApprovalService {
                                                         ); // 내가 결재한 목록
         }
 
+        if(result == null) return List.of();
+
         return result;
 
     }
 
     public ResApprovalDTO getApproval(Long approvalId) throws Exception {
-        // 1. 결재 + 결재 양식 + 부서 + 기안자 조회
+        // 1. 결재 + 첨무파일 + 결재 양식 + 부서 + 기안자 조회
         // 결재 조회
         Optional<Approval> result = approvalRepository.findById(approvalId);
 
@@ -268,6 +303,11 @@ public class ApprovalService {
 
         Approval approval = result.get();
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
+
+        // 첨부파일 조회
+        List<ApprovalFileDTO> files = approvalFileRepository.findAllByApprovalIdAndUseYn(approval.getApprovalId(), true)
+                                                            .stream().map(ApprovalFile::toApprovalFileDTO).toList();
+        resApprovalDTO.setFiles(files);
 
         // 결재 양식 조회
         ApprovalForm result3 = approvalFormRepository.findById(approval.getApprovalFormId()).get();
@@ -294,7 +334,7 @@ public class ApprovalService {
     }
 
     public ResEmployeeDTO getDetailWithDeptAndPosition(String username) {
-        return employeeRepository.findEmployeeWithDeptAndPosition(username);
+        return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
 
     public List<ResApprovalDTO> getEmployeeWithDeptAndPositionAndFile(Integer departmentId, Boolean useYn) {

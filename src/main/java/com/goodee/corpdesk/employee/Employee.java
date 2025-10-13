@@ -39,9 +39,9 @@ public class Employee extends BaseEntity {
 	@Column(name = "department_id")
 	private Integer departmentId;
 
-	private String departmentName;
-
-	private String positionName;
+//	private String departmentName;
+//
+//	private String positionName;
 
 	@ColumnDefault("3")
 	private Integer roleId;
@@ -103,9 +103,9 @@ public class Employee extends BaseEntity {
 	@ColumnDefault("0")
 	private Long currentBaseSalary;
 
-    public ResApprovalDTO  toResApprovalDTO() {
-        return ResApprovalDTO.builder()
-                .username(this.username)
-                .build();
-    }
+  public ResApprovalDTO  toResApprovalDTO() {
+      return ResApprovalDTO.builder()
+              .username(this.username)
+              .build();
+  }
 }

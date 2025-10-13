@@ -29,15 +29,11 @@ public class ChatMessageDto{
 	private String messageType;
 	
 	
-	@CreationTimestamp
 	private LocalDateTime sentAt;
 	
-	@Transient
 	private String notificationType;
-	@Transient
 	private boolean focused;
-	@Transient
 	private String imgPath;
-	@Transient
 	private String viewName;
+	private String roomName;
 }

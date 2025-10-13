@@ -152,9 +152,11 @@ margin-left: 140px;
 			          <input type="text" id="newDeptName" class="form-control" placeholder="예: 품질관리팀">
 			        </div>
 			        <div class="mb-3">
-			          <label class="form-label">상위 부서명</label>
-			          <input type="text" id="parentDeptName" class="form-control" placeholder="예: 개발팀 (없으면 루트)">
-			        </div>
+					  <label class="form-label">상위 부서</label>
+					  <select id="parentDeptSelect" class="form-select">
+					    <option value="">(없음 / 루트)</option>
+					  </select>
+					</div>
 			      </div>
 			      <div class="modal-footer">
 			        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
@@ -206,8 +208,25 @@ margin-left: 140px;
 			  </div>
 			</div>
 			
-			
-			
+			<!-- 부서원 제외 모달 -->
+			<div class="modal fade" id="excludeModal" tabindex="-1" aria-hidden="true">
+			  <div class="modal-dialog">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title">부서원 제외</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			      </div>
+			      <div class="modal-body">
+			        선택한 부서원을 정말 제외하시겠습니까?
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+			        <button type="button" class="btn btn-danger" id="confirmExcludeBtn">제외</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+						
 			
 			
 			<!-- 내용 끝 -->
@@ -314,26 +333,33 @@ $(function(){
     return sel.length > 0 ? sel[0] : null;
   }
 
-  // ===========================
-  // 추가 버튼 → 모달 열기
-  // ===========================
+//추가 버튼 → 모달 열기
   $("#addBtn").on("click", function(){
     $("#newDeptName").val("");
-    $("#parentDeptName").val("");
+    $("#parentDeptSelect").empty().append('<option value="">(없음 / 루트)</option>');
+
+    // DB에 있는 부서 목록 가져오기
+    $.getJSON("/organization/tree", function(data){
+      data.forEach(dept => {
+        $("#parentDeptSelect").append(`<option value="\${dept.id}">\${dept.text}</option>`);
+      });
+    });
+
     $("#addModal").modal("show");
   });
 
-  // 저장 버튼 → DB 반영
+
+//저장 버튼 → DB 반영
   $("#saveDeptBtn").on("click", function(){
     let name = $("#newDeptName").val().trim();
-    let parentName = $("#parentDeptName").val().trim();
+    let parentId = $("#parentDeptSelect").val();
 
     if(!name) { 
       alert("부서명을 입력하세요."); 
       return; 
     }
 
-    $.post("/organization/addByName", { parentName, name })
+    $.post("/organization/add", { parentId, name })
       .done(function(newNode){
         var tree = $('#orgTree').jstree(true);
         tree.create_node(newNode.parentId == null ? "#" : newNode.parentId, {
@@ -353,6 +379,7 @@ $(function(){
         }
       });
   });
+
 
   // ===========================
   // 삭제 버튼 → 모달 열기
@@ -435,13 +462,24 @@ $(document).on("click", "#confirmMoveBtn", function(){
 	  });
 	});
 
-//부서원 제외 버튼 동작
+//제외 버튼 → 모달 열기
 $(document).on("click", "#excludeBtn", function(){
   let selected = $(".memberCheck:checked").map(function(){ return this.value; }).get();
   if (selected.length === 0) {
     alert("제외할 직원을 선택하세요.");
     return;
   }
+
+  // 선택된 직원들 데이터 저장해두기
+  $("#confirmExcludeBtn").data("selectedEmployees", selected);
+
+  // 모달 열기
+  $("#excludeModal").modal("show");
+});
+
+// 모달에서 확인 클릭 시 제외 처리
+$(document).on("click", "#confirmExcludeBtn", function(){
+  let selected = $(this).data("selectedEmployees");
 
   $.ajax({
     url: "/organization/excludeEmployees",
@@ -450,6 +488,7 @@ $(document).on("click", "#excludeBtn", function(){
     data: JSON.stringify({ employeeUsernames: selected }),
     success: function(){
       alert("선택된 직원이 제외되었습니다.");
+      $("#excludeModal").modal("hide");
       location.reload();
     },
     error: function(){

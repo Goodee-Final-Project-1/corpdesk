@@ -37,7 +37,9 @@ public interface PersonalScheduleRepository extends JpaRepository<PersonalSchedu
     """)
     Integer findOldestScheduleYearByUsername(@Param("useYn") Boolean useYn, @Param("username") String username);
 
+    PersonalSchedule findPersonalScheduleByUseYnAndPersonalScheduleId(Boolean useYn, Long personalScheduleId);
 
+    List<PersonalSchedule> findAllByUseYnAndUsernameAndScheduleDateTimeBetween(Boolean useYn, String username, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
 	// 캘린더
 	List<PersonalSchedule> findAllByUsernameAndUseYnTrueAndScheduleDateTimeBetween(String username, LocalDateTime startDate, LocalDateTime endDate);

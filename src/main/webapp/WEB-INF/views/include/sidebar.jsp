@@ -16,7 +16,7 @@
 			<ul class="nav sidebar-inner" id="sidebar-menu">
 
 				<!-- 홈 -->
-				<li class="active">
+				<li>
 					<a class="sidenav-item-link" href="/dashboard">
 						<i class="mdi mdi-home"></i> <span class="nav-text">홈</span>
 					</a>
@@ -37,31 +37,31 @@
 
 				<!-- 메신저, 메일, 전자결재, 캘린더, 게시판 -->
 				<li>
-					<a class="sidenav-item-link" href="/chat/room/list"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/chat/room/list">
 						<i class="mdi mdi-wechat"></i> <span class="nav-text">메신저</span>
 					</a>
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="/email/received"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/email/received">
 						<i class="mdi mdi-email"></i> <span class="nav-text">메일</span>
 					</a>
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="/approval/list?username=jung_frontend"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/approval/list">
 						<i class="mdi mdi-pencil-box-outline"></i> <span class="nav-text">전자결재</span>
 					</a>
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="/calendar/list"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/calendar/list">
 						<i class="mdi mdi-calendar-check"></i> <span class="nav-text">캘린더</span>
 					</a>
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="/board/notice"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/board/notice">
 						<i class="mdi mdi-clipboard-text-outline"></i> <span class="nav-text">게시판</span>
 					</a>
 				</li>
@@ -73,19 +73,19 @@
 
 				<!-- 근태, 휴가, 일정 -->
 				<li>
-					<a class="sidenav-item-link" href="/attendance/list?username=jung_frontend"> <%-- TODO 쿼리스트링 제거 --%>
+					<a class="sidenav-item-link" href="/attendance/list">
 						<i class="mdi mdi-account-clock"></i> <span class="nav-text">근태</span>
 					</a>
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="calendar.html"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/vacation/list">
 						<i class="mdi mdi-beach"></i> <span class="nav-text">휴가</span>
 					</a>
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="/personal-schedule/list?username=jung_frontend"> <%-- TODO 쿼리스트링 제거 --%>
+					<a class="sidenav-item-link" href="/personal-schedule/list">
 						<i class="mdi mdi-alarm-check"></i> <span class="nav-text">일정</span>
 					</a>
 				</li>
@@ -108,13 +108,13 @@
 						<div class="sub-menu">
 
 							<li>
-								<a class="sidenav-item-link" href="email-inbox.html"> <!-- TODO href 수정 -->
-									<span class="nav-text">조직설계</span>
+								<a class="sidenav-item-link" href="/organization/list"> <!-- TODO href 수정 -->
+										<span class="nav-text">조직설계</span>
 								</a>
 							</li>
 
 							<li>
-								<a class="sidenav-item-link" href="email-details.html"> <!-- TODO href 수정 -->
+								<a class="sidenav-item-link" href="/position/list">
 									<span class="nav-text">직위체계</span>
 								</a>
 							</li>
@@ -124,17 +124,17 @@
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="/employee/list"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/employee/list">
 						<i class="mdi mdi-account-details"></i> <span class="nav-text">인사관리</span>
 					</a>
 				</li>
 				<li>
-					<a class="sidenav-item-link" href="/salary"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/salary">
 						<i class="mdi mdi-currency-krw"></i> <span class="nav-text">급여 관리</span>
 					</a>
 				</li>
 				<li>
-					<a class="sidenav-item-link" href="/stats"> <!-- TODO href 수정 -->
+					<a class="sidenav-item-link" href="/stats">
 						<i class="mdi mdi-chart-areaspline"></i> <span class="nav-text">통계</span>
 					</a>
 				</li>
@@ -143,3 +143,43 @@
 		</div>
 	</div>
 </aside>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var currentPath = window.location.pathname;
+
+    if (currentPath === '/' || currentPath === '/index' || currentPath === '/index.html') {
+      currentPath = '/dashboard';
+    }
+
+    var menuLinks = document.querySelectorAll('#sidebar-menu a.sidenav-item-link');
+
+    var activeItems = document.querySelectorAll('#sidebar-menu li.active');
+    activeItems.forEach(function(li) {
+      li.classList.remove('active');
+    });
+
+    menuLinks.forEach(function(link) {
+      var linkHref = link.getAttribute('href');
+
+      if (linkHref && linkHref !== 'javascript:void(0)' && currentPath.startsWith(linkHref)) {
+        var listItem = link.closest('li');
+
+        if (listItem) {
+          listItem.classList.add('active');
+
+          var parentHasSubLi = link.closest('li.has-sub');
+          if (parentHasSubLi) {
+            parentHasSubLi.classList.add('active');
+
+            var subMenuCollapse = parentHasSubLi.querySelector('.collapse');
+            if (subMenuCollapse) {
+              subMenuCollapse.classList.add('show');
+              subMenuCollapse.setAttribute('aria-expanded', 'true');
+            }
+          }
+        }
+      }
+    });
+  });
+</script>

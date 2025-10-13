@@ -1,5 +1,14 @@
 package com.goodee.corpdesk.employee;
 
+import java.io.File;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.department.entity.Department;
@@ -27,6 +36,20 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.attendance.service.AttendanceService;
+import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
+import com.goodee.corpdesk.file.FileManager;
+import com.goodee.corpdesk.file.dto.FileDTO;
+import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
+import com.goodee.corpdesk.position.entity.Position;
+import com.goodee.corpdesk.position.repository.PositionRepository;
+import com.goodee.corpdesk.vacation.VacationManager;
+import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.*;
@@ -53,12 +76,16 @@ public class EmployeeService implements UserDetailsService {
     private PositionRepository positionRepository;
 
     @Autowired
+    private RoleService roleService;
+    @Autowired
     private EmployeeFileRepository employeeFileRepository;
     @Autowired
     private FileManager fileManager;
     @Value("${app.upload}")
     private String uploadPath;
 
+    
+    
     @Autowired
     private VacationRepository vacationRepository;
     @Autowired
@@ -68,7 +95,7 @@ public class EmployeeService implements UserDetailsService {
 
     // 모든 부서 조회
     public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
+    	return departmentRepository.findByUseYnTrue();
     }
 
     // 모든 직위 조회
@@ -107,7 +134,7 @@ public class EmployeeService implements UserDetailsService {
     	// 직원 등록
         employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         employee.setUseYn(true);
-
+        roleService.assignRole(employee);
         Employee newEmployee = employeeRepository.save(employee);
 
         // 추가) 직원 등록 성공시 휴가 테이블에 insert
@@ -131,21 +158,64 @@ public class EmployeeService implements UserDetailsService {
         return newEmployee;
     }
 
-    // 직원 목록 조회 (활성만)
-    public List<Employee> getActiveEmployees() {
+    public List<EmployeeListDTO> getActiveEmployeesForList() {
         List<Employee> employees = employeeRepository.findAllByUseYnTrue();
+        List<EmployeeListDTO> result = new ArrayList<>();
+
         for (Employee emp : employees) {
-            if (emp.getDepartmentId() != null) {
-                Department dept = departmentRepository.findById(emp.getDepartmentId()).orElse(null);
-                if (dept != null) emp.setDepartmentName(dept.getDepartmentName());
+            // 부서명
+        	String deptName = "-";
+        	if (emp.getDepartmentId() != null) {
+        	    deptName = departmentRepository.findById(emp.getDepartmentId())
+        	                  .map(Department::getDepartmentName)
+        	                  .orElse("-");
+        	}
+
+            // 직위명
+        	String posName = "-";
+        	if (emp.getPositionId() != null) {
+        	    posName = positionRepository.findById(emp.getPositionId())
+        	                  .map(Position::getPositionName)
+        	                  .orElse("-");
+        	}
+
+            // ✅ 현재 출퇴근 상태 (출근, 퇴근, 휴가, 출근전)
+            String workStatus = "-";
+            try {
+                var attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
+                if (attendanceDto != null) {
+                    if ("출근".equals(attendanceDto.getWorkStatus()) || "퇴근".equals(attendanceDto.getWorkStatus())) {
+                        workStatus = attendanceDto.getWorkStatus();
+                    }
+                }
+            } catch (Exception e) {
+                workStatus = "-"; // 오류시 기본값
             }
-            if (emp.getPositionId() != null) {
-                Position pos = positionRepository.findById(emp.getPositionId()).orElse(null);
-                if (pos != null) emp.setPositionName(pos.getPositionName());
-            }
+
+            // 🔥 여기서 deptName, posName을 사용해야 함
+            result.add(new EmployeeListDTO(
+                    emp.getUsername(),
+                    emp.getName(),
+                    deptName,          // ✅ 수정: emp.getDepartmentName() ❌ → deptName ✅
+                    emp.getDepartmentId(),
+                    emp.getPositionId(),
+                    posName,           // ✅ 수정: emp.getPositionName() ❌ → posName ✅
+                    emp.getMobilePhone(),
+                    emp.getHireDate(),
+                    emp.getLastWorkingDay(),
+                    emp.getEnabled(),
+                    workStatus,
+                    emp.getPassword(),
+                    emp.getUseYn()
+            ));
         }
-        return employees;
+
+        return result;
     }
+
+
+
+
 
  // 직원 정보 수정 (파일 포함)
     public void updateEmployee(Employee employeeFromForm, MultipartFile profileImageFile) throws Exception {
@@ -172,13 +242,17 @@ public class EmployeeService implements UserDetailsService {
             persisted.setPassword(passwordEncoder.encode(employeeFromForm.getPassword()));
         } // null이면 기존 비밀번호 그대로 유지
 
+        if (employeeFromForm.getEnabled() != null) {
+            persisted.setEnabled(employeeFromForm.getEnabled());
+        }
         persisted.setGender(employeeFromForm.getGender());
-        persisted.setEnabled(employeeFromForm.getEnabled());
         persisted.setLastWorkingDay(employeeFromForm.getLastWorkingDay());
         persisted.setDirectPhone(employeeFromForm.getDirectPhone());
 
         Employee editedEmployee = employeeRepository.save(persisted);
-
+        
+        roleService.assignRole(editedEmployee);
+        employeeRepository.save(editedEmployee);
         // ---------------- 프로필 이미지 처리 ----------------
         if (profileImageFile != null && !profileImageFile.isEmpty()) {
             Optional<EmployeeFile> fileOptional = employeeFileRepository.findByUsername(persisted.getUsername());
@@ -206,16 +280,16 @@ public class EmployeeService implements UserDetailsService {
         // 추가) 직원 정보 수정 성공시 휴가 테이블 update
         if(editedEmployee.getHireDate() != null) {
             // 직원의 휴가 테이블 조회
-            Vacation vacation = vacationRepository.findByUseYnAndUsername(true, editedEmployee.getUsername());
-
-            // 총 연차 update
-            int totalVacation = vacationManager.calTotalVacation(editedEmployee.getHireDate());
-            vacation.setTotalVacation(totalVacation);
-            // 잔여 연차 update (update된 총 연차 - 사용 연차)
-            int usedVacation = vacation.getUsedVacation();
-            vacation.setRemainingVacation(totalVacation - usedVacation);
-
-            vacationRepository.save(vacation);
+//            Vacation vacation = vacationRepository.findByUseYnAndUsername(true, editedEmployee.getUsername());
+//
+//            // 총 연차 update
+//            int totalVacation = vacationManager.calTotalVacation(editedEmployee.getHireDate());
+//            vacation.setTotalVacation(totalVacation);
+//            // 잔여 연차 update (update된 총 연차 - 사용 연차)
+//            int usedVacation = vacation.getUsedVacation();
+//            vacation.setRemainingVacation(totalVacation - usedVacation);
+//
+//            vacationRepository.save(vacation);
         }
     }
 
@@ -263,8 +337,10 @@ public class EmployeeService implements UserDetailsService {
 
     public Map<String, Object> detail(String username) {
         Employee employee = employeeRepository.findById(username).orElseThrow();
-        Department department = departmentRepository.findById(employee.getDepartmentId()).orElse(null);
-        Position position = positionRepository.findById(employee.getPositionId()).orElse(null);
+		Department department = null;
+		if(employee.getDepartmentId() != null) department = departmentRepository.findById(employee.getDepartmentId()).orElse(null);
+        Position position = null;
+		if(employee.getPositionId() != null) position = positionRepository.findById(employee.getPositionId()).orElse(null);
 
         Map<String, Object> map = new HashMap<>();
         map.put("employee", employee);
@@ -313,7 +389,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     public ResEmployeeDTO getFulldetail(String username) {
-        return employeeRepository.findEmployeeWithDeptAndPosition(username);
+        return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
 
 }

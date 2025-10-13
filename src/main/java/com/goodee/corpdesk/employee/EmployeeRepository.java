@@ -1,5 +1,9 @@
 package com.goodee.corpdesk.employee;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import org.springframework.data.domain.Page;
@@ -9,10 +13,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -20,7 +23,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
         WITH e AS (
         	SELECT *
         	FROM employee
-        	WHERE username = :username
+        	WHERE
+                use_yn = :useYn
+                AND username = :username
         )
         SELECT
             e.username AS username, e.position_id AS position_id, e.department_id AS department_id, e.name AS name
@@ -30,7 +35,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
         JOIN department d USING (department_id)
         JOIN `position` p USING (position_id);
     """)
-    public ResEmployeeDTO findEmployeeWithDeptAndPosition(@Param("username") String username);
+    public ResEmployeeDTO findEmployeeWithDeptAndPosition(@Param("useYn") Boolean useYn
+                                                          , @Param("username") String username);
 
     @NativeQuery("""
         WITH
@@ -78,8 +84,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	List<Employee> findByDepartmentId(Integer departmentId);
 	
 	@Modifying
-	@Query("UPDATE Employee e SET e.departmentId = NULL, e.departmentName = NULL WHERE e.departmentId = :deptId")
-	void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
+    @Transactional
+    @Query("UPDATE Employee e SET e.departmentId = null WHERE e.departmentId = :deptId")
+    void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
 
 	List<Employee> findByDepartmentIdAndUseYnTrue(Integer departmentId);
 

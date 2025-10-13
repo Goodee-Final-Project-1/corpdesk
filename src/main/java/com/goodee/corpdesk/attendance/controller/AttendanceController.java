@@ -7,6 +7,9 @@ import com.goodee.corpdesk.employee.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -90,31 +93,21 @@ public class AttendanceController {
     }
 
     @PostMapping("")
-    public String add() throws Exception {
-        // TODO 추후 인증 붙이면서 username 수정
-        // TODO modifiedBy를 인증정보에서 가져오는 것으로 수정
+    public String add(@AuthenticationPrincipal UserDetails userDetails) throws Exception {
 
-        System.err.println("attendance/add");
-
-        String username = "jung_frontend";
+        String username = userDetails.getUsername();
         ResAttendanceDTO result = attendanceService.checkIn(username);
 
-        log.warn("{}", result);
-
         return "redirect:/attendance/list?username=" + username;
+
     }
 
     @PatchMapping("{attendanceId}")
-    public String update(@PathVariable("attendanceId") Long attendanceId) throws Exception {
-        // TODO 추후 인증 붙이면서 username 수정
-        // TODO modifiedBy를 인증정보에서 가져오는 것으로 수정
+    public String update(@PathVariable("attendanceId") Long attendanceId
+                         , @AuthenticationPrincipal UserDetails userDetails) throws Exception {
 
-        System.err.println("attendance/update");
-
-        String username = "jung_frontend";
+        String username = userDetails.getUsername();
         ResAttendanceDTO result = attendanceService.checkOut(attendanceId, username);
-
-        log.warn("{}", result);
 
         return "redirect:/attendance/list?username=" + username;
     }
