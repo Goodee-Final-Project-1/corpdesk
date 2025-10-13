@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
@@ -487,7 +488,7 @@ public class ChatRoomService {
 	public List<ChatContact> getContactList() {
 		
 		List<ChatContact> contactList= new ArrayList<>();
-		List<Employee> emp = employeeService.getActiveEmployees();		
+		List<EmployeeListDTO> emp = employeeService.getActiveEmployeesForList();
 		emp.forEach(e->{
 			if(!e.getUsername().equals("admin")) {
 				ChatContact contact = new ChatContact();
