@@ -15,11 +15,13 @@ import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
 import com.goodee.corpdesk.vacation.service.VacationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
@@ -35,11 +37,17 @@ public class HomeController {
     @Autowired
     private HomeService homeService;
     @Autowired
-    private ApprovalService approvalService;
-    @Autowired
     private VacationService vacationService;
     @Autowired
     private AttendanceService attendanceService;
+
+    @Value("${api.kakao.javascript.key}")
+    private String appkey;
+
+    @ModelAttribute("appkey")
+    public String getAppkey() {
+        return appkey;
+    }
 
     @GetMapping("/")
 	public String home() {

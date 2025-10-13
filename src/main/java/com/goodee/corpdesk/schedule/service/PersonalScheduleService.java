@@ -29,7 +29,7 @@ public class PersonalScheduleService {
     @Autowired
     private WebClient webClient;
 
-    @Value("${api.kakao.map.key}")
+    @Value("${api.kakao.restapi.key}")
     private String kakaoMapKey;
 
     public ResPersonalScheduleDTO createSchedule(String username, ReqPersonalScheduleDTO reqPersonalScheduleDTO) {

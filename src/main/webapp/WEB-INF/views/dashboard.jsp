@@ -9,7 +9,7 @@
 	<title>Insert title here</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 
-  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e8170148d86f9c8fb1da017867a75935"></script>
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}"></script>
   <script type="text/javascript" src="/js/dashboard/map.js"></script>
 
 <%--  <style>--%>
