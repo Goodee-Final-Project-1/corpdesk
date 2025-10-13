@@ -40,7 +40,7 @@ import lombok.ToString;
 @Entity @Table(name = "employee")
 @DynamicInsert
 @DynamicUpdate
-public class Employee implements UserDetails {
+public class Employee /*implements UserDetails*/ {
 	public interface CreateGroup {
 	} // 등록 시 검증
 
@@ -121,23 +121,9 @@ public class Employee implements UserDetails {
 	@ColumnDefault("0")
 	private Long currentBaseSalary;
 
-	@Transient
-	private Role role;
-
-	
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<GrantedAuthority> authorities = new ArrayList<>();
-		if (role != null) {
-			authorities.add(new SimpleGrantedAuthority(this.role.getRoleName()));
-		}
-
-		return authorities;
-	}
-
-    public ResApprovalDTO  toResApprovalDTO() {
-        return ResApprovalDTO.builder()
-                .username(this.username)
-                .build();
-    }
+  public ResApprovalDTO  toResApprovalDTO() {
+      return ResApprovalDTO.builder()
+              .username(this.username)
+              .build();
+  }
 }

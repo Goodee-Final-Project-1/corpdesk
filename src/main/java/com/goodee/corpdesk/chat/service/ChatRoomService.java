@@ -12,7 +12,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.goodee.corpdesk.chat.controller.ChatParticipantController;
+import com.goodee.corpdesk.chat.dto.ChatContact;
 import com.goodee.corpdesk.chat.dto.ChatMessageDto;
 import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
 import com.goodee.corpdesk.chat.dto.RoomData;
@@ -24,12 +25,16 @@ import com.goodee.corpdesk.chat.repository.ChatParticipantRepository;
 import com.goodee.corpdesk.chat.repository.ChatRoomRepository;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.notification.dto.NotificationDto;
+import com.goodee.corpdesk.notification.service.NotificationService;
 import com.goodee.corpdesk.position.entity.Position;
 
 @Service
 public class ChatRoomService {
+
 	@Autowired
     private ChatParticipantService chatParticipantService;
 	@Autowired
@@ -44,7 +49,11 @@ public class ChatRoomService {
 	private SimpMessagingTemplate messagingTemplate;
 	@Autowired
 	private ChatSessionTracker chatSessionTracker;
-
+	@Autowired
+	private NotificationService notificationService;
+  
+	
+	
 
 	//유저이름으로 유저 이름 부서 직위 가져옴
 		public String getUserNameDepPos(String username) {
@@ -56,7 +65,20 @@ public class ChatRoomService {
 	        return userNameDepPos;
 			
 		}
-	
+	//개인 이미지
+		public String getUserImgPath(String username) {
+			Optional<EmployeeFile> empFileOp = employeeService.getEmployeeFileByUsername(username);
+			if (empFileOp.isPresent()) {
+				EmployeeFile empFile = empFileOp.get();
+				if (empFile != null && empFile.getUseYn()) {
+					return "/files/profile/" + empFile.getSaveName() + "." + empFile.getExtension();
+				} else {
+					return "/images/default_profile.jpg";
+				}
+			} else {
+				return "/images/default_profile.jpg";
+			}
+		}
 	
 	//해당 유저의 모든 채팅방 목록을 불러옴
 	public List<RoomData> getChatRoomList(String username) {
@@ -247,13 +269,16 @@ public class ChatRoomService {
 	}
 
 
-
+@Transactional
 	public boolean outRoom(Long roomId, Principal principal) {
 		boolean result =false;
 		if(chatParticipantRepository.existsByChatRoomIdAndEmployeeUsernameAndUseYnTrue(roomId, principal.getName())) {
 			chatParticipantRepository.updateRoomUseYnFalse(principal.getName(), roomId);
 			chatParticipantService.updateLastMessage(principal.getName(), roomId);
 			
+			chatParticipantRepository.flush();
+			
+			//그룹 채팅방 일때만 퇴장 메세지를 보내줌
 			if(chatRoomRepository.findByChatRoomId(roomId).get().getChatRoomType().equals("room")) {
 				//퇴장 메세지 저장
 		    	ChatMessage msg = new ChatMessage();
@@ -261,12 +286,27 @@ public class ChatRoomService {
 			    msg.setMessageType("out");
 			    msg.setMessageContent(getUserNameDepPos(principal.getName())+"님이 퇴장하였습니다.");
 			    msg.setUseYn(true);
-			    msg = chatMessageRepository.save(msg);
-			    msg.setEmployeeUsername(principal.getName());
-			    msg.setViewName(getUserNameDepPos(principal.getName()));
-			    messagingTemplate.convertAndSend("/sub/chat/room/"+roomId,msg);
+			    ChatMessageDto saveMsg = chatMessageRepository.save(msg).toChatMessageDto();
+			    saveMsg.setEmployeeUsername(principal.getName());
+			    saveMsg.setViewName(getUserNameDepPos(principal.getName()));
+			    saveMsg.setNotificationType("out");
+			    messagingTemplate.convertAndSend("/sub/chat/room/"+roomId,saveMsg);
+			    
+			    List<ChatParticipant> participant =chatParticipantRepository.findAllByChatRoomIdAndUseYnTrue(roomId);
+				 //개인 채팅목록에 알림을 보내줌
+			    participant.forEach(p->{
+			    	  if (!chatSessionTracker.isUserFocused(roomId, p.getEmployeeUsername())) {
+			    		  saveMsg.setFocused(false);
+			    		  notificationService.saveNotification(saveMsg.getMessageId(),"message",p.getEmployeeUsername());
+			          } else {
+			        	  saveMsg.setFocused(true);
+			          }
+			  	    
+			          messagingTemplate.convertAndSendToUser(p.getEmployeeUsername(), "/queue/notifications", saveMsg);
+			    });
 			}
 			result =true;
+			
 		}
 		return result;
 	}
@@ -362,7 +402,7 @@ public class ChatRoomService {
 	}
 
 	@Transactional
-	public boolean inviteRoom(RoomData roomData) {
+	public boolean inviteRoom(RoomData roomData , Principal principal) {
 	    Optional<ChatRoom> optionalRoom = chatRoomRepository.findByChatRoomId(roomData.getChatRoomId());
 	    
 	    if (optionalRoom.isEmpty()) {
@@ -374,17 +414,21 @@ public class ChatRoomService {
 	    // 1대1 → room 전환
 	    if (chatRoom.getChatRoomTitle() == null) {
 	        chatRoom.setChatRoomTitle(roomData.getChatRoomTitle());
+	        chatParticipantRepository.updateAllRoomUseYnTrue(roomData.getChatRoomId());
 	    }
 	    chatRoom.setChatRoomType("room");
 	    
 	    chatRoomRepository.flush();
-	    RoomData chatRoomDto = chatRoom.changeToRoomData();
-	   
 	    
 	    //해당방의 모든 사람 불러옴 전에 초대된적이있으면 useYn만 바꿔주면 되기때문에
 	   
 	    roomData.getUsernames().forEach(u->{
-	    	 Long beforeInviteMessageId = chatMessageRepository.findTopByChatRoomIdOrderByMessageIdDesc(roomData.getChatRoomId()).getMessageId();
+	    	ChatMessage lastMsg = chatMessageRepository.findTopByChatRoomIdOrderByMessageIdDesc(roomData.getChatRoomId());
+	    	Long beforeInviteMessageId= null;
+	    	//1대1 개설후 아무 메세지 안보내고 바로 초대할경
+	    	if(lastMsg !=null) {
+	    		beforeInviteMessageId=lastMsg.getMessageId();
+	    	}
 	    	// 해당 유저 정보에 방정보 저장
 		    	ChatParticipant cp = chatParticipantRepository.findByChatRoomIdAndEmployeeUsername(roomData.getChatRoomId(), u);
 		    	if(cp!=null) {
@@ -409,10 +453,10 @@ public class ChatRoomService {
 		    msg.setUseYn(true);
 		    ChatMessageDto saveMsg = chatMessageRepository.save(msg).toChatMessageDto();
 		    saveMsg.setEmployeeUsername(u);
-		    saveMsg.setViewName(roomData.getChatRoomTitle());
+		    saveMsg.setViewName(chatRoom.getChatRoomTitle());
 		    saveMsg.setNotificationType("invite");
 		    saveMsg.setImgPath("/images/group_profile.png");
-		   
+		    saveMsg.setRoomName(getUserNameDepPos(u));
 		    messagingTemplate.convertAndSend("/sub/chat/room/"+roomData.getChatRoomId(),saveMsg);
 		    
 		    
@@ -420,6 +464,7 @@ public class ChatRoomService {
 			  //개인 채팅목록에 알림을 보내줌
 			    participant.forEach(p->{
 			    	  if (!chatSessionTracker.isUserFocused(roomData.getChatRoomId(), p.getEmployeeUsername())) {
+			    		  notificationService.saveNotification(saveMsg.getMessageId(),"message",p.getEmployeeUsername());
 			    		  saveMsg.setFocused(false);
 			          } else {
 			        	  saveMsg.setFocused(true);
@@ -436,6 +481,58 @@ public class ChatRoomService {
 	  
 	    
 	    return true; 
+	}
+
+
+	public List<ChatContact> getContactList() {
+		
+		List<ChatContact> contactList= new ArrayList<>();
+		List<Employee> emp = employeeService.getActiveEmployees();		
+		emp.forEach(e->{
+			if(!e.getUsername().equals("admin")) {
+				ChatContact contact = new ChatContact();
+				contact.setName(e.getName());
+				contact.setDepartmentName(e.getDepartmentName());
+				contact.setPositionName(e.getPositionName());
+				contact.setUsername(e.getUsername());
+				Optional<EmployeeFile> empF = employeeService.getEmployeeFileByUsername(e.getUsername());
+				if(empF.isPresent()) {
+					contact.setImgPath(empF.get().getSaveName()+"."+empF.get().getExtension());				
+				}else {
+					contact.setImgPath("/images/default_profile.jpg");
+				}
+				contactList.add(contact);
+			}
+			
+			
+			
+		});
+		
+		return contactList;
+	}
+
+	//읽지 않은 메세지의 세부 정보들 가져옴 
+	public List<ChatMessageDto> getChatNotificationList(String username) {
+		List<ChatMessageDto> list =new ArrayList<>();
+		List<NotificationDto> notificationList=notificationService.getMessageNotification(username);
+		
+		notificationList.forEach(nl->{
+		ChatMessageDto msg =chatMessageRepository.findByMessageId(nl.getRelatedId()).toChatMessageDto();
+		
+		String roomTitle=null;
+		if(getChatRoomType(msg.getChatRoomId()).equals("room")) {
+			roomTitle = getRoomTitle(msg.getChatRoomId());
+			msg.setImgPath("/images/group_profile.png");
+		}else {
+			roomTitle = getUserNameDepPos(msg.getEmployeeUsername());
+			msg.setImgPath(getUserImgPath(msg.getEmployeeUsername()));
+			
+		}
+		msg.setChatRoomId(msg.getChatRoomId());
+		msg.setViewName(roomTitle);
+		list.add(msg);
+		});
+		return list;
 	}
 
 	

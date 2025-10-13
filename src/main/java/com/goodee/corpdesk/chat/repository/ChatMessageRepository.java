@@ -21,5 +21,5 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long>{
 	
 	ChatMessage findTopByChatRoomIdOrderByMessageIdDesc(Long chatRoomId);
 	Long countByChatRoomId(Long chatRoomId);
-	
-}
+	ChatMessage findByMessageId(Long messageId);
+};

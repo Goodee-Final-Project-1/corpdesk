@@ -24,7 +24,7 @@
 <p>여기에 내용 추가</p>
 
 <div class="card card-default">
-	<div class="card-header">
+	<div class="card-body">
 		<form id="searchForm">
 			<div class="form-group d-flex">
 				<div>
@@ -61,8 +61,32 @@
 			</div>
 		</form>
 	</div>
+</div>
+<div class="card card-default">
 	<div class="card-body">
-		<div id="chart"></div>
+		<div id="chart1"></div>
+	</div>
+</div>
+<div class="row">
+	<div class="card card-default col-3">
+		<div class="card-body">
+			<div id="chart2"></div>
+		</div>
+	</div>
+	<div class="card card-default col-3">
+		<div class="card-body">
+			<div id="chart3"></div>
+		</div>
+	</div>
+	<div class="card card-default col-3">
+		<div class="card-body">
+			<div id="chart4"></div>
+		</div>
+	</div>
+	<div class="card card-default col-3">
+		<div class="card-body">
+			<div id="chart5"></div>
+		</div>
 	</div>
 </div>
 <!-- 내용 끝 -->
@@ -70,7 +94,12 @@
 
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
-<script src="/js/stats/list.js"></script>
+<script src="/js/stats/chart1.js"></script>
+<script src="/js/stats/chart2.js"></script>
+<script src="/js/stats/chart3.js"></script>
+<script src="/js/stats/chart4.js"></script>
+<script src="/js/stats/chart5.js"></script>
+<%--<script src="/js/stats/chart5.js"></script>--%>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>

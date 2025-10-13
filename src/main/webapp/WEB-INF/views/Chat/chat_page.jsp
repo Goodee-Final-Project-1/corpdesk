@@ -160,7 +160,7 @@ height:50px;
           <c:forEach items="${employeeList}" var="employee">
             <li class="list-group-item d-flex align-items-cent er" data-username="${employee.username}">
              <!-- 추후 사진 바꿔주면됨  -->
-              <img src="/images/default_profile.jpg" class="rounded-circle mr-3" style="width:40px; height:40px;">
+              <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:40px; height:40px;">
               <div class="flex-fill">
                 <strong class="employeeName">${employee.name}</strong><br>
                 <small>${employee.departmentName} ${employee.positionName}</small>
