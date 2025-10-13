@@ -89,7 +89,6 @@ public class ApprovalController {
                                  , @AuthenticationPrincipal UserDetails userDetails) throws Exception {
 
 		String modifiedBy = userDetails.getUsername();
-        log.warn("files: {}", Arrays.stream(files).toList());
 
 		return approvalService.createApproval(reqApprovalDTO, files, modifiedBy);
 		
