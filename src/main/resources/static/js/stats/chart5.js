@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (!response.ok) throw new Error('수신 오류');
 			const data = await response.json();
 
-			console.log(data);
+			// console.log(data);
 
 			chart5.updateOptions({
 				xaxis: {

@@ -5,9 +5,11 @@ import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,12 @@ public class StatsService {
 	private final DepartmentRepository departmentRepository;
 	private final PositionRepository positionRepository;
 
+
+	@Value("${attendance.work-hour.start}")
+	private String workStartHour;
+	@Value("${attendance.work-hour.end}")
+	private String workEndHour;
+
 	public List<Department> getDepartmentList() {
 		return departmentRepository.findAll();
 	}
@@ -29,7 +37,7 @@ public class StatsService {
 		return positionRepository.findAll();
 	}
 
-	// FIXME: 조건 조회를 하려면 분기가 4개
+	// 입퇴사자 및 재직자 통계
 	public Map<String, Object> list(LocalDate start, LocalDate end,
 			Integer departmentId, Integer positionId) {
 		Map<String, Object> map = new HashMap<>();
@@ -48,8 +56,9 @@ public class StatsService {
 		return map;
 	}
 
-	public Map<String, List> list2() {
-		List<Map<String, Long>> list = statsRepository.countAllServicePeriod();
+	// 근속기간 통계
+	public Map<String, List> list2(LocalDate start, LocalDate end) {
+		List<Map<String, Long>> list = statsRepository.countAllServicePeriod(start, end);
 
 		List<String> diff = new ArrayList<>() {{
 			add("1년 미만");
@@ -78,8 +87,9 @@ public class StatsService {
 		}};
 	}
 
-	public Map<String, List> list3() {
-		List<Map<String, Long>> list = statsRepository.countAllAge();
+	// 나이 통계
+	public Map<String, List> list3(LocalDate start, LocalDate end) {
+		List<Map<String, Long>> list = statsRepository.countAllAge(start, end);
 
 		List<String> diff = new ArrayList<>() {{
 			add("20 ~ 29세");
@@ -108,8 +118,11 @@ public class StatsService {
 		}};
 	}
 
+	// 근태 통계
 	public Map<String, List> list4(LocalDate start, LocalDate end) {
-		List<Map<String, Object>> list = statsRepository.countAllAttendance(start, end);
+		LocalTime workStartTime = LocalTime.parse(workStartHour);
+
+		List<Map<String, Object>> list = statsRepository.countAllAttendance(start, end, workStartTime);
 
 		List<String> months = new ArrayList<>();
 
@@ -134,6 +147,7 @@ public class StatsService {
 		}};
 	}
 
+	// 근무 시간 통계
 	public Map<String, List> list5(LocalDate start, LocalDate end) {
 		List<Map<String, Object>> list = statsRepository.countAllWorkHours(start, end);
 

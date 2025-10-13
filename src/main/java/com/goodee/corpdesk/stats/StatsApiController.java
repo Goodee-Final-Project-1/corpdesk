@@ -35,13 +35,31 @@ public class StatsApiController {
 	}
 
 	@PostMapping("/chart2")
-	public Map<String, List> list2() {
-		return statsService.list2();
+	public Map<String, List> list2(@RequestBody Map<String, Object> payload) {
+		LocalDate end = LocalDate.now();
+		LocalDate start = end.minusYears(1);
+		if (payload.get("start") != null && !payload.get("start").equals("")) {
+			start = LocalDate.parse((String) payload.get("start"));
+		}
+		if (payload.get("end") != null && !payload.get("end").equals("")) {
+			end = LocalDate.parse((String) payload.get("end"));
+		}
+
+		return statsService.list2(start, end);
 	}
 
 	@PostMapping("/chart3")
-	public Map<String, List> list3() {
-		return statsService.list3();
+	public Map<String, List> list3(@RequestBody Map<String, Object> payload) {
+		LocalDate end = LocalDate.now();
+		LocalDate start = end.minusYears(1);
+		if (payload.get("start") != null && !payload.get("start").equals("")) {
+			start = LocalDate.parse((String) payload.get("start"));
+		}
+		if (payload.get("end") != null && !payload.get("end").equals("")) {
+			end = LocalDate.parse((String) payload.get("end"));
+		}
+
+		return statsService.list3(start, end);
 	}
 
 	@PostMapping("/chart4")
