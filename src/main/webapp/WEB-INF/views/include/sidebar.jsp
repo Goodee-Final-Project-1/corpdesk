@@ -108,8 +108,8 @@
 						<div class="sub-menu">
 
 							<li>
-								<a class="sidenav-item-link" href="/organization/list">
-									<span class="nav-text">조직설계</span>
+								<a class="sidenav-item-link" href="/organization/list"> <!-- TODO href 수정 -->
+										<span class="nav-text">조직설계</span>
 								</a>
 							</li>
 
