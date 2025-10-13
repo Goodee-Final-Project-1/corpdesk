@@ -498,7 +498,7 @@ public class ChatRoomService {
 				contact.setUsername(e.getUsername());
 				Optional<EmployeeFile> empF = employeeService.getEmployeeFileByUsername(e.getUsername());
 				if(empF.isPresent()) {
-					contact.setImgPath(empF.get().getSaveName()+"."+empF.get().getExtension());				
+					contact.setImgPath("/files/profile/"+empF.get().getSaveName()+"."+empF.get().getExtension());				
 				}else {
 					contact.setImgPath("/images/default_profile.jpg");
 				}

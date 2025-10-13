@@ -130,7 +130,6 @@
                         <i class="mdi mdi-bell"></i>
                     </div>
                     <div class="media-body">
-                    
                         <span class="title mb-0">Add request</span>
                         <span class="discribe">${notification.content}</span>
                         <span class="time">

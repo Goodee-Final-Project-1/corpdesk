@@ -32,7 +32,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 	int updateAllReadTrue(@Param("notificationType")String notificationType,@Param("username")  String username);
 
 
-	Optional<Notification> findByRelatedIdAndNotificationTypeAndUsername(Long relatedId, String notificationType, String username);
+	List<Notification> findByRelatedIdAndNotificationTypeAndUsername(Long relatedId, String notificationType, String username);
 
 	
 	@Transactional

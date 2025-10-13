@@ -12,6 +12,9 @@ stompClient.connect({}, function(frame) {
 			}
 
         }
+		if(notification.notificationType=='approval'){
+			appendApprovalNotification(notification);
+		}
 		
         
     })
@@ -181,3 +184,17 @@ function appendApprovalNotification(notification){
 	 approvalCount.textContent = "결재 (" + newNoti + ")";
 	 approvalCount.setAttribute("data-count", newNoti);
 }
+
+const approvalTab = document.getElementById("approval");
+approvalTab.addEventListener("click",(e)=>{
+	const notificationOne = e.target.closest('.approvalNotification');
+	if(!notificationOne)return;
+	const approvalId = notificationOne.getAttribute("data-approvalId");
+	fetch("/notification/read/" + approvalId, {
+					method: "POST"
+				}).then(()=>{
+					location.href=`/approval/${approvalId}`;
+				});
+	
+
+})

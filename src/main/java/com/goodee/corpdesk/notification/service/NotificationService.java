@@ -47,15 +47,7 @@ public class NotificationService {
 		return notificationDto;
 	}
 	
-	// 특정 알림 읽음 처리 및 정보
-	public NotificationDto notificationSelect(Long relatedId ,String notificationType , String username) {
-		Optional<Notification> notification =  notificationRepository.findByRelatedIdAndNotificationTypeAndUsername(relatedId,notificationType,username);
-		if(notification.isPresent()) {
-			notificationRepository.updateReadTrue(relatedId,notificationType,username);
-			return  notification.get().ChangeToDto();
-		}
-		return null;
-		}
+	
 	//특정 알림 유형의 모든 알림 읽음 처리
 	public int setNotificationReadAll(String notificationType , String username) {
 		int result= notificationRepository.updateAllReadTrue(notificationType,username);
@@ -87,6 +79,19 @@ public class NotificationService {
 				.build();
 		return notificationRepository.save(notification);
 	}
+	//결재 알림 읽음
+	public NotificationDto readApprovalNotification(Long relatedId ,String notificationType , String username) {
+		List<Notification> notification =  notificationRepository.findByRelatedIdAndNotificationTypeAndUsername(relatedId,notificationType,username);
+		if(notification.size()>0) {
+			notificationRepository.updateReadTrue(relatedId,notificationType,username);
+		}
+		return null;
+		}
+	
+	
+	
+	
+	//결재 알림 요청
 	public void reqNotification(Long relatedId , String notificationType , String content , String username ) {
 		Notification n = saveApprovalNotification(relatedId,
 				notificationType, content,username);

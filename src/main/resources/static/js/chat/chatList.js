@@ -101,7 +101,63 @@ function ReadNotification(chatRoomId){
 	messageCount.textContent = "메시지 (" + (newMsgCount > 0 ? newMsgCount : 0) + ")";
 	messageCount.setAttribute("data-count", newMsgCount);
 }
+//결재 알림 생성
+function appendApprovalNotification(notification){
+	const approvalTab = document.getElementById("approval");
 
+
+	 //  알림 요소 생성
+	 const div = document.createElement("div");
+	 div.className = "media media-sm p-4 mb-0 notification approvalNotification";
+	 div.setAttribute("data-approvalId", notification.relatedId);
+	 div.style.cursor = "pointer";
+
+	 div.innerHTML = `
+	   <div class="media-sm-wrapper bg-info-dark">
+	   	 <i class="mdi mdi-bell"></i>
+	   </div>
+	   <div class="media-body">
+	 	 <span class="title mb-0">Add request</span>
+	  	 <span class="discribe">${notification.content}</span>
+      	 <span class="time">
+       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}"></time>...
+      	 </span>
+	   </div>
+	 `;
+
+	 //  새 알림을 목록 맨 위에 추가
+	 approvalTab.prepend(div);
+
+	 //  전체 및 메시지 카운트 갱신
+	 const allCount = document.querySelector(".all-count");
+	 const approvalCount = document.querySelector(".approval-count");
+
+	 const currentAll = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
+	 const currentNoti = parseInt(approvalCount.getAttribute("data-count") || "0", 10);
+
+	 const newAll = currentAll + 1;
+	 const newNoti = currentNoti + 1;
+
+	 allCount.textContent = newAll;
+	 allCount.setAttribute("data-allCount", newAll);
+
+	 approvalCount.textContent = "결재 (" + newNoti + ")";
+	 approvalCount.setAttribute("data-count", newNoti);
+}
+
+const approvalTab = document.getElementById("approval");
+approvalTab.addEventListener("click",(e)=>{
+	const notificationOne = e.target.closest('.approvalNotification');
+	if(!notificationOne)return;
+	const approvalId = notificationOne.getAttribute("data-approvalId");
+	fetch("/notification/read/" + approvalId, {
+					method: "POST"
+				}).then(()=>{
+					location.href=`/approval/${approvalId}`;
+				});
+	
+
+})
 
 
 function createLi(chatRoom) {
@@ -400,10 +456,11 @@ stompClient.connect({}, function(frame) {
 
 			}
 		}
+		if(notification.notificationType == 'approval'){
+			appendApprovalNotification(notification);
+		}
 
-
-			/////알림이 결재 일경우
-
+		
 
 		});
 });
