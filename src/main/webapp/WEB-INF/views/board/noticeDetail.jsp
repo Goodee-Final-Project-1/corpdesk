@@ -6,7 +6,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title><c:out value="${post.title}" /></title>
+	<title>공지 게시판</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 

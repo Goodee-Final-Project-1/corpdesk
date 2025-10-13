@@ -6,7 +6,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Insert title here</title>
+	<title>부서 게시판</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 
