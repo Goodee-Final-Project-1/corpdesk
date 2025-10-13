@@ -286,6 +286,40 @@
                 </c:when>
               </c:choose>
             </form>
+
+            <c:if test="${detail.files ne null}">
+              <div class="form-group">
+                <label for="file" class="form-label mt-4 font-weight-bold">첨부파일 (${fn:length(detail.files)})</label>
+                <div class="card">
+                  <div class="list-group list-group-flush">
+                    <c:forEach items="${detail.files}" var="el">
+                      <%-- 확장자별 색상 설정 --%>
+                      <c:choose>
+                        <c:when test="${el.extension eq 'pdf'}"><c:set var="bgColor" value="bg-danger"/></c:when>
+                        <c:when test="${el.extension eq 'doc' or el.extension eq 'docx'}"><c:set var="bgColor" value="bg-primary"/></c:when>
+                        <c:when test="${el.extension eq 'xls' or el.extension eq 'xlsx'}"><c:set var="bgColor" value="bg-success"/></c:when>
+                        <c:when test="${el.extension eq 'jpg' or el.extension eq 'jpeg' or el.extension eq 'png' or el.extension eq 'gif'}"><c:set var="bgColor" value="bg-info"/></c:when>
+                        <c:when test="${el.extension eq 'zip' or el.extension eq 'rar' or el.extension eq '7z'}"><c:set var="bgColor" value="bg-warning"/></c:when>
+                        <c:otherwise><c:set var="bgColor" value="bg-secondary"/></c:otherwise>
+                      </c:choose>
+
+                      <a href="/file/${approvalPath}/${el.fileId}" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <div class="d-flex align-items-center justify-content-center ${bgColor} text-white rounded mr-3" style="width: 40px; height: 40px; font-size: 12px; flex-shrink: 0;">
+                          <strong>${fn:toUpperCase(el.extension)}</strong>
+                        </div>
+                        <div class="flex-grow-1 text-truncate">
+                          <div class="font-weight-medium text-dark">${el.oriName}.${el.extension}</div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2" class="flex-shrink-0">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                      </a>
+                    </c:forEach>
+                  </div>
+                </div>
+              </div>
+            </c:if>
+
             </div>
 
 <%--            ${detail}--%>

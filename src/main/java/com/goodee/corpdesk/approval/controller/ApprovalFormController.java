@@ -14,6 +14,8 @@ import com.goodee.corpdesk.vacation.repository.VacationTypeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,7 +27,6 @@ import java.util.Optional;
 
 @Slf4j
 @Controller
-//@RestController // TODO postman을 사용하여 controller를 테스트하기 위해 임시로 붙임. 추후 @Controller로 수정
 @RequestMapping(value = "/approval-form/**")
 public class ApprovalFormController {
 
@@ -64,18 +65,15 @@ public class ApprovalFormController {
         log.warn("getVacationTypeList(): {}", approvalFormService.getVacationTypeList());
         return approvalFormService.getVacationTypeList();
     }
-	
-    // TODO 유저의 부서 정보를 인증 정보에서 가져오도록 수정
+
     // 결재 폼 조회
     @GetMapping("{formId}")
-    public String getApproval(@PathVariable("formId") Integer formId, @RequestParam("departmentId") Integer departmentId, @RequestParam("username") String username, Model model) throws Exception {
+    public String getApproval(@PathVariable("formId") Integer formId
+        , @RequestParam("departmentId") Integer departmentId
+        , @AuthenticationPrincipal UserDetails userDetails
+        , Model model) throws Exception {
 
-        System.err.println("getApproval()");
-
-        // 0. 유저 정보 얻어오기
-//        Employee employee = employeeRepository.findById(username).get();
-//        ResApprovalDTO resApprovalDTO = new ResApprovalDTO();
-//        resApprovalDTO.set
+        String username = userDetails.getUsername();
 
         // 0. 폼 정보 얻어오기
         ResApprovalDTO form = approvalFormService.getApprovalForm(formId);

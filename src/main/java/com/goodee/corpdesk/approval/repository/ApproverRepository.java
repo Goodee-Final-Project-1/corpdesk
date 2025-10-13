@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.goodee.corpdesk.approval.entity.Approver;
 import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.repository.query.Param;
 
 public interface ApproverRepository extends JpaRepository<Approver, Long> {
 	

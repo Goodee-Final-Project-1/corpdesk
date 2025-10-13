@@ -11,7 +11,7 @@ approvalRows.forEach((row) => {
   row.addEventListener('click', function() {
     const approvalId = row.getAttribute('data-approval-id');
     
-    location.href=`/approval/${approvalId}?username=${username}`; // "/approval/{approvalId}"로 이동
+    location.href=`/approval/${approvalId}`;
   });
 });
 
@@ -37,7 +37,7 @@ const departmentIdEl = document.querySelector('#departmentId');
 
 formCheckBtn.addEventListener('click', function () {
     if(formId === 0) alert('결재 양식을 선택해 주세요.')
-    else location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}&username=jung_frontend`; // TODO username 정보는 사용자의 인증 정보를 사용하도록 수정
+    else location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}`;
 });
 
 /**
@@ -419,33 +419,40 @@ document.getElementById('approverCheck').addEventListener('click', () => {
 /**
  * 결재 요청/임시저장/취소 버튼을 눌렀을 때
  */
-// 0. 버튼 요소들을 가져옴
-const btnSubmits = document.querySelectorAll('.btn-submit');
-const btnCancel = document.querySelector('#btnCancel');
+const filepondEl = document.querySelector('.filepond#file');
+const pond = FilePond.create(filepondEl, {
+    labelIdle: `파일을 드래그 앤 드롭하거나 <span class="filepond--label-action">여기</span>를 클릭`,
+});
 
-// 결재 요청 버튼을 눌렀을 때
-// 결재 기본 속성들&상세내용을 formData로 받아와서 ajax로 요청 후 상세페이지로 이동
+const btnSubmits = document.querySelectorAll('.btn-submit');
 btnSubmits.forEach((btn) => {
   btn.addEventListener('click', function () {
-    // 1-1. 결재 기본 속성 가져오기
+    // 1. 결재 공통내용 가져오기
     const commonForm = document.querySelector('#approvalContentCommon');
     const formData = new FormData(commonForm);
 
     // 2. 결재 상세내용 가져오기
     const formByType = document.querySelector('#approvalContentByType');
-
     const formData2 = new FormData(formByType);
 
-    // FormData2를 일반 객체로 변환
+    // 3. formData2를 json 문자열로 formData에 추가
+    // 1) formData2를 일반 객체로 변환
     const data2 = {};
     for (const [key, value] of formData2.entries()) {
       data2[key] = value;
     }
-    // JSON 문자열로 변환
+    // 2) JSON 문자열로 변환
     const jsonData2 = JSON.stringify(data2);
-    // 메인 FormData에 추가
+    // 3) formData에 추가
     formData.append('approvalContent', jsonData2);
-    console.log(jsonData2);
+
+    // 3. FilePond에서 파일 가져오기
+    const pondFiles = pond.getFiles();
+
+    // 4. formData에 파일 추가
+    for (let i = 0; i < pondFiles.length; i++) {
+      formData.append('files', pondFiles[i].file);
+    }
 
     // 버튼 종류(결재 요청/임시저장)에 따라 status를 다르게 지정
     if(btn.id === 'tempSave') formData.append('status', 't');
@@ -458,13 +465,8 @@ btnSubmits.forEach((btn) => {
         .then(r => r.json())
         .then(r => {
             console.log(r);
-
-            location.href=`/approval/${r.approvalId}?username=${username}`;
+//            location.href=`/approval/${r.approvalId}`;
         })
     ;
   });
-});
-
-btnCancel.addEventListener('click', function () {
-    location.href=`/approval/list?username=${username}`;
 });

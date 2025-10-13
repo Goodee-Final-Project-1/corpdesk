@@ -1,36 +1,20 @@
 package com.goodee.corpdesk.employee;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.common.BaseEntity;
+import com.goodee.corpdesk.employee.validation.UpdateEmail;
+import com.goodee.corpdesk.employee.validation.UpdatePassword;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-import com.goodee.corpdesk.employee.validation.UpdateEmail;
-import com.goodee.corpdesk.employee.validation.UpdatePassword;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -40,7 +24,7 @@ import lombok.ToString;
 @Entity @Table(name = "employee")
 @DynamicInsert
 @DynamicUpdate
-public class Employee implements UserDetails {
+public class Employee extends BaseEntity {
 	public interface CreateGroup {
 	} // 등록 시 검증
 
@@ -70,8 +54,6 @@ public class Employee implements UserDetails {
 	private Boolean credentialsNonExpired;
 	@ColumnDefault("1")
 	private Boolean enabled;
-	@ColumnDefault("1")
-	private Boolean useYn;
 
 	@NotBlank(message = "이름은 필수입니다.", groups = {CreateGroup.class, UpdateGroup.class})
 	private String name;
@@ -121,23 +103,9 @@ public class Employee implements UserDetails {
 	@ColumnDefault("0")
 	private Long currentBaseSalary;
 
-	@Transient
-	private Role role;
-
-	
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<GrantedAuthority> authorities = new ArrayList<>();
-		if (role != null) {
-			authorities.add(new SimpleGrantedAuthority(this.role.getRoleName()));
-		}
-
-		return authorities;
-	}
-
-    public ResApprovalDTO  toResApprovalDTO() {
-        return ResApprovalDTO.builder()
-                .username(this.username)
-                .build();
-    }
+  public ResApprovalDTO  toResApprovalDTO() {
+      return ResApprovalDTO.builder()
+              .username(this.username)
+              .build();
+  }
 }
