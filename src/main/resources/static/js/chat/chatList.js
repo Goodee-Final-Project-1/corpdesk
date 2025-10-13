@@ -23,7 +23,7 @@ lastMsgTime.forEach(t => {
   //  알림 요소 생성
   const div = document.createElement("div");
   div.className = "media media-sm p-4 mb-0 notification messageNotification";
-  div.setAttribute("data-roomid", notification.chatRoomId);
+  div.setAttribute("data-roomId", notification.chatRoomId);
   div.style.cursor = "pointer";
 
   div.innerHTML = `
@@ -46,14 +46,14 @@ lastMsgTime.forEach(t => {
   const allCount = document.querySelector(".all-count");
   const messageCount = document.querySelector(".message-count");
 
-  const currentAll = parseInt(allCount.getAttribute("data-allcount") || "0", 10);
+  const currentAll = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
   const currentMsg = parseInt(messageCount.getAttribute("data-count") || "0", 10);
 
   const newAll = currentAll + 1;
   const newMsg = currentMsg + 1;
 
   allCount.textContent = newAll;
-  allCount.setAttribute("data-allcount", newAll);
+  allCount.setAttribute("data-allCount", newAll);
 
   messageCount.textContent = "메시지 (" + newMsg + ")";
   messageCount.setAttribute("data-count", newMsg);
@@ -79,7 +79,6 @@ function formatTime(time) {
 }
 //알림 목록 처리
 function ReadNotification(chatRoomId){
-	console.log("읽음 처리")
 	//목록에서 같은 방 메세지 전부 제거 
 	const sameRoomNotifications = document.querySelectorAll('.messageNotification[data-roomId="'+ chatRoomId+'"]');
 	 sameRoomNotifications.forEach(el=>{
@@ -89,12 +88,10 @@ function ReadNotification(chatRoomId){
 	const allCount = document.querySelector(".all-count");
 	const allCountData = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
 	const removedCount = sameRoomNotifications.length;
-	console.log("!!"+allCountData);
-	console.log("!!"+removedCount);
 	// 남은 개수 계산
 	const newAllCount = allCountData - removedCount;
 	allCount.textContent = newAllCount > 0 ? newAllCount : "";
-	allCount.setAttribute("data-all", newAllCount);
+	allCount.setAttribute("data-allCount", newAllCount);
 
 	// 메시지 탭 숫자 변경
 	const messageCount = document.querySelector(".message-count");

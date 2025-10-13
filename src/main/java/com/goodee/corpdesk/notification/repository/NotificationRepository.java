@@ -42,6 +42,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 	       SET n.isRead = true,
 	           n.updatedAt = CURRENT_TIMESTAMP
 	     WHERE n.username = :username
+	       AND n.notificationType = 'message'
 	       AND n.relatedId IN (
 	           SELECT c.messageId FROM ChatMessage c WHERE c.chatRoomId = :chatRoomId
 	       )
