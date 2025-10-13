@@ -131,8 +131,21 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
 	@Query("""
 	SELECT new com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO (
-		e.username AS username,
-		e.password AS password,
+		e.username,
+		e.password,
+		e.name,
+		
+		e.accountNonExpired,
+		e.accountNonLocked,
+		e.credentialsNonExpired,
+		e.enabled,
+		
+		e.updatedAt,
+		e.createdAt,
+		e.modifiedBy,
+		e.useYn,
+		
+		e.roleId,
 		r.roleName
 	)
 	FROM Employee e
