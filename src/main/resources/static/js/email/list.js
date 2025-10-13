@@ -1,4 +1,6 @@
-const table = document.getElementById('table');
+const spinner = document.getElementById('spinner');
+const list = document.getElementById('list');
+const tbody = document.getElementById('tbody');
 const pathArr = location.pathname.split('/');
 if (pathArr.length <= 3) pathArr.push('1');
 
@@ -16,22 +18,26 @@ async function getMail() {
 		if (!response.ok) throw new Error('수신 오류');
 		const data = await response.json();
 
-		console.log(data);
+		spinner.classList.remove('d-flex');
+		list.classList.remove('d-none');
 
 		data.content.forEach(function (e) {
 			const tr = document.createElement('tr');
-			const date = new Date(e.sentDate);
+			let date = new Date(e.sentDate);
+			if (isNaN(date.getTime())) {
+				date = new Date(e.receivedDate);
+			}
 
 			tr.innerHTML = `
 				<td class="sender-name text-dark">${e.from}</td>
-				<td><a href="/email/${category}/detail/${e.emailNo}" class="text-default d-inline-block text-smoke">
+				<td><a href="/email/${category}/detail/${e.emailNo}" class="text-default d-inline-block text-smoke" style="height: 22.5px">
 					<span class="subject text-dark">${e.subject}</span>
 				</a></td>
 				<td class="date">${date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate()}</td>
 			`;
-			// table.appendChild(tr);
+			// tbody.appendChild(tr);
 			// 백엔드에서 오래된 순으로 넣었기 때문에, 거꾸로 출력
-			table.prepend(tr);
+			tbody.prepend(tr);
 		});
 
 		paging(data.page);

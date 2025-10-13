@@ -1,78 +1,214 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="sec" uri= "http://www.springframework.org/security/tags"%> 
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
 
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Chat Page</title>
-	<c:import url="/WEB-INF/views/include/head.jsp"/>
-	<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+<meta charset="UTF-8">
+<title>Chat Page</title>
+<c:import url="/WEB-INF/views/include/head.jsp" />
+<script
+	src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+<style>
+ .messageContainer{
+	height:75vh;
+
+	overflow-y:scroll; 
+	} 
+html, body {
+	overflow: hidden; /* 내부 스크롤도 완전히 제거 */
+	height: 100%;
+}
+.profileImg{
+width:50px;
+height:50px;
+}
+.media-chat:not(.media-chat-right) .text-content {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 25px !important;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 화면 꽉 차게 */
+}
+
+.messageContainer {
+  flex: 1;             /* 남은 공간 다 채움 */
+  overflow-y: auto;    /* 스크롤 가능 */
+}
+
+.chat-footer {
+  flex-shrink: 0;      /* footer가 절대 줄지 않음 */
+  background: #fff;
+  padding: 10px;
+}.input-group-chat {
+  padding : 0;
+}
+.card-header{
+	border-bottom: 1px solid #ddd !important;
+	
+}
+.hidden {
+		display: none !important;
+	}
+.hiddenSearch{
+		display: none !important;
+	}
+.system-message {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;       /* 흐리게 */
+  margin: 10px 0;
+  font-style: italic;
+}
+
+</style>
 </head>
+<body>
+	<sec:authentication property="principal.username" var="user" />
 
-<c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
+	<input type="hidden" class="username" value="${user}">
+	<input type="hidden" class="roomData" value='${roomData }'>
+	<div class="card card-default chat-right-sidebar">
+	 <div class="card-header">
+        <h2 class="roomTitle"></h2>
 
-	<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
+        <div class="dropdown">
+          <div class="dropdown">
+            <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            </a>
 
-	<c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+              <a class="dropdown-item invite"data-toggle="modal" data-target="#inviteRoomStep1" href="javascript:void(0)">초대하기</a>
+              <a class="dropdown-item participant-list" data-toggle="modal" data-target="#participantModal" href="javascript:void(0)">참여자목록</a>
+            </div>
+          </div>
+        </div>
+      </div>
 
-		<c:import url="/WEB-INF/views/include/header.jsp"/>
-	
-		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
-			<!-- 내용 시작 -->
+	<div class="card-body pb-0 messageContainer">
+		<div id="chat-list">
 			
-			<h2>그룹 채팅</h2>
+
 			
-	<p>채팅 상대입력</p><input type="text" id="otherPerson">
-
-    <button onclick="connect()">채팅 연결</button>
-    <input type="text" id="messageInput">
-    <button onclick="sendMessage()">메시지 전송</button>
-    <table></table>
-
-    <div id="messages"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
-    <script>
-        let stompClient = null;
-
-        function connect(){
-            // 쿠키는 자동으로 포함됨
-            // 소켓이라는 통로를 이용하는 Stomp 객체 
-            const socket = new SockJS("/ws");
-            stompClient = Stomp.over(socket);
-
-            stompClient.connect({}, frame => {
-                console.log("연결됨: " + frame);
-
-                // 예시: 채팅방 1번 구독
-                stompClient.subscribe("/sub/chat/room/1", msg => {
-                    const message = JSON.parse(msg.body);
-                    document.getElementById("messages").innerHTML += "<p>" + message.sender + ": " + message.messageContent + "</p>";
-                });
-            });
-        }
-
-        function sendMessage(){
-            const content = document.getElementById("messageInput").value;
-            stompClient.send("/pub/chat/message", {}, JSON.stringify({
-                chatRoomId: 1,
-                messageContent: content
-            }));
-        }
-        stompClient.subscribe("/sub/chat/room/1", msg => {
-            const body = JSON.parse(msg.body);
-            console.log("받은 메시지:", body);
-        });
-    </script>
-			<!-- 내용 끝 -->
-		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
+		</div>
+	</div>
+	<!-- Chat Footer -->
+	<div class="chat-footer">
+		<form id="chatForm">
+			<div class="input-group input-group-chat">
+				<textarea class="form-control messageInput" id="messageInput"
+					style="height: 100px;" aria-label="Text input with dropdown button"></textarea>
+				<div class="input-group-append">
+					<button type="button" id="sendBtn" class="btn btn-primary">
+						메시지 전송</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	</div>
 	
-	<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 	
-<c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
+	<!-- 참여자 목록 모달 -->
+<div class="modal fade" id="participantModal" tabindex="-1" role="dialog" aria-labelledby="participantModal"
+  aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalSmallTitle">참여자 목록</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body participant-content">
+       <ul class="list-group">
+       </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 1: 초대자 선택 모달 -->
+<div class="modal fade" id="inviteRoomStep1" tabindex="-1" role="dialog" aria-labelledby="step1Label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="step1Label">초대대상 선택</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- 검색창 -->
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="searchUserInput" placeholder="이름 검색">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary namesearchBtn" type="button">검색</button>
+          </div>
+        </div>
+
+        <!-- 사원 목록 (스크롤 가능) -->
+        <ul class="list-group" id="participantList" style="max-height: 300px; overflow-y: auto;">
+          <c:forEach items="${employeeList}" var="employee">
+            <li class="list-group-item d-flex align-items-cent er" data-username="${employee.username}">
+             <!-- 추후 사진 바꿔주면됨  -->
+              <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:40px; height:40px;">
+              <div class="flex-fill">
+                <strong class="employeeName">${employee.name}</strong><br>
+                <small>${employee.departmentName} ${employee.positionName}</small>
+              </div>
+              <input type="checkbox" value="${employee.username}" class="participant-checkbox">
+            </li>
+          </c:forEach>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary" id="nextStepBtn">초대 하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: 현재 방이 1대1인데 초대할 경우 제목을 설정해줘야함-->
+<div class="modal fade" id="inviteRoomStep2" tabindex="-1" role="dialog" aria-labelledby="step2Label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="step2Label">채팅방 제목 설정</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label for="roomTitle">채팅방 제목</label>
+        <input type="text" id="roomTitle" class="form-control" placeholder="채팅방 이름 입력">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-success" id="inviteRoomConfirmBtn">초대</button>
+      </div>
+    </div>
+  </div>
+</div>
+	
+	
+	
+	
+	
+	
+
+	<script type="text/javascript" src="/js/chat/chatPage.js"></script>
+	<!-- 내용 끝 -->
+
+
+	<c:import url="/WEB-INF/views/include/body_wrapper_end.jsp" />
 </html>

@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-
+	pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!-- Header -->
 <header class="main-header" id="header">
   <nav class="navbar navbar-expand-lg navbar-light" id="navbar">
@@ -33,7 +33,7 @@
                 <a class="nav-item nav-link" id="message-tab" data-toggle="tab" href="#message" role="tab" aria-controls="nav-profile"
                   aria-selected="false">메시지 (4)</a> <!-- TODO 추후 사용시 () 안에 실제 테이터 넣기 -->
                 <a class="nav-item nav-link" id="other-tab" data-toggle="tab" href="#other" role="tab" aria-controls="nav-contact"
-                  aria-selected="false">기타 (1)</a> <!-- TODO 추후 사용시 () 안에 실제 테이터 넣기 -->
+                  aria-selected="false">결재 (1)</a> <!-- TODO 추후 사용시 () 안에 실제 테이터 넣기 -->
               </div>
             </header>
             <!--  -->
@@ -86,23 +86,28 @@
 								<!-- 메시지 알림 -->
                 <div class="tab-pane fade" id="message" role="tabpanel" aria-labelledby="message-tab">
 
-                  <div class="media media-sm p-4 mb-0">
+
+
+
+
+				<c:forEach items="${notificationList}" var="notification">
+                  <div class="media media-sm p-4 mb-0 messageNotification" data-roomId="${notification.chatRoomId}">
                     <div class="media-sm-wrapper">
-                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
-                        <img src="/images/user/user-sm-04.jpg" alt="User Image">
-                      </a>
+                      <a href="/chat/room/list"> <!-- TODO 추후 href 변경 -->
+                        <img src="${notification.imgPath}" alt="User Image" style="width:50px; height:50px;">
+                                              </a>
                     </div>
                     <div class="media-body">
-                      <a href="/employee/detail"> <!-- TODO 추후 href 변경 -->
-                        <span class="title mb-0">Albrecht Straub</span>
-                        <span class="discribe"> Beatae quia natus assumenda laboriosam, nisi perferendis aliquid consectetur expedita non tenetur.</span>
+                      <a href="/chat/room/list"> <!-- TODO 추후 href 변경 -->
+                        <span class="title mb-0">${notification.viewName}</span>
+                        <span class="discribe"> ${notification.messageContent}</span>
                         <span class="time">
-                          <time>Just now</time>...
+                          <time>${notification.sentAt}</time>...
                         </span>
                       </a>
                     </div>
                   </div>
-
+				</c:forEach>
                 </div>
                 <!--  -->
                 
@@ -149,7 +154,7 @@
             </li>
 
             <li class="dropdown-footer">
-              <a class="dropdown-link-item" href="sign-in.html"> <!-- TODO 추후 사용시 href 변경 -->
+              <a class="dropdown-link-item" href="/logout"> <!-- TODO 추후 사용시 href 변경 -->
               	<i class="mdi mdi-logout"></i> 로그아웃
               </a>
             </li>

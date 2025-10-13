@@ -1,50 +1,36 @@
 package com.goodee.corpdesk.employee;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.common.BaseEntity;
 import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 @Getter
 @Setter
 @ToString
 @Builder
 @NoArgsConstructor @AllArgsConstructor
-@Entity @Table
+@Entity @Table(name = "employee")
 @DynamicInsert
 @DynamicUpdate
-public class Employee implements UserDetails {
+public class Employee extends BaseEntity {
 	public interface CreateGroup {
 	} // 등록 시 검증
 
 	public interface UpdateGroup {
 	} // 수정 시 검증 (비밀번호 제외)
 
-	//파일
-	@Column(name = "profile_image_save_name")
-	private String profileImageSaveName;
-	@Column(name = "profile_image_extension")
-	private String profileImageOriName;
-	@Column(name = "profile_image_ori_name")
-	private String profileImageExtension;
 
 
 	@Column(name = "position_id")
@@ -53,11 +39,11 @@ public class Employee implements UserDetails {
 	@Column(name = "department_id")
 	private Integer departmentId;
 
-	private String departmentName;
+//	private String departmentName;
+//
+//	private String positionName;
 
-	private String positionName;
-
-	@ColumnDefault("2")
+	@ColumnDefault("3")
 	private Integer roleId;
 
 	@ColumnDefault("1")
@@ -68,8 +54,6 @@ public class Employee implements UserDetails {
 	private Boolean credentialsNonExpired;
 	@ColumnDefault("1")
 	private Boolean enabled;
-	@ColumnDefault("1")
-	private Boolean useYn;
 
 	@NotBlank(message = "이름은 필수입니다.", groups = {CreateGroup.class, UpdateGroup.class})
 	private String name;
@@ -78,7 +62,7 @@ public class Employee implements UserDetails {
 	@Size(min = 5, max = 20, message = "아이디는 5~20자여야 합니다.")
 	@Id
 	private String username;
-	@Column(nullable = false)
+//	@Column(nullable = false)
 	@NotBlank(groups = UpdatePassword.class)
 	private String password;
 	@Transient
@@ -113,26 +97,15 @@ public class Employee implements UserDetails {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 	private String address;
-	private String status; // 출근,퇴근,휴가,출근전
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate lastWorkingDay;
 
-	@Transient
-	private Role role;
+	@ColumnDefault("0")
+	private Long currentBaseSalary;
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<GrantedAuthority> authorities = new ArrayList<>();
-		if (role != null) {
-			authorities.add(new SimpleGrantedAuthority(this.role.getRoleName()));
-		}
-
-		return authorities;
-	}
-
-    public ResApprovalDTO  toResApprovalDTO() {
-        return ResApprovalDTO.builder()
-                .username(this.username)
-                .build();
-    }
+  public ResApprovalDTO  toResApprovalDTO() {
+      return ResApprovalDTO.builder()
+              .username(this.username)
+              .build();
+  }
 }

@@ -49,6 +49,7 @@ public class ResApprovalDTO {
 
     // file
     private Integer fileCount;
+    private List<ApprovalFileDTO> files;
 
     private Long fileId;
     private String oriName;
@@ -58,6 +59,9 @@ public class ResApprovalDTO {
     // vacation
     private Integer vacationTypeId;
     private String vacationTypeName;
+
+    private List<ResApprovalDTO> approvals;
+    private Integer approvalCnt;
 
     // SQL 결과용 생성자
     public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status, String username,

@@ -32,7 +32,7 @@ public class FileController {
 		
 		// header 설정
 		// 파일을 보낼 때 이미지인지, 음악인지, 문서 등인지에 대한 정보를 담아 보내야 함
-		response.setHeader("Content-Disposition", "attachment;filename=\"" + fileDTO.getOriName() + "\"");
+		response.setHeader("Content-Disposition", "attachment;filename=\"" + fileDTO.getOriName() + "." + fileDTO.getExtension() + "\"");
 		response.setHeader("Content-Transfer-Encoding", "binary");
 		
 		// 3. 실제 파일을 클라이언트에게 전송

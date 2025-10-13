@@ -23,4 +23,20 @@ public class ResEmployeeDTO {
     private String positionName;
     private Integer parentPositionId;
 
+    // File
+    private String saveName;
+    private String extension;
+
+    public ResEmployeeDTO(String username, Integer positionId, Integer departmentId
+        , String name, String departmentName, Integer parentDepartmentId
+        , String positionName, Integer parentPositionId) {
+        this.username = username;
+        this.positionId = positionId;
+        this.departmentId = departmentId;
+        this.name = name;
+        this.departmentName = departmentName;
+        this.parentDepartmentId = parentDepartmentId;
+        this.positionName = positionName;
+        this.parentPositionId = parentPositionId;
+    }
 }

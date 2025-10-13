@@ -2,6 +2,9 @@ package com.goodee.corpdesk.security;
 
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
+import com.goodee.corpdesk.employee.Role;
+import com.goodee.corpdesk.employee.RoleRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import com.goodee.corpdesk.security.token.RefreshToken;
 import com.goodee.corpdesk.security.token.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
@@ -13,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -39,6 +41,8 @@ public class JwtTokenManager {
 	private EmployeeRepository employeeRepository;
 	@Autowired
 	private RefreshTokenRepository refreshTokenRepository;
+	@Autowired
+	private RoleRepository roleRepository;
 	
 	@PostConstruct
 	public void init() {
@@ -74,7 +78,7 @@ public class JwtTokenManager {
 				.builder()
 				.subject(authentication.getName())
 //                .claim("pk", employee.getEmployeeId())
-				.claim("roles", authentication.getAuthorities().toString())
+				.claim("roleId", employee.getRoleId())
 				.issuedAt(new Date())
 				.expiration(new Date(System.currentTimeMillis() + validTime))
 				.issuer(issuer)
@@ -91,10 +95,12 @@ public class JwtTokenManager {
 				.parseSignedClaims(token)
 				.getPayload()
 				;
-		Employee employee = new Employee();
-		employee.setUsername(claims.getSubject());
-		UserDetails userDetails = employeeRepository.findById(claims.getSubject()).get();
-		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//		Employee employee = employeeRepository.findById(claims.getSubject()).get();
+//		Role role = roleRepository.findById(claims.get("roleId", Integer.class)).get();
+//		employee.setRole(role);
+		EmployeeSecurityDTO employee = employeeRepository.findEmployeeSecurityByUsername(claims.getSubject()).get();
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(employee, null, employee.getAuthorities());
 		
 		return authentication;
 	}
