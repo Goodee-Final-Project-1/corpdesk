@@ -278,7 +278,8 @@ public class ChatRoomService {
 			chatParticipantService.updateLastMessage(principal.getName(), roomId);
 			
 			chatParticipantRepository.flush();
-			
+			//알림 목록에서 제거 
+			notificationService.setNotificationOneRoomReadAll(roomId, principal.getName());
 			//그룹 채팅방 일때만 퇴장 메세지를 보내줌
 			if(chatRoomRepository.findByChatRoomId(roomId).get().getChatRoomType().equals("room")) {
 				//퇴장 메세지 저장

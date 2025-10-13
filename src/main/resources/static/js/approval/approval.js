@@ -465,7 +465,7 @@ btnSubmits.forEach((btn) => {
         .then(r => r.json())
         .then(r => {
             console.log(r);
-            location.href=`/approval/${r.approvalId}`;
+//            location.href=`/approval/${r.approvalId}`;
         })
     ;
   });

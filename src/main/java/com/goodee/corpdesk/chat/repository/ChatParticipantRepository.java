@@ -35,13 +35,13 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 	//기존 방을 나갔다가 다시 열경우
 	@Transactional
 	@Modifying
-	@Query("UPDATE ChatParticipant c SET useYn = true , c.updatedAt = CURRENT_TIMESTAMP "+
+	@Query("UPDATE ChatParticipant c SET useYn = true , c.updatedAt = now() "+
 			   "WHERE c.employeeUsername = :username AND c.chatRoomId =:roomId")
 		void updateRoomUseYnTrue(@Param("username") String username, @Param("roomId") Long roomId);
 	//채팅방을 나갈 경우
 		@Transactional
 		@Modifying
-		@Query("UPDATE ChatParticipant c SET useYn = false , c.updatedAt = CURRENT_TIMESTAMP "+
+		@Query("UPDATE ChatParticipant c SET useYn = false , c.updatedAt = now() "+
 				   "WHERE c.employeeUsername = :username AND c.chatRoomId =:roomId")
 		void updateRoomUseYnFalse(@Param("username") String username, @Param("roomId") Long roomId);
 		
@@ -51,7 +51,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 		//그룹채팅 첫 메세지 일경우 모든 user 활성화 시킴
 		@Transactional
 		@Modifying
-		@Query("UPDATE ChatParticipant c SET useYn = true , c.updatedAt = CURRENT_TIMESTAMP "+
+		@Query("UPDATE ChatParticipant c SET useYn = true , c.updatedAt = now() "+
 				   "WHERE c.chatRoomId =:roomId")
 		void updateAllRoomUseYnTrue(@Param("roomId") Long chatRoomId);
 	

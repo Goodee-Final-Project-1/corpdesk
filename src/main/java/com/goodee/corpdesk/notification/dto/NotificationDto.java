@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.notification.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,5 +20,7 @@ public class NotificationDto {
 	    private String notificationType; 
 	    private Long relatedId; 
 	    private Boolean isRead;
-	    
+	    private String content;
+	    private LocalDateTime createdAt;
 }
+
