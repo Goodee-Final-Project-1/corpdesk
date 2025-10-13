@@ -5,16 +5,12 @@ import com.goodee.corpdesk.approval.service.ApprovalService;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
-import com.goodee.corpdesk.schedule.dto.DocumentDTO;
-import com.goodee.corpdesk.schedule.dto.GeocodeBodyDTO;
 import com.goodee.corpdesk.schedule.dto.ResPersonalScheduleDTO;
 import com.goodee.corpdesk.schedule.service.PersonalScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import javax.swing.text.Document;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,10 +26,6 @@ public class HomeService {
     private PersonalScheduleService personalScheduleService;
     @Autowired
     private ApprovalService approvalService;
-
-    // WebClient Bean 주입
-    @Autowired
-    private WebClient webClient;
 
     public ResEmployeeDTO getEmployee (String username) {
 

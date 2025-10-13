@@ -161,9 +161,9 @@ public class PersonalScheduleController {
     @ResponseBody
     public List<ResPersonalScheduleDTO> getTodaySchedulesApi(@AuthenticationPrincipal UserDetails userDetails) {
 
-        List<ResPersonalScheduleDTO> schdules = fetchTodaySchedules(userDetails.getUsername());
+        List<ResPersonalScheduleDTO> schedules = fetchTodaySchedules(userDetails.getUsername());
 
-        return personalScheduleService.bindGeocodesToSchedules(schdules);
+        return personalScheduleService.bindGeocodesToSchedules(schedules);
     }
 
 }
