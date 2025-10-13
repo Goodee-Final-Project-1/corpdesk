@@ -83,6 +83,8 @@ public class PersonalScheduleService {
         PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
 
         // save
+        if(!modifiedBy.equals(oldSchedule.getUsername())) throw new SecurityException("본인 소유 일정만 수정할 수 있습니다.");
+
         oldSchedule.setModifiedBy(modifiedBy);
         oldSchedule.setScheduleName(reqPersonalScheduleDTO.getScheduleName());
         oldSchedule.setScheduleDateTime(reqPersonalScheduleDTO.getScheduleDateTime());
@@ -99,6 +101,8 @@ public class PersonalScheduleService {
         PersonalSchedule oldSchedule = personalScheduleRepository.findPersonalScheduleByUseYnAndPersonalScheduleId(true, personalScheduleId);
 
         // delete
+        if(!modifiedBy.equals(oldSchedule.getUsername())) throw new SecurityException("본인 소유 일정만 삭제할 수 있습니다.");
+
         oldSchedule.setModifiedBy(modifiedBy);
         oldSchedule.setUseYn(false);
 
