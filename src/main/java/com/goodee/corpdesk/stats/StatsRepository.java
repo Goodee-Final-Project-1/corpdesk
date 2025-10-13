@@ -122,7 +122,7 @@ public interface StatsRepository extends JpaRepository<Employee, String> {
 		COUNT(CASE WHEN a.use_yn = true AND a.check_in_date_time IS NULL THEN 1 END) AS absent_count
 	FROM AllMonths am
 	LEFT JOIN attendance a
-	ON DATE_FORMAT(am.month_start, '%Y-%m') = DATE_FORMAT(a.check_in_date_time, '%Y-%m')
+	ON DATE_FORMAT(am.month_start, '%Y-%m') = DATE_FORMAT(a.created_at, '%Y-%m')
 	GROUP BY YEAR(am.month_start), MONTH(am.month_start)
 	ORDER BY am.month_start
 """)

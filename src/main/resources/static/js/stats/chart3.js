@@ -65,6 +65,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		const start = document.getElementById('start').value;
 		const end = document.getElementById('end').value;
 
-		getChart2(start, end);
+		getChart3(start, end);
 	});
 });

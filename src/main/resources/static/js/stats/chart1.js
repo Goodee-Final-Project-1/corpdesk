@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	const chart = new ApexCharts(document.querySelector("#chart1"), options1);
 	chart.render();
 
-	async function getChart(start, end, department, position) {
+	async function getChart(start, end /*, department, position*/) {
 		try {
 			const response = await fetch('/api/stats/chart1', {
 				method: 'POST',
@@ -43,8 +43,8 @@ document.addEventListener('DOMContentLoaded', function () {
 				body: JSON.stringify({
 					'start': start,
 					'end': end,
-					'department': department,
-					'position': position
+					// 'department': department,
+					// 'position': position
 				})
 			});
 			if (!response.ok) throw new Error('수신 오류');
@@ -85,10 +85,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		const start = document.getElementById('start').value;
 		const end = document.getElementById('end').value;
-		const department = document.getElementById('department').value;
-		const position = document.getElementById('position').value;
+		// const department = document.getElementById('department').value;
+		// const position = document.getElementById('position').value;
 
-		getChart(start, end, department, position);
+		getChart(start, end /*, department, position*/);
 	});
 
 });
