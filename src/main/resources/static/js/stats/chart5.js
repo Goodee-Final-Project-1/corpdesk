@@ -1,14 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-	const data1 = [];
-	const cat = [];
-
 	const searchForm = document.getElementById('searchForm');
 
-	const options = {
+	const options5 = {
 		title: {
-			text: '입퇴사자 및 재직자 통계',
-			align: 'center',
+			text: '근무시간 통계',
+			align: 'left',
 			style: {
 				fontSize: '22px',
 			}
@@ -19,31 +16,34 @@ document.addEventListener('DOMContentLoaded', function () {
 			data: []
 		}],
 		chart: {
-			height: 350,
-			type: 'line',
-			stacked: false
+			type: 'bar'
 		},
 		legend: {
-			horizontalAlign: 'left',
-			offsetX: 40
+			position: 'top',
+			markers: {
+				width: 24,
+				height: 12,
+				radius: 0
+			}
+		},
+		theme: {
+			palette: 'palette3'
 		}
 	};
 
-	const chart = new ApexCharts(document.querySelector("#chart"), options);
-	chart.render();
+	const chart5 = new ApexCharts(document.querySelector("#chart5"), options5);
+	chart5.render();
 
-	async function getChart(start, end, department, position) {
+	async function getChart5(start, end) {
 		try {
-			const response = await fetch('/api/stats', {
+			const response = await fetch('/api/stats/chart5', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
 					'start': start,
-					'end': end,
-					'department': department,
-					'position': position
+					'end': end
 				})
 			});
 			if (!response.ok) throw new Error('수신 오류');
@@ -51,24 +51,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			console.log(data);
 
-			chart.updateOptions({
+			chart5.updateOptions({
 				xaxis: {
 					categories: data.months,
 				}
 			})
 
-			chart.updateSeries([{
-				name: '입사',
+			chart5.updateSeries([{
+				name: '정규근무',
 				type: 'column',
-				data: data.joiner
+				data: data.fixed
 			}, {
-				name: '퇴사',
+				name: '연장근무',
 				type: 'column',
-				data: data.resigner
-			}, {
-				name: '재직',
-				type: 'line',
-				data: data.resider
+				data: data.overtime
 			}]);
 
 		} catch (e) {
@@ -76,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	}
 
-	getChart();
+	getChart5();
 
 
 	searchForm.addEventListener('submit', function (e) {
@@ -84,10 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		const start = document.getElementById('start').value;
 		const end = document.getElementById('end').value;
-		const department = document.getElementById('department').value;
-		const position = document.getElementById('position').value;
 
-		getChart(start, end, department, position);
+		getChart5(start, end);
 	});
-
 });
