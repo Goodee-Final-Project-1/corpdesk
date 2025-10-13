@@ -1,5 +1,4 @@
 const params = new URLSearchParams(window.location.search);
-const username = params.get("username");
 
 /**
  * 수정/삭제 혹은 승인/반려 버튼을 눌렀을 때 혹은 취소 버튼을 눌렀을 때

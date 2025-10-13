@@ -9,8 +9,16 @@
 	<title>Insert title here</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 
-  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e8170148d86f9c8fb1da017867a75935"></script>
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}"></script>
   <script type="text/javascript" src="/js/dashboard/map.js"></script>
+
+<%--  <style>--%>
+<%--      .customoverlay {position:relative;bottom:85px;border-radius:6px;border: 1px solid #ccc;border-bottom:2px solid #ddd;float:left;}--%>
+<%--      .customoverlay:nth-of-type(n) {border:0; box-shadow:0px 1px 2px #888;}--%>
+<%--      .customoverlay a {display:block;text-decoration:none;color:#000;text-align:center;border-radius:6px;font-size:14px;font-weight:bold;overflow:hidden;background: #d95050;background: #d95050 url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/arrow_white.png) no-repeat right 14px center;}--%>
+<%--      .customoverlay .title {display:block;text-align:center;background:#fff;margin-right:35px;padding:10px 15px;font-size:14px;font-weight:bold;}--%>
+<%--      .customoverlay:after {content:'';position:absolute;margin-left:-12px;left:50%;bottom:-12px;width:22px;height:12px;background:url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}--%>
+<%--  </style>--%>
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
@@ -48,7 +56,7 @@
               <div class="mb-3 d-flex justify-content-center">
                 <div onclick="location.href='/personal-schedule/list'" style="cursor: pointer">
                   <h6 class="mb-2">오늘의 일정</h6>
-                  <h3 class="mb-0">${todayScheduleCnt}</h3>
+                  <h3 class="mb-0">${personalSchedule.todayScheduleCnt}</h3>
                 </div>
               </div>
               <hr>
@@ -60,10 +68,10 @@
 <%--                </div>--%>
                 <div class="d-flex justify-content-between mb-2">
                   <span>결재 대기 문서</span>
-                  <span>${reqApprovalCnt}</span>
+                  <span>${approval.approvalCnt}</span>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <span>진여 연차</span>
+                  <span>잔여 연차</span>
                   <span>${remainingVacation eq null ? 0 : remainingVacation}일</span>
                 </div>
               </div>
@@ -109,7 +117,7 @@
                       </thead>
 
                       <tbody>
-                      <c:forEach items="${waitList }" var="el">
+                      <c:forEach items="${approval.approvals }" var="el">
                         <tr class="approval-row" onclick="location.href='/approval/${el.approvalId}'" style="cursor: pointer;">
                           <td>${fn:substring(el.createdAt, 0, 10) }</td>
                           <td>${el.formTitle }</td>

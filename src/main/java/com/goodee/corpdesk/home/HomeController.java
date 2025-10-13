@@ -13,12 +13,15 @@ import com.goodee.corpdesk.schedule.entity.PersonalSchedule;
 import com.goodee.corpdesk.schedule.service.PersonalScheduleService;
 import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
 import com.goodee.corpdesk.vacation.service.VacationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
@@ -28,18 +31,23 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@Slf4j
 public class HomeController {
 
     @Autowired
     private HomeService homeService;
     @Autowired
-    private PersonalScheduleService personalScheduleService;
-    @Autowired
-    private ApprovalService approvalService;
-    @Autowired
     private VacationService vacationService;
     @Autowired
     private AttendanceService attendanceService;
+
+    @Value("${api.kakao.javascript.key}")
+    private String appkey;
+
+    @ModelAttribute("appkey")
+    public String getAppkey() {
+        return appkey;
+    }
 
     @GetMapping("/")
 	public String home() {
@@ -57,26 +65,19 @@ public class HomeController {
     public String home(@AuthenticationPrincipal UserDetails userDetails
                        , Model model) throws Exception {
         
-        // 1. 직원 정보
         String username = userDetails.getUsername();
-        ResEmployeeDTO employee = homeService.getEmployeeInfo(username);
-        
+
+        // 1. 직원 정보
+        ResEmployeeDTO employee = homeService.getEmployee(username);
         model.addAttribute("employee", employee);
 
         // 2. 일정 정보
-        // 오늘의 일정 갯수
-        LocalDate today = LocalDate.now();
-        LocalDateTime startOfDay = today.atStartOfDay();
-        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-        List<ResPersonalScheduleDTO> todaySchedules = personalScheduleService.getSchedulesByDate(username, startOfDay, endOfDay);
-        model.addAttribute("todayScheduleCnt", todaySchedules.size());
-
-        // TODO 외부 일정
+        ResPersonalScheduleDTO personalSchedule = homeService.getTodaySchedule(username);
+        model.addAttribute("personalSchedule", personalSchedule);
 
         // 3. 결재 정보
-        List<ResApprovalDTO> reqApprovals =  approvalService.getApprovalList("request", username);
-        model.addAttribute("reqApprovalCnt", reqApprovals.size()); // 결재 대기 문서 갯수
-        model.addAttribute("waitList", reqApprovals);// 결재 대기 문서
+        ResApprovalDTO approval = homeService.getApproval(username);
+        model.addAttribute("approval", approval);
 
         // 4. 연차
         // 잔여 연차

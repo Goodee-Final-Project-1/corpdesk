@@ -60,6 +60,9 @@ public class ResApprovalDTO {
     private Integer vacationTypeId;
     private String vacationTypeName;
 
+    private List<ResApprovalDTO> approvals;
+    private Integer approvalCnt;
+
     // SQL 결과용 생성자
     public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status, String username,
                           String formTitle, Long fileCount, String departmentName) {
