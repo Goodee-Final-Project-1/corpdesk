@@ -5,6 +5,8 @@ import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.Role;
 import com.goodee.corpdesk.employee.RoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,8 +21,8 @@ public class AdminService {
 	private final EmployeeRepository employeeRepository;
 	private final RoleRepository roleRepository;
 
-	public List<Map<String, Object>> employeeList() {
-		return employeeRepository.findAllWithDepartmentAndPosition();
+	public Page<Map<String, Object>> employeeList(Pageable pageable) {
+		return employeeRepository.findAllWithDepartmentAndPosition(pageable);
 	}
 
 	public List<Role> roleList() {

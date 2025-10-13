@@ -4,6 +4,7 @@ import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.employee.Role;
 import com.goodee.corpdesk.employee.RoleRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import com.goodee.corpdesk.security.token.RefreshToken;
 import com.goodee.corpdesk.security.token.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
@@ -94,9 +95,10 @@ public class JwtTokenManager {
 				.parseSignedClaims(token)
 				.getPayload()
 				;
-		Employee employee = employeeRepository.findById(claims.getSubject()).get();
-		Role role = roleRepository.findById(claims.get("roleId", Integer.class)).get();
-		employee.setRole(role);
+//		Employee employee = employeeRepository.findById(claims.getSubject()).get();
+//		Role role = roleRepository.findById(claims.get("roleId", Integer.class)).get();
+//		employee.setRole(role);
+		EmployeeSecurityDTO employee = employeeRepository.findEmployeeSecurityByUsername(claims.getSubject()).get();
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(employee, null, employee.getAuthorities());
 		
