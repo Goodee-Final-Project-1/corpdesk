@@ -37,7 +37,7 @@ public class SecurityConfig {
 //              .cors(cors -> cors.disable())
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/approval/**", "/attendance/**", "/board/**",
+						.requestMatchers("/dashboard", "/approval/**", "/attendance/**", "/board/**",
 								"/calendar/**", "/chat/**", "/email/**", "/employee/**", "/notice/**",
 								"/organization/**", "/personal-schedule/**", "/salary/**", "/schedule/**",
 								"/stats/**", "/vacation/**").authenticated()    // 접근 제한

@@ -1,5 +1,9 @@
 package com.goodee.corpdesk.employee;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import org.springframework.data.domain.Page;
@@ -9,10 +13,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -81,8 +84,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	List<Employee> findByDepartmentId(Integer departmentId);
 	
 	@Modifying
-	@Query("UPDATE Employee e SET e.departmentId = NULL, e.departmentName = NULL WHERE e.departmentId = :deptId")
-	void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
+    @Transactional
+    @Query("UPDATE Employee e SET e.departmentId = null WHERE e.departmentId = :deptId")
+    void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
 
 	List<Employee> findByDepartmentIdAndUseYnTrue(Integer departmentId);
 
@@ -134,8 +138,21 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
 	@Query("""
 	SELECT new com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO (
-		e.username AS username,
-		e.password AS password,
+		e.username,
+		e.password,
+		e.name,
+		
+		e.accountNonExpired,
+		e.accountNonLocked,
+		e.credentialsNonExpired,
+		e.enabled,
+		
+		e.updatedAt,
+		e.createdAt,
+		e.modifiedBy,
+		e.useYn,
+		
+		e.roleId,
 		r.roleName
 	)
 	FROM Employee e

@@ -41,6 +41,7 @@ import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.department.service.DepartmentService;
 import com.goodee.corpdesk.employee.Employee.CreateGroup;
 import com.goodee.corpdesk.employee.Employee.UpdateGroup;
+import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
 import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
@@ -125,18 +126,19 @@ public class EmployeeController {
     }
 
     // 직원 목록
-    @GetMapping("/list")
+    @GetMapping("/employee/list")
     public String list(Model model) {
-        model.addAttribute("employees", employeeService.getActiveEmployees());
+        model.addAttribute("employees", employeeService.getActiveEmployeesForList());
         return "employee/list";
     }
+
     
     @GetMapping("/export")
     public void exportToExcel(HttpServletResponse response) throws IOException {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=employees.xlsx");
 
-        List<Employee> employees = employeeService.getActiveEmployees();
+        List<EmployeeListDTO> employees = employeeService.getActiveEmployeesForList();
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Employees");
@@ -154,7 +156,7 @@ public class EmployeeController {
 
             // 데이터 작성
             int rowNum = 1;
-            for (Employee employee : employees) {
+            for (EmployeeListDTO employee : employees) {
                 Row row = sheet.createRow(rowNum++);
 
                 row.createCell(0).setCellValue(
@@ -208,7 +210,7 @@ public class EmployeeController {
 
                 try {
                     // 1. 데이터 추출
-                    Employee employee = new Employee();
+                    EmployeeListDTO employee = new EmployeeListDTO();
                     employee.setName(getCellValue(row, 0));
                     String username = getCellValue(row, 1);
                     employee.setUsername(username);
@@ -252,7 +254,7 @@ public class EmployeeController {
                     }
 
                     // 3. 중복이 없을 경우에만 DB 저장
-                    employeeRepository.save(employee);
+                    employeeRepository.save(employee.toEntity());
                     successCount++;
                     
                 } catch (Exception e) {
