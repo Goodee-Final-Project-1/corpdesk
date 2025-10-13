@@ -49,6 +49,7 @@ public class ResApprovalDTO {
 
     // file
     private Integer fileCount;
+    private List<ApprovalFileDTO> files;
 
     private Long fileId;
     private String oriName;

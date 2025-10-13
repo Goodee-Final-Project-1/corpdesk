@@ -20,7 +20,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
         WITH e AS (
         	SELECT *
         	FROM employee
-        	WHERE username = :username
+        	WHERE
+                use_yn = :useYn
+                AND username = :username
         )
         SELECT
             e.username AS username, e.position_id AS position_id, e.department_id AS department_id, e.name AS name
@@ -30,7 +32,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
         JOIN department d USING (department_id)
         JOIN `position` p USING (position_id);
     """)
-    public ResEmployeeDTO findEmployeeWithDeptAndPosition(@Param("username") String username);
+    public ResEmployeeDTO findEmployeeWithDeptAndPosition(@Param("useYn") Boolean useYn
+                                                          , @Param("username") String username);
 
     @NativeQuery("""
         WITH
