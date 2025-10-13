@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goodee.corpdesk.chat.dto.ChatContact;
+import com.goodee.corpdesk.chat.dto.ChatMessageDto;
 import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatRoom;
 import com.goodee.corpdesk.chat.service.ChatRoomService;
@@ -40,10 +42,12 @@ public class ChatRoomController {
 	public String chatRoomList(Principal principal ,Model model) {
 			String username= principal.getName();
 			List<RoomData> roomList= chatRoomService.getChatRoomList(username);
-			List<Employee> employeeList = employeeService.getActiveEmployees();
+			List<ChatContact> contactList = chatRoomService.getContactList();
+			contactList.sort((o1, o2) ->{
+				return o1.getName().compareTo(o2.getName());
+			});
 			model.addAttribute("roomList", roomList);
-			model.addAttribute("employeeList",employeeList);
-		
+			model.addAttribute("contactList",contactList);
 		return "Chat/chat_list";
 	}
 	
@@ -63,9 +67,12 @@ public class ChatRoomController {
 		//json으로 변환
 		ObjectMapper mapper = new ObjectMapper();
 		String JsonRoomData = mapper.writeValueAsString(roomData);
-		List<Employee> employeeList = employeeService.getActiveEmployees();
+		List<ChatContact> contactList = chatRoomService.getContactList();
+		contactList.sort((o1, o2) ->{
+			return o1.getName().compareTo(o2.getName());
+		});
 		model.addAttribute("roomData",JsonRoomData);
-		model.addAttribute("employeeList",employeeList);
+		model.addAttribute("employeeList",contactList);
 		model.addAttribute("roomDataEl",roomData);
 		return "Chat/chat_page";
 	}
@@ -89,8 +96,8 @@ public class ChatRoomController {
 	
 	@PostMapping("inviteRoom")
 	@ResponseBody
-	public boolean inviteRoom(@RequestBody RoomData roomData) {
-		boolean result = chatRoomService.inviteRoom(roomData);
+	public boolean inviteRoom(@RequestBody RoomData roomData , Principal principal) {
+		boolean result = chatRoomService.inviteRoom(roomData , principal);
 		return result;
 	}
 }

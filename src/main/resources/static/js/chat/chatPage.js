@@ -23,15 +23,33 @@ roomtitle.textContent = roomData.chatRoomTitle
 const participantContent = document.querySelector(".participant-content");
 const ul = participantContent.querySelector("ul");
 
-//참여자 목록 
-for (let i = 0; i < roomData.viewNameList.length; i++) {
-	const li = document.createElement("li");
-	li.className = "list-group-item";
-	li.setAttribute("data-name", roomData.usernames[i]);
-	li.textContent = roomData.viewNameList[i];
-	ul.appendChild(li);
-}
 
+
+function renderParticipantList() {
+  ul.innerHTML = "";
+
+  const participants = roomData.viewNameList.map((name, index) => ({
+    name,
+    username: roomData.usernames[index]
+  }));
+
+  participants.sort((a, b) => {
+    const lastA = a.name.split(" ").pop();
+    const lastB = b.name.split(" ").pop();
+    return lastA.localeCompare(lastB, "ko");
+  });
+
+  console.log("정렬된 참여자 목록:", participants.map(p => p.name));
+
+  participants.forEach(p => {
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+    li.setAttribute("data-name", p.username);
+    li.textContent = p.name;
+    ul.appendChild(li);
+  });
+}
+renderParticipantList();
 
 
 
@@ -97,7 +115,7 @@ document.getElementById("nextStepBtn").addEventListener("click", () => {
 		})
 			.then(res => {
 				if (res) {
-					window.location.reload();
+					$("#inviteRoomStep1").modal("hide");
 				}
 			});
 	}
@@ -122,7 +140,7 @@ document.getElementById("inviteRoomConfirmBtn").addEventListener("click", () => 
 	})
 		.then(res => {
 			if (res) {
-				window.location.reload();
+				$("#inviteRoomStep2").modal("hide");
 			}
 		});
 });
@@ -365,12 +383,12 @@ stompClient.connect({}, function(frame) {
 					l.classList.add("hidden");
 				}
 			})
-			const ul =document.querySelector(".participant-content").querySelector("ul");
-			const li = document.createElement("li");
-			li.className = "list-group-item";
-			li.textContent = msg.viewName; // 서버에서 내려주는 이름 or 조립된 문자열
-			li.setAttribute("data-name",msg.employeeUsername);
-			ul.appendChild(li);
+			 // 데이터에도 추가
+  roomData.viewNameList.push(msg.roomName);
+  roomData.usernames.push(msg.employeeUsername);
+
+  // 다시 렌더링 (자동 정렬됨)
+  renderParticipantList();
 			
 		}
 		if (msg.messageType == "out") {
@@ -387,6 +405,9 @@ stompClient.connect({}, function(frame) {
 			    }
 			  });
 			
+		}
+		if(msg.notificationType=="invite"){
+			roomtitle.textContent=msg.viewName;
 		}
 		
 

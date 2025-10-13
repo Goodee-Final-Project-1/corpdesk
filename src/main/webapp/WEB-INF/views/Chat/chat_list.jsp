@@ -12,7 +12,19 @@
 	.hidden {
 		display: none !important;
 	}
+.chat-left-sidebar .card-header {
+	position: relative;
+  justify-content: center !important; /* 양끝 배치 대신 가운데 정렬 */
+  flex-direction: column; /* 세로 배치 */
+  align-items: center;
+}
+
+.chat-left-sidebar .card-header h2 {
+  margin-bottom: 10px;
+}
+
 	</style>
+
 	
 </head>
 
@@ -28,33 +40,51 @@
 			<!-- 내용 시작 -->
 			<sec:authentication property="principal.username" var="user" />
 			
-		
-			<p>연락처 목록 </p>
-			<table class= "contact">
-					<tr>
-						<th>부서</th>&nbsp;
-						<th>직위</th>&nbsp;
-						<th>이름</th>
-					</tr>
-					<c:forEach items="${employeeList}" var="employee">
-						<tr class="employeeListOne" data-employee="${employee.username }" style="cursor:pointer;">
-								<td>${employee.departmentName } &nbsp;</td>
-								
-								<td>${employee.positionName} &nbsp;</td>
-								
-								<td>${employee.name }</td>
-						</tr>
-						
-					</c:forEach>
-				</table>
-				<br>
-			<br><br><br>
+	
+<div class = "row no-gutters justify-content-center">
+	<div class ="col-lg-4 col-xxl-3">
+		<div class = "card card-default chat-left-sidebar">
+				<div class="card-header">
+			<h2 >연락처 목록</h2>
+			 <div class="input-group mb-3">
+          <input type="text" class="form-control" id="searchContactList" placeholder="이름 검색">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary contactBtn " type="button">검색</button>
+          </div>
+        </div>
+				  <!-- 그룹 채팅방 생성하기 버튼 -->
+		  
+<span class="mdi mdi-account-multiple-plus ml-auto" style="cursor: pointer; font-size: 30px;" data-toggle="modal" data-target="#createRoomStep1">
+</span> 
+
+		</div>
+			 <ul class="list-group" id="contactList" data-simplebar style="height: 562px;">
+        	  <c:forEach items="${contactList}" var="employee">
+          
+            <li class="list-group-item-action d-flex align-items-cent er employeeListOne" data-employee="${employee.username}" style="padding: 10px;">
+             <!-- 추후 사진 바꿔주면됨  -->
+              <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:60px; height:60px;">
+              <div class="flex-fill">
+                <strong class="employeeName">${employee.name}</strong><br>
+                <small>${employee.departmentName} ${employee.positionName}</small>
+              </div>
+            </li>
+     
+          </c:forEach>
+        </ul>
+		</div>
+	</div>
 			
 
 <!-- 채팅방 목록 -->
+
 <div class="col-lg-7 col-xxl-5">
-	<div class="card card-default chat-left-sidebar">
-		<ul class="card-body px-0 list-group chatList" data-simplebar style="height: 630px;">
+	<div class="card card-default chat-right-sidebar">
+		<div class="card-header">
+			<h2 style="margin: 0 auto ">채팅방 목록</h2>
+
+		</div>
+		<ul class="card-body px-0 list-group chatList" data-simplebar style="height: 677px;">
 			<c:forEach items="${roomList}" var="room">
 				<li class="mb-4 px-5 py-2 chatListOne list-group-item-action "
 					data-roomId="${room.chatRoomId }"
@@ -102,12 +132,19 @@
 		</ul>
 	</div>
 </div>
+</div>
+
+<c:forEach items ="${notificationList}" var="notification">
+
+	<p>${notification.imgPath}</p>
+	<p>${notification.viewName}</p>
+	<p>${notification.messageContent}</p>
+	<p>${notification.sentAt}</p>
+	<p>${notification.chatRoomId}</p>
 
 
-<!-- 채팅방 생성하기 버튼 -->
-<button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#createRoomStep1">
-    채팅방 생성하기
-</button>
+</c:forEach>
+
 
 <!-- Step 1: 참여자 선택 모달 -->
 <div class="modal fade" id="createRoomStep1" tabindex="-1" role="dialog" aria-labelledby="step1Label" aria-hidden="true">
@@ -130,11 +167,11 @@
 
         <!-- 사원 목록 (스크롤 가능) -->
         <ul class="list-group" id="participantList" style="max-height: 300px; overflow-y: auto;">
-          <c:forEach items="${employeeList}" var="employee">
+          <c:forEach items="${contactList}" var="employee">
           <c:if test="${employee.username ne user }">
             <li class="list-group-item d-flex align-items-cent er">
              <!-- 추후 사진 바꿔주면됨  -->
-              <img src="/images/default_profile.jpg" class="rounded-circle mr-3" style="width:40px; height:40px;">
+              <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:40px; height:40px;">
               <div class="flex-fill">
                 <strong class="employeeName">${employee.name}</strong><br>
                 <small>${employee.departmentName} ${employee.positionName}</small>
@@ -152,6 +189,8 @@
     </div>
   </div>
 </div>
+
+
 
 <!-- Step 2: 방 제목 입력 모달 -->
 <div class="modal fade" id="createRoomStep2" tabindex="-1" role="dialog" aria-labelledby="step2Label" aria-hidden="true">
