@@ -35,73 +35,7 @@
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/>
 
 <!-- Modal -->
-<div class="modal fade" id="newApprovalModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title fs-5" id="exampleModalLabel">결재 양식 선택</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body d-flex justify-content-between">
-
-                <!-- left col -->
-                <div class="card mb-4 p-0 w-75">
-
-                    <div class="card-body p-4">
-                        <ul class="list-unstyled">
-                            <c:forEach items="${formList }" var="el">
-                                <li class="text-start">
-                                    <a data-approval-form-id="${el.approvalFormId }" class="approval-form-name btn px-0 mr-3 text-dark">${el.formTitle }</a>
-                                </li>
-                            </c:forEach>
-                        </ul>
-                    </div>
-
-                </div>
-
-                <!-- right col -->
-                <div class="card mb-4 p-0 ml-2 w-100">
-
-                    <h5 class="card-title pt-4 px-4">상세정보</h5>
-
-                    <div class="card-body p-4">
-                        <ul class="list-unstyled">
-                            <li class="d-flex py-2 text-dark">
-                                <b class="col-5 p-0">제목</b>
-                                <p id="approvalTitle"></p>
-                            </li>
-                            <li class="d-flex py-2 text-dark">
-                                <b class="col-5 p-0">기안부서</b>
-                                <p>asdfasdf</p>
-                            </li>
-                            <li class="d-flex py-2 text-dark align-items-center">
-                                <label class="col-5 p-0">결재부서</label>
-                                <div class="form-group">
-                                    <select class="form-control" id="vacationType">
-
-                                        <option value="연차">${el.departmentName}</option>
-
-                                    </select>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" id="formCheck" class="btn btn-info">확인</button>
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">취소</button>
-            </div>
-
-        </div>
-    </div>
-</div>
-<!--  -->
+<c:import url="modal.jsp"/>
 
 	<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
 
@@ -116,25 +50,7 @@
 				
 				<div class="col-lg-4 col-xl-3 col-xxl-2">
 					<div class="email-left-column email-options p-4 p-xl-5">
-                        <a data-bs-toggle="modal" data-bs-target="#newApprovalModal" id="newApproval" class="btn btn-block btn-primary btn-pill mb-4 mb-xl-5">새 결재 진행</a>
-
-                        <ul class="pb-2">
-                            <li class="d-block mb-4">
-                                <a href="/approval/list?username=jung_frontend">전체</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
-                            </li>
-                            <li class="d-block mb-4">
-                                <a href="/approval/list?listType=request&username=jung_frontend">요청 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
-                            </li>
-                            <li class="d-block mb-4">
-                                <a href="/approval/list?listType=wait&username=jung_frontend">대기 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
-                            </li>
-                            <li class="d-block mb-4">
-                                <a href="/approval/list?listType=storage&username=jung_frontend">완료 목록</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
-                            </li>
-                            <li class="d-block mb-4">
-                                <a href="/approval/list?listType=temp&username=jung_frontend">임시보관함</a> <%-- TODO 쿼리파라미터에서 username 삭제 --%>
-                            </li>
-                        </ul>
+            <c:import url="widget_content.jsp"/>
 					</div>
 				</div>
 				
