@@ -13,22 +13,41 @@ import com.goodee.corpdesk.notification.entity.Notification;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-	List<Notification> findByNotificationTypeAndUsernameAndIsReadFalseOrderByRelatedIdDesc(String type, String username);
+	List<Notification> findByNotificationTypeAndUsernameAndIsReadFalseOrderByNotificationIdDesc(String type, String username);
 	
 	@Transactional
 	@Modifying(clearAutomatically = true)
-	@Query("UPDATE Notification n SET isRead = true , n.updatedAt = CURRENT_TIMESTAMP "+
-			   "WHERE n.username = :username AND n.notificationType =:notificationType AND n.relatedId =:relatedId")
+	@Query("""
+		UPDATE Notification n SET isRead = true , n.updatedAt = CURRENT_TIMESTAMP 
+		WHERE n.username = :username AND n.notificationType =:notificationType AND n.relatedId =:relatedId
+		""")
 	int updateReadTrue(@Param("relatedId")Long relatedId,@Param("notificationType")String notificationType,@Param("username") String username);
 
 	@Transactional
 	@Modifying(clearAutomatically = true)
-	@Query("UPDATE Notification n SET isRead = true , n.updatedAt = CURRENT_TIMESTAMP "+
-			   "WHERE n.username = :username AND n.notificationType =:notificationType")
+	@Query("""
+			UPDATE Notification n SET isRead = true , n.updatedAt = CURRENT_TIMESTAMP 
+			WHERE n.username = :username AND n.notificationType =:notificationType
+			""")
 	int updateAllReadTrue(@Param("notificationType")String notificationType,@Param("username")  String username);
 
 
 	Optional<Notification> findByRelatedIdAndNotificationTypeAndUsername(Long relatedId, String notificationType, String username);
+
+	
+	@Transactional
+	@Modifying(clearAutomatically = true)
+	@Query("""
+	    UPDATE Notification n
+	       SET n.isRead = true,
+	           n.updatedAt = CURRENT_TIMESTAMP
+	     WHERE n.username = :username
+	       AND n.notificationType = 'message'
+	       AND n.relatedId IN (
+	           SELECT c.messageId FROM ChatMessage c WHERE c.chatRoomId = :chatRoomId
+	       )
+	""")
+	int updateOneRoomAllReadTrue(@Param("chatRoomId")Long chatRoomId,@Param("username") String username);
 
 	
 }
