@@ -1,14 +1,16 @@
 package com.goodee.corpdesk.employee;
 
-import java.io.File;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
+import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.attendance.service.AttendanceService;
+import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
+import com.goodee.corpdesk.file.FileManager;
+import com.goodee.corpdesk.file.dto.FileDTO;
+import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
+import com.goodee.corpdesk.position.entity.Position;
+import com.goodee.corpdesk.position.repository.PositionRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
@@ -25,16 +27,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.service.AttendanceService;
-import com.goodee.corpdesk.department.entity.Department;
-import com.goodee.corpdesk.department.repository.DepartmentRepository;
-import com.goodee.corpdesk.file.FileManager;
-import com.goodee.corpdesk.file.dto.FileDTO;
-import com.goodee.corpdesk.file.entity.EmployeeFile;
-import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
-import com.goodee.corpdesk.position.entity.Position;
-import com.goodee.corpdesk.position.repository.PositionRepository;
+import java.io.File;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 @Transactional
@@ -253,8 +248,9 @@ public class EmployeeService implements UserDetailsService {
     // ---------------------- 기타 기존 메서드 ----------------------
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Employee employee = employeeRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        employee.setRole(roleRepository.findById(employee.getRoleId()).orElse(null));
+//        Employee employee = employeeRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+//        employee.setRole(roleRepository.findById(employee.getRoleId()).orElse(null));
+		EmployeeSecurityDTO employee = employeeRepository.findEmployeeSecurityByUsername(username).get();
         return employee;
     }
 
@@ -267,8 +263,10 @@ public class EmployeeService implements UserDetailsService {
 
     public Map<String, Object> detail(String username) {
         Employee employee = employeeRepository.findById(username).orElseThrow();
-        Department department = departmentRepository.findById(employee.getDepartmentId()).orElse(null);
-        Position position = positionRepository.findById(employee.getPositionId()).orElse(null);
+		Department department = null;
+		if(employee.getDepartmentId() != null) department = departmentRepository.findById(employee.getDepartmentId()).orElse(null);
+        Position position = null;
+		if(employee.getPositionId() != null) position = positionRepository.findById(employee.getPositionId()).orElse(null);
 
         Map<String, Object> map = new HashMap<>();
         map.put("employee", employee);
@@ -317,7 +315,7 @@ public class EmployeeService implements UserDetailsService {
     }
 
     public ResEmployeeDTO getFulldetail(String username) {
-        return employeeRepository.findEmployeeWithDeptAndPosition(username);
+        return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
 
 }

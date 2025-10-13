@@ -75,7 +75,13 @@ public class VacationService {
     }
 
     public ResVacationDTO getVacation(String username) throws Exception {
-        return vacationRepository.findByUseYnAndUsername(true, username).toResVacationDTO();
+
+        Vacation vacation = vacationRepository.findByUseYnAndUsername(true, username);
+
+        if(vacation == null) return new ResVacationDTO();
+
+        return vacation.toResVacationDTO();
+
     }
 
     public List<ResVacationDTO> getVacationDetails(Integer vacationId, Integer vacationTypeId) throws Exception {
