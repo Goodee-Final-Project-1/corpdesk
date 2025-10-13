@@ -100,8 +100,7 @@ public class HolidayService {
 
         // 새 데이터 저장
         List<Holiday> holidays = fetchHoliday(year);
-        
-        // TODO 저장 로직
+
         if (holidays.isEmpty()) return;
 
         for (Holiday holiday : holidays) {

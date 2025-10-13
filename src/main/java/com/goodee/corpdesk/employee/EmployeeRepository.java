@@ -1,15 +1,21 @@
 package com.goodee.corpdesk.employee;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -17,7 +23,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
         WITH e AS (
         	SELECT *
         	FROM employee
-        	WHERE username = :username
+        	WHERE
+                use_yn = :useYn
+                AND username = :username
         )
         SELECT
             e.username AS username, e.position_id AS position_id, e.department_id AS department_id, e.name AS name
@@ -27,7 +35,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
         JOIN department d USING (department_id)
         JOIN `position` p USING (position_id);
     """)
-    public ResEmployeeDTO findEmployeeWithDeptAndPosition(@Param("username") String username);
+    public ResEmployeeDTO findEmployeeWithDeptAndPosition(@Param("useYn") Boolean useYn
+                                                          , @Param("username") String username);
 
     @NativeQuery("""
         WITH
@@ -75,8 +84,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	List<Employee> findByDepartmentId(Integer departmentId);
 	
 	@Modifying
-	@Query("UPDATE Employee e SET e.departmentId = NULL, e.departmentName = NULL WHERE e.departmentId = :deptId")
-	void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
+    @Transactional
+    @Query("UPDATE Employee e SET e.departmentId = null WHERE e.departmentId = :deptId")
+    void clearDepartmentByDeptId(@Param("deptId") Integer deptId);
 
 	List<Employee> findByDepartmentIdAndUseYnTrue(Integer departmentId);
 
@@ -109,7 +119,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	Optional<EmployeeInfoDTO> findByIdWithDept(String username);
 
 
-	@NativeQuery("""
+	@Query(value = """
 	SELECT
 	    e.username AS username,
 	    e.name AS name,
@@ -121,6 +131,33 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	LEFT JOIN position p ON p.position_id = e.position_id
 	LEFT JOIN role r ON e.role_id = r.role_id
 	WHERE e.use_yn = 1
+""",
+			countQuery = "SELECT COUNT(*) FROM employee WHERE use_yn = 1",
+	nativeQuery = true)
+	Page<Map<String, Object>> findAllWithDepartmentAndPosition(Pageable pageable);
+
+	@Query("""
+	SELECT new com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO (
+		e.username,
+		e.password,
+		e.name,
+		
+		e.accountNonExpired,
+		e.accountNonLocked,
+		e.credentialsNonExpired,
+		e.enabled,
+		
+		e.updatedAt,
+		e.createdAt,
+		e.modifiedBy,
+		e.useYn,
+		
+		e.roleId,
+		r.roleName
+	)
+	FROM Employee e
+	LEFT JOIN Role r ON e.roleId = r.roleId
+	WHERE e.username = :username
 """)
-	List<Map<String, Object>> findAllWithDepartmentAndPosition();
+	Optional<EmployeeSecurityDTO> findEmployeeSecurityByUsername(@Param("username") String username);
 }

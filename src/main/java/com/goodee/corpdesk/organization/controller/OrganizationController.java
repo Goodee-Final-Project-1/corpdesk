@@ -23,6 +23,8 @@ import com.goodee.corpdesk.department.dto.MoveEmployeesDTO;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.department.service.DepartmentService;
+import com.goodee.corpdesk.employee.EmployeeRepository;
+import com.goodee.corpdesk.employee.RoleService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +35,9 @@ public class OrganizationController {
 
     private final DepartmentService departmentService;
     private final DepartmentRepository departmentRepository;
-
+    private final EmployeeRepository employeeRepository;
+    private final RoleService roleService;
+    
     // 조직도 페이지
     @GetMapping("/list")
     public String listPage() {
@@ -45,23 +49,23 @@ public class OrganizationController {
     @GetMapping("/tree")
     @ResponseBody
     public List<Map<String, Object>> getOrganizationTree() {
-        List<Department> departments = departmentRepository.findAll();
+        List<Department> departments = departmentRepository.findByUseYnTrue(); // ✅ useYn=true만 가져오기
 
         List<Map<String, Object>> nodes = new ArrayList<>();
         for (Department dept : departments) {
             Map<String, Object> node = new HashMap<>();
-            node.put("id", dept.getDepartmentId());                 // 노드 고유 id
-            node.put("parent", dept.getParentDepartmentId() == null ? "#" : dept.getParentDepartmentId()); // root면 "#"
-            node.put("text", dept.getDepartmentName());             // 노드 이름
+            node.put("id", dept.getDepartmentId());
+            node.put("parent", dept.getParentDepartmentId() == null ? "#" : dept.getParentDepartmentId());
+            node.put("text", dept.getDepartmentName());
             nodes.add(node);
         }
         return nodes;
     }
     
-    @PostMapping("/addByName")
+    @PostMapping("/add")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> addDepartmentByName(
-            @RequestParam(value = "parentName", required = false) String parentName,
+    public ResponseEntity<Map<String, Object>> addDepartment(
+            @RequestParam(value = "parentId", required = false) Integer parentId,
             @RequestParam("name") String name) {
 
         // 중복 체크
@@ -70,14 +74,9 @@ public class OrganizationController {
                     .body(Map.of("error", "이미 존재하는 부서명입니다."));
         }
 
-        Department parent = null;
-        if (parentName != null && !parentName.isBlank()) {
-            parent = departmentRepository.findByDepartmentName(parentName).orElse(null);
-        }
-
         Department dept = new Department();
         dept.setDepartmentName(name);
-        dept.setParentDepartmentId(parent != null ? parent.getDepartmentId() : null);
+        dept.setParentDepartmentId(parentId); // 바로 parentId 저장
 
         departmentRepository.save(dept);
 
@@ -91,12 +90,13 @@ public class OrganizationController {
 
 
 
+
     
     
     @PostMapping("/deleteCascade")
     @ResponseBody
     public ResponseEntity<Void> deleteCascade(@RequestParam("id") Integer id) {
-        departmentService.deleteDepartment(id);
+        departmentService.deactivateDepartment(id);
         return ResponseEntity.ok().build();
     }
 
@@ -119,6 +119,16 @@ public class OrganizationController {
     @ResponseBody
     public ResponseEntity<?> moveEmployees(@RequestBody MoveEmployeesDTO dto) {
         departmentService.moveEmployees(dto.getEmployeeUsernames(), dto.getNewDeptId());
+        
+     // 이동한 직원들 권한 재지정
+        for (String username : dto.getEmployeeUsernames()) {
+            employeeRepository.findById(username).ifPresent(emp -> {
+                roleService.assignRole(emp);
+                employeeRepository.save(emp);
+            });
+        }
+        
+        
         return ResponseEntity.ok().build();
     }
     

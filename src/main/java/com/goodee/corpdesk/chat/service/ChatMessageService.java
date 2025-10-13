@@ -11,11 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.goodee.corpdesk.chat.dto.ChatMessageDto;
 import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
-import com.goodee.corpdesk.chat.dto.RoomData;
 import com.goodee.corpdesk.chat.entity.ChatMessage;
 import com.goodee.corpdesk.chat.entity.ChatParticipant;
 import com.goodee.corpdesk.chat.repository.ChatMessageRepository;
@@ -24,10 +22,12 @@ import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.notification.service.NotificationService;
 import com.goodee.corpdesk.position.entity.Position;
 
 @Service
 public class ChatMessageService {
+
 
 	@Autowired
 	private ChatMessageRepository chatMessageRepository;
@@ -42,7 +42,8 @@ public class ChatMessageService {
 	private SimpMessagingTemplate messagingTemplate;
 	@Autowired
 	private ChatSessionTracker chatSessionTracker;
-
+	@Autowired
+	private NotificationService notificationService;
 	// 유저이름으로 유저 이름 부서 직위 가져옴
 	public String getUserNameDepPos(String username) {
 		Map<String, Object> map = employeeService.detail(username);
@@ -140,17 +141,11 @@ public class ChatMessageService {
 
 	    //  방 참가자 처리
 	    List<ChatParticipant> participants;
-	    RoomData chatRoom = new RoomData();
 	  
         //참가자 활성화
 	    if (chatRoomType.equals("direct")) {
 	        // 1대1이면 나간 사람도 다시 참여 처리
 	        participants = participantOnetoOneByRoom(msg.getChatRoomId());
-
-	        // 상대방 이름으로 방제목 세팅
-	        chatRoom.setChatRoomTitle(getUserNameDepPos(principal.getName()));
-	        chatRoom.setImgPath(getUserImgPath(principal.getName()));
-	        
 
 	    } else {
 	        // 그룹 채팅은 나간 사람한테 안보냄
@@ -159,37 +154,44 @@ public class ChatMessageService {
 	    		
 	    	}
 	        participants = participantListByRoom(msg.getChatRoomId());
-	        chatRoom.setChatRoomTitle(chatRoomService.getRoomTitle(msg.getChatRoomId()));
-	        chatRoom.setNotificationType("room");
-	        chatRoom.setImgPath("/images/group_profile.png");
 	    }
 	    
 	    //  메시지 저장
 	  		ChatMessageDto saveMsg = messageSave(msg).toChatMessageDto();
 	  	    saveMsg.setNotificationType("message");
-
 	  	    
-	  	    chatRoom.setChatRoomId(msg.getChatRoomId());
-	        chatRoom.setChatRoomLastMessage(saveMsg.getMessageContent());
-	        chatRoom.setLastMessageTime(saveMsg.getSentAt());
-	        chatRoom.setNotificationType("room");
-	        chatRoom.setUnreadCount(0L);
 	    //  방 전체 브로드캐스트
 	      
 	        //메세지 전송자 이름, 이미지 
-	        String viewName = getUserNameDepPos(principal.getName());
-	        saveMsg.setImgPath(getUserImgPath(principal.getName()));
-	        saveMsg.setViewName(viewName);
+	        String baseViewName = getUserNameDepPos(principal.getName());
+	        String baseImg = getUserImgPath(principal.getName());
+	        
+	        
+	        saveMsg.setViewName(baseViewName);
+	        saveMsg.setImgPath(baseImg);
+	        
 	        messagingTemplate.convertAndSend("/sub/chat/room/" + msg.getChatRoomId(), saveMsg);
+	        
+	        if(chatRoomType.equals("room")) {
+	        	baseViewName = chatRoomService.getRoomTitle(saveMsg.getChatRoomId());
+	        	baseImg="/images/group_profile.png";
+	        }
 
+	        //람다식 안에서는 재할당된 변수를 사용할수 없어서 초기화한 변수만 사용하기위함
+	        String viewName= baseViewName;
+	        String img = baseImg;
 	    //  개인 알림 전송
 	    // 그룹 , 개인 전부 여기서 보내줌
-	    for (ChatParticipant p : participants) {
-	        String username = p.getEmployeeUsername();
+	   participants.forEach(p->{
+		   String username = p.getEmployeeUsername();
 	        Long chatRoomId = p.getChatRoomId();
+	        saveMsg.setViewName(viewName);
+	        saveMsg.setImgPath(img);
 
 	        if (!chatSessionTracker.isUserFocused(chatRoomId, username)) {
+	        	//보고있지 않으면 DB 에도 알림을 저장함
 	        	saveMsg.setFocused(false);
+	        	notificationService.saveNotification(saveMsg.getMessageId(),"message",username);
 	        } else {
 	        	saveMsg.setFocused(true);
 	        }
@@ -198,34 +200,18 @@ public class ChatMessageService {
 	        if(chatRoomType.equals("direct") && username.equals(saveMsg.getEmployeeUsername())) {
 	        	//기본은 내가보낸 메세지를 그대로 보내는데(방에 나만 있으면 이렇게 보내짐)
 	        	List<ChatParticipant> list = participantOnetoOneByRoom(chatRoomId);
-	        	 RoomData chatRoomMe = new RoomData();
-	        	 chatRoomMe.setChatRoomId(msg.getChatRoomId());
-	        	 chatRoomMe.setChatRoomLastMessage(saveMsg.getMessageContent());
-	        	 chatRoomMe.setLastMessageTime(saveMsg.getSentAt());
-	        	 chatRoomMe.setNotificationType("room");
-	        	 chatRoomMe.setUnreadCount(0L);
-	        	 chatRoomMe.setChatRoomTitle(chatRoom.getChatRoomTitle());
-	        	 chatRoomMe.setImgPath(chatRoom.getImgPath());
 	        	 
 	        	 //상대방이 있다면 나한테는 상대방에 대한 이름이랑 이미지가 채팅방 목록에 표시되야함
 	        	 list.forEach(l->{
 	        		if(!l.getEmployeeUsername().equals(username)) {
-	        		        chatRoomMe.setChatRoomTitle(getUserNameDepPos(l.getEmployeeUsername()));
-	        		        chatRoomMe.setImgPath( getUserImgPath(l.getEmployeeUsername()));
+	        		        saveMsg.setViewName(getUserNameDepPos(l.getEmployeeUsername()));
+	        		        saveMsg.setImgPath( getUserImgPath(l.getEmployeeUsername()));
 	        		}
-	        		
 	        	});
-	        	
-	        	
-	        	messagingTemplate.convertAndSendToUser(username, "/queue/notifications", chatRoomMe);
-	 	        messagingTemplate.convertAndSendToUser(username, "/queue/notifications", saveMsg);
-	        	
-	        		continue;
 	        }
-	    
-	        messagingTemplate.convertAndSendToUser(username, "/queue/notifications", chatRoom);
 	        messagingTemplate.convertAndSendToUser(username, "/queue/notifications", saveMsg);
-	    }
+		   
+	   });
 	}
 
 }
