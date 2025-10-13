@@ -55,9 +55,9 @@ public class Employee /*implements UserDetails*/ {
 	@Column(name = "department_id")
 	private Integer departmentId;
 
-	private String departmentName;
-
-	private String positionName;
+//	private String departmentName;
+//
+//	private String positionName;
 
 	@ColumnDefault("3")
 	private Integer roleId;
@@ -121,22 +121,9 @@ public class Employee /*implements UserDetails*/ {
 	@ColumnDefault("0")
 	private Long currentBaseSalary;
 
-//	@Transient
-//	private Role role;
-//
-//	@Override
-//	public Collection<? extends GrantedAuthority> getAuthorities() {
-//		List<GrantedAuthority> authorities = new ArrayList<>();
-//		if (role != null) {
-//			authorities.add(new SimpleGrantedAuthority(this.role.getRoleName()));
-//		}
-//
-//		return authorities;
-//	}
-
-    public ResApprovalDTO  toResApprovalDTO() {
-        return ResApprovalDTO.builder()
-                .username(this.username)
-                .build();
-    }
+  public ResApprovalDTO  toResApprovalDTO() {
+      return ResApprovalDTO.builder()
+              .username(this.username)
+              .build();
+  }
 }
