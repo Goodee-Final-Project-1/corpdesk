@@ -2,6 +2,7 @@ package com.goodee.corpdesk.notification.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.approval.service.ApprovalFormService;
+import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.notification.dto.NotificationDto;
 import com.goodee.corpdesk.notification.entity.Notification;
 import com.goodee.corpdesk.notification.repository.NotificationRepository;
@@ -18,7 +22,11 @@ public class NotificationService {
 	@Autowired
 	NotificationRepository notificationRepository;
 	@Autowired
+	ApprovalFormService approvalFormService;
+	@Autowired
 	SimpMessagingTemplate messagingTemplate;
+	@Autowired
+	EmployeeService employeeService;
 	//읽지 않은 '메세지' 알림 조회
 	public List<NotificationDto> getMessageNotification(String username) {
 		List<Notification> notification =  notificationRepository.findByNotificationTypeAndUsernameAndIsReadFalseOrderByNotificationIdDesc("message",username);
@@ -70,12 +78,17 @@ public class NotificationService {
 		return notificationRepository.save(notification);
 	}
 	//결재 알림 저장
-	public Notification saveApprovalNotification(Long relatedId ,String notificationType ,String content, String username) {
+	public Notification saveApprovalNotification(Long relatedId ,String notificationType ,String content, String username) throws Exception {
+		ResApprovalDTO res= approvalFormService.getApprovalForm(relatedId.intValue());
+		Map<String, Object> map = employeeService.detail(username);
+        Employee emp = (Employee) map.get("employee");
+		res.getFormTitle();
 		Notification notification = Notification.builder()
 				.notificationType(notificationType)
 				.relatedId(relatedId)
 				.username(username)
 				.content(content)
+				.title(res.getFormTitle()+"_"+emp.getName())
 				.build();
 		return notificationRepository.save(notification);
 	}
@@ -92,7 +105,7 @@ public class NotificationService {
 	
 	
 	//결재 알림 요청
-	public void reqNotification(Long relatedId , String notificationType , String content , String username ) {
+	public void reqNotification(Long relatedId , String notificationType , String content , String username ) throws Exception {
 		Notification n = saveApprovalNotification(relatedId,
 				notificationType, content,username);
 		messagingTemplate.convertAndSendToUser(username, "/queue/notifications",n );

@@ -119,9 +119,7 @@ public class ApprovalService {
 			// 만약 승인 순서가 1이 아니면 use_yn값을 false로 하여 insert
 			if(approver.getApprovalOrder() != 1) {approver.setUseYn(false);
 			}else {
-				Notification n = notificationService.saveApprovalNotification(approval.getApprovalId(),
-						"approval", "새로운 결재 요청이 있습니다.",approver.getUsername());
-				messagingTemplate.convertAndSendToUser(approver.getUsername(), "/queue/notifications",n );
+				notificationService.reqNotification(approval.getApprovalId(),"approval", "새로운 결재 요청이 있습니다.",approver.getUsername());
 			}
 			approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
@@ -157,7 +155,11 @@ public class ApprovalService {
 	        if (approval.getStatus() == 'w') {
 	        	approverList.forEach(approver->{
 	        		if(approver.getUseYn()) {
-	        			notificationService.reqNotification(approvalId,"approval", "결재 문서가 기안자에 의해 취소되었습니다.",approver.getUsername());
+	        			try {
+							notificationService.reqNotification(approvalId,"approval", "결재 문서가 기안자에 의해 취소되었습니다.",approver.getUsername());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 	        		}
 	        	});
 	        }

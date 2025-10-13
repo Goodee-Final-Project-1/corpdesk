@@ -99,11 +99,6 @@
 								
 								<!-- 메시지 알림 -->
                 <div class="tab-pane fade show active" id="message" role="tabpanel" aria-labelledby="message-tab">
-
-
-
-
-
 				<c:forEach items="${msgNotificationList}" var="notification">
                   <div class="media media-sm p-4 mb-0 notification messageNotification" data-roomId="${notification.chatRoomId}" style="cursor: pointer;">
                     <div class="media-sm-wrapper">
