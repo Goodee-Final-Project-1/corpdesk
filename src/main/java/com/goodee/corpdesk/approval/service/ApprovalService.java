@@ -30,6 +30,9 @@ import com.goodee.corpdesk.vacation.repository.VacationRepository;
 
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -280,15 +283,17 @@ public class ApprovalService {
 		return "PROCESSED";
 	}
     
-    public List<ResApprovalDTO> getAllApprovalList(String listType, String username) throws Exception {
+    public Page<ResApprovalDTO> getAllApprovalList(String listType, String username, Pageable pageable) throws Exception {
 
-        List<ResApprovalDTO> result = new ArrayList<>();
+        Page<ResApprovalDTO> result = null;
         switch (listType) {
-            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("T")); // 내 결재 임시 보관함
-            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("W", "N", "Y")); // 내 결재 요청 목록
-            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("W"), List.of("W")); // 결재 대기 목록
-            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("Y", "N"), List.of("W", "Y", "N")); // 내가 결재한 목록
+            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("T"), pageable); // 내 결재 임시 보관함
+            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("W", "N", "Y"), pageable); // 내 결재 요청 목록
+            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("W"), List.of("W"), pageable); // 결재 대기 목록
+            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("Y", "N"), List.of("W", "Y", "N"), pageable); // 내가 결재한 목록
         }
+
+        if(result == null) return new PageImpl<ResApprovalDTO>(List.of());
 
         return result;
 

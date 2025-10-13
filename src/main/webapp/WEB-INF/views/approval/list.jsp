@@ -269,7 +269,6 @@
 
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h4 class="text-dark">${request ne null ? '결재 요청 목록' : '임시 보관함'}</h4>
-                                        <button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
                                     </div>
 
                                     <div class="email-details-content pl-0 pr-0">
@@ -325,7 +324,6 @@
 
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h4 class="text-dark">${wait ne null ? '결재 대기 목록': '결재 완료 목록'}</h4>
-                                        <button type="button" class="btn btn-outline-primary pt-1 pb-1 pl-2 pr-2"><i class="mdi mdi-plus"></i></button>
                                     </div>
 
                                     <div class="email-details-content pl-0 pr-0">

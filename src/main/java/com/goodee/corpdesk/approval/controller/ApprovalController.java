@@ -14,6 +14,10 @@ import com.goodee.corpdesk.department.service.DepartmentService;
 import com.goodee.corpdesk.employee.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -126,7 +130,8 @@ public class ApprovalController {
     @GetMapping("list")
     public String getApprovalList(@RequestParam(value = "listType", required = false) String listType
                                   , @AuthenticationPrincipal UserDetails userDetails
-                                  , Model model) throws Exception {
+                                  , Model model
+                                  , @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
 
         String username = userDetails.getUsername();
 
@@ -142,7 +147,7 @@ public class ApprovalController {
             model.addAttribute("waitList", waitList);
             model.addAttribute("storList", storList);
         } else {
-            List<ResApprovalDTO> result = approvalService.getAllApprovalList(listType, username);
+            Page<ResApprovalDTO> result = approvalService.getAllApprovalList(listType, username, pageable);
 
             model.addAttribute(listType, result);
         }
