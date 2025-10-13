@@ -160,7 +160,10 @@ public class PersonalScheduleController {
     @GetMapping("today")
     @ResponseBody
     public List<ResPersonalScheduleDTO> getTodaySchedulesApi(@AuthenticationPrincipal UserDetails userDetails) {
-        return fetchTodaySchedules(userDetails.getUsername());
+
+        List<ResPersonalScheduleDTO> schdules = fetchTodaySchedules(userDetails.getUsername());
+
+        return personalScheduleService.bindGeocodesToSchedules(schdules);
     }
 
 }
