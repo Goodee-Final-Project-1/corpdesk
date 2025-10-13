@@ -32,6 +32,5 @@ public class notificationController {
 		List<NotificationDto> approvalNotificationList = notificationService.getApprovalNotificationList(principal.getName());
 		model.addAttribute("msgNotificationList",msgNotificationList);
 		model.addAttribute("approvalNotificationList",approvalNotificationList);
-//		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~`"+approvalNotificationList.getFirst());
 	}
 }

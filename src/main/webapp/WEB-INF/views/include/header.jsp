@@ -45,7 +45,7 @@
                    + (approvalNotificationList != null ? approvalNotificationList.size() : 0)}">전체 (${(msgNotificationList != null ? msgNotificationList.size() : 0) + (approvalNotificationList != null ? approvalNotificationList.size() : 0)})</a> TODO 추후 사용시 () 안에 실제 테이터 넣기 -->
                 <a class="nav-item nav-link message-count active" id="message-tab" data-toggle="tab" href="#message" role="tab" aria-controls="nav-profile"
                   aria-selected="false" data-count="${msgNotificationList != null ? msgNotificationList.size() : 0}">메시지 (${msgNotificationList != null ? msgNotificationList.size() : 0})</a> <!-- TODO 추후 사용시 () 안에 실제 테이터 넣기 -->
-                <a class="nav-item nav-link approval-count" id="other-tab" data-toggle="tab" href="#other" role="tab" aria-controls="nav-contact"
+                <a class="nav-item nav-link approval-count" id="approval-tab" data-toggle="tab" href="#approval" role="tab" aria-controls="nav-contact"
                   aria-selected="false" data-count="${approvalNotificationList != null ? approvalNotificationList.size() : 0}">결재 (${approvalNotificationList != null ? approvalNotificationList.size() : 0})</a> <!-- TODO 추후 사용시 () 안에 실제 테이터 넣기 -->
               </div>
             </header>
@@ -123,7 +123,7 @@
                 <!--  -->
                 
                 <!-- 결재 알림 -->
-                <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="contact-tab">
+                <div class="tab-pane fade" id="approval" role="tabpanel" aria-labelledby="contact-tab">
                   <c:forEach items="${approvalNotificationList}" var="notification">
                     <div class="media media-sm p-4 mb-0 notification approvalNotification" data-approvalId="${notification.relatedId}" style="cursor: pointer;">
                     <div class="media-sm-wrapper bg-info-dark">

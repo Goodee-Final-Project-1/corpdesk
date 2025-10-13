@@ -84,14 +84,12 @@ public class ApprovalService {
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
 	// Exception: approval 혹은 approval의 조회 결과가 없거나 insert 실패
 	public ResApprovalDTO createApproval(ReqApprovalDTO reqApprovalDTO, MultipartFile[] files, String modifiedBy) throws Exception {
-		
 		// 1. 결재 내용에 insert
 		Approval approval = reqApprovalDTO.toApprovalEntity();
 		approval.setModifiedBy(modifiedBy);
 		approval = approvalRepository.save(approval); // 조회 결과가 없다면 예외가 터지고 롤백됨
 
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
-
         // 2. 파일 저장
         if (files != null && files.length > 0) {
             for (MultipartFile a : files) {
@@ -105,7 +103,6 @@ public class ApprovalService {
                 ApprovalFile approvalFile = fileDTO.toApprovalFile();
                 approvalFile.setApprovalId(approval.getApprovalId());
                 approvalFile.setModifiedBy(modifiedBy);
-
                 // 2. DB에 데이터 저장
                 approvalFileRepository.save(approvalFile);
             }
@@ -114,7 +111,6 @@ public class ApprovalService {
 		// 3. 결재자에 insert
         // 결재자 정보가 없다면 바로 return
         if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) return resApprovalDTO;
-
 		for (ApproverDTO approverDTO : reqApprovalDTO.getApproverDTOList()) {
 			Approver approver = approverDTO.toEntity();
 			approver.setApprovalId(approval.getApprovalId());
@@ -129,7 +125,6 @@ public class ApprovalService {
 			}
 			approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
-		
 		// 4. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
         return resApprovalDTO;
 		
@@ -158,16 +153,11 @@ public class ApprovalService {
 		
 		// 2. 결재자들 use_yn false로 update
 		List<Approver> approverList = approverRepository.findAllByApprovalId(approvalId);
-	     
 	     // (추가) 현재 결재중인 결재자에게 알림 전송
-	        if (approval.getStatus() == 'W') {
+	        if (approval.getStatus() == 'w') {
 	        	approverList.forEach(approver->{
 	        		if(approver.getUseYn()) {
-	        			 // DB 알림 저장
-		                Notification n=  notificationService.saveApprovalNotification(approvalId, "approval",approver.getUsername(),
-		                       "결재 문서가 기안자에 의해 취소되었습니다.");
-		                   // WebSocket 실시간 전송
-		                   messagingTemplate.convertAndSendToUser(approver.getUsername(),"/queue/notifications",n);
+	        			notificationService.reqNotification(approvalId,"approval", "결재 문서가 기안자에 의해 취소되었습니다.",approver.getUsername());
 	        		}
 	        	});
 	        }
@@ -214,7 +204,9 @@ public class ApprovalService {
 			
 			// 결재 상태 수정
 			approval.setStatus('N');
-			//알림전송
+			//기안자에게 알림전송
+			notificationService.reqNotification(approval.getApprovalId(),
+					"approval", "결재요청이 반려되었습니다.",approval.getUsername());
 		}
 		// 결재자가 승인을 했다면 (approveYn = y) 아래 2번 로직 진행
 		if(approveYn.equalsIgnoreCase("Y")) {
@@ -237,6 +229,9 @@ public class ApprovalService {
 				
 				// 결재 상태 수정
 				approval.setStatus('Y');
+				// 결재 승인 알림
+				notificationService.reqNotification(approval.getApprovalId(),
+						"approval", "결재요청이 승인되었습니다.",approval.getUsername());
 
                 // 추가) 결재 유형이 휴가라면 vacation_datail에 데이터 insert & vacaion의 사용연차, 총연차 update
                 if(approval.getApprovalFormId() == 1) {
@@ -274,6 +269,9 @@ public class ApprovalService {
 			} else {
 				// 수정할 결재자 정보가 있으면 결재 상태의 값을 수정하지 않고 그 다음 승인 순서인 결재자 정보(만약 있다면)의 use_yn값을 true로 수정
 				nextApprover.setUseYn(true);
+				// 결재 요청 알림
+				notificationService.reqNotification(approvalId,
+						"approval", "새로운 결재 요청이있습니다.",nextApprover.getUsername());
 				System.err.println(nextApprover);
 			}
 			

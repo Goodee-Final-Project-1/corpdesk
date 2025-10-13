@@ -13,7 +13,7 @@ import com.goodee.corpdesk.notification.entity.Notification;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-	List<Notification> findByNotificationTypeAndUsernameAndIsReadFalseOrderByRelatedIdDesc(String type, String username);
+	List<Notification> findByNotificationTypeAndUsernameAndIsReadFalseOrderByNotificationIdDesc(String type, String username);
 	
 	@Transactional
 	@Modifying(clearAutomatically = true)

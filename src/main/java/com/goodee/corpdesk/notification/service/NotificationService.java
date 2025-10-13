@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
@@ -16,10 +17,11 @@ import com.goodee.corpdesk.notification.repository.NotificationRepository;
 public class NotificationService {
 	@Autowired
 	NotificationRepository notificationRepository;
-	
+	@Autowired
+	SimpMessagingTemplate messagingTemplate;
 	//읽지 않은 '메세지' 알림 조회
 	public List<NotificationDto> getMessageNotification(String username) {
-		List<Notification> notification =  notificationRepository.findByNotificationTypeAndUsernameAndIsReadFalseOrderByRelatedIdDesc("message",username);
+		List<Notification> notification =  notificationRepository.findByNotificationTypeAndUsernameAndIsReadFalseOrderByNotificationIdDesc("message",username);
 		List<NotificationDto> notificationDto=new ArrayList<>();
 		if(!notification.isEmpty()) {
 			 notification.forEach(l->{
@@ -33,10 +35,11 @@ public class NotificationService {
 	}
 	// 읽지 않은 '결재' 알림 조회
 	public List<NotificationDto> getApprovalNotificationList(String username) {
-		List<Notification> notification =  notificationRepository.findByNotificationTypeAndUsernameAndIsReadFalseOrderByRelatedIdDesc("approval",username);
+		List<Notification> notification =  notificationRepository.findByNotificationTypeAndUsernameAndIsReadFalseOrderByNotificationIdDesc("approval",username);
 		List<NotificationDto> notificationDto=new ArrayList<>();
 		if(!notification.isEmpty()) {
 			 notification.forEach(l->{
+				 System.out.println(l.getRelatedId());
 				 NotificationDto n= l.ChangeToDto();
 				 notificationDto.add(n);
 			 });
@@ -83,6 +86,11 @@ public class NotificationService {
 				.content(content)
 				.build();
 		return notificationRepository.save(notification);
+	}
+	public void reqNotification(Long relatedId , String notificationType , String content , String username ) {
+		Notification n = saveApprovalNotification(relatedId,
+				notificationType, content,username);
+		messagingTemplate.convertAndSendToUser(username, "/queue/notifications",n );
 	}
 
 	

@@ -12,6 +12,7 @@ stompClient.connect({}, function(frame) {
 			}
 
         }
+		
         
     })
     
@@ -25,7 +26,7 @@ const notificationTime = document.querySelectorAll(".notificationTime");
 notificationTime.forEach(t=>{
 	t.textContent=formatTime(t.getAttribute("data-notificationTime"));
 })
-//알림 생성 로직
+//메세지 알림 생성 로직
 // 새 메시지 알림 요소 생성 함수
  function appendMessageNotification(notification) {
   const messageTab = document.getElementById("message");
@@ -132,3 +133,51 @@ messageTab.addEventListener("click",(e)=>{
 	ReadNotification(chatRoomId);
 
 })
+
+
+//결재 알림 로직
+
+
+//결재 알림 생성
+function appendApprovalNotification(notification){
+	const approvalTab = document.getElementById("approval");
+
+
+	 //  알림 요소 생성
+	 const div = document.createElement("div");
+	 div.className = "media media-sm p-4 mb-0 notification approvalNotification";
+	 div.setAttribute("data-approvalId", notification.relatedId);
+	 div.style.cursor = "pointer";
+
+	 div.innerHTML = `
+	   <div class="media-sm-wrapper bg-info-dark">
+	   	 <i class="mdi mdi-bell"></i>
+	   </div>
+	   <div class="media-body">
+	 	 <span class="title mb-0">Add request</span>
+	  	 <span class="discribe">${notification.content}</span>
+      	 <span class="time">
+       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}"></time>...
+      	 </span>
+	   </div>
+	 `;
+
+	 //  새 알림을 목록 맨 위에 추가
+	 approvalTab.prepend(div);
+
+	 //  전체 및 메시지 카운트 갱신
+	 const allCount = document.querySelector(".all-count");
+	 const approvalCount = document.querySelector(".approval-count");
+
+	 const currentAll = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
+	 const currentNoti = parseInt(approvalCount.getAttribute("data-count") || "0", 10);
+
+	 const newAll = currentAll + 1;
+	 const newNoti = currentNoti + 1;
+
+	 allCount.textContent = newAll;
+	 allCount.setAttribute("data-allCount", newAll);
+
+	 approvalCount.textContent = "결재 (" + newNoti + ")";
+	 approvalCount.setAttribute("data-count", newNoti);
+}
