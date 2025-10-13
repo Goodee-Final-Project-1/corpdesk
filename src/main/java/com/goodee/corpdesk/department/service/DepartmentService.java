@@ -170,7 +170,6 @@ public class DepartmentService {
             Employee emp = employeeRepository.findById(username)
                     .orElseThrow(() -> new RuntimeException("직원 없음: " + username));
             emp.setDepartmentId(null);      // 부서 ID null 처리
-            emp.setDepartmentName(null);
             employeeRepository.save(emp);
         }
     }

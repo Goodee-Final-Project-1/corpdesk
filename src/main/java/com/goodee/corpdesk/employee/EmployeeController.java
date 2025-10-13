@@ -56,7 +56,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Controller
-@RequestMapping("/employee/**")
+@RequestMapping("/employee")
 @Slf4j
 public class EmployeeController {
 
@@ -126,7 +126,7 @@ public class EmployeeController {
     }
 
     // 직원 목록
-    @GetMapping("/employee/list")
+    @GetMapping("/list")
     public String list(Model model) {
         model.addAttribute("employees", employeeService.getActiveEmployeesForList());
         return "employee/list";
@@ -329,7 +329,7 @@ public class EmployeeController {
 
         model.addAttribute("attendanceList", employeeService.getAttendanceByUsername(username));
         model.addAttribute("departments", employeeService.getAllDepartments());
-        model.addAttribute("positions", employeeService.getAllPositions());
+        model.addAttribute("positions", positionService.getAllActive());
 
         return "employee/edit";
     }

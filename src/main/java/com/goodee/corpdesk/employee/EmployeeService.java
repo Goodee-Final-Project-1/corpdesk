@@ -22,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.department.entity.Department;
@@ -157,15 +158,15 @@ public class EmployeeService implements UserDetailsService {
             // 직위명
         	String posName = "-";
         	if (emp.getPositionId() != null) {
-        	    posName = positionRepository.findById(emp.getPositionId())
-        	                  .map(Position::getPositionName)
-        	                  .orElse("-");
+        	    posName = positionRepository.findByPositionIdAndUseYnTrue(emp.getPositionId())
+        	            .map(Position::getPositionName)
+        	            .orElse("-");
         	}
 
             // ✅ 현재 출퇴근 상태 (출근, 퇴근, 휴가, 출근전)
             String workStatus = "-";
             try {
-                var attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
+            	ResAttendanceDTO attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
                 if (attendanceDto != null) {
                     if ("출근".equals(attendanceDto.getWorkStatus()) || "퇴근".equals(attendanceDto.getWorkStatus())) {
                         workStatus = attendanceDto.getWorkStatus();

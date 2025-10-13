@@ -114,7 +114,7 @@
 							</li>
 
 							<li>
-								<a class="sidenav-item-link" href="email-details.html"> <!-- TODO href 수정 -->
+								<a class="sidenav-item-link" href="/position/list"> <!-- TODO href 수정 -->
 									<span class="nav-text">직위체계</span>
 								</a>
 							</li>

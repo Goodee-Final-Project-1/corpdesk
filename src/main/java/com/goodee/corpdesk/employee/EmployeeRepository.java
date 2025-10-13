@@ -126,4 +126,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	WHERE e.use_yn = 1
 """)
 	List<Map<String, Object>> findAllWithDepartmentAndPosition();
+	
 }
