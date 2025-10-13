@@ -37,7 +37,7 @@ public class Notification extends BaseEntity{
 	    @Column(nullable = false)
 	    private Boolean isRead = false;
 	    
-	 public NotificationDto ChangeToDto() {
+	 public NotificationDto changeToDto() {
 		 return NotificationDto.builder()
 		 			 .notificationId(notificationId)
 		 			 .notificationType(notificationType)

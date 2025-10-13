@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.notification.dto.NotificationDto;
 import com.goodee.corpdesk.notification.entity.Notification;
 import com.goodee.corpdesk.notification.repository.NotificationRepository;
@@ -23,7 +22,7 @@ public class NotificationService {
 		List<NotificationDto> notificationDto=new ArrayList<>();
 		if(!notification.isEmpty()) {
 			 notification.forEach(l->{
-				 NotificationDto n= l.ChangeToDto();
+				 NotificationDto n= l.changeToDto();
 				 notificationDto.add(n);
 			 });
 		}
@@ -32,10 +31,17 @@ public class NotificationService {
 		return notificationDto;
 	}
 	// 읽지 않은 '결재' 알림 조회
-	public List<ResApprovalDTO> getApprovalNotificationList(String username) {
+	public List<NotificationDto> getApprovalNotificationList(String username) {
 		List<Notification> notification =  notificationRepository.findByNotificationTypeAndUsernameAndIsReadFalseOrderByRelatedIdDesc("approval",username);
-		
-		return null;
+
+		List<NotificationDto> notificationDto=new ArrayList<>();
+		if(!notification.isEmpty()) {
+			 notification.forEach(l->{
+				 NotificationDto n= l.changeToDto();
+				 notificationDto.add(n);
+			 });
+		}
+		return notificationDto;
 	}
 	
 	// 특정 알림 읽음 처리 및 정보
@@ -43,7 +49,7 @@ public class NotificationService {
 		Optional<Notification> notification =  notificationRepository.findByRelatedIdAndNotificationTypeAndUsername(relatedId,notificationType,username);
 		if(notification.isPresent()) {
 			notificationRepository.updateReadTrue(relatedId,notificationType,username);
-			return  notification.get().ChangeToDto();
+			return  notification.get().changeToDto();
 		}
 		return null;
 		}
