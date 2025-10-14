@@ -1,5 +1,27 @@
 package com.goodee.corpdesk.employee;
 
+import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.attendance.service.AttendanceService;
+import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
+import com.goodee.corpdesk.file.FileManager;
+import com.goodee.corpdesk.file.dto.FileDTO;
+import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
+import com.goodee.corpdesk.position.entity.Position;
+import com.goodee.corpdesk.position.repository.PositionRepository;
+import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
+import com.goodee.corpdesk.salary.entity.Allowance;
+import com.goodee.corpdesk.salary.entity.Deduction;
+import com.goodee.corpdesk.salary.entity.SalaryPayment;
+import com.goodee.corpdesk.salary.repository.AllowanceRepository;
+import com.goodee.corpdesk.salary.repository.DeductionRepository;
+import com.goodee.corpdesk.salary.repository.SalaryRepository;
+import com.goodee.corpdesk.vacation.VacationManager;
+import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,22 +31,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.service.AttendanceService;
-import com.goodee.corpdesk.department.entity.Department;
-import com.goodee.corpdesk.department.repository.DepartmentRepository;
-import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
-import com.goodee.corpdesk.file.FileManager;
-import com.goodee.corpdesk.file.dto.FileDTO;
-import com.goodee.corpdesk.file.entity.EmployeeFile;
-import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
-import com.goodee.corpdesk.position.entity.Position;
-import com.goodee.corpdesk.position.repository.PositionRepository;
-import com.goodee.corpdesk.vacation.VacationManager;
-import com.goodee.corpdesk.vacation.entity.Vacation;
-import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,11 +46,16 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.time.LocalDate;
+import java.util.*;
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import com.goodee.corpdesk.file.FileManager;
 import com.goodee.corpdesk.file.dto.FileDTO;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
@@ -50,9 +65,6 @@ import com.goodee.corpdesk.position.repository.PositionRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
-import java.io.File;
-import java.time.LocalDate;
-import java.util.*;
 
 @Service
 @Transactional
@@ -74,6 +86,12 @@ public class EmployeeService implements UserDetailsService {
     private DepartmentRepository departmentRepository;
     @Autowired
     private PositionRepository positionRepository;
+	@Autowired
+	private SalaryRepository salaryRepository;
+	@Autowired
+	private AllowanceRepository allowanceRepository;
+	@Autowired
+	private DeductionRepository deductionRepository;
 
     @Autowired
     private RoleService roleService;
@@ -100,7 +118,7 @@ public class EmployeeService implements UserDetailsService {
 
     // 모든 직위 조회
     public List<Position> getAllPositions() {
-        return positionRepository.findAll();
+        return positionRepository.findByUseYnTrueOrderByPositionIdAsc();
     }
 
     // username 존재 여부 체크
@@ -174,15 +192,15 @@ public class EmployeeService implements UserDetailsService {
             // 직위명
         	String posName = "-";
         	if (emp.getPositionId() != null) {
-        	    posName = positionRepository.findById(emp.getPositionId())
-        	                  .map(Position::getPositionName)
-        	                  .orElse("-");
+        	    posName = positionRepository.findByPositionIdAndUseYnTrue(emp.getPositionId())
+        	            .map(Position::getPositionName)
+        	            .orElse("-");
         	}
 
             // ✅ 현재 출퇴근 상태 (출근, 퇴근, 휴가, 출근전)
             String workStatus = "-";
             try {
-                var attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
+            	ResAttendanceDTO attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
                 if (attendanceDto != null) {
                     if ("출근".equals(attendanceDto.getWorkStatus()) || "퇴근".equals(attendanceDto.getWorkStatus())) {
                         workStatus = attendanceDto.getWorkStatus();
@@ -311,10 +329,17 @@ public class EmployeeService implements UserDetailsService {
     public void deactivateEmployee(String username) {
         Employee employee = employeeRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
- 
-
-        employee.setUseYn(false);  // 여기 수정
-        employeeRepository.save(employee); // DB 반영
+        
+	     // ✅ 퇴사일자 체크
+	        if (employee.getLastWorkingDay() == null) {
+	            // 컨트롤러에서 잡아 메시지로 내려보낼 수 있도록 런타임 예외 던짐
+	            throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
+	        }
+	        
+        	
+        	employee.setUseYn(false);
+        	employeeRepository.save(employee); // DB 반영
+        
     }
 
 
@@ -348,6 +373,30 @@ public class EmployeeService implements UserDetailsService {
         map.put("position", position);
         return map;
     }
+
+	public Page<EmployeeSalaryDTO> getSalaryList(String username, Pageable pageable) {
+		return salaryRepository.findAllEmployeeSalaryByUsername(username, pageable);
+	}
+
+	public Map<String, Object> getSalaryDetail(String username, Long paymentId) {
+		Map<String, Object> map = new HashMap<>();
+		SalaryPayment salaryPayment = salaryRepository.findByUsernameAndPaymentId(username, paymentId).get();
+
+		if (salaryPayment == null) return null;
+
+		List<Allowance> allowanceList = allowanceRepository.findAllByPaymentId(salaryPayment.getPaymentId());
+		List<Deduction> deductionList = deductionRepository.findAllByPaymentId(salaryPayment.getPaymentId());
+
+		EmployeeInfoDTO employee = employeeRepository.findByIdWithDept(salaryPayment.getUsername()).get();
+
+		map.put("salaryPayment", salaryPayment);
+		map.put("allowanceList", allowanceList);
+		map.put("deductionList", deductionList);
+
+		map.put("employee", employee);
+
+		return map;
+	}
 
 	public Employee updatePassword(Employee employee, BindingResult bindingResult) {
 		Optional<Employee> optional = employeeRepository.findById(employee.getUsername());
@@ -391,5 +440,4 @@ public class EmployeeService implements UserDetailsService {
     public ResEmployeeDTO getFulldetail(String username) {
         return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
-
 }

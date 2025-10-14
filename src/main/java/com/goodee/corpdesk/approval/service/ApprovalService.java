@@ -30,6 +30,9 @@ import com.goodee.corpdesk.vacation.repository.VacationRepository;
 
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -84,7 +87,7 @@ public class ApprovalService {
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
 	// Exception: approval 혹은 approval의 조회 결과가 없거나 insert 실패
 	public ResApprovalDTO createApproval(ReqApprovalDTO reqApprovalDTO, MultipartFile[] files, String modifiedBy) throws Exception {
-		// 1. 결재 내용에 insert
+        // 1. 결재 내용에 insert
 		Approval approval = reqApprovalDTO.toApprovalEntity();
 		approval.setModifiedBy(modifiedBy);
 		approval = approvalRepository.save(approval); // 조회 결과가 없다면 예외가 터지고 롤백됨
@@ -109,8 +112,16 @@ public class ApprovalService {
         }
 
 		// 3. 결재자에 insert
-        // 결재자 정보가 없다면 바로 return
-        if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) return resApprovalDTO;
+        // 결재자 정보가 없다면
+        // - 임시저장인 경우 -> 바로 return
+        // - 결재요청인 경우 -> 승인 상태로 처리 후 return
+        if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) {
+            if(!"T".equalsIgnoreCase(reqApprovalDTO.getStatus() + "")) approval.setStatus('Y');
+
+            resApprovalDTO.setApprovalId(approval.getApprovalId());
+
+            return resApprovalDTO;
+        }
 		for (ApproverDTO approverDTO : reqApprovalDTO.getApproverDTOList()) {
 			Approver approver = approverDTO.toEntity();
 			approver.setApprovalId(approval.getApprovalId());
@@ -123,7 +134,9 @@ public class ApprovalService {
 			}
 			approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
+
 		// 4. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
+        resApprovalDTO.setApprovalId(approval.getApprovalId());
         return resApprovalDTO;
 		
 	}
@@ -290,15 +303,17 @@ public class ApprovalService {
 		return "PROCESSED";
 	}
     
-    public List<ResApprovalDTO> getAllApprovalList(String listType, String username) throws Exception {
+    public Page<ResApprovalDTO> getAllApprovalList(String listType, String username, Pageable pageable) throws Exception {
 
-        List<ResApprovalDTO> result = new ArrayList<>();
+        Page<ResApprovalDTO> result = null;
         switch (listType) {
-            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("T")); // 내 결재 임시 보관함
-            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("W", "N", "Y")); // 내 결재 요청 목록
-            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("W"), List.of("W")); // 결재 대기 목록
-            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("Y", "N"), List.of("W", "Y", "N")); // 내가 결재한 목록
+            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("T"), pageable); // 내 결재 임시 보관함
+            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("W", "N", "Y"), pageable); // 내 결재 요청 목록
+            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("W"), List.of("W"), pageable); // 결재 대기 목록
+            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("Y", "N"), List.of("W", "Y", "N"), pageable); // 내가 결재한 목록
         }
+
+        if(result == null) return new PageImpl<ResApprovalDTO>(List.of());
 
         return result;
 
@@ -338,6 +353,10 @@ public class ApprovalService {
         Approval approval = result.get();
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
 
+        // 결재가 승인/반려 상태면 처리여부를 true로 설정
+        List<Character> yOrN = List.of('y', 'Y', 'n', 'N');
+        if(yOrN.contains(approval.getStatus())) resApprovalDTO.setProcessed(true);
+
         // 첨부파일 조회
         List<ApprovalFileDTO> files = approvalFileRepository.findAllByApprovalIdAndUseYn(approval.getApprovalId(), true)
                                                             .stream().map(ApprovalFile::toApprovalFileDTO).toList();
@@ -360,6 +379,11 @@ public class ApprovalService {
         List<ApproverDTO> approverDTOList = approverRepository.findByApprovalIdWithEmployeeAndDepartment(approvalId);
 
         if(approverDTOList.isEmpty())  return resApprovalDTO; // 결재자가 없으면? approval만 DTO에 담아서 return
+
+        for(ApproverDTO approverDTO : approverDTOList){
+            // 결재자 중 한 명이라도 승인/반려 처리를 했다면 처리여부를 true로 설정
+            if(yOrN.contains(approverDTO.getApproveYn())) resApprovalDTO.setProcessed(true);
+        }
 
         // 3. 결재와 결재자를 DTO에 담아 반환
         resApprovalDTO.setApproverDTOList(approverDTOList);
