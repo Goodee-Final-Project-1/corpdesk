@@ -10,7 +10,6 @@
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script defer type="text/javascript" src="/js/approval/approval.js"></script>
     <script defer type="text/javascript" src="/js/approval/approval_detail.js"></script>
 
     <style>
@@ -63,7 +62,6 @@
 						<div id="btnBox" data-approval-id="${detail.approvalId}" data-approver-id="${approverInfo.approverId}">
               <c:choose>
                 <c:when test="${detail.username eq userInfo.username}">
-                  <button type="button" class="btn btn-info mr-1 btn-action" id="btnEdit">수정</button>
                   <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete">삭제</button>
                 </c:when>
                 <c:otherwise>
@@ -71,7 +69,7 @@
                   <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnReject">반려</button>
                 </c:otherwise>
               </c:choose>
-              <button type="button" class="btn btn-light" id="btnCancel">취소</button>
+              <button type="button" class="btn btn-light" id="btnCancel" onclick="history.back()">취소</button>
 						</div>
 						<hr>
             <%--  --%>
