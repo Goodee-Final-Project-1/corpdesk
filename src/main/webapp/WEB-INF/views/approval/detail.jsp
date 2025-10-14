@@ -47,16 +47,16 @@
 			<!-- 내용 시작 -->
 			<div class="email-wrapper rounded border bg-white">
 				<div class="row no-gutters justify-content-center">
-				
+
 				<div class="col-lg-4 col-xl-3 col-xxl-2">
 					<div class="email-left-column email-options p-4 p-xl-5">
             <c:import url="widget_content.jsp"/>
 					</div>
 				</div>
-				
+
 				<div class="col-lg-8 col-xl-9 col-xxl-10">
 					<div class="email-right-column p-4 p-xl-5">
-						
+
 						<!-- 양식 시작 -->
             <%-- 양식 헤더 --%>
 						<div id="btnBox" data-approval-id="${detail.approvalId}" data-approver-id="${approverInfo.approverId}">
@@ -96,7 +96,7 @@
                   <td>${fn:substring(detail.createdAt, 0, 10)}</td>
                   <th class="table-light">완료일</th>
                   <td>
-                    <c:if test="${detail.status eq 'N'.charAt(0) or detail.status eq 'Y'.charAt(0)}">
+                    <c:if test="${detail.status eq 'N' or detail.status eq 'Y'}">
                       ${fn:substring(detail.updatedAt, 0, 10)}
                     </c:if>
                   </td>
@@ -241,10 +241,10 @@
 <%--            ${detail}--%>
             <%--  --%>
 						<!--  -->
-					
+
 					</div>
 				</div>
-				
+
 				</div>
 			</div>
 			
