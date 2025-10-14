@@ -39,7 +39,7 @@
 		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 			<!-- 내용 시작 -->
 			<sec:authentication property="principal.username" var="user" />
-			
+			<input type="hidden" class="username" value="${user }">
 	
 <div class = "row no-gutters justify-content-center">
 	<div class ="col-lg-4 col-xxl-3">

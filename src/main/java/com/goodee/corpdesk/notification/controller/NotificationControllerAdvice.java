@@ -16,7 +16,7 @@ import com.goodee.corpdesk.notification.service.NotificationService;
 
 
 @ControllerAdvice
-public class notificationController {
+public class NotificationControllerAdvice {
 	@Autowired
 	ChatRoomService chatRoomService;
 	@Autowired

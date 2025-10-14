@@ -2,9 +2,10 @@ const socket = new SockJS("/ws");
 stompClient = Stomp.over(socket);
 const lastMsgTime = document.querySelectorAll(".last-msg-time");
 const notificationTime = document.querySelectorAll(".notificationTime");
+const username = document.querySelector(".username").value;
 //메세지 알림 시간 
-notificationTime.forEach(t=>{
-	t.textContent=timeformat(t.getAttribute("data-notificationTime"));
+notificationTime.forEach(t => {
+	t.textContent = timeformat(t.getAttribute("data-notificationTime"));
 })
 const popup = new Map();
 
@@ -16,17 +17,17 @@ lastMsgTime.forEach(t => {
 })
 //알림 생성 로직
 // 새 메시지 알림 요소 생성 함수
- function appendMessageNotification(notification) {
-  const messageTab = document.getElementById("message");
+function appendMessageNotification(notification) {
+	const messageTab = document.getElementById("message");
 
 
-  //  알림 요소 생성
-  const div = document.createElement("div");
-  div.className = "media media-sm p-4 mb-0 notification messageNotification";
-  div.setAttribute("data-roomId", notification.chatRoomId);
-  div.style.cursor = "pointer";
+	//  알림 요소 생성
+	const div = document.createElement("div");
+	div.className = "media media-sm p-4 mb-0 notification messageNotification";
+	div.setAttribute("data-roomId", notification.chatRoomId);
+	div.style.cursor = "pointer";
 
-  div.innerHTML = `
+	div.innerHTML = `
     <div class="media-sm-wrapper">
       <img src="${notification.imgPath}" alt="User Image" style="width:50px; height:50px;">
     </div>
@@ -39,52 +40,52 @@ lastMsgTime.forEach(t => {
     </div>
   `;
 
-  //  새 알림을 목록 맨 위에 추가
-  messageTab.prepend(div);
+	//  새 알림을 목록 맨 위에 추가
+	messageTab.prepend(div);
 
-  //  전체 및 메시지 카운트 갱신
-  const allCount = document.querySelector(".all-count");
-  const messageCount = document.querySelector(".message-count");
+	//  전체 및 메시지 카운트 갱신
+	const allCount = document.querySelector(".all-count");
+	const messageCount = document.querySelector(".message-count");
 
-  const currentAll = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
-  const currentMsg = parseInt(messageCount.getAttribute("data-count") || "0", 10);
+	const currentAll = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
+	const currentMsg = parseInt(messageCount.getAttribute("data-count") || "0", 10);
 
-  const newAll = currentAll + 1;
-  const newMsg = currentMsg + 1;
+	const newAll = currentAll + 1;
+	const newMsg = currentMsg + 1;
 
-  allCount.textContent = newAll;
-  allCount.setAttribute("data-allCount", newAll);
+	allCount.textContent = newAll;
+	allCount.setAttribute("data-allCount", newAll);
 
-  messageCount.textContent = "메시지 (" + newMsg + ")";
-  messageCount.setAttribute("data-count", newMsg);
+	messageCount.textContent = "메시지 (" + newMsg + ")";
+	messageCount.setAttribute("data-count", newMsg);
 }
 
 function formatTime(time) {
-  const date = new Date(time);
-  const now = new Date();
+	const date = new Date(time);
+	const now = new Date();
 
-  const diffMin = Math.floor((now - date) / 60000);
-  if (diffMin < 1) return "방금 전";
-  if (diffMin < 60) return diffMin + "분 전";
+	const diffMin = Math.floor((now - date) / 60000);
+	if (diffMin < 1) return "방금 전";
+	if (diffMin < 60) return diffMin + "분 전";
 
-  const diffHour = Math.floor(diffMin / 60);
-  if (diffHour < 24) return diffHour + "시간 전";
+	const diffHour = Math.floor(diffMin / 60);
+	if (diffHour < 24) return diffHour + "시간 전";
 
-  return date.toLocaleDateString("ko-KR", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+	return date.toLocaleString("ko-KR", {
+		month: "short",
+		day: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
 }
 //알림 목록 처리
-function ReadNotification(chatRoomId){
+function ReadNotification(chatRoomId) {
 	//목록에서 같은 방 메세지 전부 제거 
-	const sameRoomNotifications = document.querySelectorAll('.messageNotification[data-roomId="'+ chatRoomId+'"]');
-	 sameRoomNotifications.forEach(el=>{
+	const sameRoomNotifications = document.querySelectorAll('.messageNotification[data-roomId="' + chatRoomId + '"]');
+	sameRoomNotifications.forEach(el => {
 		el.remove();
-	 })
-	 // 알림 아이콘 위 숫자 변경
+	})
+	// 알림 아이콘 위 숫자 변경
 	const allCount = document.querySelector(".all-count");
 	const allCountData = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
 	const removedCount = sameRoomNotifications.length;
@@ -101,7 +102,63 @@ function ReadNotification(chatRoomId){
 	messageCount.textContent = "메시지 (" + (newMsgCount > 0 ? newMsgCount : 0) + ")";
 	messageCount.setAttribute("data-count", newMsgCount);
 }
+//결재 알림 생성
+function appendApprovalNotification(notification) {
+	const approvalTab = document.getElementById("approval");
 
+
+	//  알림 요소 생성
+	const div = document.createElement("div");
+	div.className = "media media-sm p-4 mb-0 notification approvalNotification";
+	div.setAttribute("data-approvalId", notification.relatedId);
+	div.style.cursor = "pointer";
+
+	div.innerHTML = `
+	   <div class="media-sm-wrapper bg-info-dark">
+	   	 <i class="mdi mdi-bell"></i>
+	   </div>
+	   <div class="media-body">
+	 	 <span class="title mb-0">${notification.title}</span>
+	  	 <span class="discribe">${notification.content}</span>
+      	 <span class="time">
+       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}">${formatTime(notification.createdAt)}</time>
+      	 </span>
+	   </div>
+	 `;
+
+	//  새 알림을 목록 맨 위에 추가
+	approvalTab.prepend(div);
+
+	//  전체 및 메시지 카운트 갱신
+	const allCount = document.querySelector(".all-count");
+	const approvalCount = document.querySelector(".approval-count");
+
+	const currentAll = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
+	const currentNoti = parseInt(approvalCount.getAttribute("data-count") || "0", 10);
+
+	const newAll = currentAll + 1;
+	const newNoti = currentNoti + 1;
+
+	allCount.textContent = newAll;
+	allCount.setAttribute("data-allCount", newAll);
+
+	approvalCount.textContent = "결재 (" + newNoti + ")";
+	approvalCount.setAttribute("data-count", newNoti);
+}
+
+const approvalTab = document.getElementById("approval");
+approvalTab.addEventListener("click", (e) => {
+	const notificationOne = e.target.closest('.approvalNotification');
+	if (!notificationOne) return;
+	const approvalId = notificationOne.getAttribute("data-approvalId");
+	fetch("/notification/read/" + approvalId, {
+		method: "POST"
+	}).then(() => {
+		location.href = `/approval/${approvalId}`;
+	});
+
+
+})
 
 
 function createLi(chatRoom) {
@@ -125,6 +182,7 @@ function createLi(chatRoom) {
 		fetch("/chat/participant/lastMessage/" + chatRoom.chatRoomId, {
 			method: "POST"
 		});
+		ReadNotification(chatRoom.chatRoomId);
 		newli.querySelector(".unreadCount").textContent = "";
 		newli.setAttribute("data-unreadCount", 0);
 	});
@@ -285,7 +343,7 @@ stompClient.connect({}, function(frame) {
 					//중복임을 flag로 저장
 					existing = true;
 
-					
+
 					//초대할 경우
 					if (notification.notificationType == "invite") {
 						const chatRoomTitle = chat.querySelector(".username");
@@ -317,7 +375,7 @@ stompClient.connect({}, function(frame) {
 					}
 
 					// 메세지나 퇴장 일경우 
-					if (notification.notificationType == "message" ||notification.notificationType == "out")  {
+					if (notification.notificationType == "message" || notification.notificationType == "out") {
 						//그 창을 보고 있을때
 						if (notification.focused) {
 							lastMsg.textContent = notification.messageContent;
@@ -339,12 +397,12 @@ stompClient.connect({}, function(frame) {
 					//포커스할 때 목록에서 숫자를 0 을 바꾸기위한 알림이 옴 
 					if (notification.notificationType == "read") {
 
-						if (unreadCount) {	
+						if (unreadCount) {
 							unreadCount.className = "unreadCount";
 							unreadCount.textContent = "";
 						}
 						chat.setAttribute("data-unreadCount", 0);
-					} 
+					}
 					//다른 알림일경우 리스트에서 제일 위로 올림
 					else {
 						const chatListContainer = document.querySelector(".chatList .simplebar-content");
@@ -354,18 +412,19 @@ stompClient.connect({}, function(frame) {
 
 
 				}
-				
+
 
 
 			})
 			//메세지 알림 목록에 추가
-				if(notification.notificationType !== "read" && !notification.focused){
-					appendMessageNotification(notification);
+			if (notification.notificationType !== "read" && !(notification.notificationType === "create" &&
+				notification.employeeUsername === username) && !notification.focused) {
+				appendMessageNotification(notification);
 			}
 
 			//채팅방을 연락처 목록에서 열 때 DB를 조회해서 해당 채팅방 번호가 있으면 열지 않는데 
 			//이때 서버에서 상대에게 채팅방 구독 알림이 날라와서 중복 체크를 함		
-			if (!existing&& notification.notificationType !== "read") {
+			if (!existing && notification.notificationType !== "read") {
 				createLi(notification);
 				// 방금 만든 li 가져오기
 				const chatList = document.querySelector(".chatList .simplebar-content");
@@ -389,10 +448,16 @@ stompClient.connect({}, function(frame) {
 					}
 
 					// 안읽음 숫자
-					if (!notification.focused) {
+					if (!notification.focused && (notification.employeeUsername !== username || notification.notificationType=="invite")
+					
+					) {
 						unreadCount.className = "badge badge-secondary unreadCount";
 						unreadCount.textContent = 1;
 						newChat.setAttribute("data-unreadCount", 1);
+					} else {
+						unreadCount.className = "unreadCount";
+						unreadCount.textContent = "";
+						newChat.setAttribute("data-unreadCount", 0);
 					}
 
 				}
@@ -400,12 +465,13 @@ stompClient.connect({}, function(frame) {
 
 			}
 		}
+		if (notification.notificationType == 'approval') {
+			appendApprovalNotification(notification);
+		}
 
 
-			/////알림이 결재 일경우
 
-
-		});
+	});
 });
 //1대1 채팅 생성
 const employeeListOne = document.querySelectorAll(".employeeListOne");
@@ -438,15 +504,15 @@ employeeListOne.forEach(list => {
 })
 //메세지 알림 클릭시 해당방을 띄움
 const messageTab = document.getElementById("message");
-messageTab.addEventListener("click",(e)=>{
+messageTab.addEventListener("click", (e) => {
 	const notificationOne = e.target.closest('.messageNotification');
-	if(!notificationOne)return;
+	if (!notificationOne) return;
 
 	//메세지 목록 처리
 	const chatRoomId = notificationOne.getAttribute("data-roomId");
 	document.querySelectorAll(".chatListOne").forEach(list => {
 		const roomId = list.getAttribute('data-roomId');
-		if(roomId==chatRoomId){
+		if (roomId == chatRoomId) {
 			const pop = window.open("/chat/room/detail/" + roomId, "room_no_" + roomId, "width=700,height=650 ,left=600, top=100");
 			if (pop) {
 				pop.focus();
@@ -496,7 +562,6 @@ document.querySelector(".chatList").addEventListener("click", (e) => {
 			.then(res => {
 				if (res) {
 					li.remove();
-
 				}
 				else {
 				}
@@ -616,6 +681,8 @@ window.addEventListener("keydown", (e) => {
 // 최종 생성
 document.getElementById("createRoomConfirmBtn").addEventListener("click", () => {
 	const roomTitle = document.getElementById("roomTitle").value;
+	// 방 제목 input 초기화
+	document.getElementById("roomTitle").value = "";
 	console.log(selectedParticipants);
 	if (!roomTitle.trim()) {
 		alert("방 제목을 입력하세요.");
@@ -645,3 +712,31 @@ document.getElementById("createRoomConfirmBtn").addEventListener("click", () => 
 
 		});
 });
+
+//메세지 알림 모두읽음
+const msgAllread = document.querySelector(".mark-all-msg-read");
+msgAllread.addEventListener("click", () => {
+	const msgAll = document.querySelectorAll(".messageNotification");
+	msgAll.forEach(el => {
+		el.remove();
+	})
+	// 알림 아이콘 위 숫자 변경
+	const allCount = document.querySelector(".all-count");
+	const allCountData = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
+	const removedCount = msgAll.length;
+	// 남은 개수 계산
+	const newAllCount = allCountData - removedCount;
+	allCount.textContent = newAllCount > 0 ? newAllCount : "";
+	allCount.setAttribute("data-allCount", newAllCount);
+
+	// 메시지 탭 숫자 변경
+	const messageCount = document.querySelector(".message-count");
+	const messageContentData = parseInt(messageCount.getAttribute("data-count") || "0", 10);
+
+	messageCount.textContent = "메시지 (0)";
+	messageCount.setAttribute("data-count", '0');
+	fetch("/notification/MsgReadAll", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+	})
+})

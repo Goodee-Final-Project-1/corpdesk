@@ -151,7 +151,7 @@ document.getElementById("inviteRoomConfirmBtn").addEventListener("click", () => 
 
 // Step1 모달: 취소 버튼 + 닫기 버튼(X) + ESC 초기화
 // X 버튼 + 취소 버튼
-document.querySelectorAll("#createRoomStep1 [data-dismiss='modal'], #createRoomStep1 .close , #createRoomStep1 #nextStepBtn")
+document.querySelectorAll("#inviteRoomStep1 [data-dismiss='modal'], #inviteRoomStep1 .close , #inviteRoomStep1 #nextStepBtn")
 	.forEach(btn => {
 		btn.addEventListener("click", () => {
 
@@ -162,15 +162,12 @@ document.querySelectorAll("#createRoomStep1 [data-dismiss='modal'], #createRoomS
 			document.querySelectorAll("#participantList .participant-checkbox")
 				.forEach(cb => cb.checked = false);
 
-			// 숨겨진 li 복원
-			document.querySelectorAll("#participantList li")
-				.forEach(li => li.classList.remove("hidden"));
 
 		});
 	});
 
 // Step2 모달: 취소 버튼 + 닫기 버튼(X) 초기화
-document.querySelectorAll("#createRoomStep2 [data-dismiss='modal'], #createRoomStep2 .close #createRoomStep2 #createRoomConfirmBtn")
+document.querySelectorAll("#inviteRoomStep2 [data-dismiss='modal'], #inviteRoomStep2 .close #inviteRoomStep2 #inviteRoomConfirmBtn")
 	.forEach(btn => {
 		btn.addEventListener("click", () => {
 			// 방 제목 input 초기화
@@ -188,9 +185,6 @@ window.addEventListener("keydown", (e) => {
 		document.querySelectorAll("#participantList .participant-checkbox")
 			.forEach(cb => cb.checked = false);
 
-		// 숨겨진 li 복원
-		document.querySelectorAll("#participantList li")
-			.forEach(li => li.classList.remove("hidden"));
 
 		//step2 초기화	
 		document.getElementById("roomTitle").value = "";
@@ -224,7 +218,7 @@ function timeformat(lastMessageTime) {
 }
 
 function appendMessage(msg, prepend = false, isSameSender = null) {
-	if (msg.messageType == "enter" || msg.messageType == "out") {
+	if (msg.messageType == "enter" || msg.messageType == "out" || msg.messageType=="create") {
 		const sysdiv = document.createElement("div");
 		sysdiv.className = "system-message";
 		sysdiv.textContent = msg.messageContent;
@@ -285,6 +279,7 @@ function appendMessage(msg, prepend = false, isSameSender = null) {
 			const spanMessage = document.createElement("span");
 			spanMessage.className = "message";
 			spanMessage.textContent = msg.messageContent;
+			spanMessage.style="white-space: pre-wrap;"
 			divText.appendChild(spanMessage);
 
 			//시간
@@ -311,6 +306,7 @@ function appendMessage(msg, prepend = false, isSameSender = null) {
 			const spanMessage = document.createElement("span");
 			spanMessage.className = "message";
 			spanMessage.textContent = msg.messageContent;
+			spanMessage.style="white-space: pre-wrap;"
 			divText.appendChild(spanMessage);
 
 			//시간
@@ -341,6 +337,7 @@ function appendMessage(msg, prepend = false, isSameSender = null) {
 		const spanMessage = document.createElement("span");
 		spanMessage.className = "message";
 		spanMessage.textContent = msg.messageContent;
+		spanMessage.style="white-space: pre-wrap;"
 		divText.appendChild(spanMessage);
 
 		//시간
@@ -426,16 +423,37 @@ stompClient.connect({}, function(frame) {
 )
 
 //메세지 전송
-sendBtn.addEventListener("click", () => {
-	const inputText = document.getElementById("messageInput");
-	const msg = {
-		chatRoomId: chatRoomId,
-		employeeUsername: username,
-		messageContent: inputText.value
-	};
-	stompClient.send("/pub/chat/message", {}, JSON.stringify(msg));
-	inputText.value = "";
+const inputText = document.getElementById("messageInput");
 
+inputText.addEventListener("keydown", (e) => {
+  // Shift + Enter → 줄바꿈 허용
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault(); // 줄바꿈 방지
+
+    const msg = {
+      chatRoomId: chatRoomId,
+      employeeUsername: username,
+      messageContent: inputText.value.trim()
+    };
+
+    if (msg.messageContent.length > 0) {
+      stompClient.send("/pub/chat/message", {}, JSON.stringify(msg));
+      inputText.value = "";
+    }
+  }
+});
+sendBtn.addEventListener("click", (e) => {
+
+    const msg = {
+      chatRoomId: chatRoomId,
+      employeeUsername: username,
+      messageContent: inputText.value.trim()};
+
+    if (msg.messageContent.length > 0) {
+      stompClient.send("/pub/chat/message", {}, JSON.stringify(msg));
+      inputText.value = "";
+    }
+  
 });
 
 
