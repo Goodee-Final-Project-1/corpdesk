@@ -345,7 +345,7 @@
                             </thead>
 
                             <tbody>
-                            <c:forEach items="${listType eq 'wait' ? wait.content : storage.content }" var="el">
+                            <c:forEach items="${list.content}" var="el">
                                 <tr class="approval-row" data-approval-id="${el.approvalId }" style="cursor: pointer;">
                                     <td>${fn:substring(el.createdAt, 0, 10) }</td>
                                     <td>${el.formTitle }</td>
