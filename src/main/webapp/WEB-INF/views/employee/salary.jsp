@@ -62,12 +62,12 @@
 							<tbody>
 							<c:forEach var="s" items="${salaryList}">
 								<tr onclick="location.href='./salary/${s.paymentId}'" style="cursor: pointer">
-										<td>${s.paymentId}</td>
-										<td>${s.baseSalary}</td>
-										<td>${s.allowanceAmount}</td>
-										<td>${s.deductionAmount}</td>
-										<td>${s.baseSalary + s.allowanceAmount - s.deductionAmount}</td>
-										<td>${s.paymentDate}</td>
+									<td>${s.paymentId}</td>
+									<td>${s.baseSalary}</td>
+									<td>${s.allowanceAmount}</td>
+									<td>${s.deductionAmount}</td>
+									<td>${s.baseSalary + s.allowanceAmount - s.deductionAmount}</td>
+									<td>${s.paymentDate}</td>
 								</tr>
 							</c:forEach>
 							</tbody>
@@ -100,7 +100,6 @@
 				</div>
 			</div>
 		</div>
-	</div>
 	</div>
 </main>
 <!-- 내용 끝 -->
