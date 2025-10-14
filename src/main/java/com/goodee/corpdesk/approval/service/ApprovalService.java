@@ -119,7 +119,7 @@ public class ApprovalService {
 			// 만약 승인 순서가 1이 아니면 use_yn값을 false로 하여 insert
 			if(approver.getApprovalOrder() != 1) {approver.setUseYn(false);
 			}else {
-				notificationService.reqNotification(approval.getApprovalId(),"approval", "새로운 결재 요청이 있습니다.",approver.getUsername());
+				notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),"approval", "새로운 결재 요청이 있습니다.",approver.getUsername());
 			}
 			approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
@@ -156,7 +156,7 @@ public class ApprovalService {
 	        	approverList.forEach(approver->{
 	        		if(approver.getUseYn()) {
 	        			try {
-							notificationService.reqNotification(approvalId,"approval", "결재 문서가 기안자에 의해 취소되었습니다.",approver.getUsername());
+							notificationService.reqNotification(approvalId,approval.getApprovalFormId(),approval.getUsername(),"approval", "결재 문서가 기안자에 의해 취소되었습니다.",approver.getUsername());
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -207,7 +207,7 @@ public class ApprovalService {
 			// 결재 상태 수정
 			approval.setStatus('N');
 			//기안자에게 알림전송
-			notificationService.reqNotification(approval.getApprovalId(),
+			notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),
 					"approval", "결재요청이 반려되었습니다.",approval.getUsername());
 		}
 		// 결재자가 승인을 했다면 (approveYn = y) 아래 2번 로직 진행
@@ -232,7 +232,7 @@ public class ApprovalService {
 				// 결재 상태 수정
 				approval.setStatus('Y');
 				// 결재 승인 알림
-				notificationService.reqNotification(approval.getApprovalId(),
+				notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),
 						"approval", "결재요청이 승인되었습니다.",approval.getUsername());
 
                 // 추가) 결재 유형이 휴가라면 vacation_datail에 데이터 insert & vacaion의 사용연차, 총연차 update
@@ -271,8 +271,16 @@ public class ApprovalService {
 			} else {
 				// 수정할 결재자 정보가 있으면 결재 상태의 값을 수정하지 않고 그 다음 승인 순서인 결재자 정보(만약 있다면)의 use_yn값을 true로 수정
 				nextApprover.setUseYn(true);
+				
+				// 결재 정보 조회
+				Optional<Approval> result2 = approvalRepository.findById(approvalId);
+				
+				// approval이 null이 아닐 때만 다음 로직 진행
+				if(result2.isEmpty()) return "NOT_FOUND";
+				Approval approval = result2.get();
+				
 				// 결재 요청 알림
-				notificationService.reqNotification(approvalId,
+				notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),
 						"approval", "새로운 결재 요청이있습니다.",nextApprover.getUsername());
 				System.err.println(nextApprover);
 			}

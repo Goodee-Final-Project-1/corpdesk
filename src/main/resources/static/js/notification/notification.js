@@ -157,10 +157,10 @@ function appendApprovalNotification(notification){
 	   	 <i class="mdi mdi-bell"></i>
 	   </div>
 	   <div class="media-body">
-	 	 <span class="title mb-0">Add request</span>
+	 	 <span class="title mb-0">${notification.title}</span>
 	  	 <span class="discribe">${notification.content}</span>
       	 <span class="time">
-       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}"></time>...
+       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}">${formatTime(notification.createdAt)}</time>...
       	 </span>
 	   </div>
 	 `;
