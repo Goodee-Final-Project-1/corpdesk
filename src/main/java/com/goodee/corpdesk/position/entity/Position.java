@@ -1,13 +1,20 @@
 package com.goodee.corpdesk.position.entity;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.goodee.corpdesk.common.BaseEntity;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 
 @NoArgsConstructor
 @Setter
@@ -22,6 +29,7 @@ public class Position extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer positionId;
 
+    @Column(name = "parent_position_id", nullable = true)
     private Integer parentPositionId;
 
     @Column(nullable = false)

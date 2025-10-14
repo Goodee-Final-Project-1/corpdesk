@@ -55,7 +55,6 @@
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 <script src="/plugins/nprogress/nprogress.js"></script>
-
 <style>
     /* 모달이 열렸을 때 사이드바가 모달 뒤로 가도록 */
     .modal-open .email-left-column,

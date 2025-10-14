@@ -22,6 +22,15 @@ import com.goodee.corpdesk.salary.repository.SalaryRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
+import java.io.File;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -40,6 +49,22 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.*;
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
+import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.attendance.service.AttendanceService;
+import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
+import com.goodee.corpdesk.file.FileManager;
+import com.goodee.corpdesk.file.dto.FileDTO;
+import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
+import com.goodee.corpdesk.position.entity.Position;
+import com.goodee.corpdesk.position.repository.PositionRepository;
+import com.goodee.corpdesk.vacation.VacationManager;
+import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
 
 @Service
 @Transactional
@@ -93,7 +118,7 @@ public class EmployeeService implements UserDetailsService {
 
     // 모든 직위 조회
     public List<Position> getAllPositions() {
-        return positionRepository.findAll();
+        return positionRepository.findByUseYnTrueOrderByPositionIdAsc();
     }
 
     // username 존재 여부 체크
@@ -167,15 +192,15 @@ public class EmployeeService implements UserDetailsService {
             // 직위명
         	String posName = "-";
         	if (emp.getPositionId() != null) {
-        	    posName = positionRepository.findById(emp.getPositionId())
-        	                  .map(Position::getPositionName)
-        	                  .orElse("-");
+        	    posName = positionRepository.findByPositionIdAndUseYnTrue(emp.getPositionId())
+        	            .map(Position::getPositionName)
+        	            .orElse("-");
         	}
 
             // ✅ 현재 출퇴근 상태 (출근, 퇴근, 휴가, 출근전)
             String workStatus = "-";
             try {
-                var attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
+            	ResAttendanceDTO attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
                 if (attendanceDto != null) {
                     if ("출근".equals(attendanceDto.getWorkStatus()) || "퇴근".equals(attendanceDto.getWorkStatus())) {
                         workStatus = attendanceDto.getWorkStatus();
@@ -304,10 +329,17 @@ public class EmployeeService implements UserDetailsService {
     public void deactivateEmployee(String username) {
         Employee employee = employeeRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
- 
-
-        employee.setUseYn(false);  // 여기 수정
-        employeeRepository.save(employee); // DB 반영
+        
+	     // ✅ 퇴사일자 체크
+	        if (employee.getLastWorkingDay() == null) {
+	            // 컨트롤러에서 잡아 메시지로 내려보낼 수 있도록 런타임 예외 던짐
+	            throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
+	        }
+	        
+        	
+        	employee.setUseYn(false);
+        	employeeRepository.save(employee); // DB 반영
+        
     }
 
 
