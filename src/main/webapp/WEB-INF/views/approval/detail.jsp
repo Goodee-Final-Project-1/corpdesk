@@ -110,7 +110,7 @@
 
               <%-- 결재자 수 계산 --%>
               <c:set var="approverCount" value="${fn:length(detail.approverDTOList)}" />
-              <c:set var="approverRows" value="${(approverCount + 3) / 4}" /> <%-- 4명씩 나눈 행 수 (올림) --%>
+              <c:set var="approverRows" value="${approverCount eq 0 ? 1 : (approverCount + 3) / 4}" /> <%-- 4명씩 나눈 행 수 (올림) --%>
 
               <table class="table table-bordered">
                 <tbody>
