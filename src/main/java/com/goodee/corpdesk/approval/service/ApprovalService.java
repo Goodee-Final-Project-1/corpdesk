@@ -87,7 +87,7 @@ public class ApprovalService {
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
 	// Exception: approval 혹은 approval의 조회 결과가 없거나 insert 실패
 	public ResApprovalDTO createApproval(ReqApprovalDTO reqApprovalDTO, MultipartFile[] files, String modifiedBy) throws Exception {
-		// 1. 결재 내용에 insert
+        // 1. 결재 내용에 insert
 		Approval approval = reqApprovalDTO.toApprovalEntity();
 		approval.setModifiedBy(modifiedBy);
 		approval = approvalRepository.save(approval); // 조회 결과가 없다면 예외가 터지고 롤백됨
@@ -112,9 +112,13 @@ public class ApprovalService {
         }
 
 		// 3. 결재자에 insert
-        // 결재자 정보가 없다면 바로 승인 상태로 처리 후 return
+        // 결재자 정보가 없다면
+        // - 임시저장인 경우 -> 바로 return
+        // - 결재요청인 경우 -> 승인 상태로 처리 후 return
         if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) {
-            approval.setStatus('Y');
+            if(!"T".equalsIgnoreCase(reqApprovalDTO.getStatus() + "")) approval.setStatus('Y');
+
+            resApprovalDTO.setApproverId(approval.getApprovalId());
 
             return resApprovalDTO;
         }
@@ -132,7 +136,9 @@ public class ApprovalService {
 			}
 			approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
+
 		// 4. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
+        resApprovalDTO.setApproverId(approval.getApprovalId());
         return resApprovalDTO;
 		
 	}

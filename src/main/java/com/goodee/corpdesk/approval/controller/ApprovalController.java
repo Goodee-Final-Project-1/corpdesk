@@ -91,7 +91,8 @@ public class ApprovalController {
 	public ResApprovalDTO submit(ReqApprovalDTO reqApprovalDTO
                                  , @RequestParam(value = "files", required = false) MultipartFile[] files
                                  , @AuthenticationPrincipal UserDetails userDetails) throws Exception {
-		String modifiedBy = userDetails.getUsername();
+
+        String modifiedBy = userDetails.getUsername();
 
 		return approvalService.createApproval(reqApprovalDTO, files, modifiedBy);
 		
