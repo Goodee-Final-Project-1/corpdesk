@@ -39,14 +39,15 @@ public class AttendanceController {
     /**
      * 특정 직원에 대한 출퇴근 목록 화면을 반환합니다.
      *
-     * @param username 직원의 username
      * @return 출퇴근 목록 화면 jsp가 있는 경로
      */
     @GetMapping("list")
-    public String list(@RequestParam("username") String username
+    public String list(@AuthenticationPrincipal UserDetails userDetails
                         , @RequestParam(value = "year", required = false) String year
                         , @RequestParam(value = "month", required = false) String month
                         , Model model) throws Exception {
+        String username = userDetails.getUsername();
+
         String selectedYear = null;
         String selectedMonth = null;
 
@@ -98,7 +99,7 @@ public class AttendanceController {
         String username = userDetails.getUsername();
         ResAttendanceDTO result = attendanceService.checkIn(username);
 
-        return "redirect:/attendance/list?username=" + username;
+        return "redirect:/attendance/list";
 
     }
 
@@ -109,7 +110,7 @@ public class AttendanceController {
         String username = userDetails.getUsername();
         ResAttendanceDTO result = attendanceService.checkOut(attendanceId, username);
 
-        return "redirect:/attendance/list?username=" + username;
+        return "redirect:/attendance/list";
     }
 
 }
