@@ -198,3 +198,30 @@ approvalTab.addEventListener("click",(e)=>{
 	
 
 })
+
+const msgAllread = document.querySelector(".mark-all-msg-read");
+msgAllread.addEventListener("click",()=>{
+	const msgAll = document.querySelectorAll(".messageNotification");
+	msgAll.forEach(el=>{
+		el.remove();
+	})
+	 // 알림 아이콘 위 숫자 변경
+	const allCount = document.querySelector(".all-count");
+	const allCountData = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
+	const removedCount = msgAll.length;
+	// 남은 개수 계산
+	const newAllCount = allCountData - removedCount;
+	allCount.textContent = newAllCount > 0 ? newAllCount : "";
+	allCount.setAttribute("data-allCount", newAllCount);
+
+	// 메시지 탭 숫자 변경
+	const messageCount = document.querySelector(".message-count");
+	const messageContentData = parseInt(messageCount.getAttribute("data-count") || "0", 10);
+
+	messageCount.textContent = "메시지 (0)";
+	messageCount.setAttribute("data-count", '0');
+	fetch("/notification/MsgReadAll", {
+	  method: "POST",
+	  headers: { "Content-Type": "application/json" },
+	})
+})

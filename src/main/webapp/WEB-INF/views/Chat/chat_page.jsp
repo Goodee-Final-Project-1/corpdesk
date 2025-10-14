@@ -13,61 +13,7 @@
 <script
 	src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
-<style>
- .messageContainer{
-	height:75vh;
-
-	overflow-y:scroll; 
-	} 
-html, body {
-	overflow: hidden; /* 내부 스크롤도 완전히 제거 */
-	height: 100%;
-}
-.profileImg{
-width:50px;
-height:50px;
-}
-.media-chat:not(.media-chat-right) .text-content {
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 25px !important;
-}
-.card {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* 화면 꽉 차게 */
-}
-
-.messageContainer {
-  flex: 1;             /* 남은 공간 다 채움 */
-  overflow-y: auto;    /* 스크롤 가능 */
-}
-
-.chat-footer {
-  flex-shrink: 0;      /* footer가 절대 줄지 않음 */
-  background: #fff;
-  padding: 10px;
-}.input-group-chat {
-  padding : 0;
-}
-.card-header{
-	border-bottom: 1px solid #ddd !important;
-	
-}
-.hidden {
-		display: none !important;
-	}
-.hiddenSearch{
-		display: none !important;
-	}
-.system-message {
-  text-align: center;
-  font-size: 0.85rem;
-  color: #999;       /* 흐리게 */
-  margin: 10px 0;
-  font-style: italic;
-}
-
-</style>
+<link rel="stylesheet" href="/css/chat/chat_page.css">
 </head>
 <body>
 	<sec:authentication property="principal.username" var="user" />
@@ -103,7 +49,7 @@ height:50px;
 		<form id="chatForm">
 			<div class="input-group input-group-chat">
 				<textarea class="form-control messageInput" id="messageInput"
-					style="height: 100px;" aria-label="Text input with dropdown button"></textarea>
+					style="height: 100px; resize:none;" aria-label="Text input with dropdown button"></textarea>
 				<div class="input-group-append">
 					<button type="button" id="sendBtn" class="btn btn-primary">
 						메시지 전송</button>

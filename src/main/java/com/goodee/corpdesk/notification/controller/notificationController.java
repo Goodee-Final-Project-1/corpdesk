@@ -23,4 +23,9 @@ public class notificationController {
 		notificationService.readApprovalNotification(approvalId, "approval",principal.getName() );
 		
 	}
+	@PostMapping("MsgReadAll")
+	@ResponseBody
+	public void MsgReadAll(Principal principal) {
+		notificationService.setNotificationReadAll("message", principal.getName());
+	}
 }
