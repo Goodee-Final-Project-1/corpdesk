@@ -149,7 +149,8 @@ public class ApprovalController {
         } else {
             Page<ResApprovalDTO> result = approvalService.getAllApprovalList(listType, username, pageable);
 
-            model.addAttribute(listType, result);
+            model.addAttribute("list", result);
+            model.addAttribute("listType", listType);
         }
 
         return "approval/list";

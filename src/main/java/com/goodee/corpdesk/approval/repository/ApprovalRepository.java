@@ -18,23 +18,21 @@ import java.util.List;
 public interface ApprovalRepository extends JpaRepository<Approval, Long> {
 
     @Query("""
-        WITH a AS (
-        	SELECT a
-        	FROM Approval a
-        	WHERE
-                a.useYn = :useYn
-            	AND a.username = :username
-            	AND a.status IN :statusList
-        )
         SELECT new com.goodee.corpdesk.approval.dto.ResApprovalDTO(
-            a.approvalId AS approvalId, a.createdAt AS createdAt, a.status AS status
-        	, af.formTitle AS formTitle, count(DISTINCT af2.fileId) AS fileCount
-        	, d.departmentName AS departmentName
+            a.approvalId AS approvalId,
+            a.createdAt AS createdAt,
+            a.status AS status,
+            af.formTitle AS formTitle,
+            COUNT(DISTINCT af2.fileId) AS fileCount,
+            d.departmentName AS departmentName
         )
-        FROM a
+        FROM Approval a
         LEFT JOIN ApprovalFile af2 ON a.approvalId = af2.approvalId
         JOIN ApprovalForm af ON a.approvalFormId = af.approvalFormId
         JOIN Department d ON a.departmentId = d.departmentId
+        WHERE a.useYn = :useYn
+          AND a.username = :username
+          AND a.status IN :statusList
         GROUP BY a.approvalId
     """)
     Page<ResApprovalDTO> findApprovalSummaryByStatus(
@@ -44,24 +42,25 @@ public interface ApprovalRepository extends JpaRepository<Approval, Long> {
         Pageable pageable
     );
 
-    @NativeQuery("""
-        WITH a AS (
-        	SELECT *
-        	FROM approval
-        	WHERE
-                use_yn = :useYn
-            	AND username = :username
-            	AND status IN :statusList
+    @Query("""
+        SELECT new com.goodee.corpdesk.approval.dto.ResApprovalDTO(
+            a.approvalId AS approvalId,
+            a.createdAt AS createdAt,
+            a.status AS status,
+            af.formTitle AS formTitle,
+            count(DISTINCT af2.fileId) AS fileCount,
+            d.departmentName AS departmentName
         )
-        SELECT a.approval_id AS approvalId, a.created_at AS createdAt, a.status AS status
-        	, af.form_title AS formTitle, count(DISTINCT af2.file_id) AS fileCount
-        	, d.department_name AS departmentName
-        FROM a
-        LEFT JOIN approval_file af2 ON a.approval_id = af2.approval_id
-        JOIN approval_form af ON a.approval_form_id = af.approval_form_id
-        JOIN department d ON a.department_id = d.department_id
-        GROUP BY a.approval_id
-        ORDER BY a.created_at DESC
+        FROM Approval a
+        LEFT JOIN ApprovalFile af2 ON a.approvalId = af2.approvalId
+        JOIN ApprovalForm af ON a.approvalFormId = af.approvalFormId
+        JOIN Department d ON a.departmentId = d.departmentId
+        WHERE
+            a.useYn = :useYn
+            AND a.username = :username
+            AND a.status IN :statusList
+        GROUP BY a.approvalId
+        ORDER BY a.createdAt DESC
         LIMIT :limit
     """)
     ArrayList<ResApprovalDTO> findApprovalSummaryByStatus(
@@ -70,31 +69,24 @@ public interface ApprovalRepository extends JpaRepository<Approval, Long> {
                                 );
 
     @Query("""
-        WITH
-            a2 AS (
-            SELECT ar
-            FROM Approver ar
-            WHERE
-                ar.useYn = :useYn
-                AND ar.username = :username
-                AND ar.approveYn IN :approveYnList
-            ),
-            a AS (
-            SELECT al
-            FROM Approval al
-            WHERE al.status IN :statusList
-            )
         SELECT new com.goodee.corpdesk.approval.dto.ResApprovalDTO(
-             a.approvalId AS approvalId, a.createdAt AS createdAt, a.status AS status
-        	, a.username AS username
-        	, af.formTitle AS formTitle, count(DISTINCT af2.fileId) AS fileCount
-        	, d.departmentName AS departmentName
+            a.approvalId AS approvalId,
+            a.createdAt AS createdAt,
+            a.status AS status,
+            a.username AS username,
+            af.formTitle AS formTitle,
+            COUNT(DISTINCT af2.fileId) AS fileCount,
+            d.departmentName AS departmentName
         )
-        FROM a
-        JOIN a2 ON a.approvalId = a2.approvalId
+        FROM Approval a
+        JOIN Approver ar ON a.approvalId = ar.approvalId
         LEFT JOIN ApprovalFile af2 ON a.approvalId = af2.approvalId
         JOIN ApprovalForm af ON a.approvalFormId = af.approvalFormId
         JOIN Department d ON a.departmentId = d.departmentId
+        WHERE a.useYn = :useYn
+          AND ar.username = :username
+          AND ar.approveYn IN :approveYnList
+          AND a.status IN :statusList
         GROUP BY a.approvalId
     """)
     Page<ResApprovalDTO> findSummaryByApproverWithApproveYnAndStatus(
@@ -105,32 +97,28 @@ public interface ApprovalRepository extends JpaRepository<Approval, Long> {
         Pageable pageable
     );
 
-    @NativeQuery("""
-        WITH
-            a2 AS (
-            SELECT *
-            FROM approver
-            WHERE
-                use_yn = :useYn
-                AND username = :username
-                AND approve_yn IN :approveYnList
-            ),
-            a AS (
-            SELECT *
-            FROM approval
-            WHERE status IN :statusList
-            )
-        SELECT a.approval_id AS approvalId, a.created_at AS createdAt, a.status AS status
-        	, a.username AS username
-        	, af.form_title AS formTitle, count(DISTINCT af2.file_id) AS fileCount
-        	, d.department_name AS departmentName
-        FROM a
-        JOIN a2 ON a.approval_id = a2.approval_id
-        LEFT JOIN approval_file af2 ON a.approval_id = af2.approval_id
-        JOIN approval_form af ON a.approval_form_id = af.approval_form_id
-        JOIN department d ON a.department_id = d.department_id
-        GROUP BY a.approval_id
-        ORDER BY a.created_at DESC
+    @Query("""
+        SELECT new com.goodee.corpdesk.approval.dto.ResApprovalDTO(
+            a.approvalId AS approvalId,
+            a.createdAt AS createdAt,
+            a.status AS status,
+            a.username AS username,
+            af.formTitle AS formTitle,
+            count(DISTINCT af2.fileId) AS fileCount,
+            d.departmentName AS departmentName
+        )
+        FROM Approval a
+        JOIN Approver a2 ON a.approvalId = a2.approvalId
+        LEFT JOIN ApprovalFile af2 ON a.approvalId = af2.approvalId
+        JOIN ApprovalForm af ON a.approvalFormId = af.approvalFormId
+        JOIN Department d ON a.departmentId = d.departmentId
+        WHERE
+            a.status IN :statusList
+            AND a2.useYn = :useYn
+            AND a2.username = :username
+            AND a2.approveYn IN :approveYnList
+        GROUP BY a.approvalId
+        ORDER BY a.createdAt DESC
         LIMIT :limit
     """)
     ArrayList<ResApprovalDTO> findSummaryByApproverWithApproveYnAndStatus(
