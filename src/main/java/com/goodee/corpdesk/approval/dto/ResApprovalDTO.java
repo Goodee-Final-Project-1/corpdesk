@@ -63,6 +63,8 @@ public class ResApprovalDTO {
     private List<ResApprovalDTO> approvals;
     private Integer approvalCnt;
 
+    private boolean processed; // 결재 진행중 혹은 진행완료 = true, 그 외 = false
+
     // SQL 결과용 생성자
     public ResApprovalDTO(Long approvalId, LocalDateTime createdAt, Character status, String username,
                           String formTitle, Long fileCount, String departmentName) {

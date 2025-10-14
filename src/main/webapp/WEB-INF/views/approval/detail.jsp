@@ -62,7 +62,18 @@
 						<div id="btnBox" data-approval-id="${detail.approvalId}" data-approver-id="${approverInfo.approverId}">
               <c:choose>
                 <c:when test="${detail.username eq userInfo.username}">
-                  <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete">삭제</button>
+                  <c:choose>
+                    <c:when test="${detail.processed eq true}">
+                        <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete" disabled>
+                          <div onclick="alert('이미 승인이 진행 중이거나 완료된 결재는 삭제할 수 없습니다.')">
+                            삭제
+                          </div>
+                        </button>
+                    </c:when>
+                    <c:otherwise>
+                      <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete">삭제</button>
+                    </c:otherwise>
+                  </c:choose>
                 </c:when>
                 <c:otherwise>
                   <button type="button" class="btn btn-info mr-1 btn-action" id="btnApproval">승인</button>

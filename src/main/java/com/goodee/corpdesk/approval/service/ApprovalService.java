@@ -343,6 +343,10 @@ public class ApprovalService {
         Approval approval = result.get();
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
 
+        // 결재가 승인/반려 상태면 처리여부를 true로 설정
+        List<Character> yOrN = List.of('y', 'Y', 'n', 'N');
+        if(yOrN.contains(approval.getStatus())) resApprovalDTO.setProcessed(true);
+
         // 첨부파일 조회
         List<ApprovalFileDTO> files = approvalFileRepository.findAllByApprovalIdAndUseYn(approval.getApprovalId(), true)
                                                             .stream().map(ApprovalFile::toApprovalFileDTO).toList();
@@ -365,6 +369,11 @@ public class ApprovalService {
         List<ApproverDTO> approverDTOList = approverRepository.findByApprovalIdWithEmployeeAndDepartment(approvalId);
 
         if(approverDTOList.isEmpty())  return resApprovalDTO; // 결재자가 없으면? approval만 DTO에 담아서 return
+
+        for(ApproverDTO approverDTO : approverDTOList){
+            // 결재자 중 한 명이라도 승인/반려 처리를 했다면 처리여부를 true로 설정
+            if(yOrN.contains(approverDTO.getApproveYn())) resApprovalDTO.setProcessed(true);
+        }
 
         // 3. 결재와 결재자를 DTO에 담아 반환
         resApprovalDTO.setApproverDTOList(approverDTOList);
