@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-	// const searchForm = document.getElementById('searchForm');
+	const searchForm = document.getElementById('searchForm');
 
 	const options1 = {
 		title: {

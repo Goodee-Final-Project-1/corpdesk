@@ -99,7 +99,6 @@
 <script src="/js/stats/chart3.js"></script>
 <script src="/js/stats/chart4.js"></script>
 <script src="/js/stats/chart5.js"></script>
-<%--<script src="/js/stats/search.js"></script>--%>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>
