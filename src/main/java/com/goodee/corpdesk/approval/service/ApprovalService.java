@@ -118,7 +118,7 @@ public class ApprovalService {
         if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) {
             if(!"T".equalsIgnoreCase(reqApprovalDTO.getStatus() + "")) approval.setStatus('Y');
 
-            resApprovalDTO.setApproverId(approval.getApprovalId());
+            resApprovalDTO.setApprovalId(approval.getApprovalId());
 
             return resApprovalDTO;
         }
@@ -138,7 +138,7 @@ public class ApprovalService {
 		}
 
 		// 4. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
-        resApprovalDTO.setApproverId(approval.getApprovalId());
+        resApprovalDTO.setApprovalId(approval.getApprovalId());
         return resApprovalDTO;
 		
 	}
