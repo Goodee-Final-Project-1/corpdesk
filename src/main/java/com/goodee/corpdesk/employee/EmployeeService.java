@@ -1,18 +1,10 @@
 package com.goodee.corpdesk.employee;
 
-import java.io.File;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
 import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import com.goodee.corpdesk.file.FileManager;
 import com.goodee.corpdesk.file.dto.FileDTO;
@@ -20,11 +12,15 @@ import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
 import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
+import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
+import com.goodee.corpdesk.salary.repository.SalaryRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,20 +32,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.service.AttendanceService;
-import com.goodee.corpdesk.department.entity.Department;
-import com.goodee.corpdesk.department.repository.DepartmentRepository;
-import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
-import com.goodee.corpdesk.file.FileManager;
-import com.goodee.corpdesk.file.dto.FileDTO;
-import com.goodee.corpdesk.file.entity.EmployeeFile;
-import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
-import com.goodee.corpdesk.position.entity.Position;
-import com.goodee.corpdesk.position.repository.PositionRepository;
-import com.goodee.corpdesk.vacation.VacationManager;
-import com.goodee.corpdesk.vacation.entity.Vacation;
-import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.*;
@@ -74,6 +56,8 @@ public class EmployeeService implements UserDetailsService {
     private DepartmentRepository departmentRepository;
     @Autowired
     private PositionRepository positionRepository;
+	@Autowired
+	private SalaryRepository salaryRepository;
 
     @Autowired
     private RoleService roleService;
@@ -349,6 +333,10 @@ public class EmployeeService implements UserDetailsService {
         return map;
     }
 
+	public Page<EmployeeSalaryDTO> getSalaryList(String username, Pageable pageable) {
+		return salaryRepository.findAllEmployeeSalaryByUsername(username, pageable);
+	}
+
 	public Employee updatePassword(Employee employee, BindingResult bindingResult) {
 		Optional<Employee> optional = employeeRepository.findById(employee.getUsername());
 		Employee origin = optional.get();
@@ -391,5 +379,4 @@ public class EmployeeService implements UserDetailsService {
     public ResEmployeeDTO getFulldetail(String username) {
         return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
-
 }

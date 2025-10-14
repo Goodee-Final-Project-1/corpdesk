@@ -1,39 +1,5 @@
 package com.goodee.corpdesk.employee;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
@@ -47,11 +13,35 @@ import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.position.repository.PositionRepository;
 import com.goodee.corpdesk.position.service.PositionService;
-
+import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -420,6 +410,34 @@ public class EmployeeController {
         model.addAttribute("department", map.get("department"));
         model.addAttribute("position", map.get("position"));
     }
+
+	@GetMapping("salary")
+	public String salary(@PageableDefault(size = 5) Pageable pageable, Authentication authentication, Model model) {
+		int number = pageable.getPageNumber();
+		pageable = pageable.withPage(number == 0 ? 0 : number - 1);
+		Page<EmployeeSalaryDTO> page = employeeService.getSalaryList(authentication.getName(), pageable);
+
+		int currentPage = page.getNumber();
+
+		int startPage = (int) Math.floor(currentPage / 5) * 5;
+		int endPage = (int) Math.min(startPage + 4, page.getTotalPages() - 1);
+		endPage = endPage < 0 ? 0 : endPage;
+
+		boolean isFirst = startPage < 1;
+		boolean isLast = endPage == page.getTotalPages() - 1;
+
+//		model.addAttribute("page", page);
+		model.addAttribute("salaryList", page.getContent());
+		model.addAttribute("totalPages", page.getTotalPages());
+		model.addAttribute("currentPage", currentPage);
+		model.addAttribute("startPage", startPage);
+		model.addAttribute("endPage", endPage);
+		model.addAttribute("isFirst", isFirst);
+		model.addAttribute("isLast", isLast);
+
+
+		return  "employee/salary";
+	}
 
     @GetMapping("update/email")
     public String updateEmail(Authentication authentication, Model model) {
