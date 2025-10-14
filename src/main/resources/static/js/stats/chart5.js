@@ -18,6 +18,16 @@ document.addEventListener('DOMContentLoaded', function () {
 		chart: {
 			type: 'bar'
 		},
+		dataLabels: {
+			enabled: false
+		},
+		yaxis: {
+			labels: {
+				formatter: function (y) {
+					return y + "h";
+				}
+			}
+		},
 		legend: {
 			position: 'top',
 			markers: {
@@ -34,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	const chart5 = new ApexCharts(document.querySelector("#chart5"), options5);
 	chart5.render();
 
-	async function getChart5(start, end) {
+	async function getChart5(start, end, departmentId, positionId) {
 		try {
 			const response = await fetch('/api/stats/chart5', {
 				method: 'POST',
@@ -43,7 +53,9 @@ document.addEventListener('DOMContentLoaded', function () {
 				},
 				body: JSON.stringify({
 					'start': start,
-					'end': end
+					'end': end,
+					'departmentId': departmentId,
+					'positionId': positionId
 				})
 			});
 			if (!response.ok) throw new Error('수신 오류');
@@ -80,7 +92,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		const start = document.getElementById('start').value;
 		const end = document.getElementById('end').value;
+		const department = document.getElementById('department');
+		const position = document.getElementById('position');
 
-		getChart5(start, end);
+		const departmentId = Number(department.options[department.selectedIndex].value);
+		const positionId = Number(position.options[position.selectedIndex].value);
+
+		getChart5(start, end, departmentId, positionId);
 	});
 });

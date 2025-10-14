@@ -18,6 +18,16 @@ document.addEventListener('DOMContentLoaded', function () {
 		chart: {
 			type: 'bar'
 		},
+		dataLabels: {
+			enabled: false
+		},
+		yaxis: {
+			labels: {
+				formatter: function (y) {
+					return y.toFixed(0) + "%";
+				}
+			}
+		},
 		legend: {
 			position: 'top',
 			markers: {
@@ -34,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	const chart4 = new ApexCharts(document.querySelector("#chart4"), options4);
 	chart4.render();
 
-	async function getChart4(start, end) {
+	async function getChart4(start, end, departmentId, positionId) {
 		try {
 			const response = await fetch('/api/stats/chart4', {
 				method: 'POST',
@@ -43,7 +53,9 @@ document.addEventListener('DOMContentLoaded', function () {
 				},
 				body: JSON.stringify({
 					'start': start,
-					'end': end
+					'end': end,
+					'departmentId': departmentId,
+					'positionId': positionId
 				})
 			});
 			if (!response.ok) throw new Error('수신 오류');
@@ -84,7 +96,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		const start = document.getElementById('start').value;
 		const end = document.getElementById('end').value;
+		const department = document.getElementById('department');
+		const position = document.getElementById('position');
 
-		getChart4(start, end);
+		const departmentId = Number(department.options[department.selectedIndex].value);
+		const positionId = Number(position.options[position.selectedIndex].value);
+
+		getChart4(start, end, departmentId, positionId);
 	});
 });

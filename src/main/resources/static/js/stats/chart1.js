@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-	const searchForm = document.getElementById('searchForm');
+	// const searchForm = document.getElementById('searchForm');
 
 	const options1 = {
 		title: {
@@ -27,13 +27,13 @@ document.addEventListener('DOMContentLoaded', function () {
 				height: 12,
 				radius: 0
 			}
-		}
+		},
 	};
 
 	const chart = new ApexCharts(document.querySelector("#chart1"), options1);
 	chart.render();
 
-	async function getChart(start, end /*, department, position*/) {
+	async function getChart(start, end, departmentId, positionId) {
 		try {
 			const response = await fetch('/api/stats/chart1', {
 				method: 'POST',
@@ -43,8 +43,8 @@ document.addEventListener('DOMContentLoaded', function () {
 				body: JSON.stringify({
 					'start': start,
 					'end': end,
-					// 'department': department,
-					// 'position': position
+					'departmentId': departmentId,
+					'positionId': positionId
 				})
 			});
 			if (!response.ok) throw new Error('수신 오류');
@@ -79,16 +79,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	getChart();
 
-
 	searchForm.addEventListener('submit', function (e) {
 		e.preventDefault();
 
 		const start = document.getElementById('start').value;
 		const end = document.getElementById('end').value;
-		// const department = document.getElementById('department').value;
-		// const position = document.getElementById('position').value;
+		const department = document.getElementById('department');
+		const position = document.getElementById('position');
 
-		getChart(start, end /*, department, position*/);
+		const departmentId = Number(department.options[department.selectedIndex].value);
+		const positionId = Number(position.options[position.selectedIndex].value);
+
+		getChart(start, end, departmentId, positionId);
 	});
 
 });
