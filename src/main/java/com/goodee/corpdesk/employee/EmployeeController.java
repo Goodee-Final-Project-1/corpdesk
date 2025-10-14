@@ -447,9 +447,9 @@ public class EmployeeController {
 		return "employee/salaryDetail";
 	}
 
-	@PostMapping("salary/{paymentId}")
+	@GetMapping("salary/detail")
 	@ResponseBody
-	public Map<String, Object> salaryDetail(@PathVariable("paymentId") Long paymentId, Authentication authentication) throws JsonProcessingException {
+	public Map<String, Object> salaryDetail(Long paymentId, Authentication authentication) throws JsonProcessingException {
 
 		Map<String, Object> map = employeeService.getSalaryDetail(authentication.getName(), paymentId);
 

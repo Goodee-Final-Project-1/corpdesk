@@ -11,14 +11,11 @@ async function getDetail() {
 	const paymentId = parseInt(pathArr[pathArr.length - 1]);
 
 	try {
-		const response = await fetch(`/employee/salary/${paymentId}`, {
-			method: 'POST',
+		const response = await fetch(`/employee/salary/detail?paymentId=${paymentId}`, {
+			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({
-				'paymentId': paymentId,
-			})
 		});
 		if (!response.ok) throw new Error('수신 오류');
 		const data = await response.json();
