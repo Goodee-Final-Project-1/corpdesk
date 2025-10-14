@@ -85,7 +85,7 @@ public class EmployeeService implements UserDetailsService {
 
     // 모든 직위 조회
     public List<Position> getAllPositions() {
-        return positionRepository.findAll();
+        return positionRepository.findByUseYnTrueOrderByPositionIdAsc();
     }
 
     // username 존재 여부 체크
