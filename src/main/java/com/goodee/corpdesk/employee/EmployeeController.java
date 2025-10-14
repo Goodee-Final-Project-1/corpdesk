@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.employee;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
@@ -437,6 +438,22 @@ public class EmployeeController {
 
 
 		return  "employee/salary";
+	}
+
+	@GetMapping("salary/{paymentId}")
+	public String salaryDetail(@PathVariable("paymentId") Long paymentId,
+			Authentication authentication, Model model) throws JsonProcessingException {
+
+		return "employee/salaryDetail";
+	}
+
+	@PostMapping("salary/{paymentId}")
+	@ResponseBody
+	public Map<String, Object> salaryDetail(@PathVariable("paymentId") Long paymentId, Authentication authentication) throws JsonProcessingException {
+
+		Map<String, Object> map = employeeService.getSalaryDetail(authentication.getName(), paymentId);
+
+		return map;
 	}
 
     @GetMapping("update/email")

@@ -61,13 +61,13 @@
 							</thead>
 							<tbody>
 							<c:forEach var="s" items="${salaryList}">
-								<tr>
-									<td>${s.paymentId}</td>
-									<td>${s.baseSalary}</td>
-									<td>${s.allowanceAmount}</td>
-									<td>${s.deductionAmount}</td>
-									<td>${s.baseSalary + s.allowanceAmount - s.deductionAmount}</td>
-									<td>${s.paymentDate}</td>
+								<tr onclick="location.href='./salary/${s.paymentId}'" style="cursor: pointer">
+										<td>${s.paymentId}</td>
+										<td>${s.baseSalary}</td>
+										<td>${s.allowanceAmount}</td>
+										<td>${s.deductionAmount}</td>
+										<td>${s.baseSalary + s.allowanceAmount - s.deductionAmount}</td>
+										<td>${s.paymentDate}</td>
 								</tr>
 							</c:forEach>
 							</tbody>

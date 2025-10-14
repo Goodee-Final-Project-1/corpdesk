@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface SalaryRepository extends JpaRepository<SalaryPayment, Long> {
 
 	@Query(value = """
@@ -82,6 +84,8 @@ public interface SalaryRepository extends JpaRepository<SalaryPayment, Long> {
 			countQuery = "SELECT count(*) FROM salary_payment WHERE username = :username",
 			nativeQuery = true)
 	Page<EmployeeSalaryDTO> findAllEmployeeSalaryByUsername(String username, Pageable pageable);
+
+	Optional<SalaryPayment> findByUsernameAndPaymentId(String username, Long paymentId);
 
 //	@Query(
 //			"""
