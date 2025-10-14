@@ -64,11 +64,11 @@
                 <c:when test="${detail.username eq userInfo.username}">
                   <c:choose>
                     <c:when test="${detail.processed eq true}">
-                        <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete" disabled>
-                          <div onclick="alert('이미 승인이 진행 중이거나 완료된 결재는 삭제할 수 없습니다.')">
-                            삭제
-                          </div>
+                      <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="이미 승인이 진행 중이거나 완료된 결재는 삭제할 수 없습니다.">
+                        <button type="button" class="btn btn-outline-danger mr-1 btn-action" style="pointer-events: none;" id="btnDelete" disabled>
+                          삭제
                         </button>
+                      </span>
                     </c:when>
                     <c:otherwise>
                       <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete">삭제</button>
