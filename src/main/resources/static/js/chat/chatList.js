@@ -71,7 +71,7 @@ function formatTime(time) {
 	const diffHour = Math.floor(diffMin / 60);
 	if (diffHour < 24) return diffHour + "시간 전";
 
-	return date.toLocaleDateString("ko-KR", {
+	return date.toLocaleString("ko-KR", {
 		month: "short",
 		day: "numeric",
 		hour: "2-digit",
@@ -121,7 +121,7 @@ function appendApprovalNotification(notification) {
 	 	 <span class="title mb-0">${notification.title}</span>
 	  	 <span class="discribe">${notification.content}</span>
       	 <span class="time">
-       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}">${formatTime(notification.createdAt)}</time>...
+       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}">${formatTime(notification.createdAt)}</time>
       	 </span>
 	   </div>
 	 `;

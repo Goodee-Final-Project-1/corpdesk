@@ -13,19 +13,19 @@ import com.goodee.corpdesk.notification.service.NotificationService;
 
 @Controller
 @RequestMapping("/notification/**")
-public class notificationController {
+public class NotificationController {
 
 	@Autowired
 	private NotificationService notificationService;
 	@PostMapping("read/{approvalId}")
 	@ResponseBody
-	public void ReadApproval(@PathVariable(value="approvalId") Long approvalId , Principal principal) {
+	public void readApproval(@PathVariable(value="approvalId") Long approvalId , Principal principal) {
 		notificationService.readApprovalNotification(approvalId, "approval",principal.getName() );
 		
 	}
 	@PostMapping("MsgReadAll")
 	@ResponseBody
-	public void MsgReadAll(Principal principal) {
+	public void msgReadAll(Principal principal) {
 		notificationService.setNotificationReadAll("message", principal.getName());
 	}
 }

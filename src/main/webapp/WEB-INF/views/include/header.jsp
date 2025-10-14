@@ -100,7 +100,7 @@
 												<span class="title mb-0">${notification.title}</span> <span
 													class="discribe">${notification.content}</span> <span
 													class="time"> <time class="notificationTime"
-														data-notificationTime="${notification.createdAt}"></time>...
+														data-notificationTime="${notification.createdAt}"></time>
 												</span>
 
 											</div>
