@@ -112,8 +112,12 @@ public class ApprovalService {
         }
 
 		// 3. 결재자에 insert
-        // 결재자 정보가 없다면 바로 return
-        if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) return resApprovalDTO;
+        // 결재자 정보가 없다면 바로 승인 상태로 처리 후 return
+        if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) {
+            approval.setStatus('Y');
+
+            return resApprovalDTO;
+        }
 		for (ApproverDTO approverDTO : reqApprovalDTO.getApproverDTOList()) {
 			Approver approver = approverDTO.toEntity();
 			approver.setApprovalId(approval.getApprovalId());
