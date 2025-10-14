@@ -27,7 +27,7 @@ public class ResApprovalDTO {
 	private Integer positionId;
     private Integer approvalFormId;
     private String approvalContent;
-	private Character status;
+	private String status;
 
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
@@ -63,23 +63,25 @@ public class ResApprovalDTO {
     private List<ResApprovalDTO> approvals;
     private Integer approvalCnt;
 
+    private boolean processed; // 결재 진행중 혹은 진행완료 = true, 그 외 = false
+
     // SQL 결과용 생성자
-    public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status, String username,
+    public ResApprovalDTO(Long approvalId, LocalDateTime createdAt, Character status, String username,
                           String formTitle, Long fileCount, String departmentName) {
         this.approvalId = approvalId;
-        this.createdAt = LocalDateTime.ofInstant(createdAt.toInstant(), ZoneId.of("Asia/Seoul"));
-        this.status = status;
+        this.createdAt = createdAt;
+        this.status = status + "";
         this.username = username;
         this.formTitle = formTitle;
         this.fileCount = fileCount != null ? fileCount.intValue() : 0;
         this.departmentName = departmentName;
     }
 
-    public ResApprovalDTO(Long approvalId, Timestamp createdAt, Character status,
+    public ResApprovalDTO(Long approvalId, LocalDateTime createdAt, Character status,
                           String formTitle, Long fileCount, String departmentName) {
         this.approvalId = approvalId;
-        this.createdAt = LocalDateTime.ofInstant(createdAt.toInstant(), ZoneId.of("Asia/Seoul"));
-        this.status = status;
+        this.createdAt = createdAt;
+        this.status = status + "";
         this.formTitle = formTitle;
         this.fileCount = fileCount != null ? fileCount.intValue() : 0;
         this.departmentName = departmentName;
