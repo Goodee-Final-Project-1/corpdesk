@@ -26,6 +26,9 @@
 			<a class="nav-link active" href="/employee/detail">내 정보</a>
 		</li>
 		<li class="nav-item">
+			<a class="nav-link" href="/employee/salary">내 급여</a>
+		</li>
+		<li class="nav-item">
 			<a class="nav-link" href="/employee/update/email">이메일 변경</a>
 		</li>
 		<li class="nav-item">
