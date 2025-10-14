@@ -91,4 +91,20 @@ public interface PositionRepository extends JpaRepository<Position, Integer> {
     		""")
     		List<PositionDTO> findAllWithEmployeeCountByKeyword(@Param("keyword") String keyword);
     		
+    		
+    		// 부모에 활성 자식 수 (특정 자식들 제외)
+    		@Query("""
+    			    SELECT COUNT(p) FROM Position p
+    			     WHERE ((:parentId IS NULL AND p.parentPositionId IS NULL)
+    			            OR p.parentPositionId = :parentId)
+    			       AND p.useYn = true
+    			       AND ( :excludeIds IS NULL OR p.positionId NOT IN :excludeIds )
+    			""")
+    			int countActiveChildrenExcluding(@Param("parentId") Integer parentId,
+    			                                 @Param("excludeIds") List<Integer> excludeIds);
+
+    		@Modifying(clearAutomatically = true, flushAutomatically = true)
+    		@Query("UPDATE Position p SET p.useYn = false WHERE p.positionId IN :ids")
+    		int softDeleteIn(@Param("ids") List<Integer> ids);
+    		
 }

@@ -15,6 +15,7 @@ import com.goodee.corpdesk.position.dto.IdsDTO;
 import com.goodee.corpdesk.position.dto.PositionDTO;
 import com.goodee.corpdesk.position.service.PositionService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -35,21 +36,29 @@ public class PositionController {
 
     @PostMapping
     @ResponseBody
-    public ResponseEntity<?> add(@RequestBody PositionDTO req){
+    public ResponseEntity<?> add(@Valid @RequestBody PositionDTO req){
     	try {
         positionService.create(req.getPositionName(),req.getParentPositionId());
-        return ResponseEntity.ok().build();
-    } catch (IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    } catch (IllegalArgumentException | IllegalStateException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
    }
     @PostMapping("/delete")
     @ResponseBody
-    public void delete(@RequestBody IdsDTO ids){
-        if (ids.getIds().size() == 1) {
-            positionService.deleteOneAndReparent(ids.getIds().get(0));
-        } else {
-            positionService.deleteAllAndReparent(ids.getIds());
-        }
-    }
+    public ResponseEntity<?> delete(@RequestBody IdsDTO ids){
+    	        if (ids == null || ids.getIds() == null || ids.getIds().isEmpty()) {
+    	            return ResponseEntity.badRequest().body("삭제할 ID가 비어있습니다.");
+    	        }
+    	        try {
+    	            if (ids.getIds().size() == 1) {
+    	                positionService.deleteOneAndReparent(ids.getIds().get(0));
+    	            } else {
+    	                positionService.deleteAllAndReparent(ids.getIds());
+    	            }
+    	            return ResponseEntity.ok().build();
+    	        } catch (IllegalArgumentException | IllegalStateException e) {
+    	            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    	        }
+    	    }
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +20,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class PositionService {
 
-    @Autowired
-    private PositionRepository positionRepository;
+    
+    private final PositionRepository positionRepository;
     
     public void deleteOneAndReparent(Integer positionId) {
         Position target = positionRepository.findById(positionId)
@@ -39,7 +38,7 @@ public class PositionService {
         // 2) 부모가 이미 '삭제 대상 이외의' 다른 자식을 갖고 있는지 검사
         if (parentId != null) {
             int siblingsAtParent =
-                    positionRepository.countByParentPositionIdAndUseYnTrueAndPositionIdNot(parentId, positionId);
+                    positionRepository.countActiveChildrenExcluding(parentId, java.util.List.of(positionId));
             if (siblingsAtParent > 0 && childCount > 0) {
                 // 부모에 이미 자식이 있는 상태에서 또 다른 자식을 올리려 함 → 제약 위반
                 throw new IllegalStateException("상위 직위에 이미 다른 자식 직위가 있어 재연결할 수 없습니다.");
@@ -73,14 +72,20 @@ public class PositionService {
 
         for (Integer id : ids) {
             // 1) 새 parent 찾기: 삭제 집합에 포함되지 않은 가장 가까운 조상
-            Integer newParent = parentMap.get(id);
-            while (newParent != null && toDelete.contains(newParent)) {
-                newParent = parentMap.get(newParent); // 조상으로 계속 타고 올라감
-            }
+        	Integer newParent = parentMap.get(id);
+        	while (newParent != null && toDelete.contains(newParent)) {
+        	    // parentMap에 없으면 DB에서 parent를 읽어옴
+        	    Integer next = parentMap.containsKey(newParent)
+        	            ? parentMap.get(newParent)
+        	            : positionRepository.findById(newParent)
+        	                  .map(Position::getParentPositionId)
+        	                  .orElse(null);
+        	    newParent = next;
+        	}
             
-         // 🔸 상위직위(newParent)가 이미 자식을 갖고 있다면 재연결 불가
-            if (newParent != null &&
-                positionRepository.existsByParentPositionIdAndUseYnTrue(newParent)) {
+            //  2) 새 부모의 남는 활성 자식 검사 (삭제 대상은 제외)
+            int remaining = positionRepository.countActiveChildrenExcluding(newParent, ids);
+            if (remaining > 0) {
                 throw new IllegalStateException("상위 직위에 이미 자식 직위가 있어 재연결할 수 없습니다. id=" + newParent);
             }
             
@@ -88,10 +93,9 @@ public class PositionService {
             positionRepository.reparentChildren(id, newParent);
         }
 
-        // 3) 마지막에 모두 소프트 삭제
-        for (Integer id : ids) {
-            positionRepository.softDelete(id);
-        }
+        // 3) 마지막에 한 번만 벌크 소프트 삭제
+            positionRepository.softDeleteIn(ids);
+        
     }
     
     
@@ -113,29 +117,46 @@ public class PositionService {
 
     //  직위 생성: save 사용
     public void create(String positionName, Integer parentPositionId) {
-    	
-    	//  중복 확인
-        if (positionRepository.existsByPositionNameAndUseYnTrue(positionName)) {
-            throw new IllegalArgumentException("이미 존재하는 직위명입니다: " + positionName);
+        // 1) 입력 검증
+        String trimmed = (positionName == null) ? null : positionName.strip();
+        if (trimmed == null || trimmed.isEmpty()) {
+            throw new IllegalArgumentException("직위명은 필수입니다.");
         }
-        // 루트 단 하나 정책
+        if (trimmed.length() > 50) {
+            throw new IllegalArgumentException("직위명은 50자 이내여야 합니다.");
+        }
+
+        // 2) 중복(활성) 확인 — 필요시 정규화 키 사용
+        if (positionRepository.existsByPositionNameAndUseYnTrue(trimmed)) {
+            throw new IllegalArgumentException("이미 존재하는 직위명입니다: " + trimmed);
+        }
+
+        // 3) 루트 단 하나 정책
         if (parentPositionId == null &&
             positionRepository.existsByParentPositionIdIsNullAndUseYnTrue()) {
             throw new IllegalStateException("최상위 직위는 하나만 생성할 수 있습니다.");
         }
-        
-        // 상위직위에 이미 자식이 존재하는지 체크
+
+        // 4) 상위 직위 제약
         if (parentPositionId != null &&
             positionRepository.existsByParentPositionIdAndUseYnTrue(parentPositionId)) {
             throw new IllegalArgumentException("해당 상위 직위에는 이미 자식 직위가 존재합니다.");
         }
-        
+
+        // 5) 상위 직위 존재/활성 확인
+        if (parentPositionId != null &&
+            positionRepository.findByPositionIdAndUseYnTrue(parentPositionId).isEmpty()) {
+            throw new IllegalArgumentException("상위 직위가 존재하지 않거나 비활성 상태입니다: " + parentPositionId);
+        }
+
+        // 6) 저장
         Position p = new Position();
-        p.setPositionName(positionName);
+        p.setPositionName(trimmed);
         p.setParentPositionId(parentPositionId);
         p.setUseYn(true);
         positionRepository.save(p);
     }
+
 
     
     // ✅ 일괄 삭제: JPA 기본 제공 메서드 사용
@@ -153,17 +174,58 @@ public class PositionService {
     
     public void changeParent(Integer positionId, Integer newParentId) {
         Position p = positionRepository.findById(positionId)
-            .orElseThrow(() -> new IllegalArgumentException("직위 없음"));
+            .orElseThrow(() -> new IllegalArgumentException("직위 없음: " + positionId));
 
-        if (newParentId == null &&
+        // (선택) 비활성 노드 변경 금지 정책
+        // if (!Boolean.TRUE.equals(p.getUseYn())) {
+        //     throw new IllegalStateException("비활성 직위는 상위 변경이 불가합니다.");
+        // }
+
+        Integer currentParentId = p.getParentPositionId();
+
+        // 0) 무의미한 변경은 패스
+        if ((currentParentId == null && newParentId == null) ||
+            (currentParentId != null && currentParentId.equals(newParentId))) {
+            return; // no-op
+        }
+
+        // 1) 자기 참조 금지
+        if (newParentId != null && positionId.equals(newParentId)) {
+            throw new IllegalArgumentException("자기 자신을 상위로 지정할 수 없습니다.");
+        }
+
+        // 2) 루트 단일성: p가 현재 루트가 아닐 때만 단일성 검사
+        if (newParentId == null && currentParentId != null &&
             positionRepository.existsByParentPositionIdIsNullAndUseYnTrue()) {
             throw new IllegalStateException("최상위 직위는 하나만 가능합니다.");
         }
+
+        // 3) 새 부모 존재/활성 검증
+        if (newParentId != null &&
+            positionRepository.findByPositionIdAndUseYnTrue(newParentId).isEmpty()) {
+            throw new IllegalArgumentException("유효하지 않은 상위 직위입니다: " + newParentId);
+        }
+
+        // 4) 부모당 자식 1개 정책: 새 부모에 이미 다른 자식이 있으면 금지
         if (newParentId != null &&
             positionRepository.existsByParentPositionIdAndUseYnTrue(newParentId)) {
             throw new IllegalStateException("해당 상위 직위에는 이미 자식 직위가 존재합니다.");
         }
+
+        // 5) 사이클 방지: newParentId 사슬 상에 positionId가 있으면 금지
+        Integer cursor = newParentId;
+        while (cursor != null) {
+            if (cursor.equals(positionId)) {
+                throw new IllegalStateException("상위 변경 시 계층 순환이 발생합니다.");
+            }
+            cursor = positionRepository.findById(cursor)
+                .map(Position::getParentPositionId)
+                .orElse(null);
+        }
+
+        // 6) 변경 적용
         p.setParentPositionId(newParentId);
     }
+
     
 }

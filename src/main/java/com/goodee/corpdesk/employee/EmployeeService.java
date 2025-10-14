@@ -9,20 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.service.AttendanceService;
-import com.goodee.corpdesk.department.entity.Department;
-import com.goodee.corpdesk.department.repository.DepartmentRepository;
-import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
-import com.goodee.corpdesk.file.FileManager;
-import com.goodee.corpdesk.file.dto.FileDTO;
-import com.goodee.corpdesk.file.entity.EmployeeFile;
-import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
-import com.goodee.corpdesk.position.entity.Position;
-import com.goodee.corpdesk.position.repository.PositionRepository;
-import com.goodee.corpdesk.vacation.VacationManager;
-import com.goodee.corpdesk.vacation.entity.Vacation;
-import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,6 +28,7 @@ import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import com.goodee.corpdesk.file.FileManager;
 import com.goodee.corpdesk.file.dto.FileDTO;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
@@ -51,9 +38,6 @@ import com.goodee.corpdesk.position.repository.PositionRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
-import java.io.File;
-import java.time.LocalDate;
-import java.util.*;
 
 @Service
 @Transactional
@@ -312,10 +296,17 @@ public class EmployeeService implements UserDetailsService {
     public void deactivateEmployee(String username) {
         Employee employee = employeeRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
- 
-
-        employee.setUseYn(false);  // 여기 수정
-        employeeRepository.save(employee); // DB 반영
+        
+	     // ✅ 퇴사일자 체크
+	        if (employee.getLastWorkingDay() == null) {
+	            // 컨트롤러에서 잡아 메시지로 내려보낼 수 있도록 런타임 예외 던짐
+	            throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
+	        }
+	        
+        	
+        	employee.setUseYn(false);
+        	employeeRepository.save(employee); // DB 반영
+        
     }
 
 

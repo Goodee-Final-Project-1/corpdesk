@@ -21,7 +21,7 @@
         td.center { text-align: center; }
         .empty { color: #9ca3af; text-align: center; padding: 24px 0; }
         .positionListBox { border: 0; } /* 기존 클래스 유지 */
-        h4{margin-bottom:15px;}
+        h5{margin-bottom:15px;}
     </style>
 	
 	
@@ -42,7 +42,7 @@
                 <div class="page-title">직위체계</div>
 
                 <div class="section-card positionListBox">
-                	<h4>직위목록</h4>
+                	<h5>직위목록</h5>
                     <!-- 상단 툴바 -->
                     <div class="toolbar">
                         <div class="toolbar-left">
@@ -78,7 +78,7 @@
                                                 <td>
                                                     <input type="checkbox" name="positionId" value="${p.positionId}">
                                                 </td>
-                                                <td>${p.positionName}</td>
+                                                <td><c:out value="${p.positionName}"/></td>
                                                 <td class="center">${p.employeeCount}</td>
                                             </tr>
                                         </c:forEach>
