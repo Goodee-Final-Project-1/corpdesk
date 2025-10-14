@@ -42,7 +42,7 @@
               </li>
               <li class="d-flex py-2 text-dark">
                 <b class="col-5 p-0">기안부서</b>
-                <p>asdfasdf</p>
+                <p>${userInfo.departmentName}</p>
               </li>
               <li class="d-flex py-2 text-dark align-items-center">
                 <label class="col-5 p-0">결재부서</label>
