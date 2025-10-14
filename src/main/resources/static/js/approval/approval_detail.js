@@ -38,17 +38,18 @@ btnActions.forEach((btn) => {
 
     switch (btn.id) {
       case 'btnDelete':
-        fetch(`/approval/${approvalId}`, {
-          method: "DELETE"
-        })
-            .then(r => r.text())
-            .then(r => {
-                console.log(r)
+        const message = '정말 삭제하시겠습니까?';
 
-                alert('삭제되었습니다.');
-                history.back();
-            })
-        ;
+        if(confirm(message)) {
+          fetch(`/approval/${approvalId}`, {
+            method: "DELETE"
+          })
+              .then(r => r.text())
+              .then(r => {
+                  alert('삭제되었습니다.');
+                  history.back();
+              });
+        }
 
         break;
       case 'btnApproval':
