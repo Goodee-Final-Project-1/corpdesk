@@ -378,39 +378,6 @@ public class EmployeeController {
         return result;
     }
 
-
-
-
-	// FIXME: 배포 전에 삭제 해야됨
-//	@GetMapping
-//	public String link() {
-//		return "employee/link";
-//	}
-//
-//    @GetMapping("sample_page")
-//    public void sample() {
-//    }
-//
-//    @GetMapping("sign_in")
-//    public String signIn() {
-//        return "sample/sign_in";
-//    }
-//
-//    @GetMapping("reset")
-//    public String reset() {
-//        return "sample/reset_password";
-//    }
-
-    @GetMapping("join")
-    public void join() {
-    }
-
-    @PostMapping("join")
-    public String join(Employee employee) {
-        employeeService.join(employee);
-        return "employee/link";
-    }
-
     @GetMapping("detail")
     public void detail(Authentication authentication, Model model) {
         Map<String, Object> map = employeeService.detail(authentication.getName());

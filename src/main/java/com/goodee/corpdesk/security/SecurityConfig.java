@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,11 +38,14 @@ public class SecurityConfig {
 //              .cors(cors -> cors.disable())
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/board/notice/write", "/board/notice/*/edit").hasAnyRole("ADMIN")
+						.requestMatchers(HttpMethod.POST, "/board/notice/", "/board/notice/*", "/board/notice/*/delete").hasAnyRole("ADMIN")
+						.requestMatchers("/employee/add", "/employee/list", "/employee/export", "/employee/import",
+						"/employee/edit/**", "/employee/delete/**", "/employee/*/attendance/**", "/position/**",
+						"/admin/**", "/organization/**", "/salary/**", "/stats/**").hasAnyRole("ADMIN", "HR")
 						.requestMatchers("/dashboard", "/approval/**", "/attendance/**", "/board/**",
 								"/calendar/**", "/chat/**", "/email/**", "/employee/**", "/notice/**",
-								"/organization/**", "/personal-schedule/**", "/salary/**", "/schedule/**",
-								"/stats/**", "/vacation/**").authenticated()    // 접근 제한
-						.requestMatchers("/admin/**").hasAnyRole("ADMIN", "HR")
+								"/personal-schedule/**", "/vacation/**").authenticated()    // 접근 제한
 						.anyRequest().permitAll()
 				)
 				.exceptionHandling(e -> e

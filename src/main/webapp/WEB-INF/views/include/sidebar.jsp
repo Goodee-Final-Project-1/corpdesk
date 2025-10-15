@@ -89,14 +89,15 @@
 						<i class="mdi mdi-alarm-check"></i> <span class="nav-text">일정</span>
 					</a>
 				</li>
-				<!--  -->
 
-				<li class="section-title pt-0 pb-0">
-					<hr>
-				</li>
+				<sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_HR')">
+					<!--  -->
 
-				<!-- 조직관리, 인사관리 -->
+					<li class="section-title pt-0 pb-0">
+						<hr>
+					</li>
 
+					<!-- 조직관리, 인사관리 -->
 				<li class="has-sub">
 					<a class="sidenav-item-link" href="javascript:void(0)"
 						 data-toggle="collapse" data-target="#hr" aria-expanded="false">
@@ -138,6 +139,7 @@
 						<i class="mdi mdi-chart-areaspline"></i> <span class="nav-text">통계</span>
 					</a>
 				</li>
+				</sec:authorize>
 
 			</ul>
 		</div>
