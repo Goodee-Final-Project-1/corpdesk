@@ -332,13 +332,6 @@ public class EmployeeService implements UserDetailsService {
         return employee;
     }
 
-    public void join(Employee employee) {
-        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
-        employee.setDepartmentId(1);
-        employee.setPositionId(1);
-        employeeRepository.save(employee);
-    }
-
     public Map<String, Object> detail(String username) {
         Employee employee = employeeRepository.findById(username).orElseThrow();
 		Department department = null;
