@@ -61,7 +61,12 @@
             <%-- 양식 헤더 --%>
 						<div id="btnBox" data-approval-id="${detail.approvalId}" data-approver-id="${approverInfo.approverId}">
               <c:choose>
+
                 <c:when test="${detail.username eq userInfo.username}">
+                  <c:if test="${detail.status eq 't' or detail.status eq 'T'}">
+
+                  </c:if>
+
                   <c:choose>
                     <c:when test="${detail.processed eq true}">
                       <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="이미 승인이 진행 중이거나 완료된 결재는 삭제할 수 없습니다.">
@@ -74,11 +79,14 @@
                       <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete">삭제</button>
                     </c:otherwise>
                   </c:choose>
+
                 </c:when>
+
                 <c:otherwise>
                   <button type="button" class="btn btn-info mr-1 btn-action" id="btnApproval">승인</button>
                   <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnReject">반려</button>
                 </c:otherwise>
+
               </c:choose>
               <button type="button" class="btn btn-light" id="btnCancel" onclick="history.back()">취소</button>
 						</div>
