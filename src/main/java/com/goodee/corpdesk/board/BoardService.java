@@ -12,29 +12,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
+
 @Service
 public class BoardService {
 
   @Autowired
   private BoardRepository boardRepository;
 
+  @Autowired
+  private EmployeeRepository employeeRepository;
+
   // 현재 직원의 부서번호 가져오기
   private Integer getCurrentUserDepartmentId() {
-    org.springframework.security.core.Authentication auth =
-        org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-    Object principal = (auth != null ? auth.getPrincipal() : null);
-    if (principal instanceof com.goodee.corpdesk.employee.Employee emp) {
-      return emp.getDepartmentId();
-    }
-    throw new IllegalStateException("부서 정보를 찾을 수 없습니다.");
+    org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+    Employee employee = employeeRepository.findById(auth.getName()).get();
+    if(employee.getDepartmentId() == null)
+      throw new IllegalStateException("부서 정보를 찾을 수 없습니다.");
+    return employee.getDepartmentId();
   }
 
   // 현재 직원의 이름 가져오기
   private String getCurrentUsername() {
-    org.springframework.security.core.Authentication auth =
-        org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-    if (auth == null || !auth.isAuthenticated()
-        || auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+    org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null || !auth.isAuthenticated() || auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
       throw new IllegalStateException("로그인이 필요합니다.");
     }
     return auth.getName();
@@ -43,13 +46,13 @@ public class BoardService {
   // 관리자인지 확인
   private boolean isAdmin() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || !authentication.isAuthenticated()
-        || authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+    if (authentication == null || !authentication.isAuthenticated() || authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
       return false;
     }
     Object principal = authentication.getPrincipal();
-    if (principal instanceof com.goodee.corpdesk.employee.Employee) {
-      com.goodee.corpdesk.employee.Employee emp = (com.goodee.corpdesk.employee.Employee) principal;
+    if (principal instanceof EmployeeSecurityDTO) {
+      EmployeeSecurityDTO emp = (EmployeeSecurityDTO) principal;
+      
       // 1 = 관리자, 2 = 직원
       Integer roleId = emp.getRoleId();
       return roleId != null && (roleId == 1 || roleId == 2);
