@@ -37,6 +37,7 @@ btnActions.forEach((btn) => {
   btn.addEventListener('click', function () {
 
     switch (btn.id) {
+
       case 'btnDelete':
         const message = '정말 삭제하시겠습니까?';
 
@@ -52,6 +53,7 @@ btnActions.forEach((btn) => {
         }
 
         break;
+
       case 'btnApproval':
         fetch(`/approval/${approvalId}`, {
           method: 'PATCH',
@@ -73,6 +75,7 @@ btnActions.forEach((btn) => {
         ;
 
         break;
+
       case 'btnReject':
         fetch(`/approval/${approvalId}`, {
           method: 'PATCH',
@@ -94,6 +97,7 @@ btnActions.forEach((btn) => {
         ;
 
         break;
+
       default:
     }
 
