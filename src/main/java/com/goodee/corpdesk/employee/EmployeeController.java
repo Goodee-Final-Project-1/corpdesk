@@ -434,26 +434,27 @@ public class EmployeeController {
 
     @PostMapping("/delete/{username}")
     @ResponseBody
-    public Map<String, Object> deleteEmployee(@PathVariable("username") String username) {
+    public Map<String, Object> deleteEmployee(
+            @PathVariable("username") String username,
+            @RequestParam(value = "lastWorkingDay", required = false)
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+            LocalDate lastWorkingDay) {
+
         Map<String, Object> result = new HashMap<>();
         try {
-            log.info("삭제 요청 username={}", username);
-            employeeService.deactivateEmployee(username);
-
+            employeeService.deactivateEmployee(username, lastWorkingDay); // ▼ 변경된 서비스 호출
             result.put("success", true);
             result.put("message", "삭제(비활성화)되었습니다.");
         } catch (IllegalStateException e) {
-            // ✅ 서비스에서 퇴사일자 없을 때 던진 예외를 그대로 사용자에게 안내
-            log.warn("삭제 불가(퇴사일자 없음): {}", e.getMessage());
             result.put("success", false);
-            result.put("message", e.getMessage()); // "퇴사일자를 먼저 설정해 주세요"
+            result.put("message", e.getMessage());
         } catch (Exception e) {
-            log.error("삭제 실패: {}", e.getMessage(), e);
             result.put("success", false);
             result.put("message", "삭제 중 오류가 발생했습니다.");
         }
         return result;
     }
+
 
 
 

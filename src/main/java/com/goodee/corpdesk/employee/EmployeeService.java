@@ -333,6 +333,42 @@ public class EmployeeService implements UserDetailsService {
         
     }
 
+    @Transactional
+    public void deactivateEmployee(String username, LocalDate maybeLastWorkingDay) {
+        Employee employee = employeeRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
+
+        // 화면에서 보낸 퇴사일자가 있으면 먼저 저장
+        if (maybeLastWorkingDay != null) {
+            employee.setLastWorkingDay(maybeLastWorkingDay);
+            employeeRepository.save(employee); // 즉시 반영
+        }
+
+        // 검사
+        if (employee.getLastWorkingDay() == null) {
+            throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
+        }
+
+        employee.setUseYn(false);
+        employeeRepository.save(employee);
+    }
+
+    
+    @Transactional
+    public void terminateEmployee(String username, LocalDate lastDay) {
+        Employee e = employeeRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
+
+        if (lastDay == null && e.getLastWorkingDay() == null) {
+            throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
+        }
+        if (lastDay != null) {
+            e.setLastWorkingDay(lastDay);
+        }
+        e.setUseYn(false);
+        employeeRepository.save(e);
+    }
+
 
 
     // ---------------------- 기타 기존 메서드 ----------------------
