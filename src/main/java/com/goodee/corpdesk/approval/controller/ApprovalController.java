@@ -12,6 +12,7 @@ import com.goodee.corpdesk.approval.entity.Approval;
 import com.goodee.corpdesk.approval.service.ApprovalFormService;
 import com.goodee.corpdesk.department.service.DepartmentService;
 import com.goodee.corpdesk.employee.EmployeeService;
+import com.goodee.corpdesk.employee.ResEmployeeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -49,6 +50,16 @@ public class ApprovalController {
     @ModelAttribute("approvalPath")
     public String getApprovalPath() {
         return approvalPath;
+    }
+    @ModelAttribute("userDetail")
+    public ResEmployeeDTO getUserDetail(@AuthenticationPrincipal UserDetails userDetails) {
+
+        ResEmployeeDTO userDetail = null;
+        userDetail = employeeService.getFulldetail(userDetails.getUsername());
+        if (userDetail == null) userDetail = new ResEmployeeDTO();
+
+        return userDetail;
+
     }
 
     @Autowired
