@@ -70,7 +70,7 @@ public class Approval extends BaseEntity {
                                 .departmentId(departmentId)
                                 .approvalFormId(approvalFormId)
                                 .approvalContent(approvalContent)
-                                .status(status)
+                                .status(status + "")
                                 .createdAt(getCreatedAt())
                                 .updatedAt(getUpdatedAt())
                                 .build();

@@ -110,8 +110,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 		p.positionName
 	)
 	FROM Employee e
-	JOIN Department d ON e.departmentId = d.departmentId
-	JOIN Position p ON e.positionId = p.positionId
+	LEFT JOIN Department d ON e.departmentId = d.departmentId
+	LEFT JOIN Position p ON e.positionId = p.positionId
 	WHERE e.username = :username
 """)
 	Optional<EmployeeInfoDTO> findByIdWithDept(String username);

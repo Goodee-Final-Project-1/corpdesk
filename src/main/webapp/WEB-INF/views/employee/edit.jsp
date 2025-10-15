@@ -324,6 +324,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
  // 삭제 버튼
     window.deleteEmployee = function(username) {
+	 
+    	const lastWorkingDayInput = document.querySelector('#lastWorkingDay');
+    	  if (lastWorkingDayInput && !lastWorkingDayInput.value) {
+    	    alert('퇴사일자를 먼저 설정해 주세요');
+    	    return;
+    	  }
+	 
+	 
+	 
         if (!confirm("정말 삭제하시겠습니까?")) return;
 
         fetch(`/employee/delete/${username}`, {

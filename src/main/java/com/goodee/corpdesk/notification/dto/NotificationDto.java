@@ -22,5 +22,6 @@ public class NotificationDto {
 	    private Boolean isRead;
 	    private String content;
 	    private LocalDateTime createdAt;
+	    private String title;
 }
 

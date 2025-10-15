@@ -427,6 +427,21 @@ const pond = FilePond.create(filepondEl, {
 const btnSubmits = document.querySelectorAll('.btn-submit');
 btnSubmits.forEach((btn) => {
   btn.addEventListener('click', function () {
+    // 0. 유효성 검사: hidden input 요소의 개수로 결재자 지정 여부 확인
+    // (결재 요청 시에만 검사하며, 임시저장/취소는 검사하지 않음)
+    if (btn.id !== 'tempSave' && btn.id !== 'cancel') {
+      const approverHiddenInputs = document.querySelectorAll(
+          '#approvalContentCommon input[name^="approverDTOList"][name$=".username"]'
+      );
+
+      if (approverHiddenInputs.length === 0) {
+        const message = '결재선을 지정하지 않고 결재를 요청하면 즉시 승인 처리됩니다. 요청을 진행하시겠습니까?';
+
+        if (!confirm(message)) return;
+      }
+    }
+
+
     // 1. 결재 공통내용 가져오기
     const commonForm = document.querySelector('#approvalContentCommon');
     const formData = new FormData(commonForm);
@@ -464,8 +479,10 @@ btnSubmits.forEach((btn) => {
     })
         .then(r => r.json())
         .then(r => {
-            console.log(r);
-//            location.href=`/approval/${r.approvalId}`;
+          console.log(r);
+          console.log(r.approvalId);
+
+          location.href=`/approval/${r.approvalId}`;
         })
     ;
   });
