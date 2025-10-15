@@ -105,9 +105,76 @@ btnActions.forEach((btn) => {
 });
 
 /**
- * json 형태의 결재내용 데이터를 폼에 뿌리기
+ * 인쇄 버튼 클릭 이벤트 (html2canvas -> addImage 방식으로 수정)
  */
+document.getElementById('pdf-btn').addEventListener('click', async function () {
+  const elementToCapture = document.getElementById('pdf-area');
+  const { jsPDF } = window.jspdf;
 
-const form = document.querySelector('#approvalContentByType');
+  // 1. 링크 정보 미리 추출 (html2canvas 캡처 전)
+  const links = [];
+  const linkElements = elementToCapture.querySelectorAll('a');
 
+  // PDF 출력 폭과 HTML 가상 폭 정의
+  const pdfWidth = 190; // PDF 용지 내 폭 (mm)
+  const windowWidth = 800; // HTML 캡처 시 가상 폭 (px)
+  const margin = 10; // 좌우 상하 여백 (mm)
+  const ratio = pdfWidth / windowWidth;
 
+  linkElements.forEach(link => {
+    const rect = link.getBoundingClientRect();
+    const parentRect = elementToCapture.getBoundingClientRect();
+    links.push({
+      x: rect.left - parentRect.left,
+      y: rect.top - parentRect.top,
+      width: rect.width,
+      height: rect.height,
+      url: link.href
+    });
+  });
+
+  // 2. html2canvas로 HTML 영역을 캔버스(이미지)로 캡처
+  const canvas = await html2canvas(elementToCapture, {
+    scale: 2, // 고해상도 캡처를 위해 스케일을 2로 높입니다. (한글 깨짐 방지)
+    width: windowWidth, // 캡처할 영역의 가상 폭을 800px로 설정
+    useCORS: true,
+    allowTaint: true,
+    logging: false,
+    letterRendering: true,
+  });
+
+  // 3. 캡처된 캔버스를 이미지 데이터로 변환 (JPEG 또는 PNG)
+  const imgData = canvas.toDataURL('image/jpeg', 1.0); // JPEG 포맷으로 변환 (품질 1.0)
+
+  // 4. jsPDF 객체 생성
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+    compress: true
+  });
+
+  // A4 사이즈 (210mm x 297mm)
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  // 5. PDF에 캡처된 이미지 추가 (페이지 분할 없이 단일 페이지에 추가)
+  pdf.addImage(imgData, 'JPEG', margin, margin, pdfWidth, pdfHeight);
+
+  // 6. PDF 생성 후 링크 오버레이 추가
+  links.forEach(link => {
+    // HTML 좌표를 PDF 좌표(mm)로 변환하고 여백을 더합니다.
+    const pdfX = (link.x * ratio) + margin;
+    const pdfY = (link.y * ratio) + margin;
+    const linkPdfWidth = link.width * ratio;
+    const linkPdfHeight = link.height * ratio;
+
+    // PDF에 링크 영역을 추가합니다.
+    pdf.link(pdfX, pdfY, linkPdfWidth, linkPdfHeight, { url: link.url });
+  });
+
+  // 7. 미리보기 기능
+  const blob = pdf.output('blob');
+  const blobUrl = URL.createObjectURL(blob);
+  window.open(blobUrl, 'pdfPreview', 'width=800,height=700,resizable=yes,scrollbars=yes');
+
+});
