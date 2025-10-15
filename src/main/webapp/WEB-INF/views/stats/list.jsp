@@ -21,7 +21,6 @@
 
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
 <!-- 내용 시작 -->
-<p>여기에 내용 추가</p>
 
 <div class="card card-default">
 	<div class="card-body">
