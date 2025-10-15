@@ -1,5 +1,27 @@
 package com.goodee.corpdesk.employee;
 
+import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.attendance.service.AttendanceService;
+import com.goodee.corpdesk.department.entity.Department;
+import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
+import com.goodee.corpdesk.file.FileManager;
+import com.goodee.corpdesk.file.dto.FileDTO;
+import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
+import com.goodee.corpdesk.position.entity.Position;
+import com.goodee.corpdesk.position.repository.PositionRepository;
+import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
+import com.goodee.corpdesk.salary.entity.Allowance;
+import com.goodee.corpdesk.salary.entity.Deduction;
+import com.goodee.corpdesk.salary.entity.SalaryPayment;
+import com.goodee.corpdesk.salary.repository.AllowanceRepository;
+import com.goodee.corpdesk.salary.repository.DeductionRepository;
+import com.goodee.corpdesk.salary.repository.SalaryRepository;
+import com.goodee.corpdesk.vacation.VacationManager;
+import com.goodee.corpdesk.vacation.entity.Vacation;
+import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -11,6 +33,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +46,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.time.LocalDate;
+import java.util.*;
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
@@ -59,6 +86,12 @@ public class EmployeeService implements UserDetailsService {
     private DepartmentRepository departmentRepository;
     @Autowired
     private PositionRepository positionRepository;
+	@Autowired
+	private SalaryRepository salaryRepository;
+	@Autowired
+	private AllowanceRepository allowanceRepository;
+	@Autowired
+	private DeductionRepository deductionRepository;
 
     @Autowired
     private RoleService roleService;
@@ -350,6 +383,30 @@ public class EmployeeService implements UserDetailsService {
         return map;
     }
 
+	public Page<EmployeeSalaryDTO> getSalaryList(String username, Pageable pageable) {
+		return salaryRepository.findAllEmployeeSalaryByUsername(username, pageable);
+	}
+
+	public Map<String, Object> getSalaryDetail(String username, Long paymentId) {
+		Map<String, Object> map = new HashMap<>();
+		SalaryPayment salaryPayment = salaryRepository.findByUsernameAndPaymentId(username, paymentId).get();
+
+		if (salaryPayment == null) return null;
+
+		List<Allowance> allowanceList = allowanceRepository.findAllByPaymentId(salaryPayment.getPaymentId());
+		List<Deduction> deductionList = deductionRepository.findAllByPaymentId(salaryPayment.getPaymentId());
+
+		EmployeeInfoDTO employee = employeeRepository.findByIdWithDept(salaryPayment.getUsername()).get();
+
+		map.put("salaryPayment", salaryPayment);
+		map.put("allowanceList", allowanceList);
+		map.put("deductionList", deductionList);
+
+		map.put("employee", employee);
+
+		return map;
+	}
+
 	public Employee updatePassword(Employee employee, BindingResult bindingResult) {
 		Optional<Employee> optional = employeeRepository.findById(employee.getUsername());
 		Employee origin = optional.get();
@@ -392,5 +449,4 @@ public class EmployeeService implements UserDetailsService {
     public ResEmployeeDTO getFulldetail(String username) {
         return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
-
 }

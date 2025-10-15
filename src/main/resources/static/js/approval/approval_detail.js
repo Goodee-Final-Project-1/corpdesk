@@ -1,10 +1,34 @@
 const params = new URLSearchParams(window.location.search);
 
 /**
- * 수정/삭제 혹은 승인/반려 버튼을 눌렀을 때 혹은 취소 버튼을 눌렀을 때
+ *
+ */
+
+const approvalFormNames = document.querySelectorAll('.approval-form-name');
+const approvalTitle = document.querySelector('#approvalTitle');
+
+let formId = 0;
+
+approvalFormNames.forEach((name) => {
+  name.addEventListener('click', function () {
+    approvalTitle.textContent = name.textContent;
+
+    formId = name.getAttribute('data-approval-form-id');
+  });
+});
+
+const formCheckBtn = document.querySelector('#formCheck');
+const departmentIdEl = document.querySelector('#departmentId');
+
+formCheckBtn.addEventListener('click', function () {
+  if(formId === 0) alert('결재 양식을 선택해 주세요.')
+  else location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}`;
+});
+
+/**
+ * 수정/삭제 혹은 승인/반려 버튼을 눌렀을 때
  */
 const btnActions = document.querySelectorAll('.btn-action');
-const btnCancel = document.querySelector('#btnCancel');
 const approvalId = btnActions[0].parentElement.getAttribute('data-approval-id');
 const approverId = document.querySelector('#btnBox').getAttribute('data-approver-id');
 console.log(approverId);
@@ -13,20 +37,19 @@ btnActions.forEach((btn) => {
   btn.addEventListener('click', function () {
 
     switch (btn.id) {
-      case 'btnEdit':
-        break;
       case 'btnDelete':
-        fetch(`/approval/${approvalId}`, {
-          method: "DELETE"
-        })
-            .then(r => r.text())
-            .then(r => {
-                console.log(r)
+        const message = '정말 삭제하시겠습니까?';
 
-                alert('삭제되었습니다.');
-                location.href = `/approval/list?username=${username}`;
-            })
-        ;
+        if(confirm(message)) {
+          fetch(`/approval/${approvalId}`, {
+            method: "DELETE"
+          })
+              .then(r => r.text())
+              .then(r => {
+                  alert('삭제되었습니다.');
+                  history.back();
+              });
+        }
 
         break;
       case 'btnApproval':
@@ -45,7 +68,7 @@ btnActions.forEach((btn) => {
                 console.log(r)
 
                 alert("승인하였습니다.");
-                location.href = `/approval/${approvalId}?username=${username}`;
+                location.href = `/approval/${approvalId}`;
             })
         ;
 
@@ -66,7 +89,7 @@ btnActions.forEach((btn) => {
                 console.log(r)
 
                 alert("반려하였습니다.");
-                location.href = `/approval/${approvalId}?username=${username}`;
+                location.href = `/approval/${approvalId}`;
             })
         ;
 
@@ -75,10 +98,6 @@ btnActions.forEach((btn) => {
     }
 
   });
-});
-
-btnCancel.addEventListener('click', function () {
-    location.href=`/approval/list?username=${username}`;
 });
 
 /**

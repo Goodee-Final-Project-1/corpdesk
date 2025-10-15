@@ -39,6 +39,7 @@ public class Notification extends BaseEntity{
 	    @Column(nullable = false)
 	    private Boolean isRead = false;
 	    private String content;
+	    private String title;
 	    
 	 public NotificationDto ChangeToDto() {
 		 return NotificationDto.builder()
@@ -49,6 +50,7 @@ public class Notification extends BaseEntity{
 		 			 .relatedId(relatedId)
 		 			 .content(content)
 		 			 .createdAt(getCreatedAt())
+		 			 .title(title)
 		 			 .build();
 		 
 	 }

@@ -1,9 +1,5 @@
 package com.goodee.corpdesk.employee;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
@@ -104,8 +102,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 		p.positionName
 	)
 	FROM Employee e
-	JOIN Department d ON e.departmentId = d.departmentId
-	JOIN Position p ON e.positionId = p.positionId
+	LEFT JOIN Department d ON e.departmentId = d.departmentId
+	LEFT JOIN Position p ON e.positionId = p.positionId
 	WHERE e.username = :username
 """)
 	Optional<EmployeeInfoDTO> findByIdWithDept(String username);
