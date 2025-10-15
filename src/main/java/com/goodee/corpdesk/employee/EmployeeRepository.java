@@ -157,6 +157,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	LEFT JOIN Role r ON e.roleId = r.roleId
 	WHERE e.username = :username
 """)
-	Optional<EmployeeSecurityDTO> findEmployeeSecurityByUsername(@Param("username") String username);
+	    Optional<EmployeeSecurityDTO> findEmployeeSecurityByUsername(@Param("username") String username);
 	
-}
+	    List<Employee> findByDepartmentIdAndPositionId(Integer departmentId, Integer positionId);
+		
+	}

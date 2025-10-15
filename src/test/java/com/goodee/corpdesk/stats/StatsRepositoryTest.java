@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalTime;
 
 @SpringBootTest
 class StatsRepositoryTest {
@@ -36,7 +37,7 @@ class StatsRepositoryTest {
 
 	@Test
 	void countAllAttendance() {
-		List<Map<String, Object>> list = statsRepository.countAllAttendance(LocalDate.parse("2025-10-01"), LocalDate.parse("2025-11-01"));
+		List<Map<String, Object>> list = statsRepository.countAllAttendance(LocalDate.parse("2025-10-01"), LocalDate.parse("2025-11-01"), null, null, LocalTime.of(9, 0));
 		System.out.println("=======================================");
 		System.out.println(list);
 		Assertions.assertNotEquals(0, list.size());
@@ -44,7 +45,7 @@ class StatsRepositoryTest {
 
 	@Test
 	void countAllWorkHours() {
-		List<Map<String, Object>> list = statsRepository.countAllWorkHours(LocalDate.parse("2025-10-01"), LocalDate.parse("2025-11-01"));
+		List<Map<String, Object>> list = statsRepository.countAllWorkHours(LocalDate.parse("2025-10-01"), LocalDate.parse("2025-11-01"), null, null);
 		System.out.println("=======================================");
 		System.out.println(list);
 		Assertions.assertNotEquals(0, list.size());
