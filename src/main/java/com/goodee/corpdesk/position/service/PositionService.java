@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.position.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,8 @@ import com.goodee.corpdesk.position.dto.PositionDTO;
 import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,6 +26,11 @@ public class PositionService {
 
     
     private final PositionRepository positionRepository;
+    
+    
+    
+    
+    
     
     public void deleteOneAndReparent(Integer positionId) {
         Position target = positionRepository.findById(positionId)
@@ -107,17 +116,57 @@ public class PositionService {
     }
     
  // 직위 목록 + 사용 사원 수 + 검색
+ // 직위 목록 + 사용 사원 수 + 검색
     public List<PositionDTO> getAllWithEmployeeCount(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return positionRepository.findAllWithEmployeeCount();
-        } else {
-            return positionRepository.findAllWithEmployeeCountByKeyword(keyword.trim());
+        // 1) 전체 목록 or 검색 결과 로딩 (기존 그대로)
+        final List<PositionDTO> all = (keyword == null || keyword.trim().isEmpty())
+                ? positionRepository.findAllWithEmployeeCount()
+                : positionRepository.findAllWithEmployeeCountByKeyword(keyword.trim());
+
+        // 검색 모드면 기존 정렬 유지(평면 목록)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return all;
         }
+
+        // 2) 루트 찾기 (parentPositionId == null) — 없으면 그대로 반환
+        final PositionDTO root = all.stream()
+                .filter(dto -> dto.getParentPositionId() == null)
+                .findFirst()
+                .orElse(null);
+        if (root == null) return all;
+
+        // 3) parentId -> child DTO 매핑 (체인 구조라 0 또는 1개)
+        Map<Integer, PositionDTO> childByParent = new HashMap<>();
+        for (PositionDTO dto : all) {
+            Integer parentId = dto.getParentPositionId();
+            if (parentId != null) childByParent.put(parentId, dto);
+        }
+
+        // 4) 루트부터 아래로 순회하며 순서 재구성
+        List<PositionDTO> ordered = new ArrayList<>(all.size());
+        PositionDTO cur = root;
+        // 안전장치: 순환 방지 (이상 데이터 대비)
+        int guard = 0, limit = all.size() + 2;
+
+        while (cur != null && guard++ < limit) {
+            ordered.add(cur);
+            cur = childByParent.get(cur.getPositionId()); // 체인 구조상 최대 1명
+        }
+
+        // 5) 혹시 고립 노드가 있으면(데이터 꼬임 대비) 뒤에 덧붙이기
+        if (ordered.size() != all.size()) {
+            // 아직 미포함된 것만 추가
+            var remaining = all.stream()
+                    .filter(dto -> ordered.stream().noneMatch(o -> o.getPositionId().equals(dto.getPositionId())))
+                    .collect(Collectors.toList());
+            ordered.addAll(remaining);
+        }
+
+        return ordered;
     }
 
     //  직위 생성: save 사용
     public void create(String positionName, Integer parentPositionId) {
-        // 1) 입력 검증
         String trimmed = (positionName == null) ? null : positionName.strip();
         if (trimmed == null || trimmed.isEmpty()) {
             throw new IllegalArgumentException("직위명은 필수입니다.");
@@ -125,37 +174,36 @@ public class PositionService {
         if (trimmed.length() > 50) {
             throw new IllegalArgumentException("직위명은 50자 이내여야 합니다.");
         }
-
-        // 2) 중복(활성) 확인 — 필요시 정규화 키 사용
         if (positionRepository.existsByPositionNameAndUseYnTrue(trimmed)) {
             throw new IllegalArgumentException("이미 존재하는 직위명입니다: " + trimmed);
         }
 
-        // 3) 루트 단 하나 정책
-        if (parentPositionId == null &&
-            positionRepository.existsByParentPositionIdIsNullAndUseYnTrue()) {
-            throw new IllegalStateException("최상위 직위는 하나만 생성할 수 있습니다.");
+        // ✅ 루트 생성 요청이면: 새 루트 만들고 기존 루트(있다면) 강등
+        if (parentPositionId == null) {
+            createNewRootAndDemoteOld(trimmed);
+            return;
         }
 
-        // 4) 상위 직위 제약
-        if (parentPositionId != null &&
-            positionRepository.existsByParentPositionIdAndUseYnTrue(parentPositionId)) {
-            throw new IllegalArgumentException("해당 상위 직위에는 이미 자식 직위가 존재합니다.");
-        }
-
-        // 5) 상위 직위 존재/활성 확인
-        if (parentPositionId != null &&
-            positionRepository.findByPositionIdAndUseYnTrue(parentPositionId).isEmpty()) {
+        // 상위 직위 존재/활성 확인
+        if (positionRepository.findByPositionIdAndUseYnTrue(parentPositionId).isEmpty()) {
             throw new IllegalArgumentException("상위 직위가 존재하지 않거나 비활성 상태입니다: " + parentPositionId);
         }
 
-        // 6) 저장
+        // 상위에 이미 자식이 있으면 '끼워넣기'
+        if (positionRepository.existsByParentPositionIdAndUseYnTrue(parentPositionId)) {
+            insertUnderParent(parentPositionId, trimmed);
+            return;
+        }
+
+        // 평범한 생성
         Position p = new Position();
         p.setPositionName(trimmed);
         p.setParentPositionId(parentPositionId);
         p.setUseYn(true);
         positionRepository.save(p);
     }
+
+
 
 
     
@@ -227,5 +275,80 @@ public class PositionService {
         p.setParentPositionId(newParentId);
     }
 
+    @PersistenceContext
+    private EntityManager em; // flush용
+
+    /**
+     * 체인 구조에서 parent 밑에 새 직위를 끼워넣는다.
+     * - 부모 parent 아래 기존 자식(있다면) 잠시 NULL로 떼어냄
+     * - 새 직위를 parent의 자식으로 저장
+     * - 기존 자식을 새 직위의 자식으로 재부모지정
+     * @return 새 직위 ID
+     */
+    public Integer insertUnderParent(Integer parentId, String newName) {
+        if (parentId == null) {
+            throw new IllegalArgumentException("루트 바로 아래 끼워넣기는 금지(정책)입니다.");
+        }
+
+        positionRepository.findByPositionIdAndUseYnTrue(parentId)
+            .orElseThrow(() -> new IllegalArgumentException("상위 직위가 존재하지 않거나 비활성입니다: " + parentId));
+
+        // 1) 기존 단일 자식 찾아두기
+        var existingChildOpt = positionRepository.findByParentPositionIdAndUseYnTrue(parentId);
+
+        // 2) 유니크 충돌 방지: 기존 자식이 있으면 먼저 parent=null로 떼어냄
+        existingChildOpt.ifPresent(child -> {
+            positionRepository.setParent(child.getPositionId(), null);
+        });
+        em.flush();
+
+        // 3) 새 직위 생성 (부모 = parentId)
+        Position p = new Position();
+        p.setPositionName(newName.strip());
+        p.setParentPositionId(parentId);
+        p.setUseYn(true);
+        positionRepository.save(p);
+        em.flush();
+        Integer newId = p.getPositionId();
+
+        // 4) 기존 자식이 있었다면 새 직위 밑으로 연결
+        existingChildOpt.ifPresent(child -> {
+            positionRepository.setParent(child.getPositionId(), newId);
+        });
+
+        return newId;
+    }
+
+    public Integer createNewRootAndDemoteOld(String newName) {
+        String name = (newName == null) ? null : newName.strip();
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("직위명은 필수입니다.");
+        }
+
+        // 현재 활성 루트 조회 (※ Repository에 아래 메서드 필요: findByParentPositionIdIsNullAndUseYnTrue)
+        List<Position> roots = positionRepository.findByParentPositionIdIsNullAndUseYnTrue();
+        if (roots.size() > 1) {
+            throw new IllegalStateException("활성 최상위 직위가 2개 이상입니다. 데이터 정합성을 먼저 맞춰주세요.");
+        }
+        Position oldRoot = roots.isEmpty() ? null : roots.get(0);
+
+        // 새 루트 생성
+        Position newRoot = new Position();
+        newRoot.setPositionName(name);
+        newRoot.setParentPositionId(null);
+        newRoot.setUseYn(true);
+        positionRepository.save(newRoot);
+        em.flush(); // ID 확보
+
+        Integer newRootId = newRoot.getPositionId();
+
+        // 기존 루트가 있으면 새 루트의 자식으로 강등
+        if (oldRoot != null) {
+            // 부모당 자식 1개 정책에 위배 없음(새 루트는 방금 생성되어 자식 없음)
+            positionRepository.setParent(oldRoot.getPositionId(), newRootId);
+        }
+
+        return newRootId;
+    }
     
 }

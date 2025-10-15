@@ -214,13 +214,10 @@ public class EmployeeController {
                     employee.setName(getCellValue(row, 0));
                     String username = getCellValue(row, 1);
                     employee.setUsername(username);
-                    String mobilePhone = getCellValue(row, 4);
+                    
+                    String mobilePhone = getCellValue(row, 4).replaceAll("[^0-9]", "");
                     employee.setMobilePhone(mobilePhone);
-                    String rawPassword = getCellValue(row, 7);
-                    if (rawPassword.isEmpty()) {
-                        rawPassword = "1234";
-                    }
-                    employee.setPassword(passwordEncoder.encode(rawPassword));
+                    
                     employee.setHireDate(parseDate(getCellValue(row, 5)));
                     employee.setLastWorkingDay(parseDate(getCellValue(row, 6)));
                     
@@ -254,7 +251,8 @@ public class EmployeeController {
                     }
 
                     // 3. 중복이 없을 경우에만 DB 저장
-                    employeeRepository.save(employee.toEntity());
+                    Employee entity = employee.toEntity();
+                    employeeService.addEmployee(entity);
                     successCount++;
                     
                 } catch (Exception e) {

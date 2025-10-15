@@ -114,27 +114,35 @@ public class EmployeeService implements UserDetailsService {
         return employeeFileRepository.findByUsername(username);
     }
 
-    // 직원 등록
+ // 직원 등록
     public Employee addEmployee(Employee employee) throws Exception {
-    	// 직원 등록
-        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+        // 0) 이미 존재하면 생성 금지 (신규 전용 보장)
+        if (employeeRepository.existsById(employee.getUsername())) {
+            throw new IllegalStateException("이미 존재하는 직원입니다: " + employee.getUsername());
+        }
+
+        // 1) 비밀번호 기본값 보장 (엑셀에서 비번 열 제거했을 때 대비)
+        String raw = employee.getPassword();
+        if (raw == null || raw.isBlank()) {
+            raw = "1234"; // 정책에 맞게 기본 비번 지정 (원하면 랜덤 생성으로 대체)
+        }
+        employee.setPassword(passwordEncoder.encode(raw));
+
+        // 2) 공통 생성 로직
         employee.setUseYn(true);
         roleService.assignRole(employee);
         Employee newEmployee = employeeRepository.save(employee);
 
-        // 추가) 직원 등록 성공시 휴가 테이블에 insert
+        // 3) 휴가 테이블 초기화
         Vacation newVacation = new Vacation();
         newVacation.setUsername(employee.getUsername());
 
-        // 직원 등록시 입사일 정보도 같이 입력됐다면 그 기준으로 총발생연차 계산
-        // 입력되지 않았다면 총발생연차 0으로 설정
         int totalVacation = 0;
         LocalDate hireDate = employee.getHireDate();
-        if(hireDate != null) {
+        if (hireDate != null) {
             totalVacation = vacationManager.calTotalVacation(hireDate);
         }
         newVacation.setTotalVacation(totalVacation);
-
         newVacation.setRemainingVacation(totalVacation);
         newVacation.setUsedVacation(0);
 
@@ -142,6 +150,7 @@ public class EmployeeService implements UserDetailsService {
 
         return newEmployee;
     }
+
 
     public List<EmployeeListDTO> getActiveEmployeesForList() {
         List<Employee> employees = employeeRepository.findAllByUseYnTrue();
@@ -151,7 +160,7 @@ public class EmployeeService implements UserDetailsService {
             // 부서명
         	String deptName = "-";
         	if (emp.getDepartmentId() != null) {
-        	    deptName = departmentRepository.findById(emp.getDepartmentId())
+        	    deptName = departmentRepository.findByDepartmentIdAndUseYnTrue(emp.getDepartmentId())
         	                  .map(Department::getDepartmentName)
         	                  .orElse("-");
         	}
@@ -330,7 +339,7 @@ public class EmployeeService implements UserDetailsService {
     public Map<String, Object> detail(String username) {
         Employee employee = employeeRepository.findById(username).orElseThrow();
 		Department department = null;
-		if(employee.getDepartmentId() != null) department = departmentRepository.findById(employee.getDepartmentId()).orElse(null);
+		if(employee.getDepartmentId() != null) department = departmentRepository.findByDepartmentIdAndUseYnTrue(employee.getDepartmentId()).orElse(null);
         Position position = null;
 		if(employee.getPositionId() != null) position = positionRepository.findById(employee.getPositionId()).orElse(null);
 
