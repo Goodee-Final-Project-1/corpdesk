@@ -165,7 +165,7 @@ create table deduction
 
 create table department
 (
-    department_id        int              not null
+    department_id        int              auto_increment
         primary key,
     parent_department_id int              null,
     use_yn               bit default b'1' null,
@@ -193,7 +193,6 @@ create table employee
     username                varchar(20)         not null
         primary key,
     address                 varchar(255)        null,
-    department_name         varchar(255)        null,
     direct_phone            varchar(255)        null,
     employee_type           varchar(255)        null,
     english_name            varchar(255)        null,
@@ -202,7 +201,6 @@ create table employee
     name                    varchar(255)        null,
     nationality             varchar(255)        null,
     password                varchar(255)        not null,
-    position_name           varchar(255)        null,
     resident_number         varchar(255)        null,
     responsibility          varchar(255)        null,
     visa_status             varchar(255)        null,
@@ -348,8 +346,20 @@ create table vacation_type
     vacation_type_name varchar(255)     null
 );
 
-
-
+CREATE TABLE `notification` (
+  `notification_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `use_yn` bit(1) DEFAULT b'1',
+  `is_read` bit(1) NOT NULL,
+  `notification_type` varchar(255) NOT NULL,
+  `related_id` bigint(20) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `content` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`notification_id`)
+);
 
 
 
