@@ -96,9 +96,7 @@
         <!-- 검색창 -->
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="searchUserInput" placeholder="이름 검색">
-          <div class="input-group-append">
-            <button class="btn btn-outline-secondary namesearchBtn" type="button">검색</button>
-          </div>
+          
         </div>
 
         <!-- 사원 목록 (스크롤 가능) -->
