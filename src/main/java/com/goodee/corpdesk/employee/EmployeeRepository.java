@@ -1,9 +1,5 @@
 package com.goodee.corpdesk.employee;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import org.springframework.data.domain.Page;
@@ -15,7 +11,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -160,4 +158,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	WHERE e.username = :username
 """)
 	Optional<EmployeeSecurityDTO> findEmployeeSecurityByUsername(@Param("username") String username);
+
+	Optional<EmailOnly> findExternalEmailByUsername(String username);
 }

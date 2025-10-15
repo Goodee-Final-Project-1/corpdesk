@@ -1,18 +1,12 @@
 package com.goodee.corpdesk.employee;
 
-import java.io.File;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.email.EmailService;
+import com.goodee.corpdesk.email.SendDTO;
+import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
 import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import com.goodee.corpdesk.file.FileManager;
 import com.goodee.corpdesk.file.dto.FileDTO;
@@ -36,20 +30,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.service.AttendanceService;
-import com.goodee.corpdesk.department.entity.Department;
-import com.goodee.corpdesk.department.repository.DepartmentRepository;
-import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
-import com.goodee.corpdesk.file.FileManager;
-import com.goodee.corpdesk.file.dto.FileDTO;
-import com.goodee.corpdesk.file.entity.EmployeeFile;
-import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
-import com.goodee.corpdesk.position.entity.Position;
-import com.goodee.corpdesk.position.repository.PositionRepository;
-import com.goodee.corpdesk.vacation.VacationManager;
-import com.goodee.corpdesk.vacation.entity.Vacation;
-import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.*;
@@ -90,6 +70,9 @@ public class EmployeeService implements UserDetailsService {
     private VacationRepository vacationRepository;
     @Autowired
     private VacationManager vacationManager;
+
+	@Autowired
+	private EmailService emailService;
 
     // ---------------------- Controller용 Service 메서드 ----------------------
 
@@ -387,6 +370,33 @@ public class EmployeeService implements UserDetailsService {
         origin.setEncodedEmailPassword(aesBytesEncryptor.encrypt(employee.getExternalEmailPassword().getBytes()));
         return employeeRepository.save(origin);
     }
+
+	public String getEmail(String username) {
+		EmailOnly result = employeeRepository.findExternalEmailByUsername(username).get();
+
+		return result.getExternalEmail();
+	}
+
+	public String resetPassword(String username) throws Exception {
+		Employee employee = employeeRepository.findById(username).orElseThrow();
+
+		SendDTO sendDTO = new SendDTO();
+		sendDTO.setUser(username);
+		sendDTO.setTo(employee.getExternalEmail());
+		sendDTO.setSubject("Corpdesk 임시 비밀번호");
+
+		String tempPassword = UUID.randomUUID().toString()
+				.replace("-", "").substring(0, 10);
+
+		String encoded = passwordEncoder.encode(tempPassword);
+		employee.setPassword(encoded);
+
+		sendDTO.setText("Corpdesk 임시 비밀번호: " + tempPassword);
+
+		emailService.sendMail(sendDTO);
+
+		return "success";
+	}
 
     public ResEmployeeDTO getFulldetail(String username) {
         return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
