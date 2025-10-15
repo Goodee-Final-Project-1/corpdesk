@@ -68,15 +68,15 @@ participantListLi.forEach(l => {
 
 })
 //초대 할 사람이름으로 검색
-const namesearchBtn = document.querySelector(".namesearchBtn")
-namesearchBtn.addEventListener("click", () => {
+const invateUserInput = document.getElementById("searchUserInput");
+invateUserInput.addEventListener("input", () => {
 	const searchUserInputValue = document.getElementById("searchUserInput").value.trim();
 	const participantList = document.getElementById("participantList")
 	const participantLi = participantList.querySelectorAll("li");
 
 	participantLi.forEach(li => {
 		const employeeName = li.querySelector(".employeeName").textContent.trim();
-		if (searchUserInputValue == "" || employeeName == searchUserInputValue) {
+		if (searchUserInputValue == "" || employeeName.includes(searchUserInputValue)) {
 			li.classList.remove("hiddenSearch");
 
 		} else {
