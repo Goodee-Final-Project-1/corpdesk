@@ -205,6 +205,9 @@ create table employee
     responsibility          varchar(255)        null,
     visa_status             varchar(255)        null,
     encoded_email_password  varbinary(255)      null,
+    updated_at  datetime(6)      null,
+    created_at  datetime(6)      null,
+    modified_by varchar(255)     null
     constraint UK76jarv83fdnjla445iwiq23nh
         unique (mobile_phone)
 );
