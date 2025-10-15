@@ -12,6 +12,9 @@ stompClient.connect({}, function(frame) {
 			}
 
         }
+		if(notification.notificationType=='approval'){
+			appendApprovalNotification(notification);
+		}
 		
         
     })
@@ -82,7 +85,7 @@ function formatTime(time) {
   const diffHour = Math.floor(diffMin / 60);
   if (diffHour < 24) return diffHour + "시간 전";
 
-  return date.toLocaleDateString("ko-KR", {
+  return date.toLocaleString("ko-KR", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -154,10 +157,10 @@ function appendApprovalNotification(notification){
 	   	 <i class="mdi mdi-bell"></i>
 	   </div>
 	   <div class="media-body">
-	 	 <span class="title mb-0">Add request</span>
+	 	 <span class="title mb-0">${notification.title}</span>
 	  	 <span class="discribe">${notification.content}</span>
       	 <span class="time">
-       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}"></time>...
+       		  <time class="notificationTime" data-notificationTime="${notification.createdAt}">${formatTime(notification.createdAt)}</time>
       	 </span>
 	   </div>
 	 `;
@@ -181,3 +184,44 @@ function appendApprovalNotification(notification){
 	 approvalCount.textContent = "결재 (" + newNoti + ")";
 	 approvalCount.setAttribute("data-count", newNoti);
 }
+
+const approvalTab = document.getElementById("approval");
+approvalTab.addEventListener("click",(e)=>{
+	const notificationOne = e.target.closest('.approvalNotification');
+	if(!notificationOne)return;
+	const approvalId = notificationOne.getAttribute("data-approvalId");
+	fetch("/notification/read/" + approvalId, {
+					method: "POST"
+				}).then(()=>{
+					location.href=`/approval/${approvalId}`;
+				});
+	
+
+})
+
+const msgAllread = document.querySelector(".mark-all-msg-read");
+msgAllread.addEventListener("click",()=>{
+	const msgAll = document.querySelectorAll(".messageNotification");
+	msgAll.forEach(el=>{
+		el.remove();
+	})
+	 // 알림 아이콘 위 숫자 변경
+	const allCount = document.querySelector(".all-count");
+	const allCountData = parseInt(allCount.getAttribute("data-allCount") || "0", 10);
+	const removedCount = msgAll.length;
+	// 남은 개수 계산
+	const newAllCount = allCountData - removedCount;
+	allCount.textContent = newAllCount > 0 ? newAllCount : "";
+	allCount.setAttribute("data-allCount", newAllCount);
+
+	// 메시지 탭 숫자 변경
+	const messageCount = document.querySelector(".message-count");
+	const messageContentData = parseInt(messageCount.getAttribute("data-count") || "0", 10);
+
+	messageCount.textContent = "메시지 (0)";
+	messageCount.setAttribute("data-count", '0');
+	fetch("/notification/MsgReadAll", {
+	  method: "POST",
+	  headers: { "Content-Type": "application/json" },
+	})
+})

@@ -249,24 +249,46 @@ public class ChatRoomService {
 			chatroom.setChatRoomType(roomdata.getChatRoomType());
 			chatroom = chatRoomRepository.save(chatroom);
 			
-			//사용자 저장
-			chatParticipant.setChatRoomId(chatroom.getChatRoomId());
-			chatParticipant.setEmployeeUsername(principal.getName());
-			chatParticipant.setUseYn(true);
-			chatParticipantRepository.save(chatParticipant);
-			
 			for(String user : roomdata.getUsernames()) {
 				chatParticipant = new ChatParticipant();
 				chatParticipant.setChatRoomId(chatroom.getChatRoomId());
 				chatParticipant.setEmployeeUsername(user);
-				chatParticipant.setUseYn(false);
+				chatParticipant.setUseYn(true);
 				chatParticipantRepository.save(chatParticipant);
 			}
+			//사용자 저장
+			chatParticipant = new ChatParticipant();
+			chatParticipant.setChatRoomId(chatroom.getChatRoomId());
+			chatParticipant.setEmployeeUsername(principal.getName());
+			chatParticipant.setUseYn(true);
+			chatParticipantRepository.save(chatParticipant);
+			chatParticipantRepository.flush();
+			
+			
+			Long roomId = chatroom.getChatRoomId();
+			ChatMessage msg = new ChatMessage();
+		    msg.setChatRoomId(roomId);
+		    msg.setMessageType("create");
+		    msg.setMessageContent("새로운 채팅방이 생성되었습니다.");
+		    msg.setEmployeeUsername(principal.getName());
+		    msg.setUseYn(true);
+		    ChatMessageDto saveMsg = chatMessageRepository.save(msg).toChatMessageDto();
+		    saveMsg.setViewName(chatroom.getChatRoomTitle());
+		    saveMsg.setNotificationType("create");
+		    saveMsg.setImgPath("/images/group_profile.png");
+		    
+		    
+		    
+		    
+		    chatParticipantService.updateLastMessage(principal.getName(), roomId);
+		    messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/notifications", saveMsg);
+		    for(String user : roomdata.getUsernames()) {
+		    	notificationService.saveNotification(saveMsg.getMessageId(),"message",user);
+				  messagingTemplate.convertAndSendToUser(user, "/queue/notifications", saveMsg);
+		    }
 			
 		}
-		
 		return chatroom.getChatRoomId();
-		
 	}
 
 
@@ -499,7 +521,7 @@ public class ChatRoomService {
 				contact.setUsername(e.getUsername());
 				Optional<EmployeeFile> empF = employeeService.getEmployeeFileByUsername(e.getUsername());
 				if(empF.isPresent()) {
-					contact.setImgPath(empF.get().getSaveName()+"."+empF.get().getExtension());				
+					contact.setImgPath("/files/profile/"+empF.get().getSaveName()+"."+empF.get().getExtension());				
 				}else {
 					contact.setImgPath("/images/default_profile.jpg");
 				}

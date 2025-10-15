@@ -30,6 +30,9 @@ import com.goodee.corpdesk.vacation.repository.VacationRepository;
 
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -84,7 +87,7 @@ public class ApprovalService {
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
 	// Exception: approval 혹은 approval의 조회 결과가 없거나 insert 실패
 	public ResApprovalDTO createApproval(ReqApprovalDTO reqApprovalDTO, MultipartFile[] files, String modifiedBy) throws Exception {
-		// 1. 결재 내용에 insert
+        // 1. 결재 내용에 insert
 		Approval approval = reqApprovalDTO.toApprovalEntity();
 		approval.setModifiedBy(modifiedBy);
 		approval = approvalRepository.save(approval); // 조회 결과가 없다면 예외가 터지고 롤백됨
@@ -109,8 +112,16 @@ public class ApprovalService {
         }
 
 		// 3. 결재자에 insert
-        // 결재자 정보가 없다면 바로 return
-        if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) return resApprovalDTO;
+        // 결재자 정보가 없다면
+        // - 임시저장인 경우 -> 바로 return
+        // - 결재요청인 경우 -> 승인 상태로 처리 후 return
+        if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) {
+            if(!"T".equalsIgnoreCase(reqApprovalDTO.getStatus() + "")) approval.setStatus('Y');
+
+            resApprovalDTO.setApprovalId(approval.getApprovalId());
+
+            return resApprovalDTO;
+        }
 		for (ApproverDTO approverDTO : reqApprovalDTO.getApproverDTOList()) {
 			Approver approver = approverDTO.toEntity();
 			approver.setApprovalId(approval.getApprovalId());
@@ -119,13 +130,13 @@ public class ApprovalService {
 			// 만약 승인 순서가 1이 아니면 use_yn값을 false로 하여 insert
 			if(approver.getApprovalOrder() != 1) {approver.setUseYn(false);
 			}else {
-				Notification n = notificationService.saveApprovalNotification(approval.getApprovalId(),
-						"approval", "새로운 결재 요청이 있습니다.",approver.getUsername());
-				messagingTemplate.convertAndSendToUser(approver.getUsername(), "/queue/notifications",n );
+				notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),"approval", "새로운 결재 요청이 있습니다.",approver.getUsername());
 			}
 			approverRepository.save(approver); // 조회 결과가 없다면 예외가 터지고 롤백됨
 		}
+
 		// 4. DTO 반환 (approverDTOList()는 null인 채로 반환됨)
+        resApprovalDTO.setApprovalId(approval.getApprovalId());
         return resApprovalDTO;
 		
 	}
@@ -157,7 +168,11 @@ public class ApprovalService {
 	        if (approval.getStatus() == 'w') {
 	        	approverList.forEach(approver->{
 	        		if(approver.getUseYn()) {
-	        			notificationService.reqNotification(approvalId,"approval", "결재 문서가 기안자에 의해 취소되었습니다.",approver.getUsername());
+	        			try {
+							notificationService.reqNotification(approvalId,approval.getApprovalFormId(),approval.getUsername(),"approval", "결재 문서가 기안자에 의해 취소되었습니다.",approver.getUsername());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 	        		}
 	        	});
 	        }
@@ -205,7 +220,7 @@ public class ApprovalService {
 			// 결재 상태 수정
 			approval.setStatus('N');
 			//기안자에게 알림전송
-			notificationService.reqNotification(approval.getApprovalId(),
+			notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),
 					"approval", "결재요청이 반려되었습니다.",approval.getUsername());
 		}
 		// 결재자가 승인을 했다면 (approveYn = y) 아래 2번 로직 진행
@@ -230,7 +245,7 @@ public class ApprovalService {
 				// 결재 상태 수정
 				approval.setStatus('Y');
 				// 결재 승인 알림
-				notificationService.reqNotification(approval.getApprovalId(),
+				notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),
 						"approval", "결재요청이 승인되었습니다.",approval.getUsername());
 
                 // 추가) 결재 유형이 휴가라면 vacation_datail에 데이터 insert & vacaion의 사용연차, 총연차 update
@@ -269,8 +284,16 @@ public class ApprovalService {
 			} else {
 				// 수정할 결재자 정보가 있으면 결재 상태의 값을 수정하지 않고 그 다음 승인 순서인 결재자 정보(만약 있다면)의 use_yn값을 true로 수정
 				nextApprover.setUseYn(true);
+				
+				// 결재 정보 조회
+				Optional<Approval> result2 = approvalRepository.findById(approvalId);
+				
+				// approval이 null이 아닐 때만 다음 로직 진행
+				if(result2.isEmpty()) return "NOT_FOUND";
+				Approval approval = result2.get();
+				
 				// 결재 요청 알림
-				notificationService.reqNotification(approvalId,
+				notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),
 						"approval", "새로운 결재 요청이있습니다.",nextApprover.getUsername());
 				System.err.println(nextApprover);
 			}
@@ -280,15 +303,17 @@ public class ApprovalService {
 		return "PROCESSED";
 	}
     
-    public List<ResApprovalDTO> getAllApprovalList(String listType, String username) throws Exception {
+    public Page<ResApprovalDTO> getAllApprovalList(String listType, String username, Pageable pageable) throws Exception {
 
-        List<ResApprovalDTO> result = new ArrayList<>();
+        Page<ResApprovalDTO> result = null;
         switch (listType) {
-            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("T")); // 내 결재 임시 보관함
-            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("W", "N", "Y")); // 내 결재 요청 목록
-            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("W"), List.of("W")); // 결재 대기 목록
-            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("Y", "N"), List.of("W", "Y", "N")); // 내가 결재한 목록
+            case "temp" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("T"), pageable); // 내 결재 임시 보관함
+            case "request" -> result = approvalRepository.findApprovalSummaryByStatus(true, username, List.of("W", "N", "Y"), pageable); // 내 결재 요청 목록
+            case "wait" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("W"), List.of("W"), pageable); // 결재 대기 목록
+            case "storage" -> result = approvalRepository.findSummaryByApproverWithApproveYnAndStatus(true, username, List.of("Y", "N"), List.of("W", "Y", "N"), pageable); // 내가 결재한 목록
         }
+
+        if(result == null) return new PageImpl<ResApprovalDTO>(List.of());
 
         return result;
 
@@ -328,6 +353,10 @@ public class ApprovalService {
         Approval approval = result.get();
         ResApprovalDTO resApprovalDTO = approval.toResApprovalDTO();
 
+        // 결재가 승인/반려 상태면 처리여부를 true로 설정
+        List<Character> yOrN = List.of('y', 'Y', 'n', 'N');
+        if(yOrN.contains(approval.getStatus())) resApprovalDTO.setProcessed(true);
+
         // 첨부파일 조회
         List<ApprovalFileDTO> files = approvalFileRepository.findAllByApprovalIdAndUseYn(approval.getApprovalId(), true)
                                                             .stream().map(ApprovalFile::toApprovalFileDTO).toList();
@@ -350,6 +379,11 @@ public class ApprovalService {
         List<ApproverDTO> approverDTOList = approverRepository.findByApprovalIdWithEmployeeAndDepartment(approvalId);
 
         if(approverDTOList.isEmpty())  return resApprovalDTO; // 결재자가 없으면? approval만 DTO에 담아서 return
+
+        for(ApproverDTO approverDTO : approverDTOList){
+            // 결재자 중 한 명이라도 승인/반려 처리를 했다면 처리여부를 true로 설정
+            if(yOrN.contains(approverDTO.getApproveYn())) resApprovalDTO.setProcessed(true);
+        }
 
         // 3. 결재와 결재자를 DTO에 담아 반환
         resApprovalDTO.setApproverDTOList(approverDTOList);
