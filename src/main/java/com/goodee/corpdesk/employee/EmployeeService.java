@@ -1,27 +1,5 @@
 package com.goodee.corpdesk.employee;
 
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.service.AttendanceService;
-import com.goodee.corpdesk.department.entity.Department;
-import com.goodee.corpdesk.department.repository.DepartmentRepository;
-import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
-import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
-import com.goodee.corpdesk.file.FileManager;
-import com.goodee.corpdesk.file.dto.FileDTO;
-import com.goodee.corpdesk.file.entity.EmployeeFile;
-import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
-import com.goodee.corpdesk.position.entity.Position;
-import com.goodee.corpdesk.position.repository.PositionRepository;
-import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
-import com.goodee.corpdesk.salary.entity.Allowance;
-import com.goodee.corpdesk.salary.entity.Deduction;
-import com.goodee.corpdesk.salary.entity.SalaryPayment;
-import com.goodee.corpdesk.salary.repository.AllowanceRepository;
-import com.goodee.corpdesk.salary.repository.DeductionRepository;
-import com.goodee.corpdesk.salary.repository.SalaryRepository;
-import com.goodee.corpdesk.vacation.VacationManager;
-import com.goodee.corpdesk.vacation.entity.Vacation;
-import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,9 +24,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.time.LocalDate;
-import java.util.*;
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
@@ -62,6 +37,13 @@ import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
 import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
+import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
+import com.goodee.corpdesk.salary.entity.Allowance;
+import com.goodee.corpdesk.salary.entity.Deduction;
+import com.goodee.corpdesk.salary.entity.SalaryPayment;
+import com.goodee.corpdesk.salary.repository.AllowanceRepository;
+import com.goodee.corpdesk.salary.repository.DeductionRepository;
+import com.goodee.corpdesk.salary.repository.SalaryRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
@@ -449,4 +431,24 @@ public class EmployeeService implements UserDetailsService {
     public ResEmployeeDTO getFulldetail(String username) {
         return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
+    
+    @Transactional
+    public void updateFromImport(EmployeeListDTO dto) {
+        Employee emp = employeeRepository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("직원 없음: " + dto.getUsername()));
+
+        // 비밀번호/권한/파일 등은 손대지 않음
+        if (dto.getName() != null) emp.setName(dto.getName());
+        emp.setMobilePhone(dto.getMobilePhone());        // 정책에 맞게 유효성/중복 검사를 호출부에서 수행
+        emp.setDepartmentId(dto.getDepartmentId());      // 매칭 실패 시 null 가능
+        emp.setPositionId(dto.getPositionId());
+        emp.setHireDate(dto.getHireDate());
+        emp.setLastWorkingDay(dto.getLastWorkingDay());
+
+        employeeRepository.save(emp);
+    }
+
+    
 }
+
+
