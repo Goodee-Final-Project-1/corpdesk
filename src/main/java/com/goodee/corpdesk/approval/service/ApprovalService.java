@@ -79,6 +79,7 @@ public class ApprovalService {
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
     private FileManager fileManager;
     @Autowired
     private ApprovalFileRepository approvalFileRepository;
