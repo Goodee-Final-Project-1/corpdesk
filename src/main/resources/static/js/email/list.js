@@ -23,7 +23,7 @@ async function getMail() {
 		list.classList.remove('d-none');
 
 		if (data.content.length == 0) {
-			const cat = category == 'received' ? '보낸 ' : '받은 '
+			const cat = category == 'received' ? '받은 ' : '보낸 '
 
 			throw new Error(cat + '메일이 없습니다.');
 		}
@@ -55,6 +55,7 @@ async function getMail() {
 		console.error(e);
 		spinner.classList.remove('d-flex');
 		missing.classList.remove('d-none');
+		list.classList.add('d-none');
 		missing.classList.add('d-flex');
 	}
 }
