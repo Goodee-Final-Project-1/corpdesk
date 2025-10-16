@@ -39,10 +39,12 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/board/notice/write", "/board/notice/*/edit").hasAnyRole("ADMIN")
-						.requestMatchers(HttpMethod.POST, "/board/notice/", "/board/notice/*", "/board/notice/*/delete").hasAnyRole("ADMIN")
+						.requestMatchers(HttpMethod.POST, "/board/notice/**").hasAnyRole("ADMIN")
+
 						.requestMatchers("/employee/add", "/employee/list", "/employee/export", "/employee/import",
 						"/employee/edit/**", "/employee/delete/**", "/employee/*/attendance/**", "/position/**",
 						"/admin/**", "/organization/**", "/salary/**", "/stats/**").hasAnyRole("ADMIN", "HR")
+
 						.requestMatchers("/dashboard", "/approval/**", "/attendance/**", "/board/**",
 								"/calendar/**", "/chat/**", "/email/**", "/employee/**", "/notice/**",
 								"/personal-schedule/**", "/vacation/**").authenticated()    // 접근 제한

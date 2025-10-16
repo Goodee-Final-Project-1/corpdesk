@@ -12,6 +12,7 @@ import com.goodee.corpdesk.vacation.service.VacationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -42,7 +43,10 @@ public class HomeController {
     }
 
     @GetMapping("/")
-	public String home() {
+	public String home(Authentication authentication) {
+		if(authentication != null && authentication.isAuthenticated()) {
+			return "redirect:/dashboard";
+		}
 		return "index";
 	}
 
