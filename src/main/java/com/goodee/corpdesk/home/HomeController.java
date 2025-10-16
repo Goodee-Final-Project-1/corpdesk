@@ -1,34 +1,23 @@
 package com.goodee.corpdesk.home;
 
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-import com.goodee.corpdesk.approval.service.ApprovalService;
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
-import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.email.EmailService;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
-import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.schedule.dto.ResPersonalScheduleDTO;
-import com.goodee.corpdesk.schedule.entity.PersonalSchedule;
-import com.goodee.corpdesk.schedule.service.PersonalScheduleService;
 import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
 import com.goodee.corpdesk.vacation.service.VacationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @Slf4j
@@ -40,6 +29,10 @@ public class HomeController {
     private VacationService vacationService;
     @Autowired
     private AttendanceService attendanceService;
+	@Autowired
+	private EmployeeService employeeService;
+	@Autowired
+	private EmailService emailService;
 
     @Value("${api.kakao.javascript.key}")
     private String appkey;
@@ -50,15 +43,35 @@ public class HomeController {
     }
 
     @GetMapping("/")
-	public String home() {
-		return "login";
+	public String home(Authentication authentication) {
+		if(authentication != null && authentication.isAuthenticated()) {
+			return "redirect:/dashboard";
+		}
+		return "index";
 	}
 
 	@GetMapping("login/{msg}")
 	public String login(@PathVariable String msg, Model model) {
 		msg = msg.replaceAll("\\+", " ");
 		model.addAttribute("msg", msg);
-		return "login";
+		return "index";
+	}
+
+	@GetMapping("/reset/password")
+	public String resetPassword() {
+		return "reset_password";
+	}
+
+	@GetMapping("/get-mail")
+	@ResponseBody
+	public String getEmail(String username) {
+		return employeeService.getEmail(username);
+	}
+
+	@PostMapping("/reset-password")
+	@ResponseBody
+	public String resetPassword(String username) throws Exception {
+		return employeeService.resetPassword(username);
 	}
 
     @GetMapping("/dashboard")
