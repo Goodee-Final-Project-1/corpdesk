@@ -8,7 +8,12 @@
 	<meta charset="UTF-8">
 	<title>Insert title here</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script defer type="text/javascript" src="/js/approval/approval_detail.js"></script>
 
@@ -28,6 +33,19 @@
         /* Bootstrap 5의 경우, thead, tbody, tfoot 요소에도 기본적으로 border-top이 적용될 수 있습니다. */
         .no-top-border > :not(caption) > * > * {
             border-top: none;
+        }
+
+        #pdf-area, #pdf-area * {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
+        }
+
+        /* 테이블 내 텍스트도 강제 적용 */
+        #pdf-area table,
+        #pdf-area th,
+        #pdf-area td,
+        #pdf-area p,
+        #pdf-area h1 {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
         }
     </style>
 </head>
@@ -58,36 +76,56 @@
 					<div class="email-right-column p-4 p-xl-5">
 
 						<!-- 양식 시작 -->
+            <input type="hidden" id="approvalIdData" value="${detail.approvalId}">
             <%-- 양식 헤더 --%>
-						<div id="btnBox" data-approval-id="${detail.approvalId}" data-approver-id="${approverInfo.approverId}">
-              <c:choose>
-                <c:when test="${detail.username eq userInfo.username}">
-                  <c:choose>
-                    <c:when test="${detail.processed eq true}">
-                      <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="이미 승인이 진행 중이거나 완료된 결재는 삭제할 수 없습니다.">
-                        <button type="button" class="btn btn-outline-danger mr-1 btn-action" style="pointer-events: none;" id="btnDelete" disabled>
-                          삭제
-                        </button>
-                      </span>
-                    </c:when>
-                    <c:otherwise>
-                      <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete">삭제</button>
-                    </c:otherwise>
-                  </c:choose>
-                </c:when>
-                <c:otherwise>
-                  <button type="button" class="btn btn-info mr-1 btn-action" id="btnApproval">승인</button>
-                  <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnReject">반려</button>
-                </c:otherwise>
-              </c:choose>
-              <button type="button" class="btn btn-light" id="btnCancel" onclick="history.back()">취소</button>
+						<div class="d-flex justify-content-between" id="btnBox" data-approval-id="${detail.approvalId}" data-approver-id="${approverInfo.approverId}">
+              <div>
+                <c:choose>
+
+                  <c:when test="${detail.username eq userInfo.username}">
+                    <c:if test="${detail.status eq 't' or detail.status eq 'T'}">
+                      <form action="/approval/${detail.approvalId}/edit" method="GET">
+                        <input type="hidden" name="approvalFormId" value="${detail.approvalFormId}">
+                        <input type="hidden" name="departmentId" value="${detail.departmentId}">
+                        <button class="btn btn-info mr-1 btn-action" id="btnEdit">수정</button>
+                      </form>
+                    </c:if>
+
+                    <c:choose>
+                      <c:when test="${detail.processed eq true}">
+                        <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="이미 승인이 진행 중이거나 완료된 결재는 삭제할 수 없습니다.">
+                          <button type="button" class="btn btn-outline-danger mr-1 btn-action" style="pointer-events: none;" id="btnDelete" disabled>
+                            삭제
+                          </button>
+                        </span>
+                      </c:when>
+                      <c:otherwise>
+                        <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnDelete">삭제</button>
+                      </c:otherwise>
+                    </c:choose>
+
+                  </c:when>
+
+                  <c:otherwise>
+                    <button type="button" class="btn btn-info mr-1 btn-action" id="btnApproval">승인</button>
+                    <button type="button" class="btn btn-outline-danger mr-1 btn-action" id="btnReject">반려</button>
+                  </c:otherwise>
+
+                </c:choose>
+                <button type="button" class="btn btn-light" id="btnCancel" onclick="history.back()">취소</button>
+              </div>
+
+              <div>
+                <button type="button" id="pdf-btn">인쇄</button>
+              </div>
 						</div>
 						<hr>
             <%--  --%>
 
             <%-- 양식 내용 --%>
-            <div class="col-lg-7">
+            <div class="col-lg-7" id="pdf-area">
             <form id="approvalContentCommon">
+
               <%-- 1. 공통 양식 --%>
               <h1 class="text-center p-4">${detail.formTitle}</h1>
 
@@ -114,88 +152,11 @@
 
                 </tbody>
               </table>
-              <span>※ 기안일은 [결재 요청] 버튼을 클릭한 날짜로 확정됩니다.</span>
-              <br><br>
+              <br>
 
-              <%-- 결재자 수 계산 --%>
-              <c:set var="approverCount" value="${fn:length(detail.approverDTOList)}" />
-              <c:set var="approverRows" value="${approverCount eq 0 ? 1 : (approverCount + 3) / 4}" /> <%-- 4명씩 나눈 행 수 (올림) --%>
+              <%-- 결재자 리스트 --%>
+              <c:import url="approver_list.jsp"/>
 
-              <table class="table table-bordered">
-                <tbody>
-                <%-- 결재자 행을 동적으로 생성 --%>
-                <c:forEach var="rowIndex" begin="0" end="${approverRows - 1}">
-                  <%-- 첫 번째 행에만 "승인" 헤더를 rowspan으로 추가 --%>
-                  <tr id="approverPosition${rowIndex}">
-                    <c:if test="${rowIndex == 0}">
-                      <th class="align-middle table-light col-2" rowspan="${approverRows * 3}">승인</th>
-                    </c:if>
-
-                      <%-- 현재 행의 결재자들 (최대 4명) --%>
-                    <c:forEach var="colIndex" begin="0" end="3">
-                      <c:set var="approverIndex" value="${rowIndex * 4 + colIndex}" />
-                      <c:choose>
-                        <c:when test="${approverIndex < approverCount}">
-                          <%-- 결재자가 있는 경우 --%>
-                          <td class="text-center" style="width: 20%;">
-                              ${detail.approverDTOList[approverIndex].positionName}
-                          </td>
-                        </c:when>
-                        <c:otherwise>
-                          <%-- 빈 셀 --%>
-                          <td class="text-center" style="width: 20%;">&nbsp;</td>
-                        </c:otherwise>
-                      </c:choose>
-                    </c:forEach>
-                  </tr>
-
-                  <%-- 이름 행 --%>
-                  <tr id="approverName${rowIndex}" style="height: 90px;">
-                    <c:forEach var="colIndex" begin="0" end="3">
-                      <c:set var="approverIndex" value="${rowIndex * 4 + colIndex}" />
-                      <c:choose>
-                        <c:when test="${approverIndex < approverCount}">
-                          <%-- 결재자가 있는 경우 --%>
-                          <td class="text-center align-middle" style="width: 20%;">
-                              ${detail.approverDTOList[approverIndex].name}
-                          </td>
-                        </c:when>
-                        <c:otherwise>
-                          <%-- 빈 셀 --%>
-                          <td class="text-center align-middle" style="width: 20%;">&nbsp;</td>
-                        </c:otherwise>
-                      </c:choose>
-                    </c:forEach>
-                  </tr>
-
-                  <%-- 승인일자 행 --%>
-                  <tr id="approvalDate${rowIndex}">
-                    <c:forEach var="colIndex" begin="0" end="3">
-                      <c:set var="approverIndex" value="${rowIndex * 4 + colIndex}" />
-                      <c:choose>
-                        <c:when test="${approverIndex < approverCount}">
-                          <%-- 결재자가 있는 경우 --%>
-                          <td class="text-center align-middle" style="width: 20%;">
-                              <c:if test="${detail.approverDTOList[approverIndex].approveYn eq 'N'.charAt(0)}">
-                                <p class="text-danger">반려: ${fn:substring(detail.approverDTOList[approverIndex].createdAt, 0, 10)}</p>
-                              </c:if>
-                              <c:if test="${detail.approverDTOList[approverIndex].approveYn eq 'Y'.charAt(0)}">
-                                <p class="text-info">승인: ${fn:substring(detail.approverDTOList[approverIndex].createdAt, 0, 10)}</p>
-                              </c:if>
-                              &nbsp;
-                          </td>
-                        </c:when>
-                        <c:otherwise>
-                          <%-- 빈 셀 --%>
-                          <td class="text-center align-middle" style="width: 20%;">&nbsp;</td>
-                        </c:otherwise>
-                      </c:choose>
-                    </c:forEach>
-                  </tr>
-                </c:forEach>
-                </tbody>
-              </table>
-              <%--  --%>
             </form>
 
             <form id="approvalContentByType">

@@ -224,6 +224,30 @@ switch (approvalFormId) {
         removeBtn.addEventListener('click', () => liElement.remove());
     }
 
+    // ========== 페이지 로드 시 기존 결재자 정보를 모달에 추가 ==========
+    (function loadExistingApprovers() {
+      // 수정 모드에서 기존 결재자 정보가 있는지 확인
+      const existingApprovers = document.querySelectorAll('#approvalContentCommon input[name^="approverDTOList"][name$=".username"]');
+
+      if (existingApprovers.length > 0) {
+        existingApprovers.forEach((input, index) => {
+          const username = input.value;
+
+          // employeeList에서 해당 username을 가진 li 요소 찾기
+          const employeeLi = employeeList.querySelector(`li[data-username="${username}"]`);
+
+          if (employeeLi) {
+            // 기존 li 요소를 복제하여 결재선 목록에 추가
+            const clonedLi = employeeLi.cloneNode(true);
+            clonedLi.classList.add('added-approver');
+            addRemoveButton(clonedLi);
+            approverList.appendChild(clonedLi);
+          }
+        });
+      }
+    })();
+    // ================================================================
+
     // 2. 드래그 시작/종료 이벤트
     employeeList.addEventListener('dragstart', (e) => {
         const targetLi = e.target.closest('li[draggable="true"]');
@@ -485,5 +509,32 @@ btnSubmits.forEach((btn) => {
           location.href=`/approval/${r.approvalId}`;
         })
     ;
+  });
+});
+
+/**
+ * 첨부파일 삭제
+ */
+const fileDelBtns = document.querySelectorAll('.btn-del-file');
+fileDelBtns.forEach((btn) => {
+  btn.addEventListener('click', function () {
+    const message = '파일을 삭제하시겠습니까?';
+
+    if(!confirm(message)) return;
+
+    const fileId = btn.getAttribute('data-file-id');
+    console.log('fileId', fileId);
+
+    // 서버에 삭제 요청
+    fetch(`/approval/file/${fileId}`, {
+      method: 'DELETE'
+    })
+        .then(r => {
+          if (r.ok) btn.parentElement.remove();
+          else alert('파일 삭제에 실패했습니다.');
+        })
+        .catch(() => alert('네트워크 오류로 삭제에 실패했습니다.'))
+    ;
+
   });
 });

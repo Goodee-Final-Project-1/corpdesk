@@ -1,5 +1,7 @@
 package com.goodee.corpdesk.approval.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.approval.service.ApprovalFormService;
@@ -22,7 +24,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -46,6 +50,16 @@ public class ApprovalFormController {
 	public String getCat() {
 		return cat;
 	}
+    @ModelAttribute("userDetail")
+    public ResEmployeeDTO getUserDetail(@AuthenticationPrincipal UserDetails userDetails) {
+
+        ResEmployeeDTO userDetail = null;
+        userDetail = employeeService.getFulldetail(userDetails.getUsername());
+        if (userDetail == null) userDetail = new ResEmployeeDTO();
+
+        return userDetail;
+
+    }
 
     // 결재 양식 데이터 뿌리기
     @ModelAttribute("formList")
