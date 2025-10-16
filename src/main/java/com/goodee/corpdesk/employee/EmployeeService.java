@@ -1,5 +1,4 @@
 package com.goodee.corpdesk.employee;
-
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
@@ -44,8 +43,8 @@ import java.io.File;
 import java.time.LocalDate;
 import java.util.*;
 
-@Service
 @Transactional
+@Service
 public class EmployeeService implements UserDetailsService {
 
     @Autowired
@@ -166,8 +165,7 @@ public class EmployeeService implements UserDetailsService {
 
         return newEmployee;
     }
-
-
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public List<EmployeeListDTO> getActiveEmployeesForList() {
         List<Employee> employees = employeeRepository.findAllByUseYnTrue();
         List<EmployeeListDTO> result = new ArrayList<>();
