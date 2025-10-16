@@ -23,7 +23,7 @@
 <!-- 내용 시작 -->
 
 <div class="card card-default">
-	<div class="card-body">
+	<div class="card-body p-6">
 		<form id="searchForm">
 			<div class="form-group d-flex">
 				<div>
@@ -67,22 +67,22 @@
 	</div>
 </div>
 <div class="row">
-	<div class="card card-default col-xl-3 col-lg-6">
+	<div class="card card-default col-xl-3 col-md-6">
 		<div class="card-body">
 			<div id="chart2"></div>
 		</div>
 	</div>
-	<div class="card card-default col-xl-3 col-lg-6">
+	<div class="card card-default col-xl-3 col-md-6">
 		<div class="card-body">
 			<div id="chart3"></div>
 		</div>
 	</div>
-	<div class="card card-default col-xl-3 col-lg-6">
+	<div class="card card-default col-xl-3 col-md-6">
 		<div class="card-body">
 			<div id="chart4"></div>
 		</div>
 	</div>
-	<div class="card card-default col-xl-3 col-lg-6">
+	<div class="card card-default col-xl-3 col-md-6">
 		<div class="card-body">
 			<div id="chart5"></div>
 		</div>
