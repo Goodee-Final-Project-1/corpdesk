@@ -530,11 +530,10 @@ fileDelBtns.forEach((btn) => {
       method: 'DELETE'
     })
         .then(r => {
-          console.log(r);
-
-          btn.parentElement.remove();
-
+          if (r.ok) btn.parentElement.remove();
+          else alert('파일 삭제에 실패했습니다.');
         })
+        .catch(() => alert('네트워크 오류로 삭제에 실패했습니다.'))
     ;
 
   });

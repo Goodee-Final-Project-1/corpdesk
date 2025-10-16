@@ -35,6 +35,9 @@ class AdminSubordinateTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private EmployeeService employeeService;
+
     private List<Employee> admins;
 
     @BeforeEach
@@ -45,7 +48,7 @@ class AdminSubordinateTest {
 
     @Test
     @DisplayName("각 관리자에게 3명의 부하직원을 추가하는 테스트")
-    void add_subordinates_to_admins_test() {
+    void add_subordinates_to_admins_test() throws Exception {
         // Given
         List<Employee> newSubordinates = new ArrayList<>();
         int subordinateCounter = 1;
@@ -75,7 +78,9 @@ class AdminSubordinateTest {
             }
         }
 
-        employeeRepository.saveAll(newSubordinates);
+        for(Employee e : newSubordinates) {
+            employeeService.addEmployee(e);
+        }
 
         // Then
         for (Employee admin : admins) {
@@ -88,7 +93,7 @@ class AdminSubordinateTest {
 
             // 새로 추가된 3명의 부하직원만 필터링
             long count = foundSubordinates.stream()
-                                          .filter(e -> e.getUsername().startsWith("subordinate"))
+                                          .filter(e -> e.getUsername().startsWith("user"))
                                           .count();
 
             assertEquals(3, count, admin.getName() + " 관리자의 부하직원이 3명이어야 합니다.");

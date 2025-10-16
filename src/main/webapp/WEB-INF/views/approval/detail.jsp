@@ -76,6 +76,7 @@
 					<div class="email-right-column p-4 p-xl-5">
 
 						<!-- 양식 시작 -->
+            <input type="hidden" id="approvalIdData" value="${detail.approvalId}">
             <%-- 양식 헤더 --%>
 						<div class="d-flex justify-content-between" id="btnBox" data-approval-id="${detail.approvalId}" data-approver-id="${approverInfo.approverId}">
               <div>

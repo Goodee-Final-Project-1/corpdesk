@@ -29,7 +29,8 @@ formCheckBtn.addEventListener('click', function () {
  * 수정/삭제 혹은 승인/반려 버튼을 눌렀을 때
  */
 const btnActions = document.querySelectorAll('.btn-action');
-const approvalId = btnActions[0].parentElement.getAttribute('data-approval-id');
+const approvalId = document.querySelector('#approvalIdData').value;
+console.log('approvalId: ', approvalId);
 const approverId = document.querySelector('#btnBox').getAttribute('data-approver-id');
 console.log(approverId);
 
@@ -213,19 +214,6 @@ document.getElementById('pdf-btn').addEventListener('click', async function () {
     pageNumber++;
   }
   // ==================
-
-
-  // 6. PDF 생성 후 링크 오버레이 추가
-  links.forEach(link => {
-    // HTML 좌표를 PDF 좌표(mm)로 변환하고 여백을 더합니다.
-    const pdfX = (link.x * ratio) + margin;
-    const pdfY = (link.y * ratio) + margin;
-    const linkPdfWidth = link.width * ratio;
-    const linkPdfHeight = link.height * ratio;
-
-    // PDF에 링크 영역을 추가합니다.
-    pdf.link(pdfX, pdfY, linkPdfWidth, linkPdfHeight, { url: link.url });
-  });
 
   // 7. 미리보기 기능
   const blob = pdf.output('blob');

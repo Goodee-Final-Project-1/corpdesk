@@ -416,7 +416,11 @@ public class ApprovalService {
 
     public ResponseEntity<String> deleteFile(Long fileId, String username) throws Exception {
 
-        ApprovalFile approvalFile = approvalFileRepository.findById(fileId).get();
+        Optional<ApprovalFile> opt = approvalFileRepository.findById(fileId);
+
+        if (opt.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        ApprovalFile approvalFile = opt.get();
 
         if(!username.equals(approvalFile.getModifiedBy())) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 

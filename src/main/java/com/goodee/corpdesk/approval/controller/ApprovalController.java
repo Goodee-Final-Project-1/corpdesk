@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -125,15 +126,17 @@ public class ApprovalController {
     // 결재 수정 화면 요청
     @GetMapping("{approvalId}/edit")
     public String edit(@PathVariable("approvalId") Long approvalId,
-                       ReqApprovalDTO reqApprovalDTO,
                        @AuthenticationPrincipal UserDetails userDetails,
                        Model model) throws Exception {
 
         String username = userDetails.getUsername();
-        
+        ResApprovalDTO detail = approvalService.getApproval(approvalId);
+
+        if(!username.equals(detail.getUsername())) throw new AccessDeniedException("접근 권한 없음");
+
         // 폼을 구성하는 정보들 바인딩
         // 0. 폼 정보 얻어오기
-        ResApprovalDTO form = approvalFormService.getApprovalForm(reqApprovalDTO.getApprovalFormId());
+        ResApprovalDTO form = approvalFormService.getApprovalForm(detail.getApprovalFormId());
         model.addAttribute("form", form);
 
         // 1. 유저 정보 얻어오기
@@ -141,18 +144,17 @@ public class ApprovalController {
         model.addAttribute("userInfo", userInfo);
 
         // 2. 결재 대상 부서의 정보 얻어오기
-        ResApprovalDTO targetDept = departmentService.getDepartment(reqApprovalDTO.getDepartmentId());
+        ResApprovalDTO targetDept = departmentService.getDepartment(detail.getDepartmentId());
         model.addAttribute("targetDept", targetDept);
 
         // 3. 결재 대상 부서의 직원 목록 얻어오기 - 직원id, 직원이름, 부서명, 직위명, 파일정보
-        List<ResApprovalDTO> employeeList = approvalService.getEmployeeWithDeptAndPositionAndFile(reqApprovalDTO.getDepartmentId(), true);
+        List<ResApprovalDTO> employeeList = approvalService.getEmployeeWithDeptAndPositionAndFile(detail.getDepartmentId(), true);
         model.addAttribute("employeeList", employeeList);
 
         // 4. 기안일(오늘 날짜)
         model.addAttribute("today", LocalDate.now().toString());
 
         // 결재 내용 정보들 바인딩
-        ResApprovalDTO detail = approvalService.getApproval(approvalId);
 
         // approvalContent는 JSON 파싱해서 별도로 전달
         if (detail != null && detail.getApprovalContent() != null) {
@@ -185,14 +187,15 @@ public class ApprovalController {
 	// 1. approvalId, approverId를 사용해 결재와 결재자 데이터를 받아와 수정하는 방식의 메서드
 	@PatchMapping("{approvalId}")
     @ResponseBody
-	public String process(@PathVariable("approvalId") Long approvalId, @RequestBody ReqApprovalDTO reqApprovalDTO) throws Exception {
-		
+	public String process(@PathVariable("approvalId") String approvalId, @RequestBody ReqApprovalDTO reqApprovalDTO) throws Exception {
+
 		System.err.println("process()");
 
         // reqApprovalDTO에는 approverId, approveYn가 있음
-        log.warn("{}", reqApprovalDTO);
-		String result = approvalService.processApproval(approvalId, reqApprovalDTO); // NOT_FOUND, PROCESSED 중 하나의 값이 반환됨
-		log.info("{}", result);
+        log.warn("approvalId: {}", approvalId);
+        log.warn("reqApprovalDTO: {}", reqApprovalDTO);
+		String result = approvalService.processApproval(Long.parseLong(approvalId), reqApprovalDTO); // NOT_FOUND, PROCESSED 중 하나의 값이 반환됨
+		log.info("result: {}", result);
 		
 		return result;
 	}
