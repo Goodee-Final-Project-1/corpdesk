@@ -152,6 +152,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	WHERE e.username = :username
 """)
 	Optional<EmployeeSecurityDTO> findEmployeeSecurityByUsername(@Param("username") String username);
-
+	
+	List<Employee> findByDepartmentIdAndPositionId(Integer departmentId, Integer positionId);
+		
 	Optional<EmailOnly> findExternalEmailByUsername(String username);
 }

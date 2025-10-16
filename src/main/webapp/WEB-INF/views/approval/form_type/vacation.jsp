@@ -4,7 +4,7 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <%-- 상세조회인지 확인하는 변수 설정 --%>
-<c:set var="isDetail" value="${detail ne null}" />
+<c:set var="isDetail" value="${detail ne null and edit eq null}" />
 
 <%-- 상세조회용 CSS 스타일 --%>
 <c:if test="${isDetail}">
