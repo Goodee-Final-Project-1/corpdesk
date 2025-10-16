@@ -132,13 +132,13 @@ public class EmployeeService implements UserDetailsService {
  // 직원 등록
     public Employee addEmployee(Employee employee) throws Exception {
     	// 0) username 필수 및 중복 금지
-    	        String username = employee.getUsername();
-    	        if (username == null || username.isBlank()) {
-    	            throw new IllegalArgumentException("username는 필수입니다.");
-    	        }
-    	        if (employeeRepository.existsById(username)) {
-    	            throw new IllegalStateException("이미 존재하는 직원입니다: " + username);
-    	        }
+    	String username = employee.getUsername();
+    	if (username == null || username.isBlank()) {
+    	  throw new IllegalArgumentException("username는 필수입니다.");
+    	   }
+    	  if (employeeRepository.existsById(username)) {
+    	    throw new IllegalStateException("이미 존재하는 직원입니다: " + username);
+    	   }
 
         // 1) 비밀번호 기본값 보장 (엑셀에서 비번 열 제거했을 때 대비)
         String raw = employee.getPassword();
