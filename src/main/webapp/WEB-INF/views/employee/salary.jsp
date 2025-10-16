@@ -2,6 +2,8 @@
 				 pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -63,11 +65,11 @@
 							<c:forEach var="s" items="${salaryList}">
 								<tr onclick="location.href='./salary/${s.paymentId}'" style="cursor: pointer">
 									<td>${s.paymentId}</td>
-									<td>${s.baseSalary}</td>
-									<td>${s.allowanceAmount}</td>
-									<td>${s.deductionAmount}</td>
-									<td>${s.baseSalary + s.allowanceAmount - s.deductionAmount}</td>
-									<td>${s.paymentDate}</td>
+									<td><fmt:formatNumber value="${s.baseSalary}" pattern="#,###" /></td>
+									<td><fmt:formatNumber value="${s.allowanceAmount}" pattern="#,###" /></td>
+									<td><fmt:formatNumber value="${s.deductionAmount}" pattern="#,###" /></td>
+									<td><fmt:formatNumber value="${s.baseSalary + s.allowanceAmount - s.deductionAmount}" pattern="#,###" /></td>
+									<td>${fn:substring(s.paymentDate, 0, 10)}</td>
 								</tr>
 							</c:forEach>
 							</tbody>
