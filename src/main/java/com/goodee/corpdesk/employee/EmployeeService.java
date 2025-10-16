@@ -1,27 +1,5 @@
 package com.goodee.corpdesk.employee;
 
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.service.AttendanceService;
-import com.goodee.corpdesk.department.entity.Department;
-import com.goodee.corpdesk.department.repository.DepartmentRepository;
-import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
-import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
-import com.goodee.corpdesk.file.FileManager;
-import com.goodee.corpdesk.file.dto.FileDTO;
-import com.goodee.corpdesk.file.entity.EmployeeFile;
-import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
-import com.goodee.corpdesk.position.entity.Position;
-import com.goodee.corpdesk.position.repository.PositionRepository;
-import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
-import com.goodee.corpdesk.salary.entity.Allowance;
-import com.goodee.corpdesk.salary.entity.Deduction;
-import com.goodee.corpdesk.salary.entity.SalaryPayment;
-import com.goodee.corpdesk.salary.repository.AllowanceRepository;
-import com.goodee.corpdesk.salary.repository.DeductionRepository;
-import com.goodee.corpdesk.salary.repository.SalaryRepository;
-import com.goodee.corpdesk.vacation.VacationManager;
-import com.goodee.corpdesk.vacation.entity.Vacation;
-import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -47,9 +25,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.time.LocalDate;
-import java.util.*;
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
@@ -63,6 +38,13 @@ import com.goodee.corpdesk.file.entity.EmployeeFile;
 import com.goodee.corpdesk.file.repository.EmployeeFileRepository;
 import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
+import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
+import com.goodee.corpdesk.salary.entity.Allowance;
+import com.goodee.corpdesk.salary.entity.Deduction;
+import com.goodee.corpdesk.salary.entity.SalaryPayment;
+import com.goodee.corpdesk.salary.repository.AllowanceRepository;
+import com.goodee.corpdesk.salary.repository.DeductionRepository;
+import com.goodee.corpdesk.salary.repository.SalaryRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
@@ -148,27 +130,39 @@ public class EmployeeService implements UserDetailsService {
         return employeeFileRepository.findByUsername(username);
     }
 
-    // 직원 등록
+ // 직원 등록
     public Employee addEmployee(Employee employee) throws Exception {
-    	// 직원 등록
-        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+    	// 0) username 필수 및 중복 금지
+    	String username = employee.getUsername();
+    	if (username == null || username.isBlank()) {
+    	  throw new IllegalArgumentException("username는 필수입니다.");
+    	   }
+    	  if (employeeRepository.existsById(username)) {
+    	    throw new IllegalStateException("이미 존재하는 직원입니다: " + username);
+    	   }
+
+        // 1) 비밀번호 기본값 보장 (엑셀에서 비번 열 제거했을 때 대비)
+        String raw = employee.getPassword();
+        if (raw == null || raw.isBlank()) {
+            raw = "1234"; // 정책에 맞게 기본 비번 지정 (원하면 랜덤 생성으로 대체)
+        }
+        employee.setPassword(passwordEncoder.encode(raw));
+
+        // 2) 공통 생성 로직
         employee.setUseYn(true);
         roleService.assignRole(employee);
         Employee newEmployee = employeeRepository.save(employee);
 
-        // 추가) 직원 등록 성공시 휴가 테이블에 insert
+        // 3) 휴가 테이블 초기화
         Vacation newVacation = new Vacation();
         newVacation.setUsername(employee.getUsername());
 
-        // 직원 등록시 입사일 정보도 같이 입력됐다면 그 기준으로 총발생연차 계산
-        // 입력되지 않았다면 총발생연차 0으로 설정
         int totalVacation = 0;
         LocalDate hireDate = employee.getHireDate();
-        if(hireDate != null) {
+        if (hireDate != null) {
             totalVacation = vacationManager.calTotalVacation(hireDate);
         }
         newVacation.setTotalVacation(totalVacation);
-
         newVacation.setRemainingVacation(totalVacation);
         newVacation.setUsedVacation(0);
 
@@ -185,7 +179,7 @@ public class EmployeeService implements UserDetailsService {
             // 부서명
         	String deptName = "-";
         	if (emp.getDepartmentId() != null) {
-        	    deptName = departmentRepository.findById(emp.getDepartmentId())
+        	    deptName = departmentRepository.findByDepartmentIdAndUseYnTrue(emp.getDepartmentId())
         	                  .map(Department::getDepartmentName)
         	                  .orElse("-");
         	}
@@ -343,7 +337,27 @@ public class EmployeeService implements UserDetailsService {
         
     }
 
-
+    // 단일 메서드로 통합
+    @Transactional
+    public void deactivateEmployee(String username, LocalDate lastWorkingDay) {
+        Employee employee = employeeRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
+        
+        // lastWorkingDay가 제공되면 설정
+        if (lastWorkingDay != null) {
+            employee.setLastWorkingDay(lastWorkingDay);
+            employeeRepository.save(employee);
+        }
+        
+        // 퇴사일자 검증
+        if (employee.getLastWorkingDay() == null) {
+            throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
+        }
+        
+        employee.setUseYn(false);
+        employeeRepository.save(employee);
+    }
+    
 
     // ---------------------- 기타 기존 메서드 ----------------------
     @Override
@@ -364,7 +378,7 @@ public class EmployeeService implements UserDetailsService {
     public Map<String, Object> detail(String username) {
         Employee employee = employeeRepository.findById(username).orElseThrow();
 		Department department = null;
-		if(employee.getDepartmentId() != null) department = departmentRepository.findById(employee.getDepartmentId()).orElse(null);
+		if(employee.getDepartmentId() != null) department = departmentRepository.findByDepartmentIdAndUseYnTrue(employee.getDepartmentId()).orElse(null);
         Position position = null;
 		if(employee.getPositionId() != null) position = positionRepository.findById(employee.getPositionId()).orElse(null);
 
@@ -441,4 +455,53 @@ public class EmployeeService implements UserDetailsService {
     public ResEmployeeDTO getFulldetail(String username) {
         return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
     }
+    
+    @Transactional
+    public void updateFromImport(EmployeeListDTO dto) {
+        Employee emp = employeeRepository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("직원 없음: " + dto.getUsername()));
+        
+        // 휴대폰 중복 검사 (자신 제외)
+            if (dto.getMobilePhone() != null && !dto.getMobilePhone().isBlank()) {
+                boolean phoneInUseByOther = employeeRepository.existsByMobilePhone(dto.getMobilePhone())
+                        && !dto.getMobilePhone().equals(emp.getMobilePhone());
+                if (phoneInUseByOther) {
+                    throw new IllegalStateException("이미 사용 중인 휴대폰 번호입니다: " + dto.getMobilePhone());
+                }
+            }
+        
+            // 부서 ID 유효성
+            if (dto.getDepartmentId() != null) {
+                departmentRepository.findByDepartmentIdAndUseYnTrue(dto.getDepartmentId())
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 부서 ID: " + dto.getDepartmentId()));
+            }
+        
+            // 직위 ID 유효성
+            if (dto.getPositionId() != null) {
+                positionRepository.findByPositionIdAndUseYnTrue(dto.getPositionId())
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 직위 ID: " + dto.getPositionId()));
+            }
+        
+            // 날짜 논리 검증
+            if (dto.getHireDate() != null && dto.getLastWorkingDay() != null 
+                    && dto.getLastWorkingDay().isBefore(dto.getHireDate())) {
+                throw new IllegalArgumentException("퇴사일자가 입사일자보다 앞설 수 없습니다");
+            }
+        
+        
+
+        // 비밀번호/권한/파일 등은 손대지 않음
+        if (dto.getName() != null) emp.setName(dto.getName());
+        emp.setMobilePhone(dto.getMobilePhone());        // 정책에 맞게 유효성/중복 검사를 호출부에서 수행
+        emp.setDepartmentId(dto.getDepartmentId());      // 매칭 실패 시 null 가능
+        emp.setPositionId(dto.getPositionId());
+        emp.setHireDate(dto.getHireDate());
+        emp.setLastWorkingDay(dto.getLastWorkingDay());
+
+        employeeRepository.save(emp);
+    }
+
+    
 }
+
+
