@@ -131,10 +131,14 @@ public class EmployeeService implements UserDetailsService {
 
  // 직원 등록
     public Employee addEmployee(Employee employee) throws Exception {
-        // 0) 이미 존재하면 생성 금지 (신규 전용 보장)
-        if (employeeRepository.existsById(employee.getUsername())) {
-            throw new IllegalStateException("이미 존재하는 직원입니다: " + employee.getUsername());
-        }
+    	// 0) username 필수 및 중복 금지
+    	        String username = employee.getUsername();
+    	        if (username == null || username.isBlank()) {
+    	            throw new IllegalArgumentException("username는 필수입니다.");
+    	        }
+    	        if (employeeRepository.existsById(username)) {
+    	            throw new IllegalStateException("이미 존재하는 직원입니다: " + username);
+    	        }
 
         // 1) 비밀번호 기본값 보장 (엑셀에서 비번 열 제거했을 때 대비)
         String raw = employee.getPassword();
@@ -333,43 +337,27 @@ public class EmployeeService implements UserDetailsService {
         
     }
 
+    // 단일 메서드로 통합
     @Transactional
-    public void deactivateEmployee(String username, LocalDate maybeLastWorkingDay) {
+    public void deactivateEmployee(String username, LocalDate lastWorkingDay) {
         Employee employee = employeeRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
-
-        // 화면에서 보낸 퇴사일자가 있으면 먼저 저장
-        if (maybeLastWorkingDay != null) {
-            employee.setLastWorkingDay(maybeLastWorkingDay);
-            employeeRepository.save(employee); // 즉시 반영
+        
+        // lastWorkingDay가 제공되면 설정
+        if (lastWorkingDay != null) {
+            employee.setLastWorkingDay(lastWorkingDay);
+            employeeRepository.save(employee);
         }
-
-        // 검사
+        
+        // 퇴사일자 검증
         if (employee.getLastWorkingDay() == null) {
             throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
         }
-
+        
         employee.setUseYn(false);
         employeeRepository.save(employee);
     }
-
     
-    @Transactional
-    public void terminateEmployee(String username, LocalDate lastDay) {
-        Employee e = employeeRepository.findByUsername(username)
-            .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
-
-        if (lastDay == null && e.getLastWorkingDay() == null) {
-            throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
-        }
-        if (lastDay != null) {
-            e.setLastWorkingDay(lastDay);
-        }
-        e.setUseYn(false);
-        employeeRepository.save(e);
-    }
-
-
 
     // ---------------------- 기타 기존 메서드 ----------------------
     @Override
@@ -472,6 +460,35 @@ public class EmployeeService implements UserDetailsService {
     public void updateFromImport(EmployeeListDTO dto) {
         Employee emp = employeeRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("직원 없음: " + dto.getUsername()));
+        
+        // 휴대폰 중복 검사 (자신 제외)
+            if (dto.getMobilePhone() != null && !dto.getMobilePhone().isBlank()) {
+                boolean phoneInUseByOther = employeeRepository.existsByMobilePhone(dto.getMobilePhone())
+                        && !dto.getMobilePhone().equals(emp.getMobilePhone());
+                if (phoneInUseByOther) {
+                    throw new IllegalStateException("이미 사용 중인 휴대폰 번호입니다: " + dto.getMobilePhone());
+                }
+            }
+        
+            // 부서 ID 유효성
+            if (dto.getDepartmentId() != null) {
+                departmentRepository.findByDepartmentIdAndUseYnTrue(dto.getDepartmentId())
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 부서 ID: " + dto.getDepartmentId()));
+            }
+        
+            // 직위 ID 유효성
+            if (dto.getPositionId() != null) {
+                positionRepository.findByPositionIdAndUseYnTrue(dto.getPositionId())
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 직위 ID: " + dto.getPositionId()));
+            }
+        
+            // 날짜 논리 검증
+            if (dto.getHireDate() != null && dto.getLastWorkingDay() != null 
+                    && dto.getLastWorkingDay().isBefore(dto.getHireDate())) {
+                throw new IllegalArgumentException("퇴사일자가 입사일자보다 앞설 수 없습니다");
+            }
+        
+        
 
         // 비밀번호/권한/파일 등은 손대지 않음
         if (dto.getName() != null) emp.setName(dto.getName());

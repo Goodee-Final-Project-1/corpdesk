@@ -42,6 +42,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
+import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.department.service.DepartmentService;
 import com.goodee.corpdesk.employee.Employee.CreateGroup;
@@ -50,6 +51,7 @@ import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
 import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
 import com.goodee.corpdesk.position.service.PositionService;
 import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
@@ -233,22 +235,28 @@ public class EmployeeController {
 
                     String deptName = getCellValue(row, 2).trim();
                     if (!deptName.isEmpty() && !deptName.equals("-")) {
-                        departmentRepository.findByDepartmentName(deptName).ifPresent(d -> {
-                            employee.setDepartmentId(d.getDepartmentId());
-                            employee.setDepartmentName(d.getDepartmentName());
-                        });
+                    	    Department dept = departmentRepository.findByDepartmentName(deptName)
+                    			        .orElseThrow(() -> new IllegalArgumentException(
+                    			            String.format("행 %d: 존재하지 않는 부서명 '%s'", row.getRowNum()+1, deptName)));
+                    			    employee.setDepartmentId(dept.getDepartmentId());
+                    			    employee.setDepartmentName(dept.getDepartmentName());
                     }
 
                     String posName = getCellValue(row, 3).trim();
                     if (!posName.isEmpty() && !posName.equals("-")) {
-                        positionRepository.findByPositionName(posName).ifPresent(p -> {
-                            employee.setPositionId(p.getPositionId());
-                            employee.setPositionName(p.getPositionName());
-                        });
+                    	    Position pos = positionRepository.findByPositionName(posName)
+                    			        .orElseThrow(() -> new IllegalArgumentException(
+                    			            String.format("행 %d: 존재하지 않는 직위명 '%s'", row.getRowNum()+1, posName)));
+                    		    	employee.setPositionId(pos.getPositionId());
+                    			    employee.setPositionName(pos.getPositionName());
                     }
 
 
                     String mobilePhone = getCellValue(row, 4).replaceAll("[^0-9]", "");
+                    if (!mobilePhone.isEmpty() && !mobilePhone.matches("^01[0-9]{8,9}$")) {
+                    	    throw new IllegalArgumentException(
+                    	        String.format("행 %d: 유효하지 않은 휴대폰 번호 형식 '%s'", row.getRowNum()+1, mobilePhone));
+                    	}
                     employee.setMobilePhone(mobilePhone);
 
                     employee.setHireDate(readDate(row, 5));        // ▼ (2)에서 추가할 메서드

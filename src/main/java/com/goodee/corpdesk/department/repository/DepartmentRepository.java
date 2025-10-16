@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.goodee.corpdesk.department.entity.Department;
-import com.goodee.corpdesk.position.entity.Position;
 
 public interface DepartmentRepository extends JpaRepository<Department, Integer> {
 
@@ -27,6 +26,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
     @Query("update Department d set d.parentDepartmentId = :newParentId where d.parentDepartmentId = :oldParentId")
     int reparentChildren(@Param("oldParentId") Integer oldParentId,
                          @Param("newParentId") Integer newParentId);
-	Optional<Position> findByDepartmentNameAndUseYnTrue(String deptName);
+	Optional<Department> findByDepartmentNameAndUseYnTrue(String deptName);
 
 }

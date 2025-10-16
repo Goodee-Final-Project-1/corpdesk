@@ -36,7 +36,6 @@
 <c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
 <c:import url="/WEB-INF/views/include/header.jsp"/>
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
-<form:hidden path="username" id="employeeUsername" />
 <!-- 사원 정보 폼 -->
 <div class="card card-default">
 <div class="card-body">

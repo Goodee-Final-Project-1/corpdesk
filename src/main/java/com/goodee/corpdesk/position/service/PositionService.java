@@ -116,7 +116,6 @@ public class PositionService {
     }
     
  // 직위 목록 + 사용 사원 수 + 검색
- // 직위 목록 + 사용 사원 수 + 검색
     public List<PositionDTO> getAllWithEmployeeCount(String keyword) {
         // 1) 전체 목록 or 검색 결과 로딩 (기존 그대로)
         final List<PositionDTO> all = (keyword == null || keyword.trim().isEmpty())
