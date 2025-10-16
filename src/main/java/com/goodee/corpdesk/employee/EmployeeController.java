@@ -472,7 +472,7 @@ public class EmployeeController {
 
 	@PostMapping("update/email")
 	public String updateEmail(Authentication authentication, @Validated(UpdateEmail.class) Employee employee,
-			BindingResult bindingResult) {
+			BindingResult bindingResult, Model model) {
 		if (bindingResult.hasErrors()) {
 			return "employee/update_email";
 		}
@@ -484,7 +484,8 @@ public class EmployeeController {
 			return "employee/update_email";
 		}
 
-        return "redirect:/employee/link";
+		model.addAttribute("msg", "변경되었습니다.");
+        return "employee/update_email";
     }
 
     @GetMapping("update/password")
