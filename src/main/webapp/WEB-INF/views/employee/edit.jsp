@@ -7,7 +7,6 @@
 <head>
 <meta charset="UTF-8">
 <title>사원 상세 페이지</title>
-<input type="hidden" id="username" value="${employee.username}">
 <c:import url="/WEB-INF/views/include/head.jsp"/>
 <style>
 /* 기존 스타일 그대로 유지 */
@@ -37,7 +36,6 @@
 <c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
 <c:import url="/WEB-INF/views/include/header.jsp"/>
 <c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
-
 <!-- 사원 정보 폼 -->
 <div class="card card-default">
 <div class="card-body">
@@ -152,7 +150,7 @@
 	                	주소<form:input path="address" class="form-control"/>
 	                </div>
 	                <div class="col-md-3">
-	                	퇴사일자 <form:input path="lastWorkingDay" type="date" class="form-control"/>
+	                	퇴사일자 <form:input path="lastWorkingDay" id="lastWorkingDay" type="date" class="form-control"/>
 	                </div>
                 </div>
             </div>
@@ -322,37 +320,8 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
- // 삭제 버튼
-    window.deleteEmployee = function(username) {
-	 
-    	const lastWorkingDayInput = document.querySelector('#lastWorkingDay');
-    	  if (lastWorkingDayInput && !lastWorkingDayInput.value) {
-    	    alert('퇴사일자를 먼저 설정해 주세요');
-    	    return;
-    	  }
-	 
-	 
-	 
-        if (!confirm("정말 삭제하시겠습니까?")) return;
 
-        fetch(`/employee/delete/${username}`, {
-            method: 'POST'
-            // CSRF 헤더 제거
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert("삭제 성공!");
-                window.location.href = "/employee/list";
-            } else {
-                alert("삭제 실패: " + (data.error || "서버 오류"));
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("삭제 중 오류 발생");
-        });
-    };
+
 
 
 
@@ -441,6 +410,48 @@ document.addEventListener("DOMContentLoaded", function() {
 
 });
 
+//삭제 버튼
+function deleteEmployee(username) {
+const lastWorkingDayInput = document.getElementById('lastWorkingDay');
+if (lastWorkingDayInput && !lastWorkingDayInput.value) {
+alert('퇴사일자를 먼저 설정해 주세요');
+return;
+}
+if (!confirm("정말 삭제하시겠습니까?")) return;
+
+// CSRF 메타 (둘 다 있을 때만 추가 → Invalid name 방지)
+const csrfTokenEl  = document.querySelector('meta[name="_csrf"]');
+const csrfHeaderEl = document.querySelector('meta[name="_csrf_header"]');
+const token  = csrfTokenEl  ? csrfTokenEl.getAttribute('content')  : null;
+const header = csrfHeaderEl ? csrfHeaderEl.getAttribute('content') : null;
+
+const headers = new Headers();
+headers.append('Content-Type', 'application/x-www-form-urlencoded');
+if (header && token) headers.append(header.trim(), token.trim());
+
+const body = new URLSearchParams({
+lastWorkingDay: lastWorkingDayInput ? lastWorkingDayInput.value : ''
+});
+
+fetch('/employee/delete/' + encodeURIComponent(username), {
+method: 'POST',
+headers,
+body: body.toString()
+})
+.then(res => res.json())
+.then(data => {
+if (data.success) {
+  alert(data.message || "삭제 성공!");
+  window.location.href = "/employee/list";
+} else {
+  alert("삭제 실패: " + (data.message || "서버 오류"));
+}
+})
+.catch(err => {
+console.error(err);
+alert("삭제 중 오류 발생");
+});
+}
 
 //---------------- 출퇴근 수정 이벤트 함수 ----------------
 function attachUpdateEvent(button){

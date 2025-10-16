@@ -1,7 +1,9 @@
 package com.goodee.corpdesk.employee;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,9 +13,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
@@ -88,17 +89,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
 	List<Employee> findByDepartmentIdAndUseYnTrue(Integer departmentId);
 
-
-
-
-
-
-
-
-
-
-
-
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("update Employee e set e.departmentId = :newDeptId where e.departmentId = :oldDeptId")
+	int moveAllByDepartment(@Param("oldDeptId") Integer oldDeptId,
+	                        @Param("newDeptId") Integer newDeptId);
 
 
 	@Query("""
@@ -158,5 +152,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	WHERE e.username = :username
 """)
 	Optional<EmployeeSecurityDTO> findEmployeeSecurityByUsername(@Param("username") String username);
-	
+
+	Optional<EmailOnly> findExternalEmailByUsername(String username);
 }
