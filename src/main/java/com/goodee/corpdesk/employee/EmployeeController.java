@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
+import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
 import com.goodee.corpdesk.department.service.DepartmentService;
 import com.goodee.corpdesk.employee.Employee.CreateGroup;
@@ -12,6 +13,7 @@ import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
 import com.goodee.corpdesk.employee.validation.UpdateEmail;
 import com.goodee.corpdesk.employee.validation.UpdatePassword;
 import com.goodee.corpdesk.file.entity.EmployeeFile;
+import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
 import com.goodee.corpdesk.position.service.PositionService;
 import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
@@ -38,7 +40,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,61 +196,98 @@ public class EmployeeController {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
 
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
+            int rowIndex = 0;
+            int consecutiveEmpty = 0;
+            final int EMPTY_BREAK = 50; // 연속 50개 빈 행이면 종료
+
+            for (Row row : sheet) {
+                if (rowIndex++ == 0) continue; // 헤더(0행) 스킵
+
+                if (isRowEmpty(row)) {
+                    if (++consecutiveEmpty >= EMPTY_BREAK) break;
+                    continue;
+                }
+                consecutiveEmpty = 0;
 
                 try {
-                    // 1. 데이터 추출
                     EmployeeListDTO employee = new EmployeeListDTO();
                     employee.setName(getCellValue(row, 0));
-                    String username = getCellValue(row, 1);
-                    employee.setUsername(username);
-                    String mobilePhone = getCellValue(row, 4);
-                    employee.setMobilePhone(mobilePhone);
-                    String rawPassword = getCellValue(row, 7);
-                    if (rawPassword.isEmpty()) {
-                        rawPassword = "1234";
-                    }
-                    employee.setPassword(passwordEncoder.encode(rawPassword));
-                    employee.setHireDate(parseDate(getCellValue(row, 5)));
-                    employee.setLastWorkingDay(parseDate(getCellValue(row, 6)));
-                    
-                    String deptName = getCellValue(row, 2);
-                    departmentRepository.findByDepartmentName(deptName).ifPresent(dept -> {
-                        employee.setDepartmentId(dept.getDepartmentId());
-                        employee.setDepartmentName(dept.getDepartmentName());
-                    });
 
-                    String posName = getCellValue(row, 3);
-                    positionRepository.findByPositionName(posName).ifPresent(pos -> {
-                        employee.setPositionId(pos.getPositionId());
-                        employee.setPositionName(pos.getPositionName());
-                    });
-                    
+                    String username = getCellValue(row, 1).trim();
+                    if (username.isEmpty()) throw new IllegalArgumentException("아이디가 비어있음");
+                    employee.setUsername(username);
+
+                    String deptName = getCellValue(row, 2).trim();
+                    if (!deptName.isEmpty() && !deptName.equals("-")) {
+                    	    Department dept = departmentRepository.findByDepartmentName(deptName)
+                    			        .orElseThrow(() -> new IllegalArgumentException(
+                    			            String.format("행 %d: 존재하지 않는 부서명 '%s'", row.getRowNum()+1, deptName)));
+                    			    employee.setDepartmentId(dept.getDepartmentId());
+                    			    employee.setDepartmentName(dept.getDepartmentName());
+                    }
+
+                    String posName = getCellValue(row, 3).trim();
+                    if (!posName.isEmpty() && !posName.equals("-")) {
+                    	    Position pos = positionRepository.findByPositionName(posName)
+                    			        .orElseThrow(() -> new IllegalArgumentException(
+                    			            String.format("행 %d: 존재하지 않는 직위명 '%s'", row.getRowNum()+1, posName)));
+                    		    	employee.setPositionId(pos.getPositionId());
+                    			    employee.setPositionName(pos.getPositionName());
+                    }
+
+
+                    String mobilePhone = getCellValue(row, 4).replaceAll("[^0-9]", "");
+                    if (!mobilePhone.isEmpty() && !mobilePhone.matches("^01[0-9]{8,9}$")) {
+                    	    throw new IllegalArgumentException(
+                    	        String.format("행 %d: 유효하지 않은 휴대폰 번호 형식 '%s'", row.getRowNum()+1, mobilePhone));
+                    	}
+                    employee.setMobilePhone(mobilePhone);
+
+                    employee.setHireDate(readDate(row, 5));        // ▼ (2)에서 추가할 메서드
+                    employee.setLastWorkingDay(readDate(row, 6));  // ▼ (2)에서 추가할 메서드
+
                     employee.setUseYn(true);
 
-                    // 2. DB에 저장하기 전 중복 확인 로직 추가
-                    // username 중복 확인
-                    if (employeeService.isUsernameExists(username)) {
-                        log.warn("직원 데이터 처리 실패 ({}번째 행): 아이디 '{}'가 이미 존재합니다.", i + 1, username);
-                        failCount++;
-                        continue; // 다음 행으로 이동
-                    }
-                    
-                    // mobilePhone 중복 확인
-                    if (employeeService.isMobilePhoneExists(mobilePhone)) {
-                        log.warn("직원 데이터 처리 실패 ({}번째 행): 휴대폰 번호 '{}'가 이미 존재합니다.", i + 1, mobilePhone);
-                        failCount++;
-                        continue; // 다음 행으로 이동
+                 // (업서트) username이 있으면 업데이트, 없으면 신규 생성
+                    boolean exists = employeeService.isUsernameExists(username);
+
+                    if (exists) {
+                        // 휴대폰 중복: 같은 사람은 허용, 다른 사람과 충돌이면 실패
+                        if (!mobilePhone.isEmpty()) {
+                            boolean phoneInUseByOther = employeeService.isMobilePhoneExists(mobilePhone)
+                                    && employeeRepository.findByUsername(username)
+                                                         .map(e -> !mobilePhone.equals(e.getMobilePhone()))
+                                                         .orElse(true);
+                            if (phoneInUseByOther) {
+                                log.warn("행 {}: 휴대폰 '{}'가 다른 사용자와 중복", row.getRowNum()+1, mobilePhone);
+                                failCount++;
+                                continue;
+                            }
+                        }
+
+                        // 업데이트(비밀번호/권한은 건드리지 않음)
+                        employeeService.updateFromImport(employee);
+                        successCount++;
+
+                    } else {
+                        // 신규 생성
+                        if (!mobilePhone.isEmpty() && employeeService.isMobilePhoneExists(mobilePhone)) {
+                            log.warn("행 {}: 휴대폰 '{}' 중복", row.getRowNum()+1, mobilePhone);
+                            failCount++;
+                            continue;
+                        }
+
+                        Employee entity = employee.toEntity();
+                        if (entity.getPassword() == null || entity.getPassword().isBlank()) {
+                            entity.setPassword("1234"); // raw, addEmployee에서 encode됨
+                        }
+                        employeeService.addEmployee(entity);
+                        successCount++;
                     }
 
-                    // 3. 중복이 없을 경우에만 DB 저장
-                    employeeRepository.save(employee.toEntity());
-                    successCount++;
-                    
+
                 } catch (Exception e) {
-                    log.error("직원 데이터 처리 실패 ({}번째 행): {}", i + 1, e.getMessage());
+                    log.error("직원 데이터 처리 실패 ({}행): {}", row.getRowNum()+1, e.getMessage());
                     failCount++;
                 }
             }
@@ -276,31 +314,62 @@ public class EmployeeController {
         return formatter.formatCellValue(cell).trim();
     }
 
-    private LocalDate parseDate(String dateString) {
-        if (dateString == null || dateString.isEmpty() || "-".equals(dateString.trim())) {
-            return null;
+    private boolean isRowEmpty(Row row) {
+        if (row == null) return true;
+        int first = row.getFirstCellNum();
+        int last = row.getLastCellNum();
+        if (first < 0 || last < 0) return true;
+        DataFormatter fmt = new DataFormatter();
+        for (int c = first; c < last; c++) {
+            Cell cell = row.getCell(c);
+            if (cell == null) continue;
+            if (cell.getCellType() != CellType.BLANK) {
+                String v = fmt.formatCellValue(cell);
+                if (v != null && !v.trim().isEmpty()) return false;
+            }
+        }
+        return true;
+    }
+
+    private LocalDate readDate(Row row, int idx) {
+        Cell cell = row.getCell(idx);
+        if (cell == null) return null;
+
+        // 1) 엑셀 날짜 셀(서식 포함)
+        if (DateUtil.isCellDateFormatted(cell)) {
+            try {
+                return cell.getLocalDateTimeCellValue().toLocalDate();
+            } catch (Exception ignore) {
+                return cell.getDateCellValue().toInstant()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate();
+            }
         }
 
-        String trimmedDateString = dateString.trim();
+        // 2) 문자열/숫자 직렬값 파싱
+        String s = getCellValue(row, idx);
+        if (s == null || s.isBlank() || "-".equals(s.trim())) return null;
 
-        // 구분자가 있는 포맷터들
-        DateTimeFormatter[] formatters = {
+        // 숫자 직렬값(예: 45292)
+        if (s.matches("\\d{3,6}")) {
+            try { return DateUtil.getLocalDateTime(Double.parseDouble(s)).toLocalDate(); }
+            catch (Exception ignore) {}
+        }
+
+        DateTimeFormatter[] fmts = {
             DateTimeFormatter.ofPattern("yyyy-MM-dd"),
             DateTimeFormatter.ofPattern("yyyy/MM/dd"),
             DateTimeFormatter.ofPattern("yyyy.MM.dd"),
-            DateTimeFormatter.ofPattern("yyyyMMdd")  // 구분자 없는 포맷 추가
+            DateTimeFormatter.ofPattern("yyyyMMdd"),
+            DateTimeFormatter.ofPattern("M/d/yyyy"),
+            DateTimeFormatter.ofPattern("MM/dd/yyyy"),
+            DateTimeFormatter.ofPattern("d/M/yyyy"),
+            DateTimeFormatter.ofPattern("dd/MM/yyyy")
         };
-
-        for (DateTimeFormatter f : formatters) {
-            try {
-                return LocalDate.parse(trimmedDateString, f);
-            } catch (DateTimeParseException ignored) {
-                // 다른 포맷으로 재시도
-            }
+        for (DateTimeFormatter f : fmts) {
+            try { return LocalDate.parse(s.trim(), f); } catch (Exception ignored) {}
         }
-        
-        // 모든 포맷으로 실패하면 예외 발생
-        throw new DateTimeParseException("Unsupported date format: " + dateString, dateString, 0);
+        return null; // 못 읽으면 null (필요 시 예외로 바꿔도 됨)
     }
 
 
@@ -357,21 +426,21 @@ public class EmployeeController {
 
     @PostMapping("/delete/{username}")
     @ResponseBody
-    public Map<String, Object> deleteEmployee(@PathVariable("username") String username) {
+    public Map<String, Object> deleteEmployee(
+            @PathVariable("username") String username,
+            @RequestParam(value = "lastWorkingDay", required = false)
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+            LocalDate lastWorkingDay) {
+
         Map<String, Object> result = new HashMap<>();
         try {
-            log.info("삭제 요청 username={}", username);
-            employeeService.deactivateEmployee(username);
-
+            employeeService.deactivateEmployee(username, lastWorkingDay); // ▼ 변경된 서비스 호출
             result.put("success", true);
             result.put("message", "삭제(비활성화)되었습니다.");
         } catch (IllegalStateException e) {
-            // ✅ 서비스에서 퇴사일자 없을 때 던진 예외를 그대로 사용자에게 안내
-            log.warn("삭제 불가(퇴사일자 없음): {}", e.getMessage());
             result.put("success", false);
-            result.put("message", e.getMessage()); // "퇴사일자를 먼저 설정해 주세요"
+            result.put("message", e.getMessage());
         } catch (Exception e) {
-            log.error("삭제 실패: {}", e.getMessage(), e);
             result.put("success", false);
             result.put("message", "삭제 중 오류가 발생했습니다.");
         }
@@ -439,7 +508,7 @@ public class EmployeeController {
 
 	@PostMapping("update/email")
 	public String updateEmail(Authentication authentication, @Validated(UpdateEmail.class) Employee employee,
-			BindingResult bindingResult) {
+			BindingResult bindingResult, Model model) {
 		if (bindingResult.hasErrors()) {
 			return "employee/update_email";
 		}
@@ -451,7 +520,8 @@ public class EmployeeController {
 			return "employee/update_email";
 		}
 
-        return "redirect:/employee/link";
+		model.addAttribute("msg", "변경되었습니다.");
+        return "employee/update_email";
     }
 
     @GetMapping("update/password")
