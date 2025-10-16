@@ -45,10 +45,11 @@
 						<div class="app-brand w-100 d-flex justify-content-center border-bottom-0">
 							<h4 class="text-dark text-center mb-5">이메일 변경</h4>
 <%--							<a class="w-auto pl-0" href="/index.html">--%>
-<%--								<img src="images/logo.png" alt="Mono">--%>
-<%--								<span class="brand-name text-dark">MONO</span>--%>
-<%--							</a>--%>
+							<%--								<img src="images/logo.png" alt="Mono">--%>
+							<%--								<span class="brand-name text-dark">MONO</span>--%>
+							<%--							</a>--%>
 						</div>
+						<p>${msg}</p>
 					</div>
 					<div class="card-body px-5 pb-5 pt-0">
 						<form:form action="/employee/update/email" method="post" modelAttribute="employee">
