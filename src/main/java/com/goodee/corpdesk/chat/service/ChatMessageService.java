@@ -50,8 +50,20 @@ public class ChatMessageService {
 		Employee emp = (Employee) map.get("employee");
 		Department department = (Department) map.get("department");
 		Position position = (Position) map.get("position");
-		String userNameDepPos = department.getDepartmentName() + " " + position.getPositionName() + " " + emp.getName();
-		return userNameDepPos;
+		  String userNameDepPos=null;
+	        if(department==null) {
+	        	userNameDepPos = "-";
+	        }else {
+	        	userNameDepPos =department.getDepartmentName();
+	        }
+	        if(position==null) {
+	        	userNameDepPos=userNameDepPos+" - ";
+	        }else {
+	        	userNameDepPos=userNameDepPos+" "+position.getPositionName();
+	        }
+	        
+	         userNameDepPos = userNameDepPos+ " " + emp.getName();
+	        return userNameDepPos;
 
 	}
 
