@@ -1,5 +1,6 @@
 package com.goodee.corpdesk.chat.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,9 +36,9 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 	//기존 방을 나갔다가 다시 열경우
 	@Transactional
 	@Modifying
-	@Query("UPDATE ChatParticipant c SET useYn = true , c.updatedAt = now() "+
+	@Query("UPDATE ChatParticipant c SET useYn = true , c.updatedAt =:updatedAt "+
 			   "WHERE c.employeeUsername = :username AND c.chatRoomId =:roomId")
-		void updateRoomUseYnTrue(@Param("username") String username, @Param("roomId") Long roomId);
+		void updateRoomUseYnTrue(@Param("username") String username,@Param("updatedAt")LocalDateTime updateAt, @Param("roomId") Long roomId);
 	//채팅방을 나갈 경우
 		@Transactional
 		@Modifying

@@ -1,43 +1,5 @@
 package com.goodee.corpdesk.employee;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goodee.corpdesk.attendance.DTO.AttendanceEditDTO;
 import com.goodee.corpdesk.attendance.entity.Attendance;
@@ -55,11 +17,33 @@ import com.goodee.corpdesk.position.entity.Position;
 import com.goodee.corpdesk.position.repository.PositionRepository;
 import com.goodee.corpdesk.position.service.PositionService;
 import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
-
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -461,40 +445,6 @@ public class EmployeeController {
             result.put("message", "삭제 중 오류가 발생했습니다.");
         }
         return result;
-    }
-
-
-
-
-
-	// FIXME: 배포 전에 삭제 해야됨
-//	@GetMapping
-//	public String link() {
-//		return "employee/link";
-//	}
-//
-//    @GetMapping("sample_page")
-//    public void sample() {
-//    }
-//
-//    @GetMapping("sign_in")
-//    public String signIn() {
-//        return "sample/sign_in";
-//    }
-//
-//    @GetMapping("reset")
-//    public String reset() {
-//        return "sample/reset_password";
-//    }
-
-    @GetMapping("join")
-    public void join() {
-    }
-
-    @PostMapping("join")
-    public String join(Employee employee) {
-        employeeService.join(employee);
-        return "employee/link";
     }
 
     @GetMapping("detail")
