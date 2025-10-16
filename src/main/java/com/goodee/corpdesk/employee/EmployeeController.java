@@ -119,19 +119,26 @@ public class EmployeeController {
             return "employee/add";
         }
 
-        if (employeeService.isUsernameExists(employee.getUsername())) {
+        // ✅ 입력값 정규화 후 중복 체크
+        String normUsername = canon(employee.getUsername());
+        String normMobile   = canonMobile(employee.getMobilePhone());
+        employee.setUsername(normUsername);
+        employee.setMobilePhone(normMobile);
+
+        if (employeeService.isUsernameExists(normUsername)) {
             bindingResult.rejectValue("username", "error.employee", "이미 사용 중인 아이디입니다.");
             return "employee/add";
         }
 
-        if (employeeService.isMobilePhoneExists(employee.getMobilePhone())) {
+        if (employeeService.isMobilePhoneExists(normMobile)) {
             bindingResult.rejectValue("mobilePhone", "error.employee", "이미 등록된 휴대전화입니다.");
             return "employee/add";
         }
-        
-        employeeService.addEmployee(employee);
+
+        employeeService.addEmployee(employee); // 서비스에서도 한 번 더 정규화하지만 idempotent
         return "redirect:/employee/list";
     }
+
 
     // 직원 목록
     @GetMapping("/list")
@@ -205,117 +212,171 @@ public class EmployeeController {
     
  // importFromExcel 메서드 내부 로직 수정
     @PostMapping("/import")
-    public String importFromExcel(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
-        int successCount = 0;
-        int failCount = 0;
+    public String importFromExcel(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
+        int success = 0, fail = 0, skip = 0;
+
+        // 파일 내 중복 방지용
+        java.util.Set<String> seenUsernames = new java.util.HashSet<>();
 
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
-
-            int rowIndex = 0;
-            int consecutiveEmpty = 0;
-            final int EMPTY_BREAK = 50; // 연속 50개 빈 행이면 종료
+            int rowIndex = 0, consecutiveEmpty = 0;
+            final int EMPTY_BREAK = 50;
 
             for (Row row : sheet) {
-                if (rowIndex++ == 0) continue; // 헤더(0행) 스킵
-
-                if (isRowEmpty(row)) {
+                if (rowIndex++ == 0) continue;                 // 헤더 스킵
+                if (isRowEmpty(row)) {                         // 빈행 처리
                     if (++consecutiveEmpty >= EMPTY_BREAK) break;
                     continue;
                 }
                 consecutiveEmpty = 0;
 
                 try {
-                    EmployeeListDTO employee = new EmployeeListDTO();
-                    employee.setName(getCellValue(row, 0));
-
-                    String username = getCellValue(row, 1).trim();
-                    if (username.isEmpty()) throw new IllegalArgumentException("아이디가 비어있음");
-                    employee.setUsername(username);
-
-                    String deptName = getCellValue(row, 2).trim();
-                    if (!deptName.isEmpty() && !deptName.equals("-")) {
-                    	    Department dept = departmentRepository.findByDepartmentName(deptName)
-                    			        .orElseThrow(() -> new IllegalArgumentException(
-                    			            String.format("행 %d: 존재하지 않는 부서명 '%s'", row.getRowNum()+1, deptName)));
-                    			    employee.setDepartmentId(dept.getDepartmentId());
-                    			    employee.setDepartmentName(dept.getDepartmentName());
+                    // --------- 정규화 유틸 사용 ---------
+                    String name     = canon(getCellValue(row, 0));
+                    String username = canon(getCellValue(row, 1));
+                    if (username == null || username.isEmpty()) {
+                        throw new IllegalArgumentException("아이디가 비어있음");
                     }
 
-                    String posName = getCellValue(row, 3).trim();
-                    if (!posName.isEmpty() && !posName.equals("-")) {
-                    	    Position pos = positionRepository.findByPositionName(posName)
-                    			        .orElseThrow(() -> new IllegalArgumentException(
-                    			            String.format("행 %d: 존재하지 않는 직위명 '%s'", row.getRowNum()+1, posName)));
-                    		    	employee.setPositionId(pos.getPositionId());
-                    			    employee.setPositionName(pos.getPositionName());
+                    // 1) username raw vs canon
+                    final String rawU      = getCellValue(row, 1);
+                    final String canonU    = username; // 이미 canon() 적용된 값
+                    final String hexRawU   = java.util.HexFormat.of().formatHex(rawU.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    final String hexCanonU = java.util.HexFormat.of().formatHex(canonU.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    log.info("행 {} USER raw='{}'(hex={}) -> canon='{}'(hex={})",
+                            row.getRowNum()+1, rawU, hexRawU, canonU, hexCanonU);
+
+                    // 2) 파일 내 중복 검사 결과 (기존 seenUsernames.add(username) 대체)
+                    boolean firstSeen = seenUsernames.add(canonU);
+                    log.info("행 {} seenUsernames.add('{}') -> {}", row.getRowNum()+1, canonU, firstSeen);
+                    if (!firstSeen) {
+                        skip++;
+                        continue;
                     }
 
+                    // 3) 부서/직위 raw vs canon
+                    String deptRaw  = getCellValue(row, 2);
+                    String posRaw   = getCellValue(row, 3);
+                    String deptName = canon(deptRaw);
+                    String posName  = canon(posRaw);
+                    log.info("행 {} DEPT raw='{}' -> canon='{}'", row.getRowNum()+1, deptRaw, deptName);
+                    log.info("행 {} POS  raw='{}' -> canon='{}'", row.getRowNum()+1, posRaw,  posName);
 
-                    String mobilePhone = getCellValue(row, 4).replaceAll("[^0-9]", "");
-                    if (!mobilePhone.isEmpty() && !mobilePhone.matches("^01[0-9]{8,9}$")) {
-                    	    throw new IllegalArgumentException(
-                    	        String.format("행 %d: 유효하지 않은 휴대폰 번호 형식 '%s'", row.getRowNum()+1, mobilePhone));
-                    	}
-                    employee.setMobilePhone(mobilePhone);
+                    // 4) 모바일 raw vs canon + 존재여부
+                    String mobileRaw   = getCellValue(row, 4);
+                    String mobilePhone = canonMobile(mobileRaw);
+                    boolean mobileExists = employeeService.isMobilePhoneExists(mobilePhone);
+                    log.info("행 {} MOBILE raw='{}' -> canon='{}', existsByMobile={}",
+                            row.getRowNum()+1, mobileRaw, mobilePhone, mobileExists);
 
-                    employee.setHireDate(readDate(row, 5));        // ▼ (2)에서 추가할 메서드
-                    employee.setLastWorkingDay(readDate(row, 6));  // ▼ (2)에서 추가할 메서드
+                    // 5) username 존재여부 (DB)
+                    boolean userExists = employeeService.isUsernameExists(canonU);
+                    log.info("행 {} existsByUsername(canon)={}", row.getRowNum()+1, userExists);
 
-                    employee.setUseYn(true);
+                    // 부서/직위 매핑(이름 → ID)
+                    EmployeeListDTO dto = new EmployeeListDTO();
+                    dto.setName(name);
+                    dto.setUsername(canonU);
 
-                 // (업서트) username이 있으면 업데이트, 없으면 신규 생성
-                    boolean exists = employeeService.isUsernameExists(username);
-
-                    if (exists) {
-                        // 휴대폰 중복: 같은 사람은 허용, 다른 사람과 충돌이면 실패
-                        if (!mobilePhone.isEmpty()) {
-                            boolean phoneInUseByOther = employeeService.isMobilePhoneExists(mobilePhone)
-                                    && employeeRepository.findByUsername(username)
-                                                         .map(e -> !mobilePhone.equals(e.getMobilePhone()))
-                                                         .orElse(true);
-                            if (phoneInUseByOther) {
-                                log.warn("행 {}: 휴대폰 '{}'가 다른 사용자와 중복", row.getRowNum()+1, mobilePhone);
-                                failCount++;
-                                continue;
-                            }
-                        }
-
-                        // 업데이트(비밀번호/권한은 건드리지 않음)
-                        employeeService.updateFromImport(employee);
-                        successCount++;
-
-                    } else {
-                        // 신규 생성
-                        if (!mobilePhone.isEmpty() && employeeService.isMobilePhoneExists(mobilePhone)) {
-                            log.warn("행 {}: 휴대폰 '{}' 중복", row.getRowNum()+1, mobilePhone);
-                            failCount++;
-                            continue;
-                        }
-
-                        Employee entity = employee.toEntity();
-                        if (entity.getPassword() == null || entity.getPassword().isBlank()) {
-                            entity.setPassword("1234"); // raw, addEmployee에서 encode됨
-                        }
-                        employeeService.addEmployee(entity);
-                        successCount++;
+                    if (!isDashOrEmpty(deptName)) {
+                        Department dept = departmentRepository.findByDepartmentName(deptName)
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                String.format("행 %d: 존재하지 않는 부서명 '%s'", row.getRowNum()+1, deptName)));
+                        dto.setDepartmentId(dept.getDepartmentId());
+                        dto.setDepartmentName(dept.getDepartmentName());
+                    }
+                    if (!isDashOrEmpty(posName)) {
+                        Position pos = positionRepository.findByPositionName(posName)
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                String.format("행 %d: 존재하지 않는 직위명 '%s'", row.getRowNum()+1, posName)));
+                        dto.setPositionId(pos.getPositionId());
+                        dto.setPositionName(pos.getPositionName());
                     }
 
+                    dto.setMobilePhone(mobilePhone);
+                    dto.setHireDate(readDate(row, 5));
+                    dto.setLastWorkingDay(readDate(row, 6));
+                    dto.setUseYn(true);
+
+                    // ------ 업서트 금지: 생성 전용 ------
+                    if (userExists) {
+                        // 재업로드 시 같은(정규화된) username이면 스킵
+                        skip++;
+                        continue;
+                    }
+
+                    // 신규 생성 전 휴대폰 중복(다른 사용자) 방지
+                    if (!mobilePhone.isEmpty() && mobileExists) {
+                        log.warn("행 {}: 휴대폰 '{}' 중복", row.getRowNum()+1, mobilePhone);
+                        fail++;
+                        continue;
+                    }
+
+                    // 신규 엔티티 생성
+                    Employee entity = dto.toEntity();
+                    if (entity.getPassword() == null || entity.getPassword().isBlank()) {
+                        entity.setPassword("1234"); // raw, addEmployee에서 encode됨
+                    }
+
+                    // 최종 방어(경합 대비): 다시 username 존재 확인
+                    if (employeeService.isUsernameExists(canonU)) {
+                        skip++;
+                        continue;
+                    }
+
+                    employeeService.addEmployee(entity);
+                    success++;
 
                 } catch (Exception e) {
-                    log.error("직원 데이터 처리 실패 ({}행): {}", row.getRowNum()+1, e.getMessage());
-                    failCount++;
+                    String usernameRaw = getCellValue(row, 1);
+                    String deptRaw     = getCellValue(row, 2);
+                    String posRaw      = getCellValue(row, 3);
+                    String mobileRaw   = getCellValue(row, 4);
+
+                    String userHex = java.util.HexFormat.of().formatHex(usernameRaw.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    String deptHex = java.util.HexFormat.of().formatHex(deptRaw.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    String posHex  = java.util.HexFormat.of().formatHex(posRaw.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+                    log.error("행 {} 실패: {} | name='{}', username='{}'(hex={}), dept='{}'(hex={}), pos='{}'(hex={}), mobile='{}'",
+                            row.getRowNum()+1, e.getMessage(),
+                            getCellValue(row,0),
+                            usernameRaw, userHex,
+                            deptRaw, deptHex,
+                            posRaw, posHex,
+                            mobileRaw
+                    );
+                    fail++;
                 }
             }
+
         } catch (IOException e) {
             log.error("엑셀 파일 처리 중 오류 발생: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("message", "엑셀 파일 처리 중 오류 발생: " + e.getMessage());
+            ra.addFlashAttribute("message", "엑셀 파일 처리 중 오류: " + e.getMessage());
             return "redirect:/employee/list";
         }
-        
-        // 최종 메시지 반환 로직은 하나로 통합
-        redirectAttributes.addFlashAttribute("message", successCount + "명 등록 완료, 실패: " + failCount + "명");
+
+        ra.addFlashAttribute("message", String.format("등록: %d명, 스킵: %d명, 실패: %d명", success, skip, fail));
         return "redirect:/employee/list";
+    }
+
+    // 유틸들 추가
+    private static final java.util.regex.Pattern ZERO_WIDTH =
+        java.util.regex.Pattern.compile("[\\u200B\\u200C\\u200D\\uFEFF]");
+
+    private String canon(String s) {
+        if (s == null) return "";
+        String t = s.strip();
+        t = ZERO_WIDTH.matcher(t).replaceAll("");
+        t = java.text.Normalizer.normalize(t, java.text.Normalizer.Form.NFKC);
+        return t;
+    }
+    private String canonMobile(String s) {
+        String t = canon(s);
+        return t.replaceAll("[^0-9]", "");
+    }
+    private boolean isDashOrEmpty(String s) {
+        return s == null || s.isEmpty() || "-".equals(s);
     }
 
  // 셀 값 가져오기 헬퍼 메서드 수정

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -47,9 +49,8 @@ import com.goodee.corpdesk.salary.repository.SalaryRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
-
-@Service
 @Transactional
+@Service
 public class EmployeeService implements UserDetailsService {
 
     @Autowired
@@ -132,10 +133,13 @@ public class EmployeeService implements UserDetailsService {
  // 직원 등록
     public Employee addEmployee(Employee employee) throws Exception {
     	// 0) username 필수 및 중복 금지
-    	String username = employee.getUsername();
+    	String username = canon(employee.getUsername());
     	if (username == null || username.isBlank()) {
     	  throw new IllegalArgumentException("username는 필수입니다.");
-    	   }
+    	   }  
+    	   employee.setUsername(username);
+    	   employee.setMobilePhone(canonMobile(employee.getMobilePhone()));
+    	   
     	  if (employeeRepository.existsById(username)) {
     	    throw new IllegalStateException("이미 존재하는 직원입니다: " + username);
     	   }
@@ -169,8 +173,7 @@ public class EmployeeService implements UserDetailsService {
 
         return newEmployee;
     }
-
-
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public List<EmployeeListDTO> getActiveEmployeesForList() {
         List<Employee> employees = employeeRepository.findAllByUseYnTrue();
         List<EmployeeListDTO> result = new ArrayList<>();
@@ -320,22 +323,6 @@ public class EmployeeService implements UserDetailsService {
         }
     }
 
-    // 직원 삭제(비활성화)
-    public void deactivateEmployee(String username) {
-        Employee employee = employeeRepository.findByUsername(username)
-            .orElseThrow(() -> new IllegalArgumentException("해당 직원이 존재하지 않습니다."));
-        
-	     // ✅ 퇴사일자 체크
-	        if (employee.getLastWorkingDay() == null) {
-	            // 컨트롤러에서 잡아 메시지로 내려보낼 수 있도록 런타임 예외 던짐
-	            throw new IllegalStateException("퇴사일자를 먼저 설정해 주세요");
-	        }
-	        
-        	
-        	employee.setUseYn(false);
-        	employeeRepository.save(employee); // DB 반영
-        
-    }
 
     // 단일 메서드로 통합
     @Transactional
@@ -355,6 +342,7 @@ public class EmployeeService implements UserDetailsService {
         }
         
         employee.setUseYn(false);
+        employee.setEnabled(false);
         employeeRepository.save(employee);
     }
     
@@ -500,6 +488,40 @@ public class EmployeeService implements UserDetailsService {
 
         employeeRepository.save(emp);
     }
+
+    
+ // 기존
+    private static final Pattern ZERO_WIDTH =
+        Pattern.compile("[\\u200B\\u200C\\u200D\\uFEFF]");
+
+    // 개선: 숨은 문자 추가 (WORD JOINER, SOFT HYPHEN 등)
+    private static final Pattern HIDDEN =
+        Pattern.compile("[\\u200B\\u200C\\u200D\\uFEFF\\u2060\\u00AD]");
+
+    // NBSP(00A0) 포함 모든 공백류를 일반 공백으로 통일 후 trim
+    private static final Pattern ALL_SPACES =
+        Pattern.compile("\\p{Z}+");
+
+    // 제어문자 제거
+    private static final Pattern CTRLS =
+        Pattern.compile("\\p{Cntrl}+");
+
+    private String canon(String s) {
+        if (s == null) return "";
+        String t = s;
+        t = HIDDEN.matcher(t).replaceAll("");
+        t = CTRLS.matcher(t).replaceAll("");          // 줄바꿈/탭 등 제어문자 제거
+        t = ALL_SPACES.matcher(t).replaceAll(" ");    // 유니코드 공백 통일
+        t = java.text.Normalizer.normalize(t, java.text.Normalizer.Form.NFKC);
+        return t.strip();                              // 앞뒤 공백 제거
+    }
+
+
+    	private String canonMobile(String s) {
+    	    if (s == null) return null;
+    	    String t = canon(s);
+    	    return t.replaceAll("[^0-9]", "");
+    	}
 
     
 }
