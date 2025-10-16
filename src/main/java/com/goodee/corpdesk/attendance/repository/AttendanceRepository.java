@@ -103,8 +103,9 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     @NativeQuery("""
         WITH a AS (
             SELECT
-               TIMESTAMPDIFF(HOUR, check_in_date_time, check_out_date_time) AS workHours
-               , TIMESTAMPDIFF(DAY, check_in_date_time - INTERVAL 1 DAY, check_out_date_time)
+                DAY(check_in_date_time) AS workDate
+               , SUM(TIMESTAMPDIFF(HOUR, check_in_date_time, COALESCE(check_out_date_time, :now))) AS workHours
+               , MAX(TIMESTAMPDIFF(DAY, check_in_date_time - INTERVAL 1 DAY, COALESCE(check_out_date_time, :now)))
                   AS workDays
                , check_in_date_time
                , check_out_date_time
@@ -114,13 +115,15 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
                 AND username = :username
                 AND (:year IS NULL OR YEAR(check_in_date_time) = :year)
                 AND (:month IS NULL OR MONTH(check_in_date_time) = :month)
+            GROUP BY DATE(check_in_date_time)
         )
         SELECT SUM(a.workHours) AS totalWorkHours, SUM(a.workDays) AS totalWorkDays
         FROM a
     """)
     ResAttendanceDTO findWorkSummaryByUsernameAndYearMonth(@Param("username") String username,
                                                            @Param("year") String year,
-                                                           @Param("month") String month);
+                                                           @Param("month") String month,
+                                                           @Param("now") LocalDateTime now);
 
     // 특정 직원의 근무 상세 기록 조회 (출근일, 출근시간, 퇴근일, 퇴근시간, 근무상태) - 전체/년/월/년&월
     @NativeQuery("""

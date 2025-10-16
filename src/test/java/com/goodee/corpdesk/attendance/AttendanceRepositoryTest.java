@@ -177,7 +177,7 @@ class AttendanceRepositoryTest {
 
         // when
         ResAttendanceDTO workSummary = attendanceRepository.findWorkSummaryByUsernameAndYearMonth(
-                username, null, null);
+                username, null, null, LocalDateTime.now());
 
         // then
         log.warn("{}의 전체 근무 집계:", username);
@@ -194,7 +194,7 @@ class AttendanceRepositoryTest {
 
         // when
         ResAttendanceDTO workSummary = attendanceRepository.findWorkSummaryByUsernameAndYearMonth(
-                username, year, null);
+                username, year, null, LocalDateTime.now());
 
         // then
         log.warn("{}의 {}년 근무 집계:", username, year);
@@ -212,7 +212,7 @@ class AttendanceRepositoryTest {
 
         // when
         ResAttendanceDTO workSummary = attendanceRepository.findWorkSummaryByUsernameAndYearMonth(
-                username, year, month);
+                username, year, month, LocalDateTime.now());
 
         // then
         log.warn("{}의 {}년 {}월 근무 집계:", username, year, month);
