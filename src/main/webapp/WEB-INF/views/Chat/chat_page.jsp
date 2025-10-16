@@ -23,6 +23,7 @@
 	<div class="card card-default chat-right-sidebar">
 	 <div class="card-header">
         <h2 class="roomTitle"></h2>
+        
 
         <div class="dropdown">
           <div class="dropdown">
@@ -45,11 +46,32 @@
 		</div>
 	</div>
 	<!-- Chat Footer -->
-	<div class="chat-footer">
+	<div class="chat-footer "style="background-color:#f0f1f5;" >
+	 <div class="d-flex justify-content-end mb-2 align-items-center" style="margin-right:20px; ">
+    <span class="mr-2" id="translateStatusLabel">번역 비활성화</span>
+    <div class="dropdown">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button"
+              id="translateToggle" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+        번역 설정
+      </button>
+      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="translateToggle">
+        <a class="dropdown-item set-lang" data-lang="EN-US" href="#">영어 (English)</a>
+        <a class="dropdown-item set-lang" data-lang="JA" href="#">일본어 (日本語)</a>
+        <a class="dropdown-item set-lang" data-lang="ZH" href="#">중국어 (中文)</a>
+        <a class="dropdown-item set-lang" data-lang="ES" href="#">스페인어 (Español)</a>
+        <a class="dropdown-item set-lang" data-lang="KO" href="#">한국어</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="#" id="deacivateTranslation">번역 비활성화</a>
+      </div>
+    </div>
+  </div>
+	
+	
 		<form id="chatForm">
 			<div class="input-group input-group-chat">
 				<textarea class="form-control messageInput" id="messageInput"
-					style="height: 100px; resize:none;" aria-label="Text input with dropdown button"></textarea>
+					 aria-label="Text input with dropdown button"></textarea>
 				<div class="input-group-append">
 					<button type="button" id="sendBtn" class="btn btn-primary">
 						메시지 전송</button>

@@ -68,3 +68,8 @@ height:50px;
 
     width: 97%;
 }
+.messageInput {
+	height: 100px !important;
+	resize:none !important;
+	border-left-color: #e5e9f2 !important;
+}
