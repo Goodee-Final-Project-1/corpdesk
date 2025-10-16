@@ -2,6 +2,7 @@
          pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <div class="modal fade" id="newApprovalModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -42,7 +43,7 @@
               </li>
               <li class="d-flex py-2 text-dark">
                 <b class="col-5 p-0">기안부서</b>
-                <p>${userInfo.departmentName}</p>
+                <p>${userDetail.departmentName}</p>
               </li>
               <li class="d-flex py-2 text-dark align-items-center">
                 <label class="col-5 p-0">결재부서</label>

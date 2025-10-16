@@ -228,7 +228,9 @@ public class AttendanceService {
     // 특정 직원의 총 근무 시간 및 총 근무 일수를 조회하여 반환합니다.
     // year와 month가 null이면 전체 횟수를 조회합니다.
     public ResAttendanceDTO getWorkSummary(String username, String year, String month) throws Exception {
-       return attendanceRepository.findWorkSummaryByUsernameAndYearMonth(username, year, month);
+
+       return attendanceRepository.findWorkSummaryByUsernameAndYearMonth(username, year, month, LocalDateTime.now());
+
     }
 
     // 특정 직원의 상세 출퇴근 기록 목록 (출근일, 출퇴근 시간, 근무 상태 등)을 조회합니다.
