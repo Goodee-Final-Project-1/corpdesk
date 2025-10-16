@@ -68,15 +68,15 @@ participantListLi.forEach(l => {
 
 })
 //초대 할 사람이름으로 검색
-const namesearchBtn = document.querySelector(".namesearchBtn")
-namesearchBtn.addEventListener("click", () => {
+const invateUserInput = document.getElementById("searchUserInput");
+invateUserInput.addEventListener("input", () => {
 	const searchUserInputValue = document.getElementById("searchUserInput").value.trim();
 	const participantList = document.getElementById("participantList")
 	const participantLi = participantList.querySelectorAll("li");
 
 	participantLi.forEach(li => {
 		const employeeName = li.querySelector(".employeeName").textContent.trim();
-		if (searchUserInputValue == "" || employeeName == searchUserInputValue) {
+		if (searchUserInputValue == "" || employeeName.includes(searchUserInputValue)) {
 			li.classList.remove("hiddenSearch");
 
 		} else {
@@ -192,6 +192,52 @@ window.addEventListener("keydown", (e) => {
 
 
 });
+
+//메세지 번역 로직
+let translateEnabled = false;
+let targetLang = null;
+
+function toStringLang(lang){
+	switch(lang){
+		case "EN-US":
+			return "영어"
+		case "JA":
+			return "일본어"
+		case "ES":
+			return "스페인어"
+		case "ZH":
+			return "중국어"
+		case "KO":
+			return "한국어"
+		
+	}
+}
+
+  const statusLabel = document.getElementById("translateStatusLabel");
+  const deacivateTranslationBtn = document.getElementById("deacivateTranslation");
+
+  // 언어 선택
+  document.querySelectorAll(".set-lang").forEach(item => {
+    item.addEventListener("click", (e) => {
+      targetLang = e.target.getAttribute("data-lang");
+	  translateEnabled = true;
+	  statusLabel.textContent = "번역 활성화("+toStringLang(targetLang)+")";
+	  statusLabel.style.color = "green";
+    });
+  });
+
+  // 번역 비활성 
+  deacivateTranslationBtn.addEventListener("click", () => {
+    translateEnabled = false;
+	targetLang=null;
+	statusLabel.textContent = "번역 비활성화";
+    statusLabel.style.color = "gray";
+  });
+
+
+
+
+
 
 //메세지 연결 송수신
 // 메세지 수신 박스
@@ -371,8 +417,31 @@ stompClient.connect({}, function(frame) {
 	stompClient.subscribe("/sub/chat/room/" + chatRoomId, (message) => {
 		const msg = JSON.parse(message.body);
 		const isSameSender = msg.employeeUsername == lastSender;
+		if(translateEnabled){
+			console.log("여기");
+			const translate = {text:msg.messageContent,
+								targetLang:targetLang};
+			fetch("/chat/translate",{
+						method:"post",
+						headers:{
+							"Content-Type": "application/json"
+						},
+						body:JSON.stringify(translate)
+						
+					}).then(res=>res.text())
+					  .then(res=>{
+						console.log("여기"+res);
+						msg.messageContent=res;
+						appendMessage(msg, false, isSameSender);
+					  });
+			}else{
+				appendMessage(msg, false, isSameSender);
+				
+			}
 		
-		appendMessage(msg, false, isSameSender);
+		
+		
+		
 		if (msg.messageType == "enter") {
 			 document.querySelectorAll("#participantList li").forEach(l => {
 				const username = msg.employeeUsername
