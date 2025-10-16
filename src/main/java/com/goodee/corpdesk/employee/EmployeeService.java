@@ -41,6 +41,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -66,8 +67,8 @@ import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
 
-@Service
 @Transactional
+@Service
 public class EmployeeService implements UserDetailsService {
 
     @Autowired
@@ -175,7 +176,7 @@ public class EmployeeService implements UserDetailsService {
 
         return newEmployee;
     }
-
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public List<EmployeeListDTO> getActiveEmployeesForList() {
         List<Employee> employees = employeeRepository.findAllByUseYnTrue();
         List<EmployeeListDTO> result = new ArrayList<>();

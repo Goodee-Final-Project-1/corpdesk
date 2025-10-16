@@ -84,7 +84,8 @@ public class ChatMessageService {
 
 		list.forEach(l -> {
 			if (!l.getUseYn()) {
-				chatParticipantRepository.updateRoomUseYnTrue(l.getEmployeeUsername(), RoomId);
+				l.setUpdatedAt(LocalDateTime.now());
+				chatParticipantRepository.updateRoomUseYnTrue(l.getEmployeeUsername(),l.getUpdatedAt(), RoomId);
 			}
 		});
 		return list;
