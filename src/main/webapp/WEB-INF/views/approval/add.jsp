@@ -162,41 +162,61 @@
               <span>※ 기안일은 [결재 요청] 버튼을 클릭한 날짜로 확정됩니다.</span>
               <br><br>
 
-              <table class="table table-bordered">
-                <tbody>
-                <%-- 승인란 --%>
-                <tr id="approverPosition">
-                    <th class="align-middle table-light col-2" rowspan="3">승인</th>
-                    <div>
-                        <td class="text-center" style="width: 20%;">&nbsp;</td>
-                        <td class="text-center" style="width: 20%;"></td>
-                        <td class="text-center" style="width: 20%;"></td>
-                        <td class="text-center" style="width: 20%;"></td>
-                    </div>
-                </tr>
+              <%-- 결재자 리스트 표시 --%>
+              <c:choose>
 
-                <tr id="approverName" style="height: 90px;">
-                    <div>
-                        <td class="text-center align-middle"></td>
-                        <td class="text-center align-middle"></td>
-                        <td class="text-center align-middle"></td>
-                        <td class="text-center align-middle"></td>
-                    </div>
-                </tr>
+                <c:when test="${edit eq true and detail.approverDTOList ne null and not empty detail.approverDTOList}">
+                  <%-- 수정 모드: 기존 결재자 정보 표시 --%>
+                  <c:import url="approver_list.jsp"/>
 
-                <tr id="approvalDate">
-                    <div>
-                        <td class="text-center">&nbsp;</td>
-                        <td class="text-center"></td>
-                        <td class="text-center"></td>
-                        <td class="text-center"></td>
-                    </div>
-                </tr>
-                <%--  --%>
-                </tbody>
-              </table>
-              <%--  --%>
-              <div id="newApproverRow"></div>
+                  <%-- 기존 결재자 정보를 hidden input으로 추가 (JavaScript에서 읽기 위함) --%>
+                  <c:forEach items="${detail.approverDTOList}" var="approver" varStatus="status">
+                    <input type="hidden" name="approverDTOList[${status.index}].username" value="${approver.username}">
+                    <input type="hidden" name="approverDTOList[${status.index}].approvalOrder" value="${approver.approvalOrder}">
+                  </c:forEach>
+                </c:when>
+
+                <c:otherwise>
+                  <%-- 신규 작성 모드: 빈 결재선 표시 --%>
+                  <table class="table table-bordered">
+                    <tbody>
+                    <%-- 승인란 --%>
+                    <tr id="approverPosition">
+                        <th class="align-middle table-light col-2" rowspan="3">승인</th>
+                        <div>
+                            <td class="text-center" style="width: 20%;">&nbsp;</td>
+                            <td class="text-center" style="width: 20%;"></td>
+                            <td class="text-center" style="width: 20%;"></td>
+                            <td class="text-center" style="width: 20%;"></td>
+                        </div>
+                    </tr>
+
+                    <tr id="approverName" style="height: 90px;">
+                        <div>
+                            <td class="text-center align-middle"></td>
+                            <td class="text-center align-middle"></td>
+                            <td class="text-center align-middle"></td>
+                            <td class="text-center align-middle"></td>
+                        </div>
+                    </tr>
+
+                    <tr id="approvalDate">
+                        <div>
+                            <td class="text-center">&nbsp;</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                        </div>
+                    </tr>
+                    <%--  --%>
+                    </tbody>
+                  </table>
+                  <%--  --%>
+                  <div id="newApproverRow"></div>
+                </c:otherwise>
+
+              </c:choose>
+
 
               <%-- 서버 전송용 input hidden --%>
               <input type="hidden" name="username" value="${userInfo.username}">
