@@ -154,11 +154,66 @@ document.getElementById('pdf-btn').addEventListener('click', async function () {
     compress: true
   });
 
+  // ================== 문서 사이즈 계산 및 페이지 분할 후 jsPDF 객체에 추가
   // A4 사이즈 (210mm x 297mm)
+  const pageHeight = 297; // A4 세로 길이
+  const contentHeight = pageHeight - (margin * 2); // 여백을 제외한 실제 컨텐츠 높이
   const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-  // 5. PDF에 캡처된 이미지 추가 (페이지 분할 없이 단일 페이지에 추가)
-  pdf.addImage(imgData, 'JPEG', margin, margin, pdfWidth, pdfHeight);
+  // 5. PDF에 캡처된 이미지를 페이지별로 분할하여 추가
+  let position = 0;
+  let pageNumber = 0;
+
+  while (position < pdfHeight) {
+    if (pageNumber > 0) {
+      pdf.addPage();
+    }
+
+    // 현재 페이지에 들어갈 이미지 영역 계산
+    const remainingHeight = pdfHeight - position;
+    const currentPageHeight = Math.min(contentHeight, remainingHeight);
+
+    // canvas에서 현재 페이지에 해당하는 부분만 잘라내기
+    const sourceY = (position / pdfHeight) * canvas.height;
+    const sourceHeight = (currentPageHeight / pdfHeight) * canvas.height;
+
+    // 임시 캔버스 생성하여 해당 영역만 복사
+    const pageCanvas = document.createElement('canvas');
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = sourceHeight;
+    const pageContext = pageCanvas.getContext('2d');
+
+    pageContext.drawImage(
+        canvas,
+        0, sourceY, canvas.width, sourceHeight,
+        0, 0, canvas.width, sourceHeight
+    );
+
+    const pageImgData = pageCanvas.toDataURL('image/jpeg', 1.0);
+
+    // PDF에 이미지 추가
+    pdf.addImage(pageImgData, 'JPEG', margin, margin, pdfWidth, currentPageHeight);
+
+    // 6. 현재 페이지의 링크 오버레이 추가
+    links.forEach(link => {
+      const linkY = (link.y * ratio) + margin;
+
+      // 링크가 현재 페이지 범위에 있는지 확인
+      if (linkY >= position + margin && linkY < position + margin + contentHeight) {
+        const pdfX = (link.x * ratio) + margin;
+        const adjustedY = linkY - position; // 페이지 내 상대 위치로 조정
+        const linkPdfWidth = link.width * ratio;
+        const linkPdfHeight = link.height * ratio;
+
+        pdf.link(pdfX, adjustedY, linkPdfWidth, linkPdfHeight, { url: link.url });
+      }
+    });
+
+    position += contentHeight;
+    pageNumber++;
+  }
+  // ==================
+
 
   // 6. PDF 생성 후 링크 오버레이 추가
   links.forEach(link => {
