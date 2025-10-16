@@ -1,5 +1,4 @@
 package com.goodee.corpdesk.employee;
-
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -8,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +31,8 @@ import com.goodee.corpdesk.attendance.entity.Attendance;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
 import com.goodee.corpdesk.department.entity.Department;
 import com.goodee.corpdesk.department.repository.DepartmentRepository;
+import com.goodee.corpdesk.email.EmailService;
+import com.goodee.corpdesk.email.SendDTO;
 import com.goodee.corpdesk.employee.dto.EmployeeListDTO;
 import com.goodee.corpdesk.employee.dto.EmployeeSecurityDTO;
 import com.goodee.corpdesk.file.FileManager;
@@ -49,14 +51,14 @@ import com.goodee.corpdesk.salary.repository.SalaryRepository;
 import com.goodee.corpdesk.vacation.VacationManager;
 import com.goodee.corpdesk.vacation.entity.Vacation;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
+
+
 @Transactional
 @Service
 public class EmployeeService implements UserDetailsService {
 
     @Autowired
     private EmployeeRepository employeeRepository;
-    @Autowired
-    private RoleRepository roleRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -91,6 +93,9 @@ public class EmployeeService implements UserDetailsService {
     private VacationRepository vacationRepository;
     @Autowired
     private VacationManager vacationManager;
+
+	@Autowired
+	private EmailService emailService;
 
     // ---------------------- Controller용 Service 메서드 ----------------------
 
@@ -356,13 +361,6 @@ public class EmployeeService implements UserDetailsService {
         return employee;
     }
 
-    public void join(Employee employee) {
-        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
-        employee.setDepartmentId(1);
-        employee.setPositionId(1);
-        employeeRepository.save(employee);
-    }
-
     public Map<String, Object> detail(String username) {
         Employee employee = employeeRepository.findById(username).orElseThrow();
 		Department department = null;
@@ -439,6 +437,33 @@ public class EmployeeService implements UserDetailsService {
         origin.setEncodedEmailPassword(aesBytesEncryptor.encrypt(employee.getExternalEmailPassword().getBytes()));
         return employeeRepository.save(origin);
     }
+
+	public String getEmail(String username) {
+		EmailOnly result = employeeRepository.findExternalEmailByUsername(username).get();
+
+		return result.getExternalEmail();
+	}
+
+	public String resetPassword(String username) throws Exception {
+		Employee employee = employeeRepository.findById(username).orElseThrow();
+
+		SendDTO sendDTO = new SendDTO();
+		sendDTO.setUser(username);
+		sendDTO.setTo(employee.getExternalEmail());
+		sendDTO.setSubject("Corpdesk 임시 비밀번호");
+
+		String tempPassword = UUID.randomUUID().toString()
+				.replace("-", "").substring(0, 10);
+
+		String encoded = passwordEncoder.encode(tempPassword);
+		employee.setPassword(encoded);
+
+		sendDTO.setText("Corpdesk 임시 비밀번호: " + tempPassword);
+
+		emailService.sendMail(sendDTO);
+
+		return "success";
+	}
 
     public ResEmployeeDTO getFulldetail(String username) {
         return employeeRepository.findEmployeeWithDeptAndPosition(true, username);
