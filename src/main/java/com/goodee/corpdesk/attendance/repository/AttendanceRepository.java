@@ -103,7 +103,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     @NativeQuery("""
         WITH a AS (
             SELECT
-                DAY(check_in_date_time) AS workDate
+                DATE(check_in_date_time) AS workDate
                , SUM(TIMESTAMPDIFF(HOUR, check_in_date_time, COALESCE(check_out_date_time, :now))) AS workHours
                , MAX(TIMESTAMPDIFF(DAY, check_in_date_time - INTERVAL 1 DAY, COALESCE(check_out_date_time, :now)))
                   AS workDays
