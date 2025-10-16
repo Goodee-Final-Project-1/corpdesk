@@ -37,6 +37,15 @@ public interface PersonalScheduleRepository extends JpaRepository<PersonalSchedu
     """)
     Integer findOldestScheduleYearByUsername(@Param("useYn") Boolean useYn, @Param("username") String username);
 
+    @Query("""
+        SELECT YEAR(MAX(ps.scheduleDateTime))
+        FROM PersonalSchedule ps
+        WHERE
+            ps.useYn = :useYn
+            AND ps.username = :username
+    """)
+    Integer findLastScheduleYearByUsername(@Param("useYn") Boolean useYn, @Param("username") String username);
+
     PersonalSchedule findPersonalScheduleByUseYnAndPersonalScheduleId(Boolean useYn, Long personalScheduleId);
 
     List<PersonalSchedule> findAllByUseYnAndUsernameAndScheduleDateTimeBetween(Boolean useYn, String username, LocalDateTime startOfDay, LocalDateTime endOfDay);

@@ -7,6 +7,7 @@ import com.goodee.corpdesk.schedule.dto.ResPersonalScheduleDTO;
 import com.goodee.corpdesk.schedule.entity.PersonalSchedule;
 import com.goodee.corpdesk.schedule.repository.PersonalScheduleRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class PersonalScheduleService {
 
     @Autowired
@@ -56,16 +58,19 @@ public class PersonalScheduleService {
 
         // 유저의 가장 오래된 일정 year 반환
         Integer oldestYear = personalScheduleRepository.findOldestScheduleYearByUsername(true, username);
+        // 유저의 가장 미래의 일정 year 반환
+        Integer lastYear = personalScheduleRepository.findLastScheduleYearByUsername(true, username);
 
-        // year ~ 오늘로 List 생성 (유저의 가장 오래된 일정 year가 없다면 오늘 날짜만 있는 List 리턴
+        // oldestYear ~ lastYear로 List 생성 (oldestYear가 없다면 오늘 날짜만 있는 List 리턴
         int currentYear = LocalDate.now().getYear();
-
         if(oldestYear == null) return List.of(currentYear);
 
         List<Integer> years = new ArrayList<>();
-        for(int year = oldestYear; year <= currentYear; year++){
+        for(int year = oldestYear; year <= lastYear; year++){
             years.add(year);
         }
+
+        years.forEach(y -> log.warn("years - y: {}", y));
 
         return years;
         

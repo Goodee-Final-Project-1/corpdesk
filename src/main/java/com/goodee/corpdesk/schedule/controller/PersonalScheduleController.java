@@ -62,7 +62,7 @@ public class PersonalScheduleController {
         List<ResPersonalScheduleDTO> schedules = personalScheduleService.getSchedules(username, reqPersonalScheduleDTO);
 
         // yearRange 생성
-        List<Integer> yearRange = personalScheduleService.getYearRangeByUsername(reqPersonalScheduleDTO.getUsername());
+        List<Integer> yearRange = personalScheduleService.getYearRangeByUsername(username);
 
         model.addAttribute("schedules", schedules);
         model.addAttribute("yearRange", yearRange);
