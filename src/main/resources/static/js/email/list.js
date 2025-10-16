@@ -1,4 +1,5 @@
 const spinner = document.getElementById('spinner');
+const missing = document.getElementById('missing');
 const list = document.getElementById('list');
 const tbody = document.getElementById('tbody');
 const pathArr = location.pathname.split('/');
@@ -15,11 +16,17 @@ async function getMail() {
 		const response = await fetch(`/api/email/${category}/${page}`, {
 			method: 'POST'
 		});
-		if (!response.ok) throw new Error('수신 오류');
+		if (!response.ok) throw new Error('메일을 가져올 수 없습니다.');
 		const data = await response.json();
 
 		spinner.classList.remove('d-flex');
 		list.classList.remove('d-none');
+
+		if (data.content.length == 0) {
+			const cat = category == 'received' ? '받은 ' : '보낸 '
+
+			throw new Error(cat + '메일이 없습니다.');
+		}
 
 		data.content.forEach(function (e) {
 			const tr = document.createElement('tr');
@@ -42,7 +49,14 @@ async function getMail() {
 
 		paging(data.page);
 	} catch (e) {
-		console.log(e);
+		const errorMsg = document.getElementById('errorMsg');
+		errorMsg.innerText = e.message;
+
+		console.error(e);
+		spinner.classList.remove('d-flex');
+		missing.classList.remove('d-none');
+		list.classList.add('d-none');
+		missing.classList.add('d-flex');
 	}
 }
 

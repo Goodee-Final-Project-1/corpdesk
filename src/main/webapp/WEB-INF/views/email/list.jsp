@@ -27,6 +27,9 @@
 			<div id="spinner" class="d-flex d-none align-items-center justify-content-center" style="height: 160px">
 				<div class="sk-pulse"></div>
 			</div>
+			<div id="missing" class="d-none align-items-center justify-content-center" style="height: 160px">
+				<p id="errorMsg">메일이 없습니다.</p>
+			</div>
 			<div id="list" class="d-none email-right-column p-4 p-xl-5">
 				<div class="email-right-header justify-content-center mb-0">
 					<%-- 페이징 --%>
