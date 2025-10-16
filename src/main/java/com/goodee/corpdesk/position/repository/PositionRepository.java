@@ -23,13 +23,28 @@ public interface PositionRepository extends JpaRepository<Position, Integer> {
     int countByParentPositionIdAndUseYnTrueAndPositionIdNot(Integer parentPositionId, Integer excludeChildId);
     
     
+    
     // 활성 루트(부모=null) 존재 여부
     boolean existsByParentPositionIdIsNullAndUseYnTrue();
     boolean existsByPositionNameAndUseYnTrue(String positionName);
     boolean existsByParentPositionIdAndUseYnTrue(Integer parentId);
     
     // 직계 자식들 조회
-    List<Position> findByParentPositionIdAndUseYnTrue(Integer parentPositionId);
+    Optional<Position> findByParentPositionIdAndUseYnTrue(Integer parentPositionId);
+    
+    // 특정 자식의 parent를 직접 바꾸기
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Position p SET p.parentPositionId = :newParentId WHERE p.positionId = :childId")
+    int setParent(@Param("childId") Integer childId, @Param("newParentId") Integer newParentId);
+    
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        UPDATE Position p
+           SET p.parentPositionId = NULL
+         WHERE p.parentPositionId = :parentId
+           AND p.useYn = true
+    """)
+    int detachActiveChild(@Param("parentId") Integer parentId);
 
     // 자식들의 parent를 일괄 변경
     @Modifying(clearAutomatically = true, flushAutomatically = true)
@@ -106,5 +121,8 @@ public interface PositionRepository extends JpaRepository<Position, Integer> {
     		@Modifying(clearAutomatically = true, flushAutomatically = true)
     		@Query("UPDATE Position p SET p.useYn = false WHERE p.positionId IN :ids")
     		int softDeleteIn(@Param("ids") List<Integer> ids);
+    		
+    		// 현재 활성 최상위(부모=null)들을 전부 가져오기
+    		List<Position> findByParentPositionIdIsNullAndUseYnTrue();
     		
 }
