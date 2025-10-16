@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			data: []
 		}],
 		chart: {
-			// height: 350,
 			type: 'line',
+			height: 350,
 			stacked: false
 		},
 		legend: {
