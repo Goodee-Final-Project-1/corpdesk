@@ -28,6 +28,12 @@ import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.position.entity.Position;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "Chat", description = "채팅 관련 API")
 @Controller
 @RequestMapping("/chat/room/**")
 public class ChatRoomController {
@@ -51,7 +57,7 @@ public class ChatRoomController {
 		return "Chat/chat_list";
 	}
 	
-	
+	@Operation(summary = "채팅방 내부", description = "그룹,개인 채팅방을 엽니다")
 	@GetMapping("detail/{roomId}")
 	public String chatRoomDetail(@PathVariable(value = "roomId") Long roomId , Model model , Principal principal) throws JsonProcessingException {
 		RoomData roomData = new RoomData();
@@ -76,7 +82,7 @@ public class ChatRoomController {
 		model.addAttribute("roomDataEl",roomData);
 		return "Chat/chat_page";
 	}
-	
+	@Operation(summary = "방 생성", description = "그룹,개인 채팅방을 생성 합니다")
 	@ResponseBody
 	@PostMapping("createRoom")
 	public RoomData createRoom(@RequestBody RoomData roomdata , Principal principal) {
@@ -87,13 +93,15 @@ public class ChatRoomController {
 
 		return chatRoom;
 	}
+	@Operation(summary = "방 삭제", description = "그룹,개인 채팅방을 삭제 합니다")
 	@GetMapping("out/{roomId}")
 	@ResponseBody
-	public boolean chatRoomOut(@PathVariable(value = "roomId") Long roomId,Principal principal) {
+	public boolean chatRoomOut(@Parameter(description = "나갈 방 ID",example = "1",required = true) @PathVariable(value = "roomId") Long roomId,Principal principal) {
 		boolean result = chatRoomService.outRoom(roomId,principal);
 		return result;
 	}
 	
+	@Operation(summary = "채팅 인원 초대", description = "개인 , 그룹 채팅방에 인원을 초대 합니다")
 	@PostMapping("inviteRoom")
 	@ResponseBody
 	public boolean inviteRoom(@RequestBody RoomData roomData , Principal principal) {

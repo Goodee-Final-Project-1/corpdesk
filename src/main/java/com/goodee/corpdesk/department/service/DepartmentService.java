@@ -77,7 +77,7 @@ public class DepartmentService {
     }
 
     public List<DepartmentTreeDTO> getDepartmentTree() {
-        List<Department> departments = departmentRepository.findAll();
+        List<Department> departments = departmentRepository.findByUseYnTrue();
         List<DepartmentTreeDTO> tree = new ArrayList<>();
 
         for (Department dept : departments) {
@@ -104,7 +104,7 @@ public class DepartmentService {
         }
 
         // 하위 부서들
-        List<String> childDepartments = departmentRepository.findByParentDepartmentId(dept.getDepartmentId())
+        List<String> childDepartments = departmentRepository.findByParentDepartmentIdAndUseYnTrue(dept.getDepartmentId())
                 .stream()
                 .map(Department::getDepartmentName)
                 .toList();
@@ -153,15 +153,22 @@ public class DepartmentService {
         Department dept = departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("부서를 찾을 수 없습니다."));
 
-        // 현재 부서 useYn false
+        Integer parentId = dept.getParentDepartmentId();
+
+        // ✅ 1. 루트 부서(상위 부서 없음)일 경우 예외 처리
+        if (parentId == null) {
+            throw new IllegalStateException("루트 부서는 삭제할 수 없습니다.");
+        }
+
+        // ✅ 2. 부서원들을 상위 부서로 이동
+        employeeRepository.moveAllByDepartment(id, parentId);
+
+        // ✅ 3. 하위 부서들을 상위 부서로 끌어올리기
+        departmentRepository.reparentChildren(id, parentId);
+
+        // ✅ 4. 현재 부서 비활성화
         dept.setUseYn(false);
         departmentRepository.save(dept);
-
-        // 하위 부서들도 같이 useYn false
-        List<Department> children = departmentRepository.findByParentDepartmentId(id);
-        for (Department child : children) {
-            deactivateDepartment(child.getDepartmentId());
-        }
     }
     
     @Transactional

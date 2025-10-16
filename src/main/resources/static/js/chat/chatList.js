@@ -586,15 +586,16 @@ document.getElementById("nextStepBtn").addEventListener("click", () => {
 });
 
 //초대 목록 이름으로 검색
-const namesearchBtn = document.querySelector(".namesearchBtn")
-namesearchBtn.addEventListener("click", () => {
+const invatenamesearch = document.getElementById("searchUserInput");
+invatenamesearch.addEventListener("input", () => {
+	
 	const searchUserInputValue = document.getElementById("searchUserInput").value.trim();
 	const participantList = document.getElementById("participantList")
 	const participantLi = participantList.querySelectorAll("li");
 
 	participantLi.forEach(li => {
 		const employeeName = li.querySelector(".employeeName").textContent.trim();
-		if (searchUserInputValue == "" || employeeName == searchUserInputValue) {
+		if (searchUserInputValue == "" || employeeName.includes(searchUserInputValue)) {
 			li.classList.remove("hidden");
 
 		} else {
@@ -604,22 +605,22 @@ namesearchBtn.addEventListener("click", () => {
 	})
 })
 //연락처 목록 이름으로 검색
-const contactBtn = document.querySelector(".contactBtn")
-contactBtn.addEventListener("click", () => {
-	const searchUserInputValue = document.getElementById("searchContactList").value.trim();
+const searchUserInput = document.getElementById("searchContactList");
+searchUserInput.addEventListener("input",()=>{
+	const searchUserInputValue= searchUserInput.value.trim();
 	const participantList = document.getElementById("contactList")
-	const participantLi = participantList.querySelectorAll("li");
+		const participantLi = participantList.querySelectorAll("li");
 
-	participantLi.forEach(li => {
-		const employeeName = li.querySelector(".employeeName").textContent.trim();
-		if (searchUserInputValue == "" || employeeName == searchUserInputValue) {
-			li.classList.remove("hidden");
+		participantLi.forEach(li => {
+			const employeeName = li.querySelector(".employeeName").textContent.trim();
+			if (searchUserInputValue == "" || employeeName.includes(searchUserInputValue) ) {
+				li.classList.remove("hidden");
 
-		} else {
-			li.classList.add("hidden");
-		}
+			} else {
+				li.classList.add("hidden");
+			}
 
-	})
+		})
 })
 
 

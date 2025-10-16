@@ -8,22 +8,7 @@
 	<meta charset="UTF-8">
 	<title>채팅 목록</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
-	<style type="text/css">
-	.hidden {
-		display: none !important;
-	}
-.chat-left-sidebar .card-header {
-	position: relative;
-  justify-content: center !important; /* 양끝 배치 대신 가운데 정렬 */
-  flex-direction: column; /* 세로 배치 */
-  align-items: center;
-}
-
-.chat-left-sidebar .card-header h2 {
-  margin-bottom: 10px;
-}
-
-	</style>
+<link rel="stylesheet" href="/css/chat/chat_list.css">
 
 	
 </head>
@@ -48,10 +33,7 @@
 			<h2 >연락처 목록</h2>
 			 <div class="input-group mb-3">
           <input type="text" class="form-control" id="searchContactList" placeholder="이름 검색">
-          <div class="input-group-append">
-            <button class="btn btn-outline-secondary contactBtn " type="button">검색</button>
-          </div>
-        </div>
+         </div>
 				  <!-- 그룹 채팅방 생성하기 버튼 -->
 		  
 <span class="mdi mdi-account-multiple-plus ml-auto" style="cursor: pointer; font-size: 30px;" data-toggle="modal" data-target="#createRoomStep1">
@@ -160,9 +142,7 @@
         <!-- 검색창 -->
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="searchUserInput" placeholder="이름 검색">
-          <div class="input-group-append">
-            <button class="btn btn-outline-secondary namesearchBtn" type="button">검색</button>
-          </div>
+        
         </div>
 
         <!-- 사원 목록 (스크롤 가능) -->
