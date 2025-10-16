@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			data: []
 		}],
 		chart: {
-			type: 'bar'
+			type: 'bar',
+			height: 300,
 		},
 		dataLabels: {
 			enabled: false
