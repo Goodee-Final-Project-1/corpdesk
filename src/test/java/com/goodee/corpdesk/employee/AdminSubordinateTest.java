@@ -66,7 +66,7 @@ class AdminSubordinateTest {
                 String subordinateUsername = "user" + subordinateCounter++;
                 Employee subordinate = Employee.builder()
                         .username(subordinateUsername)
-                        .password(passwordEncoder.encode("pass123"))
+                        .password("pass123")
                         .name("부하직원" + (subordinateCounter - 1))
                         .departmentId(admin.getDepartmentId())
                         .positionId(subordinatePositionId)
