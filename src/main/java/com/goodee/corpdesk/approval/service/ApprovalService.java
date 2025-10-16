@@ -83,6 +83,8 @@ public class ApprovalService {
     private FileManager fileManager;
     @Autowired
     private ApprovalFileRepository approvalFileRepository;
+    @Autowired
+    private ApprovalFileRepository addApprovalFileRepository;
 
     // 반환값 종류
     // ResApprovalDTO: approval 혹은 approval과 approver insert 성공, approval의 정보만 반환
@@ -160,7 +162,7 @@ public class ApprovalService {
 		// -> true -> 결재 취소 거부
 		// -> false -> 결재 취소 진행
 		Approval approval = result.get();
-		if (approval.getStatus() == 'Y' || approval.getStatus() == 'N') return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		if (approval.getStatus() == 'Y' || approval.getStatus() == 'N') return new ResponseEntity<>(HttpStatus.CONFLICT); // CONFLICT: 이미 완료된 리소스에 대한 수정을 거부
 		else approval.setUseYn(false);
 		
 		// 2. 결재자들 use_yn false로 update
@@ -410,6 +412,26 @@ public class ApprovalService {
         if(approver == null)  return null;
 
         return approver.toResApprovalDTO();
+    }
+
+    public ResponseEntity<String> deleteFile(Long fileId, String username) throws Exception {
+
+        ApprovalFile approvalFile = approvalFileRepository.findById(fileId).get();
+
+        if(!username.equals(approvalFile.getModifiedBy())) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        // DB에서 useYn=false 처리
+        approvalFile.setUseYn(false);
+        approvalFileRepository.save(approvalFile);
+
+        // HDD에서 삭제
+        FileDTO fileDTO = new FileDTO();
+        fileDTO.setSaveName(approvalFile.getSaveName());
+        fileDTO.setExtension(approvalFile.getExtension());
+        fileManager.deleteFile(upload + approvalPath, fileDTO);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+
     }
 
 }

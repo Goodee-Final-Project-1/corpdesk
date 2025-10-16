@@ -168,12 +168,12 @@ public class ApprovalController {
             }
         }
 
-//        ResApprovalDTO userInfo = approvalService.getDetail(username);
         ResApprovalDTO approverInfo = approvalService.getAppover(approvalId,  username);
 
         model.addAttribute("detail", detail);
-//        model.addAttribute("userInfo", userInfo);
         model.addAttribute("approverInfo", approverInfo);
+
+        model.addAttribute("edit", true);
 
         return "approval/add";
 
@@ -261,6 +261,18 @@ public class ApprovalController {
         model.addAttribute("approverInfo", approverInfo);
 
         return "approval/detail";
+
+    }
+    
+    // 첨부파일 삭제
+    @DeleteMapping("file/{fileId}")
+    @ResponseBody
+    public ResponseEntity<String> deleteFile(@PathVariable("fileId") Long fileId,
+                           @AuthenticationPrincipal UserDetails userDetails) throws Exception {
+
+        String username = userDetails.getUsername();
+
+        return approvalService.deleteFile(fileId, username);
 
     }
     

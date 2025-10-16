@@ -487,3 +487,31 @@ btnSubmits.forEach((btn) => {
     ;
   });
 });
+
+/**
+ * 첨부파일 삭제
+ */
+const fileDelBtns = document.querySelectorAll('.btn-del-file');
+fileDelBtns.forEach((btn) => {
+  btn.addEventListener('click', function () {
+    const message = '파일을 삭제하시겠습니까?';
+
+    if(!confirm(message)) return;
+
+    const fileId = btn.getAttribute('data-file-id');
+    console.log('fileId', fileId);
+
+    // 서버에 삭제 요청
+    fetch(`/approval/file/${fileId}`, {
+      method: 'DELETE'
+    })
+        .then(r => {
+          console.log(r);
+
+          btn.parentElement.remove();
+
+        })
+    ;
+
+  });
+});

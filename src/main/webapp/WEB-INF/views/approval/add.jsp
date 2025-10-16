@@ -222,9 +222,23 @@
 
             <%-- 첨부파일 --%>
             <div class="form-group">
-                <label for="file" class="form-label mt-4">첨부파일</label>
-                <%-- multiple 속성: 태그 하나로 여러 파일을 업로드할 수 있도록 함 --%>
-                <input type="file" class="filepond" name="file" id="file" multiple>
+              <label for="file" class="form-label mt-4">첨부파일</label>
+
+              <c:if test="${edit eq true and (detail.files ne null and not empty detail.files)}">
+
+                <br>
+                <c:forEach items="${detail.files}" var="el">
+                  <p class="badge badge-pill badge-light">
+                    ${el.oriName}.${el.extension}&nbsp;
+                    <a class="btn-del-file" data-file-id="${el.fileId}" style="cursor: pointer"><i class="mdi mdi-close"></i></a>
+                  </p>
+                  &nbsp;
+                </c:forEach>
+                <br><br>
+
+              </c:if>
+              <%-- multiple 속성: 태그 하나로 여러 파일을 업로드할 수 있도록 함 --%>
+              <input type="file" class="filepond" name="file" id="file" multiple>
             </div>
 
 						<!--  -->
