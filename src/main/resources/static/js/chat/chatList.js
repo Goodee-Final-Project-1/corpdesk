@@ -577,7 +577,11 @@ document.getElementById("nextStepBtn").addEventListener("click", () => {
 	selectedParticipants = Array.from(document.querySelectorAll(".participant-checkbox:checked"))
 		.map(cb => cb.value);
 	if (selectedParticipants.length < 2) {
-		alert("참여자를 최소 2명 이상 선택하세요.");
+    Swal.fire({
+      text: "참여자를 최소 2명 이상 선택하세요.",
+      icon: "warning"
+    });
+
 		return;
 	}
 	$("#createRoomStep1").modal("hide");
@@ -686,7 +690,11 @@ document.getElementById("createRoomConfirmBtn").addEventListener("click", () => 
 	document.getElementById("roomTitle").value = "";
 	console.log(selectedParticipants);
 	if (!roomTitle.trim()) {
-		alert("방 제목을 입력하세요.");
+    Swal.fire({
+      text: "방 제목을 입력하세요.",
+      icon: "warning"
+    });
+
 		return;
 	}
 

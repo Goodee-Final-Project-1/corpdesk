@@ -37,10 +37,28 @@
         <a href="${pageContext.request.contextPath}/board/department">목록으로</a>
         <c:if test="${isOwner}">
           <a href="${pageContext.request.contextPath}/board/department/${post.boardId}/edit">수정</a>
-          <form method="post" action="${pageContext.request.contextPath}/board/department/${post.boardId}/delete" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');">
+          <form id="boardDelForm" method="post" action="${pageContext.request.contextPath}/board/department/${post.boardId}/delete" style="display:inline;">
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-            <button type="submit">삭제</button>
+            <button type="button" onclick="deleteNotice()">삭제</button>
           </form>
+
+          <script>
+            async function deleteNotice() {
+              const form = document.querySelector('#boardDelForm');
+
+              const result = await Swal.fire({
+                text: "정말 삭제하시겠습니까?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "삭제",
+                cancelButtonText: "취소",
+                reverseButtons: true
+              });
+
+              if(result.isConfirmed) form.submit();
+
+            }
+          </script>
         </c:if>
       </div>      
 			<!-- 내용 끝 -->
