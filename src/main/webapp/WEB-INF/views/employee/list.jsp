@@ -48,7 +48,7 @@
 								<span>${emp.departmentName}</span>
 							</c:if></td>
 						<td>${emp.positionName}</td>
-						<td>${emp.mobilePhone}</td>
+						<td>${emp.displayMobilePhone}</td>
 						<td>${emp.hireDate}</td>
 						<td><c:if test="${emp.lastWorkingDay == null}">
 								<span>-</span>

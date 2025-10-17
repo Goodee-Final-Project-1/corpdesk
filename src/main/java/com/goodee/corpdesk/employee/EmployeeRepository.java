@@ -156,4 +156,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 	List<Employee> findByDepartmentIdAndPositionId(Integer departmentId, Integer positionId);
 		
 	Optional<EmailOnly> findExternalEmailByUsername(String username);
+	
+	
+	
 }

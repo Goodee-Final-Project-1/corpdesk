@@ -184,55 +184,51 @@ public class EmployeeService implements UserDetailsService {
         List<EmployeeListDTO> result = new ArrayList<>();
 
         for (Employee emp : employees) {
-            // 부서명
-        	String deptName = "-";
-        	if (emp.getDepartmentId() != null) {
-        	    deptName = departmentRepository.findByDepartmentIdAndUseYnTrue(emp.getDepartmentId())
-        	                  .map(Department::getDepartmentName)
-        	                  .orElse("-");
-        	}
-
-            // 직위명
-        	String posName = "-";
-        	if (emp.getPositionId() != null) {
-        	    posName = positionRepository.findByPositionIdAndUseYnTrue(emp.getPositionId())
-        	            .map(Position::getPositionName)
-        	            .orElse("-");
-        	}
-
-            // ✅ 현재 출퇴근 상태 (출근, 퇴근, 휴가, 출근전)
-            String workStatus = "-";
-            try {
-            	ResAttendanceDTO attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
-                if (attendanceDto != null) {
-                    if ("출근".equals(attendanceDto.getWorkStatus()) || "퇴근".equals(attendanceDto.getWorkStatus())) {
-                        workStatus = attendanceDto.getWorkStatus();
-                    }
-                }
-            } catch (Exception e) {
-                workStatus = "-"; // 오류시 기본값
+            String deptName = "-";
+            if (emp.getDepartmentId() != null) {
+                deptName = departmentRepository.findByDepartmentIdAndUseYnTrue(emp.getDepartmentId())
+                           .map(Department::getDepartmentName)
+                           .orElse("-");
+            }
+            String posName = "-";
+            if (emp.getPositionId() != null) {
+                posName = positionRepository.findByPositionIdAndUseYnTrue(emp.getPositionId())
+                           .map(Position::getPositionName)
+                           .orElse("-");
             }
 
-            // 🔥 여기서 deptName, posName을 사용해야 함
-            result.add(new EmployeeListDTO(
-                    emp.getUsername(),
-                    emp.getName(),
-                    deptName,          // ✅ 수정: emp.getDepartmentName() ❌ → deptName ✅
-                    emp.getDepartmentId(),
-                    emp.getPositionId(),
-                    posName,           // ✅ 수정: emp.getPositionName() ❌ → posName ✅
-                    emp.getMobilePhone(),
-                    emp.getHireDate(),
-                    emp.getLastWorkingDay(),
-                    emp.getEnabled(),
-                    workStatus,
-                    emp.getPassword(),
-                    emp.getUseYn()
-            ));
-        }
+            String workStatus = "-";
+            try {
+                ResAttendanceDTO attendanceDto = attendanceService.getCurrentAttendance(emp.getUsername());
+                if (attendanceDto != null &&
+                   ("출근".equals(attendanceDto.getWorkStatus()) || "퇴근".equals(attendanceDto.getWorkStatus()))) {
+                    workStatus = attendanceDto.getWorkStatus();
+                }
+            } catch (Exception e) { workStatus = "-"; }
 
+            // ✅ 여기! 보기용으로 하이픈을 넣어 내려준다
+            String formattedMobile = formatMobile(emp.getMobilePhone());
+
+            result.add(new EmployeeListDTO(
+            	    emp.getUsername(),
+            	    emp.getName(),
+            	    deptName,
+            	    emp.getDepartmentId(),
+            	    emp.getPositionId(),
+            	    posName,
+            	    emp.getMobilePhone(),      // DB 원본 (숫자만)
+            	    formattedMobile,           // ✅ 표시용
+            	    emp.getHireDate(),
+            	    emp.getLastWorkingDay(),
+            	    emp.getEnabled(),
+            	    workStatus,
+            	    emp.getPassword(),
+            	    emp.getUseYn()
+            	));
+        }
         return result;
     }
+
 
 
 
@@ -247,7 +243,7 @@ public class EmployeeService implements UserDetailsService {
         persisted.setName(employeeFromForm.getName());
         persisted.setEmployeeType(employeeFromForm.getEmployeeType());
         persisted.setExternalEmail(employeeFromForm.getExternalEmail());
-        persisted.setMobilePhone(employeeFromForm.getMobilePhone());
+        persisted.setMobilePhone(canonMobile(employeeFromForm.getMobilePhone()));
         persisted.setDepartmentId(employeeFromForm.getDepartmentId());
         persisted.setPositionId(employeeFromForm.getPositionId());
         persisted.setHireDate(employeeFromForm.getHireDate());
@@ -474,14 +470,16 @@ public class EmployeeService implements UserDetailsService {
         Employee emp = employeeRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("직원 없음: " + dto.getUsername()));
         
-        // 휴대폰 중복 검사 (자신 제외)
-            if (dto.getMobilePhone() != null && !dto.getMobilePhone().isBlank()) {
-                boolean phoneInUseByOther = employeeRepository.existsByMobilePhone(dto.getMobilePhone())
-                        && !dto.getMobilePhone().equals(emp.getMobilePhone());
-                if (phoneInUseByOther) {
-                    throw new IllegalStateException("이미 사용 중인 휴대폰 번호입니다: " + dto.getMobilePhone());
-                }
-            }
+        	// 휴대폰 중복 검사 (자신 제외)
+	        String normalized = canonMobile(dto.getMobilePhone());
+	        if (normalized != null && !normalized.isBlank()) {
+	            boolean phoneInUseByOther =
+	                employeeRepository.existsByMobilePhone(normalized)
+	                && !normalized.equals(emp.getMobilePhone());
+	            if (phoneInUseByOther) {
+	                throw new IllegalStateException("이미 사용 중인 휴대폰 번호입니다: " + dto.getMobilePhone());
+	            }
+	        }
         
             // 부서 ID 유효성
             if (dto.getDepartmentId() != null) {
@@ -505,7 +503,7 @@ public class EmployeeService implements UserDetailsService {
 
         // 비밀번호/권한/파일 등은 손대지 않음
         if (dto.getName() != null) emp.setName(dto.getName());
-        emp.setMobilePhone(dto.getMobilePhone());        // 정책에 맞게 유효성/중복 검사를 호출부에서 수행
+        emp.setMobilePhone(normalized);        // 정책에 맞게 유효성/중복 검사를 호출부에서 수행
         emp.setDepartmentId(dto.getDepartmentId());      // 매칭 실패 시 null 가능
         emp.setPositionId(dto.getPositionId());
         emp.setHireDate(dto.getHireDate());
@@ -542,11 +540,30 @@ public class EmployeeService implements UserDetailsService {
     }
 
 
-    	private String canonMobile(String s) {
-    	    if (s == null) return null;
-    	    String t = canon(s);
-    	    return t.replaceAll("[^0-9]", "");
-    	}
+ // 숫자만 남기기 (저장/중복체크용)
+    private String canonMobile(String s) {
+        if (s == null) return null;
+        String t = canon(s);              // 이미 있는 canon()으로 숨은문자/공백 정리
+        return t.replaceAll("[^0-9]", ""); // 숫자만 남김
+    }
+
+    // 보기용 하이픈 포맷 (목록/상세 출력용)
+    private String formatMobile(String s) {
+        if (s == null || s.isBlank()) return "-";
+        String d = s.replaceAll("\\D", ""); // 혹시 저장이 정규화 안된 값이 있어도 방어
+        if (d.isBlank()) return "-";
+
+        // 대한민국 모바일 일반 규칙:
+        // 11자리(예: 01012345678) -> 3-4-4
+        // 10자리(예: 0111234567, 0161234567 등 구번호) -> 3-3-4
+        if (d.length() == 11) {
+            return d.replaceFirst("(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3");
+        } else if (d.length() == 10) {
+            return d.replaceFirst("(\\d{3})(\\d{3})(\\d{4})", "$1-$2-$3");
+        }
+        // 그 외 길이는 원본 리턴(내선/해외 등 예외 케이스)
+        return s;
+    }
 
     
 }
