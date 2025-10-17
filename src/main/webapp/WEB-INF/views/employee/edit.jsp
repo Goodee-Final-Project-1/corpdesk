@@ -293,8 +293,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const workStatus = document.getElementById("newWorkStatus").value;
         const dateTime = document.getElementById("newDateTime").value;
 
-        if (!dateTime) { 
-            alert("날짜와 시간을 입력해주세요."); 
+        if (!dateTime) {
+            Swal.fire({
+              text: "날짜와 시간을 입력해주세요.",
+              icon: "warning"
+            });
             return; 
         }
 
@@ -311,12 +314,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 location.reload(); // 페이지 새로고침
 
             } else {
-                alert("추가 실패: " + data.error);
+                Swal.fire({
+                  text: "추가에 실패했습니다.",
+                  icon: "error"
+                });
             }
         })
         .catch(err => { 
-            console.error(err); 
-            alert("추가 중 오류 발생"); 
+            console.error(err);
+            Swal.fire({
+              text: "추가 중 오류가 발생했습니다.",
+              icon: "error"
+            });
         });
     });
 
@@ -345,13 +354,28 @@ document.addEventListener("DOMContentLoaded", function() {
              	// 여기가 중요: input 초기화
                 const profileInput = document.getElementById('profileImageInput');
                 if (profileInput) profileInput.value = "";
-                
-                alert('사진이 삭제되었습니다.');
+
+                Swal.fire({
+                  text: "사진이 삭제되었습니다.",
+                  icon: "success"
+                });
+
             } else {
-                alert('사진 삭제에 실패했습니다.');
+                Swal.fire({
+                  text: "사진 삭제에 실패했습니다.",
+                  icon: "error"
+                });
             }
         })
-        .catch(error => { console.error('에러:', error); alert('사진 삭제 중 오류 발생'); });
+        .catch(error => {
+          console.error('에러:', error);
+
+          Swal.fire({
+            text: "사진 삭제 중 오류가 발생했습니다.",
+            icon: "error"
+          });
+
+        });
     }
     window.deleteProfileImage = deleteProfileImage; // 버튼에서 접근 가능하도록 전역 등록
 
@@ -375,36 +399,75 @@ document.addEventListener("DOMContentLoaded", function() {
             const selectedIds = Array.from(document.querySelectorAll("input[name='attendanceIds']:checked"))
                                      .map(cb => cb.value);
             if(selectedIds.length === 0){
-                alert("삭제할 항목을 선택해주세요.");
+                Swal.fire({
+                  text: "삭제할 항목을 선택해주세요.",
+                  icon: "warning"
+                });
+
                 return;
             }
 
-            if(!confirm("선택한 출퇴근 기록을 정말 삭제하시겠습니까?")) return;
+            Swal.fire({
+              text: "정말 삭제하시겠습니까?",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonText: "삭제",
+              cancelButtonText: "취소",
+              reverseButtons: true
+            }).then(result => {
 
-            const username = document.getElementById("username").value;
+              if (result.isConfirmed) {
 
-            fetch(`/employee/${username}/attendance/delete`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ attendanceIds: selectedIds })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success){
-                    alert("삭제 성공!");
-                    // 삭제된 행 제거
-                    selectedIds.forEach(id => {
-                        const row = document.querySelector(`tr[data-attendance-id='${id}']`);
-                        if(row) row.remove();
-                     // 삭제 성공 후 hash 설정 + 페이지 새로고침
-                        location.hash = "#attendance";
-                        location.reload();
-                    });
-                } else {
-                    alert("삭제 실패: " + data.error);
-                }
-            })
-            .catch(err => { console.error(err); alert("삭제 중 오류 발생"); });
+                const username = document.getElementById("username").value;
+
+                fetch(`/employee/${username}/attendance/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ attendanceIds: selectedIds })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success){
+                        Swal.fire({
+                          text: "삭제되었습니다.",
+                          icon: "success"
+                        }).then(result => {
+                          // 확인 버튼을 누르거나 창 밖을 클릭했을 때 모두 실행
+                          if (result.isConfirmed || result.isDismissed) {
+
+                            // 삭제된 행 제거
+                            selectedIds.forEach(id => {
+                              const row = document.querySelector(`tr[data-attendance-id='${id}']`);
+                              if(row) row.remove();
+                              // 삭제 성공 후 hash 설정 + 페이지 새로고침
+                              location.hash = "#attendance";
+                              location.reload();
+                            });
+
+                          }
+                        });
+
+                    } else {
+                        Swal.fire({
+                          text: "삭제에 실패했습니다.",
+                          icon: "error"
+                        });
+                    }
+                })
+                .catch(err => {
+                  console.error(err);
+
+                  Swal.fire({
+                    text: "삭제 중 오류가 발생했습니다.",
+                    icon: "error"
+                  });
+
+                });
+
+              }
+
+            });
+
         });
     }
 
@@ -412,45 +475,78 @@ document.addEventListener("DOMContentLoaded", function() {
 
 //삭제 버튼
 function deleteEmployee(username) {
-const lastWorkingDayInput = document.getElementById('lastWorkingDay');
-if (lastWorkingDayInput && !lastWorkingDayInput.value) {
-alert('퇴사일자를 먼저 설정해 주세요');
-return;
-}
-if (!confirm("정말 삭제하시겠습니까?")) return;
+  const lastWorkingDayInput = document.getElementById('lastWorkingDay');
+  if (lastWorkingDayInput && !lastWorkingDayInput.value) {
 
-// CSRF 메타 (둘 다 있을 때만 추가 → Invalid name 방지)
-const csrfTokenEl  = document.querySelector('meta[name="_csrf"]');
-const csrfHeaderEl = document.querySelector('meta[name="_csrf_header"]');
-const token  = csrfTokenEl  ? csrfTokenEl.getAttribute('content')  : null;
-const header = csrfHeaderEl ? csrfHeaderEl.getAttribute('content') : null;
+    Swal.fire({
+      text: "퇴사일자를 먼저 설정해 주세요.",
+      icon: "warning"
+    });
 
-const headers = new Headers();
-headers.append('Content-Type', 'application/x-www-form-urlencoded');
-if (header && token) headers.append(header.trim(), token.trim());
+    return;
+  }
 
-const body = new URLSearchParams({
-lastWorkingDay: lastWorkingDayInput ? lastWorkingDayInput.value : ''
-});
+  Swal.fire({
+    text: "정말 삭제하시겠습니까?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "삭제",
+    cancelButtonText: "취소",
+    reverseButtons: true
+  }).then(result => {
+    if (result.isConfirmed) {
 
-fetch('/employee/delete/' + encodeURIComponent(username), {
-method: 'POST',
-headers,
-body: body.toString()
-})
-.then(res => res.json())
-.then(data => {
-if (data.success) {
-  alert(data.message || "삭제 성공!");
-  window.location.href = "/employee/list";
-} else {
-  alert("삭제 실패: " + (data.message || "서버 오류"));
-}
-})
-.catch(err => {
-console.error(err);
-alert("삭제 중 오류 발생");
-});
+      // CSRF 메타 (둘 다 있을 때만 추가 → Invalid name 방지)
+      const csrfTokenEl = document.querySelector('meta[name="_csrf"]');
+      const csrfHeaderEl = document.querySelector('meta[name="_csrf_header"]');
+      const token = csrfTokenEl ? csrfTokenEl.getAttribute('content') : null;
+      const header = csrfHeaderEl ? csrfHeaderEl.getAttribute('content') : null;
+
+      const headers = new Headers();
+      headers.append('Content-Type', 'application/x-www-form-urlencoded');
+      if (header && token) headers.append(header.trim(), token.trim());
+
+      const body = new URLSearchParams({
+        lastWorkingDay: lastWorkingDayInput ? lastWorkingDayInput.value : ''
+      });
+
+      fetch('/employee/delete/' + encodeURIComponent(username), {
+        method: 'POST',
+        headers,
+        body: body.toString()
+      })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+
+              Swal.fire({
+                text: "삭제되었습니다.",
+                icon: "success"
+              }).then(result => {
+                // 확인 버튼을 누르거나 창 밖을 클릭했을 때 모두 실행
+                if (result.isConfirmed || result.isDismissed) window.location.href = "/employee/list";
+              });
+
+            } else {
+              Swal.fire({
+                text: "삭제에 실패했습니다.",
+                icon: "error"
+              });
+            }
+          })
+          .catch(err => {
+            console.error(err);
+
+            Swal.fire({
+              text: "삭제 중 오류가 발생했습니다.",
+              icon: "error"
+            });
+
+          });
+
+    }
+  });
+
 }
 
 //---------------- 출퇴근 수정 이벤트 함수 ----------------
@@ -519,10 +615,21 @@ function attachUpdateEvent(button){
                     this.classList.remove("btn-success");
                     this.classList.add("btn-warning");
                 } else {
-                    alert("수정 실패: " + data.error);
+                    Swal.fire({
+                      text: "수정에 실패했습니다.",
+                      icon: "error"
+                    });
                 }
             })
-            .catch(err => { console.error(err); alert("수정 중 오류 발생"); });
+            .catch(err => {
+              console.error(err);
+
+              Swal.fire({
+                text: "수정 중 오류가 발생했습니다.",
+                icon: "error"
+              });
+
+            });
         }
     });
 }

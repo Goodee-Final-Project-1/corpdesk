@@ -36,7 +36,12 @@ const formCheckBtn = document.querySelector('#formCheck');
 const departmentIdEl = document.querySelector('#departmentId');
 
 formCheckBtn.addEventListener('click', function () {
-    if(formId === 0) alert('결재 양식을 선택해 주세요.')
+    if(formId === 0) {
+      Swal.fire({
+        text: '결재 양식을 선택해 주세요.',
+        icon: 'waring'
+      });
+    }
     else location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}`;
 });
 
@@ -163,7 +168,10 @@ switch (approvalFormId) {
 
         // 2. 종료일이 시작일보다 빠른 경우 초기화 및 알림
         if (endDateValue && endDateValue < startDateValue) {
-          alert('출장 종료일은 시작일보다 빠를 수 없습니다.');
+          Swal.fire({
+            text: '출장 종료일은 시작일보다 빠를 수 없습니다.',
+            icon: 'waring'
+          });
           businessEndDateInput.value = ''; // 값 초기화
         }
       }
@@ -284,7 +292,10 @@ switch (approvalFormId) {
         const username = newLi.getAttribute('data-username');
         // 중복 확인: data-username이 같은 요소가 이미 있는지 확인
         if (approverList.querySelector(`[data-username="${username}"]`)) {
-            alert('이미 추가된 결재자입니다.');
+            Swal.fire({
+              text: '이미 추가된 결재자입니다.',
+              icon: 'waring'
+            });
             return;
         }
 
@@ -459,56 +470,67 @@ btnSubmits.forEach((btn) => {
       );
 
       if (approverHiddenInputs.length === 0) {
-        const message = '결재선을 지정하지 않고 결재를 요청하면 즉시 승인 처리됩니다. 요청을 진행하시겠습니까?';
 
-        if (!confirm(message)) return;
+        Swal.fire({
+          text: "결재선을 지정하지 않고 결재를 요청하면 즉시 승인 처리됩니다. 요청을 진행하시겠습니까?",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "요청",
+          cancelButtonText: "취소",
+          reverseButtons: true
+        }).then(result => {
+          if (result.isConfirmed) {
+
+            // 1. 결재 공통내용 가져오기
+            const commonForm = document.querySelector('#approvalContentCommon');
+            const formData = new FormData(commonForm);
+
+            // 2. 결재 상세내용 가져오기
+            const formByType = document.querySelector('#approvalContentByType');
+            const formData2 = new FormData(formByType);
+
+            // 3. formData2를 json 문자열로 formData에 추가
+            // 1) formData2를 일반 객체로 변환
+            const data2 = {};
+            for (const [key, value] of formData2.entries()) {
+              data2[key] = value;
+            }
+            // 2) JSON 문자열로 변환
+            const jsonData2 = JSON.stringify(data2);
+            // 3) formData에 추가
+            formData.append('approvalContent', jsonData2);
+
+            // 3. FilePond에서 파일 가져오기
+            const pondFiles = pond.getFiles();
+
+            // 4. formData에 파일 추가
+            for (let i = 0; i < pondFiles.length; i++) {
+              formData.append('files', pondFiles[i].file);
+            }
+
+            // 버튼 종류(결재 요청/임시저장)에 따라 status를 다르게 지정
+            if(btn.id === 'tempSave') formData.append('status', 't');
+
+            // 3. ajax 요청
+            fetch('/approval', {
+              method: 'POST',
+              body: formData
+            })
+                .then(r => r.json())
+                .then(r => {
+                  console.log(r);
+                  console.log(r.approvalId);
+
+                  location.href=`/approval/${r.approvalId}`;
+                })
+            ;
+
+          }
+        });
+
       }
     }
 
-
-    // 1. 결재 공통내용 가져오기
-    const commonForm = document.querySelector('#approvalContentCommon');
-    const formData = new FormData(commonForm);
-
-    // 2. 결재 상세내용 가져오기
-    const formByType = document.querySelector('#approvalContentByType');
-    const formData2 = new FormData(formByType);
-
-    // 3. formData2를 json 문자열로 formData에 추가
-    // 1) formData2를 일반 객체로 변환
-    const data2 = {};
-    for (const [key, value] of formData2.entries()) {
-      data2[key] = value;
-    }
-    // 2) JSON 문자열로 변환
-    const jsonData2 = JSON.stringify(data2);
-    // 3) formData에 추가
-    formData.append('approvalContent', jsonData2);
-
-    // 3. FilePond에서 파일 가져오기
-    const pondFiles = pond.getFiles();
-
-    // 4. formData에 파일 추가
-    for (let i = 0; i < pondFiles.length; i++) {
-      formData.append('files', pondFiles[i].file);
-    }
-
-    // 버튼 종류(결재 요청/임시저장)에 따라 status를 다르게 지정
-    if(btn.id === 'tempSave') formData.append('status', 't');
-
-    // 3. ajax 요청
-    fetch('/approval', {
-      method: 'POST',
-      body: formData
-    })
-        .then(r => r.json())
-        .then(r => {
-          console.log(r);
-          console.log(r.approvalId);
-
-          location.href=`/approval/${r.approvalId}`;
-        })
-    ;
   });
 });
 
@@ -518,23 +540,43 @@ btnSubmits.forEach((btn) => {
 const fileDelBtns = document.querySelectorAll('.btn-del-file');
 fileDelBtns.forEach((btn) => {
   btn.addEventListener('click', function () {
-    const message = '파일을 삭제하시겠습니까?';
 
-    if(!confirm(message)) return;
+    Swal.fire({
+      text: "파일을 삭제하시겠습니까?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "삭제",
+      cancelButtonText: "취소",
+      reverseButtons: true
+    }).then(result => {
+      if (result.isConfirmed) {
 
-    const fileId = btn.getAttribute('data-file-id');
-    console.log('fileId', fileId);
+        const fileId = btn.getAttribute('data-file-id');
+        console.log('fileId', fileId);
 
-    // 서버에 삭제 요청
-    fetch(`/approval/file/${fileId}`, {
-      method: 'DELETE'
-    })
-        .then(r => {
-          if (r.ok) btn.parentElement.remove();
-          else alert('파일 삭제에 실패했습니다.');
+        // 서버에 삭제 요청
+        fetch(`/approval/file/${fileId}`, {
+          method: 'DELETE'
         })
-        .catch(() => alert('네트워크 오류로 삭제에 실패했습니다.'))
-    ;
+            .then(r => {
+              if (r.ok) btn.parentElement.remove();
+              else {
+                Swal.fire({
+                  text: '파일 삭제에 실패했습니다.',
+                  icon: 'error'
+                });
+              }
+            })
+            .catch(() => {
+              Swal.fire({
+                text: '파일 삭제 중 오류가 발생했습니다.',
+                icon: 'error'
+              });
+            })
+        ;
+
+      }
+    });
 
   });
 });
