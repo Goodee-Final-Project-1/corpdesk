@@ -116,7 +116,8 @@ public class EmployeeService implements UserDetailsService {
 
     // 휴대폰 존재 여부 체크
     public boolean isMobilePhoneExists(String mobilePhone) {
-        return employeeRepository.existsByMobilePhone(mobilePhone);
+    	String normalized = canonMobile(mobilePhone);
+    	return normalized != null && employeeRepository.existsByMobilePhone(normalized);
     }
 
     // username으로 Employee 조회 (없으면 예외)

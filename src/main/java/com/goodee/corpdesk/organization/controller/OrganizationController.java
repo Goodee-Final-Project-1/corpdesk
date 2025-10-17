@@ -74,16 +74,23 @@ public class OrganizationController {
                     .body(Map.of("error", "부서명을 입력하세요."));
         }
 
-        // ✅ 비즈니스 로직은 서비스로 위임 (트랜잭션 포함)
-        Department dept = departmentService.addOrReactivateDepartment(trimmed, parentId);
+        try {
+            Department dept = departmentService.addOrReactivateDepartment(trimmed, parentId);
 
-        Map<String, Object> res = new HashMap<>();
-        res.put("id", dept.getDepartmentId());
-        res.put("parentId", dept.getParentDepartmentId());
-        res.put("name", dept.getDepartmentName());
-        return ResponseEntity.ok(res);
+            Map<String, Object> res = new HashMap<>();
+            res.put("id", dept.getDepartmentId());
+            res.put("parentId", dept.getParentDepartmentId());
+            res.put("name", dept.getDepartmentName());
+            return ResponseEntity.ok(res);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
-
 
 
 
