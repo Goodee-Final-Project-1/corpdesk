@@ -191,4 +191,44 @@ public class DepartmentService {
         }
     }
     
+    public Department addOrReactivateDepartment(String rawName, Integer parentId) {
+        String name = rawName == null ? "" : rawName.trim();
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("부서명을 입력하세요.");
+        }
+
+        // 1) 부모 유효성(선택적으로 강화)
+        if (parentId != null) {
+            departmentRepository.findByDepartmentIdAndUseYnTrue(parentId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상위 부서입니다."));
+        }
+
+        // 2) 활성 중복 체크
+        if (departmentRepository.existsByDepartmentNameAndUseYnTrue(name)) {
+            throw new IllegalStateException("이미 존재하는 부서명입니다.");
+        }
+
+        // 3) 비활성 동명 재활성화
+        Optional<Department> inactive = departmentRepository.findByDepartmentNameAndUseYnFalse(name);
+        if (inactive.isPresent()) {
+            Department d = inactive.get();
+
+            if (parentId != null && parentId.equals(d.getDepartmentId())) {
+                throw new IllegalArgumentException("자기 자신을 상위 부서로 지정할 수 없습니다.");
+            }
+
+            d.setUseYn(true);
+            d.setParentDepartmentId(parentId);
+            return departmentRepository.save(d);
+        }
+
+        // 4) 신규 생성
+        Department d = new Department();
+        d.setDepartmentName(name);
+        d.setParentDepartmentId(parentId);
+        d.setUseYn(true);
+        return departmentRepository.save(d);
+    }
+    
+    
 }

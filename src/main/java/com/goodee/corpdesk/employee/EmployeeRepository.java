@@ -157,6 +157,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 		
 	Optional<EmailOnly> findExternalEmailByUsername(String username);
 	
-	
+	boolean existsByMobilePhoneAndUsernameNot(String mobilePhone, String username);
 	
 }

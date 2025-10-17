@@ -143,7 +143,14 @@ public class EmployeeService implements UserDetailsService {
     	  throw new IllegalArgumentException("username는 필수입니다.");
     	   }  
     	   employee.setUsername(username);
-    	   employee.setMobilePhone(canonMobile(employee.getMobilePhone()));
+    	   // ✅ 휴대폰 정규화 + 신규 중복 검사
+    	    String normalized = canonMobile(employee.getMobilePhone());
+    	    if (normalized != null) {
+    	        if (employeeRepository.existsByMobilePhone(normalized)) {
+    	            throw new IllegalStateException("이미 사용 중인 휴대폰 번호입니다: " + employee.getMobilePhone());
+    	        }
+    	    }
+    	    employee.setMobilePhone(normalized);
     	   
     	  if (employeeRepository.existsById(username)) {
     	    throw new IllegalStateException("이미 존재하는 직원입니다: " + username);
@@ -239,11 +246,23 @@ public class EmployeeService implements UserDetailsService {
         Employee persisted = employeeRepository.findById(employeeFromForm.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + employeeFromForm.getUsername()));
 
+    
+        
+        
         // Employee 필드 업데이트
         persisted.setName(employeeFromForm.getName());
         persisted.setEmployeeType(employeeFromForm.getEmployeeType());
         persisted.setExternalEmail(employeeFromForm.getExternalEmail());
-        persisted.setMobilePhone(canonMobile(employeeFromForm.getMobilePhone()));
+        // ✅ 휴대폰 자기 자신 제외 중복 검사
+        String normalizedMobile = canonMobile(employeeFromForm.getMobilePhone());
+        if (normalizedMobile != null) {
+            boolean takenByOthers = employeeRepository
+                    .existsByMobilePhoneAndUsernameNot(normalizedMobile, persisted.getUsername());
+            if (takenByOthers) {
+                throw new IllegalStateException("이미 사용 중인 휴대폰 번호입니다: " + employeeFromForm.getMobilePhone());
+            }
+        }
+        persisted.setMobilePhone(normalizedMobile);
         persisted.setDepartmentId(employeeFromForm.getDepartmentId());
         persisted.setPositionId(employeeFromForm.getPositionId());
         persisted.setHireDate(employeeFromForm.getHireDate());
@@ -473,10 +492,9 @@ public class EmployeeService implements UserDetailsService {
         	// 휴대폰 중복 검사 (자신 제외)
 	        String normalized = canonMobile(dto.getMobilePhone());
 	        if (normalized != null && !normalized.isBlank()) {
-	            boolean phoneInUseByOther =
-	                employeeRepository.existsByMobilePhone(normalized)
-	                && !normalized.equals(emp.getMobilePhone());
-	            if (phoneInUseByOther) {
+	            boolean takenByOthers = employeeRepository
+	                .existsByMobilePhoneAndUsernameNot(normalized, emp.getUsername());
+	            if (takenByOthers) {
 	                throw new IllegalStateException("이미 사용 중인 휴대폰 번호입니다: " + dto.getMobilePhone());
 	            }
 	        }
@@ -543,8 +561,9 @@ public class EmployeeService implements UserDetailsService {
  // 숫자만 남기기 (저장/중복체크용)
     private String canonMobile(String s) {
         if (s == null) return null;
-        String t = canon(s);              // 이미 있는 canon()으로 숨은문자/공백 정리
-        return t.replaceAll("[^0-9]", ""); // 숫자만 남김
+        String t = canon(s);
+        String onlyDigits = t.replaceAll("[^0-9]", "");
+        return onlyDigits.isBlank() ? null : onlyDigits;  // ✅ 빈값은 null
     }
 
     // 보기용 하이픈 포맷 (목록/상세 출력용)
@@ -561,8 +580,8 @@ public class EmployeeService implements UserDetailsService {
         } else if (d.length() == 10) {
             return d.replaceFirst("(\\d{3})(\\d{3})(\\d{4})", "$1-$2-$3");
         }
-        // 그 외 길이는 원본 리턴(내선/해외 등 예외 케이스)
-        return s;
+        
+        return d;
     }
 
     
