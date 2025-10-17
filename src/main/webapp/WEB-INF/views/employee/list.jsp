@@ -95,8 +95,17 @@
 		
 		<c:if test="${not empty message}">
 		    <script>
-		    let msg = `${message}`.replace(/\\n/g, "\n");
-	        alert(msg);
+          document.addEventListener('DOMContentLoaded', function() {
+
+            let msg = `${message}`.replace(/\\n/g, "\n");
+
+            Swal.fire({
+              title: "가져오기 결과",
+              text: msg
+            });
+
+          });
+
 		    </script>
 		</c:if>
 
@@ -112,15 +121,26 @@ window.addEventListener('DOMContentLoaded', (event) => {
     if (urlParams.has('success')) {
         const added = urlParams.get('added') || 0;
         const skipped = urlParams.get('skipped') || 0;
-        alert(`엑셀 가져오기 완료!\n추가: ${added}명\n건너뜀: ${skipped}명`);
+
+        Swal.fire({
+          title: "가져오기 완료",
+          text: `\n추가: ${added}명\n건너뜀: ${skipped}명`
+        });
+
     }
 
     if (urlParams.has('error')) {
         const errorType = urlParams.get('error');
         if (errorType === 'emptyfile') {
-            alert("파일이 선택되지 않았습니다.");
+            Swal.fire({
+              text: "파일이 선택되지 않았습니다.",
+              icon: "warning"
+            });
         } else {
-            alert("엑셀 가져오기 중 오류가 발생했습니다.");
+            Swal.fire({
+              text: "엑셀 가져오기 중 오류가 발생했습니다.",
+              icon: "error"
+            });
         }
     }
 });

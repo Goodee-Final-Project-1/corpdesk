@@ -7,6 +7,9 @@
 <!-- theme meta -->
 <meta name="theme-name" content="mono" />
 
+<%-- sweet alert --%>
+<script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <!-- GOOGLE FONTS -->
 <link href="https://fonts.googleapis.com/css?family=Karla:400,700|Roboto" rel="stylesheet">
 <link href="/plugins/material/css/materialdesignicons.min.css" rel="stylesheet" />
