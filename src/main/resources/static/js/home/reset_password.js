@@ -49,8 +49,10 @@ async function resetPassword(username) {
 		console.log(data);
 
 		if (data == 'success') {
-			alert('임시 비밀번호가 발송되었습니다.');
-			location.href = '/';
+			Swal.fire({
+        text: '임시 비밀번호가 발송되었습니다.',
+        icon: 'success'
+      }).then(result => location.href = '/');
 		}
 
 	} catch (e) {

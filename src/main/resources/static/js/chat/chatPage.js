@@ -93,7 +93,11 @@ document.getElementById("nextStepBtn").addEventListener("click", () => {
 	selectedParticipants = Array.from(document.querySelectorAll(".participant-checkbox:checked"))
 		.map(cb => cb.value);
 	if (selectedParticipants.length < 1) {
-		alert("초대할 인원을 선택하세요.");
+    Swal.fire({
+      text: "초대할 인원을 선택하세요.",
+      icon: "warning"
+    });
+
 		return;
 	}
 	//1대1방일경우 제목을 추가로 입력해야함
@@ -125,7 +129,10 @@ document.getElementById("nextStepBtn").addEventListener("click", () => {
 document.getElementById("inviteRoomConfirmBtn").addEventListener("click", () => {
 	const roomTitle = document.getElementById("roomTitle").value;
 	if (!roomTitle.trim()) {
-		alert("방 제목을 입력하세요.");
+    Swal.fire({
+      text: "방 제목을 입력하세요.",
+      icon: "warning"
+    });
 		return;
 	}
 	const data = {
@@ -487,7 +494,10 @@ stompClient.connect({}, function(frame) {
 	if (errorHandled) return;
 	errorHandled = true;
 
-	alert("참여되지 않은 사용자입니다.");
+  Swal.fire({
+    text: "참여되지 않은 사용자입니다.",
+    icon: "warning"
+  });
 }
 )
 
