@@ -134,9 +134,14 @@
                   <h2>공지사항</h2>
                 </div>
                 <div class="card-body">
-                  <div class="p-5 text-center">
-                    <p class="text-muted">(공지사항 목록)</p>
-                  </div>
+                  <ul class="list-unstyled mb-0">
+                    <li class="mb-2">• 연말정산 안내</li>
+                    <li class="mb-2">• 신년 워크샵 공지</li>
+                    <li class="mb-0">• 보안 교육 안내</li>
+                  </ul>
+<%--                  <div class="p-5 text-center">--%>
+<%--                    <p class="text-muted">(공지사항 목록)</p>--%>
+<%--                  </div>--%>
                 </div>
               </div>
             </article>
