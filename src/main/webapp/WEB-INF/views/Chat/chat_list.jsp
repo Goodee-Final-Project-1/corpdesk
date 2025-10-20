@@ -8,7 +8,9 @@
 	<meta charset="UTF-8">
 	<title>채팅 목록</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
-<%--  <link rel="stylesheet" href="/css/chat/chat_list.css">--%>
+<link rel="stylesheet" href="/css/chat/chat_list.css">
+
+	
 </head>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
@@ -24,92 +26,106 @@
 			<sec:authentication property="principal.username" var="user" />
 			<input type="hidden" class="username" value="${user }">
 	
-<div class = "row">
-  <!-- 연락처 목록 -->
-  <div class="col-lg-4 col-xl-3">
-    <div class="card card-default">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h2 class="mb-0">연락처 목록</h2>
-        <span class="mdi mdi-account-multiple-plus" data-toggle="modal" data-target="#createRoomStep1" style="cursor: pointer; font-size: 24px;"></span>
-      </div>
-      <div class="card-body p-0">
-        <!-- 검색창 -->
-        <div class="p-4 pb-0">
-          <div class="input-group mb-3">
-            <input type="text" class="form-control" id="searchContactList" placeholder="이름 검색">
-          </div>
-        </div>
-        <!-- 연락처 리스트 -->
-        <ul class="list-group list-group-flush" id="contactList" data-simplebar style="max-height: 562px;">
-          <c:forEach items="${contactList}" var="employee">
-            <li class="list-group-item list-group-item-action d-flex align-items-center employeeListOne" data-employee="${employee.username}">
-              <img src="${employee.imgPath}" class="rounded-circle mr-3" alt="Profile" style="width: 50px; height: 50px;">
-              <div class="flex-fill">
-                <strong class="employeeName d-block">${employee.name}</strong>
-                <small class="text-muted">${employee.departmentName} ${employee.positionName}</small>
-              </div>
-            </li>
-          </c:forEach>
-        </ul>
-      </div>
-    </div>
-  </div>
+<div class = "row no-gutters justify-content-center">
+	<div class ="col-lg-4 col-xxl-3">
+		<div class = "card card-default chat-left-sidebar">
+				<div class="card-header">
+			<h2 >연락처 목록</h2>
+			 <div class="input-group mb-3">
+          <input type="text" class="form-control" id="searchContactList" placeholder="이름 검색">
+         </div>
+				  <!-- 그룹 채팅방 생성하기 버튼 -->
+		  
+<span class="mdi mdi-account-multiple-plus ml-auto" style="cursor: pointer; font-size: 30px;" data-toggle="modal" data-target="#createRoomStep1">
+</span> 
 
-  <!-- 채팅방 목록 -->
-  <div class="col-lg-8 col-xl-9">
-    <div class="card card-default">
-      <div class="card-header">
-        <h2 class="mb-0">채팅방 목록</h2>
-      </div>
-      <div class="card-body p-0">
-        <ul class="list-group list-group-flush chatList" data-simplebar style="max-height: 677px;">
-          <c:forEach items="${roomList}" var="room">
-            <li class="list-group-item list-group-item-action chatListOne"
-                data-roomId="${room.chatRoomId}"
-                data-unreadCount="${room.unreadCount}">
-              <div class="d-flex align-items-center">
-                <div class="mr-3">
-                  <img class="rounded-circle" src="${room.imgPath}" alt="Room Image" style="width: 60px; height: 60px;">
-                </div>
-                <div class="flex-fill">
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong class="username text-dark">${room.chatRoomTitle}</strong>
-                    <div class="d-flex align-items-center">
-                      <c:choose>
-                        <c:when test="${room.unreadCount ne 0}">
-                          <span class="badge badge-primary unreadCount mr-2">${room.unreadCount}</span>
-                        </c:when>
-                        <c:otherwise>
-                          <span class="unreadCount"></span>
-                        </c:otherwise>
-                      </c:choose>
-                      <small class="text-muted last-msg-time" data-lastMessageTime="${room.lastMessageTime}"></small>
-                    </div>
-                  </div>
-                  <p class="last-msg text-muted mb-0 text-truncate">${room.chatRoomLastMessage}</p>
-                </div>
-                <div class="dropdown ml-2">
-                  <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
-                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
-                    <a class="dropdown-item room-out" href="javascript:void(0)">채팅방 나가기</a>
-                  </div>
-                </div>
+		</div>
+			 <ul class="list-group" id="contactList" data-simplebar style="height: 562px;">
+        	  <c:forEach items="${contactList}" var="employee">
+          
+            <li class="list-group-item-action d-flex align-items-cent er employeeListOne" data-employee="${employee.username}" style="padding: 10px;">
+             <!-- 추후 사진 바꿔주면됨  -->
+              <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:60px; height:60px;">
+              <div class="flex-fill">
+                <strong class="employeeName">${employee.name}</strong><br>
+                <small>${employee.departmentName} ${employee.positionName}</small>
               </div>
             </li>
+     
           </c:forEach>
         </ul>
-      </div>
-    </div>
-  </div>
+		</div>
+	</div>
+			
+
+<!-- 채팅방 목록 -->
+
+<div class="col-lg-7 col-xxl-5">
+	<div class="card card-default chat-right-sidebar">
+		<div class="card-header">
+			<h2 style="margin: 0 auto ">채팅방 목록</h2>
+
+		</div>
+		<ul class="card-body px-0 list-group chatList" data-simplebar style="height: 677px;">
+			<c:forEach items="${roomList}" var="room">
+				<li class="mb-4 px-5 py-2 chatListOne list-group-item-action "
+					data-roomId="${room.chatRoomId }"
+					data-unreadCount="${room.unreadCount }">
+					<div class="media media-message">
+						<div class="position-relative mr-3">
+							<img class="rounded-circle" src="${room.imgPath}"
+								alt="User Image" style="width: 70px; height:70px;">
+						</div>
+
+						<div class="media-body">
+							<div class="message-contents">
+								<span
+									class="d-flex justify-content-between align-items-center mb-1">
+									<span class="username text-dark">${room.chatRoomTitle}</span> <span
+									class=""> <c:choose>
+											<c:when test="${room.unreadCount ne 0 }">
+												<span class="badge badge-secondary unreadCount">
+													${room.unreadCount } </span>
+											</c:when>
+											<c:otherwise>
+												<span class="unreadCount"> </span>
+											</c:otherwise>
+										</c:choose> <span class="state text-smoke last-msg-time"
+										data-lastMessageTime="${room.lastMessageTime}"><em></em></span>
+								</span>
+								</span>
+
+								<p class="last-msg text-smoke">${room.chatRoomLastMessage}</p>
+							</div>
+						</div>
+							<div class="dropdown kebab-menu" style="margin-left:10px;">
+								<a class="dropdown-toggle icon-burger-mini kebab-menu" href="#"
+									role="button" id="dropdownMenuLink" data-toggle="dropdown"
+									aria-haspopup="true" aria-expanded="false"> </a>
+
+								<div class="dropdown-menu  dropdown-menu-right"
+									aria-labelledby="dropdownMenuLink">
+									<a class="dropdown-item room-out" href="javascript:void(0)">채팅방 나가기</a>
+								</div>
+							</div>
+					</div>
+				</li>
+			</c:forEach>
+		</ul>
+	</div>
+</div>
 </div>
 
-<%--<c:forEach items ="${notificationList}" var="notification">--%>
-<%--	<p>${notification.imgPath}</p>--%>
-<%--	<p>${notification.viewName}</p>--%>
-<%--	<p>${notification.messageContent}</p>--%>
-<%--	<p>${notification.sentAt}</p>--%>
-<%--	<p>${notification.chatRoomId}</p>--%>
-<%--</c:forEach>--%>
+<c:forEach items ="${notificationList}" var="notification">
+
+	<p>${notification.imgPath}</p>
+	<p>${notification.viewName}</p>
+	<p>${notification.messageContent}</p>
+	<p>${notification.sentAt}</p>
+	<p>${notification.chatRoomId}</p>
+
+
+</c:forEach>
 
 
 <!-- Step 1: 참여자 선택 모달 -->
@@ -126,19 +142,22 @@
         <!-- 검색창 -->
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="searchUserInput" placeholder="이름 검색">
+        
         </div>
+
         <!-- 사원 목록 (스크롤 가능) -->
         <ul class="list-group" id="participantList" style="max-height: 300px; overflow-y: auto;">
           <c:forEach items="${contactList}" var="employee">
-            <c:if test="${employee.username ne user }">
-              <li class="list-group-item d-flex align-items-cent er">
-                <img src="${employee.imgPath}" class="rounded-circle mr-3" alt="Profile" style="width:40px; height:40px;">
-                <div class="flex-fill">
-                  <strong class="employeeName d-block">${employee.name}</strong><br>
-                  <small class="text-muted">${employee.departmentName} ${employee.positionName}</small>
-                </div>
-                <input type="checkbox" value="${employee.username}" class="participant-checkbox">
-              </li>
+          <c:if test="${employee.username ne user }">
+            <li class="list-group-item d-flex align-items-cent er">
+             <!-- 추후 사진 바꿔주면됨  -->
+              <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:40px; height:40px;">
+              <div class="flex-fill">
+                <strong class="employeeName">${employee.name}</strong><br>
+                <small>${employee.departmentName} ${employee.positionName}</small>
+              </div>
+              <input type="checkbox" value="${employee.username}" class="participant-checkbox">
+            </li>
             </c:if>
           </c:forEach>
         </ul>
@@ -150,6 +169,8 @@
     </div>
   </div>
 </div>
+
+
 
 <!-- Step 2: 방 제목 입력 모달 -->
 <div class="modal fade" id="createRoomStep2" tabindex="-1" role="dialog" aria-labelledby="step2Label" aria-hidden="true">
@@ -166,18 +187,33 @@
         <input type="text" id="roomTitle" class="form-control" placeholder="채팅방 이름 입력">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-light" data-dismiss="modal">취소</button>
-        <button type="button" class="btn btn-info" id="createRoomConfirmBtn">생성</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-success" id="createRoomConfirmBtn">생성</button>
       </div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
-<script src="/js/chat/chatList.js"></script>
 
-<!-- 내용 끝 -->
+
+
+
+
+
+
+
+
+
+				
+				<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+  			    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+				<script src="/js/chat/chatList.js" ></script>
+				
+				
+			
+			
+			
+			<!-- 내용 끝 -->
 		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 	
 	<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
