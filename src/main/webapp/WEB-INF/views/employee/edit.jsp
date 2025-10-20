@@ -9,20 +9,63 @@
   <title>사원 상세 페이지</title>
   <c:import url="/WEB-INF/views/include/head.jsp"/>
   <style>
-  /* 기존 스타일 그대로 유지 */
-  .headProfile{margin-top:70px;margin-bottom:70px;border:1px solid gray;padding:20px;align-items:stretch;gap:50px;}
-  .headProfile .d-flex { flex-direction: column; }
-  .info-container { flex:1; width:100%;}
-  .employeeInformation{flex-direction: column; flex-wrap: wrap; jusify-content: space-evenly; margin-bottom:90px; margin-top:20px;}
-  .buttonBox{margin-top: 50px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;}
-  .tabs{margin-bottom:30px;}
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  .tab-button { border: none; background: none; padding: 10px 20px; cursor: pointer; }
-  .tab-button.active { font-weight: bold; border-bottom: 2px solid #007bff; }
+      /* 기존 스타일 그대로 유지 */
+      .headProfile {
+          margin-top: 70px;
+          margin-bottom: 70px;
+          border: 1px solid gray;
+          padding: 20px;
+          align-items: stretch;
+          gap: 50px;
+      }
+
+      .headProfile .d-flex {
+          flex-direction: column;
+      }
+
+      .info-container {
+          flex: 1;
+          width: 100%;
+      }
+
+      .employeeInformation {
+          flex-direction: column;
+          flex-wrap: wrap;
+          jusify-content: space-evenly;
+          margin-bottom: 90px;
+          margin-top: 20px;
+      }
+
+      .buttonBox {
+          margin-top: 50px;
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+      }
+
+      .tabs {
+          margin-bottom: 30px;
+      }
+
+      .tab-content {
+          display: none;
+      }
+
+      .tab-content.active {
+          display: block;
+      }
+
+      .tab-button {
+          border: none;
+          background: none;
+          padding: 10px 20px;
+          cursor: pointer;
+      }
+
+      .tab-button.active {
+          font-weight: bold;
+          border-bottom: 2px solid #007bff;
+      }
 
   </style>
 
@@ -46,67 +89,83 @@
     </div>
 
     <div class="box">
-      <div class="headProfile d-flex justify-content-start align-items-start">
-        <div class="fileBox me-5">
+      <div class="d-flex justify-content-between">
+        <div class="d-flex flex-column align-items-center col-lg-3">
           <c:set var="profileImageUrl" value="/images/default_profile.jpg"/>
           <c:if test="${employeeFile != null and employeeFile.useYn}">
             <c:set var="profileImageUrl" value="/files/profile/${employeeFile.saveName}.${employeeFile.extension}"/>
           </c:if>
           <img id="profileImage" src="${profileImageUrl}" alt="Profile Image"
-               style="width:150px; height:150px; border-radius:50%; object-fit: cover; margin-left:25px;">
+               style="width:150px; height:150px; border-radius:50%; object-fit: cover;">
           <input type="file" id="profileImageInput" name="profileImageFile" style="display:none;" accept="image/*">
-          <div class="image-buttons" style="margin-top: 50px;">
+          <div class="text-center mt-1">
             <button type="button" class="btn btn-primary btn-sm"
                     onclick="document.getElementById('profileImageInput').click()">사진 변경
             </button>
             <button type="button" class="btn btn-danger btn-sm" onclick="deleteProfileImage()">사진 삭제</button>
           </div>
         </div>
-        <div class="info-container d-flex">
-          <div class="row">
-            <div class="col-md-3">
-              이름<form:input path="name" class="form-control"/>
+        <div class="col-lg-9">
+            <%-- 이름, 직원구분, 부서 --%>
+          <div class="d-flex justify-content-between mb-2">
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">이름</p>
+              <form:input path="name" class="form-control"/>
             </div>
-            <div class="col-md-3">
-              직원구분<form:select path="employeeType" class="form-control">
-              <form:option value="" label="선택하세요"/>
-              <form:option value="정규" label="정규"/>
-              <form:option value="계약" label="계약"/>
-              <form:option value="외주" label="외주"/>
-              <form:option value="파견" label="파견"/>
-              <form:option value="파트" label="파트"/>
-              <form:option value="기타" label="기타"/>
-            </form:select>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">직원구분</p>
+              <form:select path="employeeType" class="form-control">
+                <form:option value="" label="선택하세요"/>
+                <form:option value="정규" label="정규"/>
+                <form:option value="계약" label="계약"/>
+                <form:option value="외주" label="외주"/>
+                <form:option value="파견" label="파견"/>
+                <form:option value="파트" label="파트"/>
+                <form:option value="기타" label="기타"/>
+              </form:select>
             </div>
-            <div class="col-md-3">
-              부서<form:select path="departmentId" class="form-control">
-              <form:option value="" label="부서를 선택하세요"/>
-              <form:options items="${departments}" itemValue="departmentId" itemLabel="departmentName"/>
-            </form:select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-3">
-              입사일<form:input path="hireDate" type="date" class="form-control"/>
-            </div>
-            <div class="col-md-3">
-              휴대전화<form:input path="mobilePhone" class="form-control"/>
-            </div>
-            <div class="col-md-3">
-              직통번호<form:input path="directPhone" class="form-control"/>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">부서</p>
+              <form:select path="departmentId" class="form-control">
+                <form:option value="" label="부서를 선택하세요"/>
+                <form:options items="${departments}" itemValue="departmentId" itemLabel="departmentName"/>
+              </form:select>
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-3">
-              외부이메일<form:input path="externalEmail" class="form-control"/>
+
+            <%-- 입사일, 휴대전화. 직통번호 --%>
+          <div class="d-flex justify-content-between mb-2">
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">입사일</p>
+              <form:input path="hireDate" type="date" class="form-control"/>
             </div>
-            <div class="col-md-3">
-              직위<form:select path="positionId" class="form-control">
-              <form:option value="" label="직위를 선택하세요"/>
-              <form:options items="${positions}" itemValue="positionId" itemLabel="positionName"/>
-            </form:select>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">휴대전화</p>
+              <form:input path="mobilePhone" class="form-control"/>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">직통번호</p>
+              <form:input path="directPhone" class="form-control"/>
             </div>
           </div>
+
+            <%-- 외부이메일, 직위 --%>
+          <div class="d-flex justify-content-between mb-2">
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">외부이메일</p>
+              <form:input path="externalEmail" class="form-control"/>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">직위</p>
+              <form:select path="positionId" class="form-control">
+                <form:option value="" label="직위를 선택하세요"/>
+                <form:options items="${positions}" itemValue="positionId" itemLabel="positionName"/>
+              </form:select>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -122,45 +181,60 @@
 
     <!-- 정보 탭 -->
     <div class="tab-content active" id="info">
-      <span class="badge badge-dark">직원정보</span>
-      <div class="employeeInformation d-flex">
-        <div class="employeebox">
-          <div class="row">
-            <div class="col-md-2">
-              주민(외국인)번호 <form:input path="residentNumber" class="form-control"/>
+      <div class="d-flex flex-column">
+        <div class="employeebox mb-5">
+
+            <%-- 주민번호, 국적, 체류자격 --%>
+          <div class="d-flex justify-content-between mb-2">
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">주민(외국인)번호</p>
+              <form:input path="residentNumber" class="form-control"/>
             </div>
-            <div class="col-md-2">
-              국적 <form:input path="nationality" class="form-control"/>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">국적</p>
+              <form:input path="nationality" class="form-control"/>
             </div>
-            <div class="col-md-2">
-              체류자격 <form:input path="visaStatus" class="form-control"/>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-2">
-              영문이름 <form:input path="englishName" class="form-control"/>
-            </div>
-            <div class="col-md-2">
-              성별 <form:select path="gender" class="form-control">
-              <form:option value="M" label="남"/>
-              <form:option value="F" label="여"/>
-            </form:select>
-            </div>
-            <div class="col-md-2">
-              생년월일 <form:input path="birthDate" type="date" class="form-control"/>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">체류자격</p>
+              <form:input path="visaStatus" class="form-control"/>
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-2">
-              주소<form:input path="address" class="form-control"/>
+
+            <%-- 영문이름, 성별, 생년월일 --%>
+          <div class="d-flex justify-content-between mb-2">
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">영문이름</p>
+              <form:input path="englishName" class="form-control"/>
             </div>
-            <div class="col-md-3">
-              퇴사일자 <form:input path="lastWorkingDay" id="lastWorkingDay" type="date" class="form-control"/>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">성별</p>
+              <form:select path="gender" class="form-control">
+                <form:option value="M" label="남"/>
+                <form:option value="F" label="여"/>
+              </form:select>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">생년월일</p>
+              <form:input path="birthDate" type="date" class="form-control"/>
+            </div>
+          </div>
+
+            <%-- 주소, 퇴사일자 --%>
+          <div class="d-flex justify-content-between mb-2">
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">주소</p>
+              <form:input path="address" class="form-control"/>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
+              <p class="col-md-4 text-left">퇴사일자</p>
+              <form:input path="lastWorkingDay" id="lastWorkingDay" type="date" class="form-control"/>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
             </div>
           </div>
         </div>
 
-        <div class="buttonBox">
+        <div class="m-auto mt-3">
           <input type="submit" value="수정" class="btn btn-primary">
           <button type="button" onclick="deleteEmployee('${employee.username}')" class="btn btn-danger">삭제</button>
         </div>
@@ -173,28 +247,30 @@
     <div class="tab-content" id="attendance">
 
       <!-- 출퇴근 추가 폼 -->
-
       <div class="mb-3">
-        <label>구분</label>
-        <select id="newWorkStatus" class="form-control" style="width:150px; display:inline-block;">
+        <label class="mr-2">구분</label>
+        <select id="newWorkStatus" class="form-control mr-4" style="width:150px; display:inline-block;">
           <option value="출근">출근</option>
           <option value="퇴근">퇴근</option>
           <option value="출근전">출근전</option>
           <option value="휴가">휴가</option>
         </select>
 
-        <label>일시</label>
-        <input type="datetime-local" id="newDateTime" class="form-control" style="width:200px; display:inline-block;">
+        <label class="mr-2">일시</label>
+        <input type="datetime-local" id="newDateTime" class="form-control mr-4" style="width:200px; display:inline-block;">
 
         <button type="button" id="addAttendanceBtn" class="btn btn-info">추가</button>
       </div>
 
-
+      <%-- 출퇴근 목록 테이블 --%>
       <form id="attendanceForm">
-        <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+        <div class="mb-3">
+          <button type="submit" class="btn btn-danger btn-sm">선택 삭제</button>
+        </div>
+
         <input type="hidden" name="username" value="${employee.username}"/>
-        <table class="table table-light">
-          <thead class="thead-light">
+        <table class="table table-hover">
+          <thead>
           <tr>
             <th><input type="checkbox" id="checkAll"/></th>
             <th>구분</th>
@@ -237,12 +313,14 @@
         </table>
       </form>
     </div>
+  <div class="text-right mt-6">
+    <a href="/employee/list" class="btn btn-primary">목록으로</a>
   </div>
+  </div>
+
+
 </div>
 </div>
-</div>
-<div class="d-flex justify-content-center mt-4">
-  <a href="/employee/list" class="btn btn-primary">목록으로</a>
 </div>
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
