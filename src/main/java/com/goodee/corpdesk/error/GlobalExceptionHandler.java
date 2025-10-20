@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
 
     // 405 Method Not Allowed: 요청한 URL은 존재하지만, 지원하지 않는 HTTP 메소드로 요청함
     // HttpRequestMethodNotSupportedException
-    @ExceptionHandler(MethodNotAllowedException.class)
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public String handleMethodNotAllowed(Exception ex, RedirectAttributes redirectAttributes) {
         log.error("Method Not Allowed: {}", ex.getMessage());
         redirectAttributes.addFlashAttribute("errorMessage", "지원하지 않는 요청 방식입니다.");
