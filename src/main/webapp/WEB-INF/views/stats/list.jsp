@@ -26,14 +26,17 @@
 	<div class="card-body p-6">
 		<form id="searchForm">
 			<div class="form-group d-flex">
-				<div>
+
+				<div class="mr-3">
 					<label class="d-block">조회기간</label>
 					<div class="d-flex">
-						<input type="date" id="start" class="form-control">
-						<input type="date" id="end" class="form-control">
+						<input type="date" id="start" class="form-control mr-2">
+            <span class=" mr-2">~</span>
+						<input type="date" id="end" class="form-control mr-2">
 					</div>
 				</div>
-				<div>
+
+				<div class="mr-3">
 					<label class="d-block">부서</label>
 					<select id="department" class="form-control">
 						<option>선택</option>
@@ -42,7 +45,8 @@
 						</c:forEach>
 					</select>
 				</div>
-				<div>
+
+				<div class="mr-3">
 					<label class="d-block">직급</label>
 					<select id="position" class="form-control">
 						<option>선택</option>
@@ -51,12 +55,14 @@
 						</c:forEach>
 					</select>
 				</div>
+
 				<div>
 					<label class="d-block">&nbsp;</label>
 					<button class="btn btn-sm btn-primary">
 						<i class="mdi mdi-database-search"></i> 조회
 					</button>
 				</div>
+
 			</div>
 		</form>
 	</div>
