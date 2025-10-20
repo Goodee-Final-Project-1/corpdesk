@@ -49,8 +49,7 @@ public class UserProfileInterceptor implements HandlerInterceptor {
             || authentication instanceof AnonymousAuthenticationToken // 로그인하지 않은 익명 사용자인 경우 (참고: AnonymousAuthenticationToken은 isAuthenticated() == true를 반환)
         ) return;
 
-        Object principal = authentication.getPrincipal();
-        String username = ((UserDetails) principal).getUsername();
+        String username = authentication.getName();
 
         // 2. 추출한 사용자 정보로 DB에서 정보 조회
         Optional<EmployeeFile> file = employeeService.getEmployeeFileByUsername(username);
