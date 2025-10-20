@@ -8,8 +8,7 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-import java.nio.file.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 
 @ControllerAdvice
 @Slf4j
@@ -49,7 +48,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodNotAllowedException.class)
     public String handleMethodNotAllowed(Exception ex, RedirectAttributes redirectAttributes) {
         log.error("Method Not Allowed: {}", ex.getMessage());
-        redirectAttributes.addFlashAttribute("errorMessage", "서버 내부 오류가 발생했습니다. 관리자에게 문의해주세요.");
+        redirectAttributes.addFlashAttribute("errorMessage", "지원하지 않는 요청 방식입니다.");
         return "redirect:/error/405";
     }
 
@@ -60,8 +59,9 @@ public class GlobalExceptionHandler {
      * Exception (최상위 예외): 위에서 개별적으로 처리하지 않은 모든 예외는 여기에 해당
      */
     @ExceptionHandler(Exception.class)
-    public String handleAllExceptions(Exception ex) {
+    public String handleAllExceptions(Exception ex, RedirectAttributes redirectAttributes) {
         log.error("Internal Server Error: {}", ex.getMessage());
+        redirectAttributes.addFlashAttribute("errorMessage", "서버 내부 오류가 발생했습니다. 관리자에게 문의해주세요.");
         return "redirect:/error/500";
     }
 
