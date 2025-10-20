@@ -1,31 +1,20 @@
 package com.goodee.corpdesk.employee;
 
-import java.time.LocalDate;
-
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.common.BaseEntity;
+import com.goodee.corpdesk.employee.validation.UpdateEmail;
+import com.goodee.corpdesk.employee.validation.UpdatePassword;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-import com.goodee.corpdesk.common.BaseEntity;
-import com.goodee.corpdesk.employee.validation.UpdateEmail;
-import com.goodee.corpdesk.employee.validation.UpdatePassword;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.time.LocalDate;
 
 @Getter
 @Setter
