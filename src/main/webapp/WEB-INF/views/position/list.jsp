@@ -150,55 +150,85 @@
 	  $('#addPositionModal').modal('show');
 	}
 
-  async function submitAddPosition(e){
-	  e.preventDefault();
-	  const form = e.target;
-	  const body = {
-	    positionName: form.positionName.value.trim(),
-	    parentPositionId: form.parentPositionId.value ? Number(form.parentPositionId.value) : null
-	  };
-	  if(!body.positionName) return;
+  async function submitAddPosition(e) {
+    e.preventDefault();
+    const form = e.target;
+    const body = {
+      positionName: form.positionName.value.trim(),
+      parentPositionId: form.parentPositionId.value ? Number(form.parentPositionId.value) : null
+    };
+    if (!body.positionName) return;
 
-	  const res = await fetch('<c:url value="/position"/>', {
-	    method: 'POST',
-	    headers: Object.assign(
-	      { 'Content-Type': 'application/json' },
-	      csrfHeader ? { [csrfHeader]: csrfToken } : {}
-	    ),
-	    body: JSON.stringify(body)
-	  });
+    const res = await fetch('<c:url value="/position"/>', {
+      method: 'POST',
+      headers: Object.assign(
+          {'Content-Type': 'application/json'},
+          csrfHeader ? {[csrfHeader]: csrfToken} : {}
+      ),
+      body: JSON.stringify(body)
+    });
 
-	  if(res.ok){
-		  $('#addPositionModal').modal('hide');
-		  location.reload();
-	  } else if(res.status === 409){
-		    const msg = await res.text();
-		    alert(msg); // ✅ 중복일 때 메시지 표시
-		  } else {
-		    alert('직위 추가에 실패했습니다.');
-		  }
-		}
+    if (res.ok) {
+      $('#addPositionModal').modal('hide');
+      location.reload();
+    } else if (res.status === 409) {
+      const msg = await res.text();
+      // 중복일 때 메시지 표시
+      Swal.fire({
+        text: msg,
+        icon: "warning"
+      });
+    } else {
+      Swal.fire({
+        text: '직위 추가에 실패했습니다.',
+        icon: "error"
+      });
+    }
+  }
 
 
   async function deleteSelected(){
+    // 1. 검증 로직
     const ids = Array.from(document.querySelectorAll('input[name="positionId"]:checked'))
-      .map(cb => Number(cb.value));
-    if(ids.length === 0){ alert('선택된 항목이 없습니다.'); return; }
-    if(!confirm(`선택된 직위를 삭제하시겠어요?`)) return;
+        .map(cb => Number(cb.value));
+    if(ids.length === 0){
+      Swal.fire({
+        text: "선택된 항목이 없습니다.",
+        icon: "warning"
+      });
+      return;
+    }
 
-    const res = await fetch('<c:url value="/position/delete"/>', {
-      method: 'POST', // (DELETE 사용시 서버 매핑에 맞춰 변경)
-      headers: Object.assign(
-        { 'Content-Type': 'application/json' },
-        csrfHeader ? { [csrfHeader]: csrfToken } : {}
-      ),
-      body: JSON.stringify({ ids })
+    // 2. 사용자 확인 (await로 기다림)
+    const result = await Swal.fire({  // await 사용
+      text: "정말 삭제하시겠습니까?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "삭제",
+      cancelButtonText: "취소",
+      reverseButtons: true
     });
 
-    if(res.ok){
-      location.reload();
-    }else{
-      alert('삭제에 실패했습니다.');
+    // 3. 확인했으면 삭제 진행 (await로 기다림)
+    if (result.isConfirmed) {
+      const res = await fetch('<c:url value="/position/delete"/>', {
+        method: 'POST',
+        headers: Object.assign(
+            { 'Content-Type': 'application/json' },
+            csrfHeader ? { [csrfHeader]: csrfToken } : {}
+        ),
+        body: JSON.stringify({ ids })
+      });
+
+      // 4. 결과 처리
+      if(res.ok){
+        location.reload();
+      }else{
+        Swal.fire({
+          text: "삭제에 실패했습니다.",
+          icon: "error"
+        });
+      }
     }
   }
 </script>

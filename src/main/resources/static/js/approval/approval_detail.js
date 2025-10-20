@@ -21,7 +21,12 @@ const formCheckBtn = document.querySelector('#formCheck');
 const departmentIdEl = document.querySelector('#departmentId');
 
 formCheckBtn.addEventListener('click', function () {
-  if(formId === 0) alert('결재 양식을 선택해 주세요.')
+  if(formId === 0) {
+    Swal.fire({
+      text: '결재 양식을 선택해 주세요.',
+      icon: 'waring'
+    });
+  }
   else location.href=`/approval-form/${formId}?departmentId=${departmentIdEl.value}`;
 });
 
@@ -40,18 +45,30 @@ btnActions.forEach((btn) => {
     switch (btn.id) {
 
       case 'btnDelete':
-        const message = '정말 삭제하시겠습니까?';
-
-        if(confirm(message)) {
-          fetch(`/approval/${approvalId}`, {
-            method: "DELETE"
-          })
-              .then(r => r.text())
-              .then(r => {
-                  alert('삭제되었습니다.');
-                  history.back();
-              });
-        }
+        Swal.fire({
+          text: "정말 삭제하시겠습니까?",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "삭제",
+          cancelButtonText: "취소",
+          reverseButtons: true
+        }).then(result => {
+          if (result.isConfirmed) {
+            fetch(`/approval/${approvalId}`, {
+              method: "DELETE"
+            })
+                .then(r => r.text())
+                .then(r => {
+                  Swal.fire({
+                    text: "삭제되었습니다.",
+                    icon: "success"
+                  }).then(result => {
+                    // 확인 버튼을 누르거나 창 밖을 클릭했을 때 모두 실행
+                    if (result.isConfirmed || result.isDismissed) history.back();
+                  });
+                });
+          }
+        });
 
         break;
 
@@ -70,7 +87,10 @@ btnActions.forEach((btn) => {
             .then(r => {
                 console.log(r)
 
-                alert("승인하였습니다.");
+                Swal.fire({
+                  text: '승인하였습니다.',
+                  icon: 'success'
+                });
                 location.href = `/approval/${approvalId}`;
             })
         ;
@@ -92,7 +112,10 @@ btnActions.forEach((btn) => {
             .then(r => {
                 console.log(r)
 
-                alert("반려하였습니다.");
+                Swal.fire({
+                  text: '반려하였습니다.',
+                  icon: 'success'
+                });
                 location.href = `/approval/${approvalId}`;
             })
         ;

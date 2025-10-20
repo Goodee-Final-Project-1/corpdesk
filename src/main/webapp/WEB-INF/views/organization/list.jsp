@@ -293,7 +293,8 @@ $(function(){
     	} else {
     	  $("#deptChildren").text("정보 없음");
     	}
-   // 부서원 목록
+
+      // 부서원 목록
       if (detail.members && detail.members.length > 0) {
         let memberHtml = `
             <li class="list-group-item">
@@ -306,13 +307,13 @@ $(function(){
         detail.members.forEach(m => {
         	let deptName = m.departmentName ? m.departmentName : "부서 없음";
         	  let posName = m.positionName ? m.positionName : "직위 없음";
-    memberHtml += `
-      <li class="list-group-item">
-        <input type="checkbox" class="memberCheck" value="\${m.username}">
-        \${m.name} \${m.positionName}
-      </li>
-    `;
-  });
+        memberHtml += `
+          <li class="list-group-item">
+            <input type="checkbox" class="memberCheck" value="\${m.username}">
+            \${m.name} \${m.positionName}
+          </li>
+        `;
+      });
         
        
 
@@ -322,7 +323,10 @@ $(function(){
         $("#deptMemberList").html("<li class='list-group-item'>부서원이 없습니다</li>");
       }
     }).fail(function(){
-      alert("부서 상세 정보를 불러올 수 없습니다.");
+      Swal.fire({
+        text: "부서 상세 정보를 불러오지 못했습니다.",
+        icon: "error"
+      });
     });
   });
 
@@ -354,9 +358,14 @@ $(function(){
     let name = $("#newDeptName").val().trim();
     let parentId = $("#parentDeptSelect").val();
 
-    if(!name) { 
-      alert("부서명을 입력하세요."); 
-      return; 
+    if(!name) {
+
+      Swal.fire({
+        text: "부서명을 입력해주세요.",
+        icon: "warning"
+      });
+
+      return;
     }
 
     $.post("/organization/add", { parentId, name })
@@ -368,14 +377,24 @@ $(function(){
         });
 
         $("#addModal").modal("hide");
-        alert("부서가 추가되었습니다!");
-        location.reload();
+
+        Swal.fire({
+          text: "추가되었습니다.",
+          icon: "success"
+        }).then(result => location.reload());
+
       })
       .fail(function(xhr){
         if(xhr.status === 409) {
-          alert("이미 존재하는 부서명입니다.");
+          Swal.fire({
+            text: "이미 존재하는 부서명입니다.",
+            icon: "warning"
+          });
         } else {
-          alert("부서 추가 중 오류가 발생했습니다.");
+          Swal.fire({
+            text: "부서 추가 중 오류가 발생했습니다.",
+            icon: "error"
+          });
         }
       });
   });
@@ -386,7 +405,14 @@ $(function(){
   // ===========================
   $("#deleteBtn").on("click", function(){
     var selected = getSelectedNode();
-    if(!selected) { alert("삭제할 부서를 선택하세요."); return; }
+    if(!selected) {
+      Swal.fire({
+        text: "삭제할 부서를 선택하세요.",
+        icon: "warning"
+      });
+
+      return;
+    }
     $("#deleteModal").modal("show");
   });
 
@@ -398,8 +424,10 @@ $(function(){
     $.post("/organization/deleteCascade", { id: selected.id }, function(){
       $('#orgTree').jstree(true).delete_node(selected);
       $("#deleteModal").modal("hide");
-      alert("부서가 삭제되었습니다!");
-      location.reload();
+      Swal.fire({
+        text: "삭제되었습니다.",
+        icon: "success"
+      }).then(result => location.reload());
     });
   });
 });
@@ -413,7 +441,11 @@ $(document).on("change", "#checkAll", function(){
 $(document).on("click", "#moveDeptBtn", function(){
   let selected = $(".memberCheck:checked").map(function(){ return this.value; }).get();
   if (selected.length === 0) {
-    alert("이동할 직원을 선택하세요.");
+    Swal.fire({
+      text: "이동할 직원을 선택해주세요.",
+      icon: "warining"
+    });
+
     return;
   }
 
@@ -442,7 +474,11 @@ $(document).on("click", "#confirmMoveBtn", function(){
 	  let selected = $(this).data("selectedEmployees");
 
 	  if (!newDeptId) {
-	    alert("이동할 부서를 선택하세요.");
+      Swal.fire({
+        text: "이동할 부서를 선택해주세요.",
+        icon: "warning"
+      });
+
 	    return;
 	  }
 
@@ -452,12 +488,19 @@ $(document).on("click", "#confirmMoveBtn", function(){
 	    contentType: "application/json",
 	    data: JSON.stringify({ employeeUsernames: selected, newDeptId: newDeptId }),
 	    success: function(){
-	      alert("부서 이동이 완료되었습니다!");
-	      $("#moveDeptModal").modal("hide");
-	      location.reload();
+        Swal.fire({
+          text: "부서 이동이 완료되었습니다.",
+          icon: "success"
+        }).then(result => {
+          $("#moveDeptModal").modal("hide");
+          location.reload();
+        });
 	    },
 	    error: function(){
-	      alert("부서 이동 중 오류가 발생했습니다.");
+        Swal.fire({
+          text: "부서 이동 중 오류가 발생했습니다.",
+          icon: "error"
+        });
 	    }
 	  });
 	});
@@ -466,7 +509,11 @@ $(document).on("click", "#confirmMoveBtn", function(){
 $(document).on("click", "#excludeBtn", function(){
   let selected = $(".memberCheck:checked").map(function(){ return this.value; }).get();
   if (selected.length === 0) {
-    alert("제외할 직원을 선택하세요.");
+    Swal.fire({
+      text: "제외할 직원을 선택해주세요.",
+      icon: "warning"
+    });
+
     return;
   }
 
@@ -487,12 +534,19 @@ $(document).on("click", "#confirmExcludeBtn", function(){
     contentType: "application/json",
     data: JSON.stringify({ employeeUsernames: selected }),
     success: function(){
-      alert("선택된 직원이 제외되었습니다.");
-      $("#excludeModal").modal("hide");
-      location.reload();
+      Swal.fire({
+        text: "제외되었습니다.",
+        icon: "success"
+      }).then(result => {
+        $("#excludeModal").modal("hide");
+        location.reload();
+      });
     },
     error: function(){
-      alert("직원 제외 중 오류가 발생했습니다.");
+      Swal.fire({
+        text: "직원 제외 중 오류가 발생했습니다.",
+        icon: "error"
+      });
     }
   });
 });
