@@ -28,19 +28,22 @@
 <c:import url="/WEB-INF/views/schedule/modal.jsp"/>
 
 <!-- 내용 시작 -->
-<div class="d-flex">
-	<div class="card card-default h-50">
-		<div class="card-body">
-			<jsp:include page="aside.jsp"/>
-		</div>
-	</div>
+<div class="row">
+  <div class="col-lg-3">
+    <div class="card card-default">
+      <div class="card-body">
+        <jsp:include page="aside.jsp"/>
+      </div>
+    </div>
+  </div>
 
-	<div class="card card-default w-75">
-		<div class="card-header"></div>
-		<div class="card-body">
-			<div id='calendar'></div>
-		</div>
-	</div>
+  <div class="col-lg-9">
+    <div class="card card-default w-100">
+      <div class="card-body">
+        <div id='calendar'></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- 내용 끝 -->
