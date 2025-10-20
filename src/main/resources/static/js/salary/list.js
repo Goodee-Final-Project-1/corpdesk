@@ -64,6 +64,8 @@ function paging(data) {
 	const div = document.getElementById('pagination');
 	const pagination = document.createElement('ul');
 	pagination.classList.add('pagination');
+	pagination.classList.add('pagination-flat');
+	pagination.classList.add('pagination-flat-rounded');
 
 	const totalPages = data.totalPages;
 	const currentPage = data.number;

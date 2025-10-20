@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 
 @Controller
-@RequestMapping(value = "/file/*")
+@RequestMapping(value = "/file/**")
 public class FileController {
 	
 	@Autowired

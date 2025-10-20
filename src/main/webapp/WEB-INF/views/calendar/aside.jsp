@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <aside>
-	<div class="email-left-column email-options p-4 p-xl-5">
+	<div class="email-left-column email-options p-0">
 		<button href="#" class="btn btn-block btn-primary mb-4 mb-xl-5" data-toggle="modal" data-target="#scheduleModal">
 			<i class="mdi mdi-calendar-plus mr-2"></i> 일정 추가하기
 		</button>
