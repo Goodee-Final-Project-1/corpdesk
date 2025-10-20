@@ -1,20 +1,31 @@
 package com.goodee.corpdesk.employee;
 
-import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
-import com.goodee.corpdesk.common.BaseEntity;
-import com.goodee.corpdesk.employee.validation.UpdateEmail;
-import com.goodee.corpdesk.employee.validation.UpdatePassword;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import java.time.LocalDate;
+
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
+import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
+import com.goodee.corpdesk.common.BaseEntity;
+import com.goodee.corpdesk.employee.validation.UpdateEmail;
+import com.goodee.corpdesk.employee.validation.UpdatePassword;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -92,6 +103,12 @@ public class Employee extends BaseEntity {
 	private String mobilePhone;
 	private String nationality;
 	private String visaStatus;
+	@Pattern(
+		    regexp = "^[A-Z ]+$",
+		    message = "영문 대문자와 공백만 입력 가능합니다",
+		    groups = {CreateGroup.class, UpdateGroup.class}
+		)
+		@Size(max = 50)
 	private String englishName;
 	private Character gender;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
