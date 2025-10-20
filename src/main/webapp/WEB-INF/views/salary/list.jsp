@@ -26,7 +26,7 @@
 	<div class="card-body">
 		<main>
 			<table data-page-length='10' <%--id="productsTable"--%>
-						 class="table table-hover table-product <%--display--%> table-striped" style="width:100%">
+						 class="table table-hover table-product" style="width:100%">
 				<thead>
 				<tr>
 <%--					<th>조회</th>--%>
@@ -51,8 +51,6 @@
 	<div class="card card-default align-items-center border-0">
 		<div class="card-body">
 			<nav aria-label="Page navigation example" id="pagination">
-				<ul class="pagination">
-				</ul>
 			</nav>
 		</div>
 	</div>

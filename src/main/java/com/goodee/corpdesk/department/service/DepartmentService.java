@@ -154,19 +154,29 @@ public class DepartmentService {
                 .orElseThrow(() -> new RuntimeException("부서를 찾을 수 없습니다."));
 
         Integer parentId = dept.getParentDepartmentId();
+        boolean isRoot = (parentId == null);
 
-        // ✅ 1. 루트 부서(상위 부서 없음)일 경우 예외 처리
-        if (parentId == null) {
-            throw new IllegalStateException("루트 부서는 삭제할 수 없습니다.");
+        // 1) 부서원 이동
+        if (isRoot) {
+            // 루트면: 부서원 departmentId 를 null 로 (스키마가 NULL 허용)
+            employeeRepository.clearDepartmentByDeptId(id);
+            // 만약 NULL 불가 스키마라면, 여기서 '미배정' 부서로 이동하도록 변경하세요.
+            // employeeRepository.moveAllByDepartment(id, unassignedDeptId);
+        } else {
+            // 루트가 아니면 상위 부서로 이동
+            employeeRepository.moveAllByDepartment(id, parentId);
         }
 
-        // ✅ 2. 부서원들을 상위 부서로 이동
-        employeeRepository.moveAllByDepartment(id, parentId);
+        // 2) 하위 부서 재부모 지정
+        if (isRoot) {
+            // 루트면: 자식들을 최상위로 승격 (parentDepartmentId = null)
+            departmentRepository.reparentChildrenToNull(id);
+        } else {
+            // 루트가 아니면: 자식들을 현재 부서의 상위로 올림
+            departmentRepository.reparentChildren(id, parentId);
+        }
 
-        // ✅ 3. 하위 부서들을 상위 부서로 끌어올리기
-        departmentRepository.reparentChildren(id, parentId);
-
-        // ✅ 4. 현재 부서 비활성화
+        // 3) 현재 부서 비활성화(Soft delete)
         dept.setUseYn(false);
         departmentRepository.save(dept);
     }
@@ -180,5 +190,45 @@ public class DepartmentService {
             employeeRepository.save(emp);
         }
     }
+    
+    public Department addOrReactivateDepartment(String rawName, Integer parentId) {
+        String name = rawName == null ? "" : rawName.trim();
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("부서명을 입력하세요.");
+        }
+
+        // 1) 부모 유효성(선택적으로 강화)
+        if (parentId != null) {
+            departmentRepository.findByDepartmentIdAndUseYnTrue(parentId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상위 부서입니다."));
+        }
+
+        // 2) 활성 중복 체크
+        if (departmentRepository.existsByDepartmentNameAndUseYnTrue(name)) {
+            throw new IllegalStateException("이미 존재하는 부서명입니다.");
+        }
+
+        // 3) 비활성 동명 재활성화
+        Optional<Department> inactive = departmentRepository.findByDepartmentNameAndUseYnFalse(name);
+        if (inactive.isPresent()) {
+            Department d = inactive.get();
+
+            if (parentId != null && parentId.equals(d.getDepartmentId())) {
+                throw new IllegalArgumentException("자기 자신을 상위 부서로 지정할 수 없습니다.");
+            }
+
+            d.setUseYn(true);
+            d.setParentDepartmentId(parentId);
+            return departmentRepository.save(d);
+        }
+
+        // 4) 신규 생성
+        Department d = new Department();
+        d.setDepartmentName(name);
+        d.setParentDepartmentId(parentId);
+        d.setUseYn(true);
+        return departmentRepository.save(d);
+    }
+    
     
 }

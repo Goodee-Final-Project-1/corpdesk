@@ -68,24 +68,28 @@ public class OrganizationController {
             @RequestParam(value = "parentId", required = false) Integer parentId,
             @RequestParam("name") String name) {
 
-        // 중복 체크
-        if (departmentRepository.findByDepartmentName(name).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "이미 존재하는 부서명입니다."));
+        String trimmed = name == null ? "" : name.trim();
+        if (trimmed.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "부서명을 입력하세요."));
         }
 
-        Department dept = new Department();
-        dept.setDepartmentName(name);
-        dept.setParentDepartmentId(parentId); // 바로 parentId 저장
+        try {
+            Department dept = departmentService.addOrReactivateDepartment(trimmed, parentId);
 
-        departmentRepository.save(dept);
+            Map<String, Object> res = new HashMap<>();
+            res.put("id", dept.getDepartmentId());
+            res.put("parentId", dept.getParentDepartmentId());
+            res.put("name", dept.getDepartmentName());
+            return ResponseEntity.ok(res);
 
-        Map<String, Object> res = new HashMap<>();
-        res.put("id", dept.getDepartmentId());
-        res.put("parentId", dept.getParentDepartmentId());
-        res.put("name", dept.getDepartmentName());
-
-        return ResponseEntity.ok(res);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
 
@@ -140,4 +144,5 @@ public class OrganizationController {
     }
 
     
+   
 }

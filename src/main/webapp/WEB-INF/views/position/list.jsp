@@ -1,125 +1,121 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+         pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html>
 <head>
-
-	<meta charset="UTF-8">
-	<title>직위</title>
-	<c:import url="/WEB-INF/views/include/head.jsp"/>
-	
-	<style>
-        .page-title { font-size: 22px; font-weight: 600; margin-bottom: 16px; color: black;}
-        .section-card { padding: 16px 18px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .toolbar-left { display: flex; gap: 8px; }
-        .search-input { width: 260px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
-        th { background: #fafafa; font-weight: 600; }
-        td.center { text-align: center; }
-        .empty { color: #9ca3af; text-align: center; padding: 24px 0; }
-        .positionListBox { border: 0; } /* 기존 클래스 유지 */
-        h5{margin-bottom:15px;}
-    </style>
-	
-	
+  <meta charset="UTF-8">
+  <title>직위</title>
+  <c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 
-<c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/> 
+<c:import url="/WEB-INF/views/include/body_wrapper_start.jsp"/>
 
-	<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
+<c:import url="/WEB-INF/views/include/sidebar.jsp"/>
 
-	<c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
+<c:import url="/WEB-INF/views/include/page_wrapper_start.jsp"/>
 
-		<c:import url="/WEB-INF/views/include/header.jsp"/>
-	
-		<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
-			<!-- ===== 내용 시작 ===== -->
-        <div class="card card-default">
-            <div class="card-body">
-                <div class="page-title">직위체계</div>
+<c:import url="/WEB-INF/views/include/header.jsp"/>
 
-                <div class="section-card positionListBox">
-                	<h5>직위목록</h5>
-                    <!-- 상단 툴바 -->
-                    <div class="toolbar">
-                        <div class="toolbar-left">
-                            <button type="button" class="btn btn-primary" onclick="openAddModal()">+ 추가</button>
-                            <button type="button" class="btn btn-danger" onclick="deleteSelected()">X 삭제</button>
-                        </div>
-                        <div class="toolbar-right">
-                            <form action="<c:url value='/position/list'/>" method="get" class="d-flex" role="search">
-                                <input type="text" class="form-control search-input" name="q"
-                                       value="${param.q}" placeholder="검색(직위명)">
-                                <button class="btn btn-outline-secondary ml-2" type="submit">Search</button>
-                            </form>
-                        </div>
-                    </div>
+<c:import url="/WEB-INF/views/include/content_wrapper_start.jsp"/>
+<!-- 내용 시작 -->
 
-                    <!-- 테이블 -->
-                    <div class="table-responsive">
-                        <table id="productsTable" class="table table-hover table-product">
-                            <thead>
-                                <tr>
-                                    <th style="width:48px;">
-                                        <input type="checkbox" id="selectAll" onclick="toggleAll(this)">
-                                    </th>
-                                    <th>직위명(오름차순 정렬)</th>
-                                    <th style="width:160px;" class="center">사용사원(명)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:choose>
-                                    <c:when test="${not empty positionList}">
-                                        <c:forEach var="p" items="${positionList}">
-                                            <tr>
-                                                <td>
-                                                    <input type="checkbox" name="positionId" value="${p.positionId}">
-                                                </td>
-                                                <td><c:out value="${p.positionName}"/></td>
-                                                <td class="center">${p.employeeCount}</td>
-                                            </tr>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <tr><td colspan="3" class="empty">표시할 직위가 없습니다.</td></tr>
-                                    </c:otherwise>
-                                </c:choose>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<div class="card card-default">
+  <div class="card-header">
+    <h2 class="mb-0">직위체계</h2>
+  </div>
+
+  <div class="card-body">
+    <h5 class="mb-3">직위목록</h5>
+
+    <!-- 상단 툴바 -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex">
+        <button type="button" class="btn btn-primary mr-2" onclick="openAddModal()">
+          <i class="mdi mdi-plus mr-1"></i>추가
+        </button>
+        <button type="button" class="btn btn-danger" onclick="deleteSelected()">
+          <i class="mdi mdi-delete mr-1"></i>삭제
+        </button>
+      </div>
+      <div>
+        <form action="<c:url value='/position/list'/>" method="get" class="form-inline" role="search">
+          <div class="input-group">
+            <input type="text" class="form-control" name="q" value="${param.q}" placeholder="검색(직위명)">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="submit">
+                <i class="mdi mdi-magnify"></i> Search
+              </button>
             </div>
-        </div>
-        <!-- ===== 내용 끝 ===== -->
-		<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
-	
-	<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
-	
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 테이블 -->
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+        <tr>
+          <th style="width:48px;">
+            <input type="checkbox" id="selectAll" onclick="toggleAll(this)">
+          </th>
+          <th>직위명(오름차순 정렬)</th>
+          <th style="width:160px;" class="text-center">사용사원(명)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:choose>
+          <c:when test="${not empty positionList}">
+            <c:forEach var="p" items="${positionList}">
+              <tr>
+                <td>
+                  <input type="checkbox" name="positionId" value="${p.positionId}">
+                </td>
+                <td><c:out value="${p.positionName}"/></td>
+                <td class="text-center">${p.employeeCount}</td>
+              </tr>
+            </c:forEach>
+          </c:when>
+          <c:otherwise>
+            <tr>
+              <td colspan="3" class="text-center text-muted p-5">표시할 직위가 없습니다.</td>
+            </tr>
+          </c:otherwise>
+        </c:choose>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 내용 끝 -->
+<c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
+
+<c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
+
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 
-<!-- 모달 (간단 템플릿) -->
+<!-- 모달 -->
 <div class="modal fade" id="addPositionModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form id="addPositionForm" class="modal-content" onsubmit="return submitAddPosition(event)">
       <div class="modal-header">
         <h5 class="modal-title">직위 추가</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
-		  <span aria-hidden="true">&times;</span>
-		</button>
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
 
       <div class="modal-body">
-        <div class="mb-3">
+        <div class="form-group">
           <label class="form-label">직위명</label>
           <input class="form-control" name="positionName" required maxlength="30" placeholder="예) 대리">
         </div>
 
-        <div class="mb-3">
+        <div class="form-group">
           <label class="form-label">상위 직위 선택</label>
-          <select class="form-select" name="parentPositionId">
+          <select class="form-control" name="parentPositionId">
             <option value="">(최상위 직위)</option>
             <c:forEach var="p" items="${allPositions}">
               <option value="${p.positionId}">${p.positionName}</option>
@@ -129,7 +125,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" data-dismiss="modal">취소</button>
+        <button class="btn btn-light" type="button" data-dismiss="modal">취소</button>
         <button class="btn btn-primary" type="submit">저장</button>
       </div>
     </form>
@@ -146,9 +142,9 @@
   }
 
   function openAddModal(){
-	  document.getElementById('addPositionForm').reset();
-	  $('#addPositionModal').modal('show');
-	}
+    document.getElementById('addPositionForm').reset();
+    $('#addPositionModal').modal('show');
+  }
 
   async function submitAddPosition(e) {
     e.preventDefault();
@@ -186,7 +182,6 @@
     }
   }
 
-
   async function deleteSelected(){
     // 1. 검증 로직
     const ids = Array.from(document.querySelectorAll('input[name="positionId"]:checked'))
@@ -200,7 +195,7 @@
     }
 
     // 2. 사용자 확인 (await로 기다림)
-    const result = await Swal.fire({  // await 사용
+    const result = await Swal.fire({
       text: "정말 삭제하시겠습니까?",
       icon: "question",
       showCancelButton: true,
@@ -232,6 +227,5 @@
     }
   }
 </script>
-
 
 </html>
