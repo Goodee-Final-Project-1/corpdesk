@@ -35,7 +35,7 @@
 </style>
 <head>
 	<meta charset="UTF-8">
-	<title>Insert title here</title>
+	<title>사원 등록</title>
 	<c:import url="/WEB-INF/views/include/head.jsp"/>
 </head>
 
