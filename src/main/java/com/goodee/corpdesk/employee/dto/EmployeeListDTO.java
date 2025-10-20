@@ -19,6 +19,7 @@ public class EmployeeListDTO {
     private Integer positionId;
     private String positionName;
     private String mobilePhone;
+    private String displayMobilePhone; // ✅ 표시용 (010-0000-0000 형태)
     private LocalDate hireDate;
     private LocalDate lastWorkingDay;
     private Boolean enabled;
