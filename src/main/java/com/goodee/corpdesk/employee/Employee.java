@@ -92,6 +92,12 @@ public class Employee extends BaseEntity {
 	private String mobilePhone;
 	private String nationality;
 	private String visaStatus;
+	@Pattern(
+		    regexp = "^[A-Z ]+$",
+		    message = "영문 대문자와 공백만 입력 가능합니다",
+		    groups = {CreateGroup.class, UpdateGroup.class}
+		)
+		@Size(max = 50)
 	private String englishName;
 	private Character gender;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")

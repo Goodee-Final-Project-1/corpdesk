@@ -708,6 +708,18 @@
     });
   }
 
+  document.addEventListener("DOMContentLoaded", () => {
+	  const englishInput = document.querySelector("input[name='englishName']");
+	  if (englishInput) {
+	    englishInput.addEventListener("input", (e) => {
+	      // 1) 자동 대문자 변환
+	      let value = e.target.value.toUpperCase();
+	      // 2) 영문 대문자와 공백만 허용 (기타 문자 제거)
+	      value = value.replace(/[^A-Z ]/g, '');
+	      e.target.value = value;
+	    });
+	  }
+	});
 
   // 기존 버튼에도 적용
   document.querySelectorAll(".updateAttendanceBtn").forEach(btn => attachUpdateEvent(btn));
