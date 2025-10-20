@@ -67,7 +67,7 @@ public class ChatRoomController {
 		if(roomData==null) {
 			//TODO
 			//에러 창으로 이동
-			return "Chat/chat_page";
+			return "Chat/chat_error";
 		}
 		
 		//json으로 변환

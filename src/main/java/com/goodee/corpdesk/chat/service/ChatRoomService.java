@@ -371,9 +371,7 @@ public class ChatRoomService {
 	public String getRoomPageTitle(Long roomId , Principal principal) {
 		String roomType = getChatRoomType(roomId);
 		String roomTitle = null;
-		if(roomType=="direct") {
-			
-			
+		if(roomType.equals("direct")) {
 		}else{
 			roomTitle=getRoomTitle(roomId);
 		}
@@ -384,7 +382,7 @@ public class ChatRoomService {
 
 
 	public RoomData chatRoomDetail(Long roomId, Principal principal) {
-		if(chatRoomRepository.findByChatRoomId(roomId).isEmpty()) {
+		if(chatRoomRepository.findByChatRoomId(roomId).isEmpty()||!chatParticipantRepository.existsByChatRoomIdAndEmployeeUsername(roomId,principal.getName())) {
 			return null;
 		}
 		if(getChatRoomType(roomId)==null) {

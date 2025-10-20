@@ -124,7 +124,7 @@
         <!-- 사원 목록 (스크롤 가능) -->
         <ul class="list-group" id="participantList" style="max-height: 300px; overflow-y: auto;">
           <c:forEach items="${employeeList}" var="employee">
-            <li class="list-group-item d-flex align-items-cent er" data-username="${employee.username}">
+            <li class="list-group-item d-flex align-items-center" data-username="${employee.username}">
              <!-- 추후 사진 바꿔주면됨  -->
               <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:40px; height:40px;">
               <div class="flex-fill">
@@ -176,5 +176,5 @@
 	<!-- 내용 끝 -->
 
 
-	<c:import url="/WEB-INF/views/include/body_wrapper_end.jsp" />
+	<c:import url="/WEB-INF/views/include/body_wrapper_end2.jsp" />
 </html>
