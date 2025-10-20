@@ -382,7 +382,7 @@ public class ChatRoomService {
 
 
 	public RoomData chatRoomDetail(Long roomId, Principal principal) {
-		if(chatRoomRepository.findByChatRoomId(roomId).isEmpty()||!chatParticipantRepository.existsByChatRoomIdAndEmployeeUsernameAndUseYnTrue(roomId,principal.getName())) {
+		if(chatRoomRepository.findByChatRoomId(roomId).isEmpty()||!chatParticipantRepository.existsByChatRoomIdAndEmployeeUsername(roomId,principal.getName())) {
 			return null;
 		}
 		if(getChatRoomType(roomId)==null) {
