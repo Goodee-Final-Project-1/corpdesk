@@ -120,10 +120,17 @@
 				<!-- User Account -->
 				<li class="dropdown user-menu">
 					<button class="dropdown-toggle nav-link" data-toggle="dropdown">
-						<img src="/images/user/user-xs-01.jpg"
-							class="user-image rounded-circle" alt="User Image" />
-						<!-- TODO 추후 사용시 src 변경 -->
-						<span class="d-none d-lg-inline-block">이름</span>
+            <c:set var="hasProfileImg" value="${profileImgName ne null and profileImgName ne '' and profileImgExt ne null and profileImgExt ne ''}"></c:set>
+
+            <c:choose>
+              <c:when test="${hasProfileImg}">
+                <img src="/files/${profileImgPath}/${profileImgName}.${profileImgExt}" class="user-image rounded-circle" alt="User Image" />
+              </c:when>
+              <c:otherwise>
+						    <img src="/images/default_profile.jpg" class="user-image rounded-circle" alt="User Image" />
+              </c:otherwise>
+            </c:choose>
+						<span class="d-none d-lg-inline-block">${profileName ne null ? profileName : ''}${profilePosition ne null ? ' ' += profilePosition : ''}</span>
 					</button>
 					<ul class="dropdown-menu dropdown-menu-right">
 						<li><a class="dropdown-link-item" href="/employee/detail">
