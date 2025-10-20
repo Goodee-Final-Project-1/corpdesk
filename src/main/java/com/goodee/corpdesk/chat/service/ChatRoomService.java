@@ -371,9 +371,7 @@ public class ChatRoomService {
 	public String getRoomPageTitle(Long roomId , Principal principal) {
 		String roomType = getChatRoomType(roomId);
 		String roomTitle = null;
-		if(roomType=="direct") {
-			
-			
+		if(roomType.equals("direct")) {
 		}else{
 			roomTitle=getRoomTitle(roomId);
 		}
