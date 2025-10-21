@@ -17,7 +17,7 @@ public interface StatsRepository extends JpaRepository<Employee, String> {
 		UNION ALL
 		SELECT month_start + INTERVAL 1 MONTH
 		FROM AllMonths
-		WHERE month_start < :end
+		WHERE month_start <= :end - INTERVAL 1 MONTH
 	)
 	SELECT DATE_FORMAT(am.month_start, '%Y-%m') AS date
 	FROM AllMonths am
@@ -33,7 +33,7 @@ public interface StatsRepository extends JpaRepository<Employee, String> {
 		UNION ALL
 		SELECT month_start + INTERVAL 1 MONTH
 		FROM AllMonths
-		WHERE month_start < :end
+		WHERE month_start <= :end - INTERVAL 1 MONTH
 	)
 	SELECT COUNT(e.hire_date) AS count
 	FROM AllMonths am
@@ -52,7 +52,7 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 		UNION ALL
 		SELECT month_start + INTERVAL 1 MONTH
 		FROM AllMonths
-		WHERE month_start < :end
+		WHERE month_start <= :end - INTERVAL 1 MONTH
 	)
 	SELECT COUNT(e.last_working_day) AS count
 	FROM AllMonths am
@@ -71,7 +71,7 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 		UNION ALL
 		SELECT month_start + INTERVAL 1 MONTH
 		FROM AllMonths
-		WHERE month_start < :end
+		WHERE month_start <= :end - INTERVAL 1 MONTH
 	)
 	SELECT COUNT(e.username) AS count
 	FROM AllMonths am
@@ -129,7 +129,7 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 		UNION ALL
 		SELECT month_start + INTERVAL 1 MONTH
 		FROM AllMonths
-		WHERE month_start < :end
+		WHERE month_start <= :end - INTERVAL 1 MONTH
 	)
 	SELECT
 		DATE_FORMAT(am.month_start, '%Y-%m') AS month,
@@ -155,7 +155,7 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 		UNION ALL
 		SELECT month_start + INTERVAL 1 MONTH
 		FROM AllMonths
-		WHERE month_start < :end
+		WHERE month_start <= :end - INTERVAL 1 MONTH
 	)
 	SELECT
 		DATE_FORMAT(am.month_start, '%Y-%m') AS month,
