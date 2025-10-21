@@ -16,8 +16,14 @@ async function getMail() {
 		const response = await fetch(`/api/email/${category}/${page}`, {
 			method: 'POST'
 		});
+		console.log(response);
 		if (!response.ok) throw new Error('메일을 가져올 수 없습니다.');
-		const data = await response.json();
+		let data;
+		try {
+			data = await response.json();
+		} catch (e) {
+			throw new Error("메일을 가져올 수 없습니다.");
+		}
 
 		spinner.classList.remove('d-flex');
 		list.classList.remove('d-none');

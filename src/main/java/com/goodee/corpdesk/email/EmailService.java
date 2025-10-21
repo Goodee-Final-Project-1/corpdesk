@@ -43,13 +43,13 @@ public class EmailService {
 	}
 
 	// 받은 메일 목록
-	public PagedModel<EmailDTO> receivedList(String username, Pageable pageable) {
+	public PagedModel<EmailDTO> receivedList(String username, Pageable pageable) throws Exception {
 		Employee employee = getEmployee(username);
 		return this.mailList(employee, pageable, "INBOX");
 	}
 
 	// 보낸 메일 목록
-	public PagedModel<EmailDTO> sentList(String username, Pageable pageable) {
+	public PagedModel<EmailDTO> sentList(String username, Pageable pageable) throws Exception {
 		Employee employee = getEmployee(username);
 		return mailList(employee, pageable, getSentFolderName(employee));
 	}
