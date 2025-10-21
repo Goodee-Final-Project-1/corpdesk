@@ -724,6 +724,41 @@
   // 기존 버튼에도 적용
   document.querySelectorAll(".updateAttendanceBtn").forEach(btn => attachUpdateEvent(btn));
 
+  
+//010-1234-5678 자동 포맷
+  function fmtMobile(v){
+    const d=(v||'').replace(/\D/g,'');
+    if(d.length<=3) return d;
+    if(d.length<=7) return d.replace(/(\d{3})(\d{1,4})/,'$1-$2');
+    return d.replace(/(\d{3})(\d{3,4})(\d{1,4}).*/,'$1-$2-$3');
+  }
+
+  const mobileEl=document.getElementById('mobilePhone');
+  if(mobileEl){
+    mobileEl.addEventListener('input',e=>{
+      const pos=e.target.selectionStart;
+      e.target.value=fmtMobile(e.target.value);
+      try{ e.target.setSelectionRange(e.target.value.length,e.target.value.length); }catch(_){}
+    });
+  }
+
+  // 제출 전 간단 검증
+  const form=document.querySelector('form[action="/employee/edit"]');
+  if(form && mobileEl){
+    form.addEventListener('submit',e=>{
+      const raw=mobileEl.value.replace(/\D/g,'');
+      const ok=/^(01[0-9])\d{7,8}$/.test(raw) || raw.length===0; // 수정 시 공란 허용이면 length===0 허용
+      if(!ok){
+        e.preventDefault();
+        mobileEl.classList.add('is-invalid');
+        // 서버 에러와 중복될 수 있지만 UX상 즉시 알림
+        alert('휴대전화 형식이 올바르지 않습니다. 예: 01012345678');
+      }else{
+        mobileEl.classList.remove('is-invalid');
+      }
+    });
+  }
+  
 </script>
 
 </html>
