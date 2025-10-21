@@ -9,6 +9,8 @@
   <title>Insert title here</title>
   <c:import url="/WEB-INF/views/include/head.jsp"/>
 
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
   <script defer src="/js/schedule/list.js"></script>
 </head>
 
@@ -78,7 +80,10 @@
             <div class="col-12">
               <div class="form-group">
                 <label class="font-weight-bold">주소</label>
-                <input type="text" class="form-control-plaintext border-bottom pb-2" name="address" value="${schedule.address != null ? schedule.address : ''}">
+                <div class="d-flex justify-content-between">
+                  <input type="text" id="scheduleLocationDetail" class="form-control-plaintext border-bottom pb-2" name="address" value="${schedule.address != null ? schedule.address : ''}">
+                  <input type="button" onclick="searchAddressDetail()" value="주소 검색" class="d_btn btn btn-light ml-2">
+                </div>
               </div>
             </div>
           </div>
@@ -114,3 +119,14 @@
 
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>
+
+<script>
+  function searchAddressDetail() {
+    new daum.Postcode({
+      oncomplete: function(data) {
+        const locationInput = document.getElementById("scheduleLocationDetail");
+        locationInput.value = data.address;
+      }
+    }).open();
+  }
+</script>
