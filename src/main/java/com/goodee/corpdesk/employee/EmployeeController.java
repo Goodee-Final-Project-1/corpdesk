@@ -57,12 +57,8 @@ import com.goodee.corpdesk.position.service.PositionService;
 import com.goodee.corpdesk.salary.dto.EmployeeSalaryDTO;
 
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-@Getter
-@Setter
 @Controller
 @RequestMapping("/employee")
 @Slf4j

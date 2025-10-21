@@ -136,6 +136,8 @@ public class SalaryService {
 			LocalDateTime checkIn = a.getCheckInDateTime();
 			LocalDateTime checkOut = a.getCheckOutDateTime();
 
+			if (checkIn == null || checkOut == null) continue;
+
 			// 총 근로 시간 (소수점으로 분단위까지)
 			Double workHours = (double) Duration.between(checkIn, checkOut).toMinutes() / 60;
 			// 연장근로

@@ -43,7 +43,7 @@
 			 <ul class="list-group" id="contactList" data-simplebar style="height: 562px;">
         	  <c:forEach items="${contactList}" var="employee">
           
-            <li class="list-group-item-action d-flex align-items-cent er employeeListOne" data-employee="${employee.username}" style="padding: 10px;">
+            <li class="list-group-item-action d-flex align-items-center employeeListOne" data-employee="${employee.username}" style="padding: 10px;">
              <!-- 추후 사진 바꿔주면됨  -->
               <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:60px; height:60px;">
               <div class="flex-fill">
@@ -149,7 +149,7 @@
         <ul class="list-group" id="participantList" style="max-height: 300px; overflow-y: auto;">
           <c:forEach items="${contactList}" var="employee">
           <c:if test="${employee.username ne user }">
-            <li class="list-group-item d-flex align-items-cent er">
+            <li class="list-group-item d-flex align-items-center">
              <!-- 추후 사진 바꿔주면됨  -->
               <img src="${employee.imgPath}" class="rounded-circle mr-3" style="width:40px; height:40px;">
               <div class="flex-fill">

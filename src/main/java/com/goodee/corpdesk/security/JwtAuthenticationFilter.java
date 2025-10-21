@@ -1,14 +1,5 @@
 package com.goodee.corpdesk.security;
 
-import java.io.IOException;
-import java.util.NoSuchElementException;
-
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,6 +7,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import java.io.IOException;
 
 @Slf4j
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
@@ -66,7 +63,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                         cookie.setMaxAge(0);
 
                         response.addCookie(cookie);
-                        response.sendRedirect("/");
+                        response.sendRedirect("/logout");
                         return;
                     } catch (Exception e1) {
                         e1.printStackTrace();
