@@ -61,12 +61,12 @@
               <td>
                 <c:choose>
                   <c:when test="${title eq '공지 게시판'}">
-                    <a href="${pageContext.request.contextPath}/board/notice/${post.boardId}">
+                    <a href="${pageContext.request.contextPath}/board/notice/${post.boardId}" style="color: inherit; text-decoration: none;">
                       <c:out value="${post.title}"/>
                     </a>
                   </c:when>
                   <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/board/department/${post.boardId}">
+                    <a href="${pageContext.request.contextPath}/board/department/${post.boardId}" style="color: inherit; text-decoration: none;">
                       <c:out value="${post.title}"/>
                     </a>
                   </c:otherwise>
