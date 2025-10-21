@@ -118,7 +118,6 @@
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
-</html>
 
 <script>
   function searchAddressDetail() {
@@ -130,3 +129,5 @@
     }).open();
   }
 </script>
+</html>
+
