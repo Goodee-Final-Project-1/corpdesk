@@ -83,8 +83,64 @@
         </table>
       </div>
     </c:if>
+		<c:set var="pageNumber1" value="${page.number + 1}"/>
+		<c:set var="totalPages" value="${page.totalPages > 0 ? page.totalPages : 1}"/>
+		<c:set var="window" value="5"/>
+		
+		<c:set var="start" value="${pageNumber1 - (window - 1) / 2}"/>
+		<c:if test="${start < 1}">
+		  <c:set var="start" value="1"/>
+		</c:if>
+		
+		<c:set var="end" value="${start + window - 1}"/>
+		<c:if test="${end > totalPages}">
+		  <c:set var="end" value="${totalPages}"/>
+		  <c:set var="start" value="${end - window + 1}"/>
+		  <c:if test="${start < 1}">
+		    <c:set var="start" value="1"/>
+		  </c:if>
+		</c:if>
+		
+		<c:choose>
+		  <c:when test="${title eq '공지 게시판'}">
+		    <c:set var="basePath" value="${pageContext.request.contextPath}/board/notice"/>
+		  </c:when>
+		  <c:otherwise>
+		    <c:set var="basePath" value="${pageContext.request.contextPath}/board/department"/>
+		  </c:otherwise>
+		</c:choose>
+		
+		<nav aria-label="board pagination" class="d-flex justify-content-center mt-4">
+		  <ul class="pagination mb-0">
+		
+		    <li class="page-item ${page.first ? 'disabled' : ''}">
+		      <a class="page-link" href="${basePath}?page=0&size=${page.size}">&laquo;</a>
+		    </li>
+		
+		    <li class="page-item ${page.first ? 'disabled' : ''}">
+		      <a class="page-link" href="${basePath}?page=${page.number - 1 < 0 ? 0 : page.number - 1}&size=${page.size}">&lsaquo;</a>
+		    </li>
+		
+		    <c:forEach begin="${start}" end="${end}" var="i">
+		      <li class="page-item ${i == pageNumber1 ? 'active' : ''}">
+		        <a class="page-link" href="${basePath}?page=${i-1}&size=${page.size}">${i}</a>
+		      </li>
+		    </c:forEach>
+		
+		    <li class="page-item ${page.last ? 'disabled' : ''}">
+		      <a class="page-link" href="${basePath}?page=${page.number + 1 >= totalPages ? totalPages - 1 : page.number + 1}&size=${page.size}">&rsaquo;</a>
+		    </li>
+		
+		    <li class="page-item ${page.last ? 'disabled' : ''}">
+		      <a class="page-link" href="${basePath}?page=${totalPages - 1}&size=${page.size}">&raquo;</a>
+		    </li>
+		
+		  </ul>
+		</nav>
   </div>
+  
 </div>
+
 
 <!-- 내용 끝 -->
 <c:import url="/WEB-INF/views/include/content_wrapper_end.jsp"/>
