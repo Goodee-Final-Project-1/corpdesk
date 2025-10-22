@@ -10,7 +10,7 @@
 
 <%--	<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css' rel='stylesheet'>--%>
 <%--	<link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>--%>
-	<link rel="stylesheet" href="/css/calendar/list.css">
+<%--	<link rel="stylesheet" href="/css/calendar/list.css">--%>
 
 	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
 </head>
@@ -49,7 +49,6 @@
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
 <script src="/js/calendar/list.js"></script>
-<script src="/js/calendar/add.js"></script>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>
