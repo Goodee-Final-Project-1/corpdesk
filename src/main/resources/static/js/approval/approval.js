@@ -447,8 +447,13 @@ function renderApproversToTable(approvers) {
 
 // 4. 결재선 확인 버튼 이벤트 리스너 등록
 document.getElementById('approverCheck').addEventListener('click', () => {
-    const approvers = Array.from(document.querySelectorAll('#approver-list li'));
-    renderApproversToTable(approvers);
+  const approvers = Array.from(document.querySelectorAll('#approver-list li'));
+  renderApproversToTable(approvers);
+
+  // 확인 버튼에서 포커스 제거 (접근성 오류 해결)
+  document.activeElement.blur();
+
+  // 모달은 data-dismiss="modal" 속성이나 다른 방식으로 닫힐 것임
 });
 
 /**
@@ -461,17 +466,24 @@ const pond = FilePond.create(filepondEl, {
 
 const btnSubmits = document.querySelectorAll('.btn-submit');
 btnSubmits.forEach((btn) => {
-  btn.addEventListener('click', function () {
+  btn.addEventListener('click', async function () {
+    console.log(btn.id);
+
     // 0. 유효성 검사: hidden input 요소의 개수로 결재자 지정 여부 확인
     // (결재 요청 시에만 검사하며, 임시저장/취소는 검사하지 않음)
     if (btn.id !== 'tempSave' && btn.id !== 'cancel') {
+      console.log(1);
+
       const approverHiddenInputs = document.querySelectorAll(
           '#approvalContentCommon input[name^="approverDTOList"][name$=".username"]'
       );
 
-      if (approverHiddenInputs.length === 0) {
+      let confirmed = false;
 
-        Swal.fire({
+      if (approverHiddenInputs.length === 0) {
+        console.log(2);
+
+        confirmed = await Swal.fire({
           text: "결재선을 지정하지 않고 결재를 요청하면 즉시 승인 처리됩니다. 요청을 진행하시겠습니까?",
           icon: "question",
           showCancelButton: true,
@@ -479,56 +491,59 @@ btnSubmits.forEach((btn) => {
           cancelButtonText: "취소",
           reverseButtons: true
         }).then(result => {
-          if (result.isConfirmed) {
-
-            // 1. 결재 공통내용 가져오기
-            const commonForm = document.querySelector('#approvalContentCommon');
-            const formData = new FormData(commonForm);
-
-            // 2. 결재 상세내용 가져오기
-            const formByType = document.querySelector('#approvalContentByType');
-            const formData2 = new FormData(formByType);
-
-            // 3. formData2를 json 문자열로 formData에 추가
-            // 1) formData2를 일반 객체로 변환
-            const data2 = {};
-            for (const [key, value] of formData2.entries()) {
-              data2[key] = value;
-            }
-            // 2) JSON 문자열로 변환
-            const jsonData2 = JSON.stringify(data2);
-            // 3) formData에 추가
-            formData.append('approvalContent', jsonData2);
-
-            // 3. FilePond에서 파일 가져오기
-            const pondFiles = pond.getFiles();
-
-            // 4. formData에 파일 추가
-            for (let i = 0; i < pondFiles.length; i++) {
-              formData.append('files', pondFiles[i].file);
-            }
-
-            // 버튼 종류(결재 요청/임시저장)에 따라 status를 다르게 지정
-            if(btn.id === 'tempSave') formData.append('status', 't');
-
-            // 3. ajax 요청
-            fetch('/approval', {
-              method: 'POST',
-              body: formData
-            })
-                .then(r => r.json())
-                .then(r => {
-                  console.log(r);
-                  console.log(r.approvalId);
-
-                  location.href=`/approval/${r.approvalId}`;
-                })
-            ;
-
-          }
+          if (result.isConfirmed) return true;
+          else return false;
         });
-
+      } else {
+        confirmed = true;
       }
+
+      if(confirmed) {
+        // 1. 결재 공통내용 가져오기
+        const commonForm = document.querySelector('#approvalContentCommon');
+        const formData = new FormData(commonForm);
+
+        // 2. 결재 상세내용 가져오기
+        const formByType = document.querySelector('#approvalContentByType');
+        const formData2 = new FormData(formByType);
+
+        // 3. formData2를 json 문자열로 formData에 추가
+        // 1) formData2를 일반 객체로 변환
+        const data2 = {};
+        for (const [key, value] of formData2.entries()) {
+          data2[key] = value;
+        }
+        // 2) JSON 문자열로 변환
+        const jsonData2 = JSON.stringify(data2);
+        // 3) formData에 추가
+        formData.append('approvalContent', jsonData2);
+
+        // 3. FilePond에서 파일 가져오기
+        const pondFiles = pond.getFiles();
+
+        // 4. formData에 파일 추가
+        for (let i = 0; i < pondFiles.length; i++) {
+          formData.append('files', pondFiles[i].file);
+        }
+
+        // 버튼 종류(결재 요청/임시저장)에 따라 status를 다르게 지정
+        if(btn.id === 'tempSave') formData.append('status', 't');
+
+        // 3. ajax 요청
+        fetch('/approval', {
+          method: 'POST',
+          body: formData
+        })
+            .then(r => r.json())
+            .then(r => {
+              console.log(r);
+              console.log(r.approvalId);
+
+              location.href=`/approval/${r.approvalId}`;
+            })
+        ;
+      }
+
     }
 
   });
