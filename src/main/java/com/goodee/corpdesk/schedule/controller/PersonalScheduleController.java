@@ -159,7 +159,7 @@ public class PersonalScheduleController {
     // API용
     @GetMapping("today")
     @ResponseBody
-    public List<ResPersonalScheduleDTO> getTodaySchedulesApi(@AuthenticationPrincipal UserDetails userDetails) {
+    public List<ResPersonalScheduleDTO> getTodaySchedulesApi(@AuthenticationPrincipal UserDetails userDetails) throws Exception {
 
         List<ResPersonalScheduleDTO> schedules = fetchTodaySchedules(userDetails.getUsername());
 

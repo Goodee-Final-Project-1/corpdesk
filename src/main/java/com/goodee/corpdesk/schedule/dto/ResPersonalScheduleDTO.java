@@ -22,6 +22,7 @@ public class ResPersonalScheduleDTO {
 
     private List<ResPersonalScheduleDTO> schedules;
     private Integer todayScheduleCnt;
+    private Integer totalScheduleCnt;
 
     private Double latitude; // 위도(y)
     private Double longitude; // 경도(x)

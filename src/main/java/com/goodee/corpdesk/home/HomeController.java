@@ -92,7 +92,7 @@ public class HomeController {
         model.addAttribute("employee", employee);
 
         // 2. 일정 정보
-        ResPersonalScheduleDTO personalSchedule = homeService.getTodaySchedule(username);
+        ResPersonalScheduleDTO personalSchedule = homeService.getSchedule(username);
         model.addAttribute("personalSchedule", personalSchedule);
 
         // 3. 결재 정보
