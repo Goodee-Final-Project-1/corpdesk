@@ -6,15 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +40,15 @@ public class ChatRoomController {
 	EmployeeService employeeService;
 	@Autowired
 	SimpMessagingTemplate simpMessagingTemplate;
+
+    @Value("${cat.chat}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
+
 	@GetMapping("list")
 	public String chatRoomList(Principal principal ,Model model) {
 			String username= principal.getName();
