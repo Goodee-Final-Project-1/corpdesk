@@ -252,8 +252,6 @@
         <select id="newWorkStatus" class="form-control mr-4" style="width:150px; display:inline-block;">
           <option value="출근">출근</option>
           <option value="퇴근">퇴근</option>
-          <option value="출근전">출근전</option>
-          <option value="휴가">휴가</option>
         </select>
 
         <label class="mr-2">일시</label>
@@ -645,8 +643,6 @@
                 <select class="form-control workStatusInput">
                     <option value="출근" ${currentStatus == "출근" ? "selected" : ""}>출근</option>
                     <option value="퇴근" ${currentStatus == "퇴근" ? "selected" : ""}>퇴근</option>
-                    <option value="출근전" ${currentStatus == "출근전" ? "selected" : ""}>출근전</option>
-                    <option value="휴가" ${currentStatus == "휴가" ? "selected" : ""}>휴가</option>
                 </select>`;
 
         dateTimeCell.innerHTML = `<input type="datetime-local" class="form-control dateTimeInput" value="${dateTimeValue}"/>`;

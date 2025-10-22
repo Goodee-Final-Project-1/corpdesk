@@ -60,7 +60,7 @@
           <th style="width:48px;">
             <input type="checkbox" id="selectAll" onclick="toggleAll(this)">
           </th>
-          <th>직위명(오름차순 정렬)</th>
+          <th>직위명(내림차순 정렬)</th>
           <th style="width:160px;" class="text-center">사용사원(명)</th>
         </tr>
         </thead>
