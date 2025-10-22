@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,14 +25,14 @@ public class EmailApiController {
 	 * @return 페이징 처리된 수신 목록
 	 */
 	@PostMapping("received/{page}")
-	public Object received(Authentication authentication, @PathVariable Integer page) {
+	public ResponseEntity<?> received(Authentication authentication, @PathVariable Integer page) {
 		String username = authentication.getName();
 		Pageable pageable = PageRequest.of(page - 1, 10);
 
 		try {
-			return emailService.receivedList(username, pageable);
+			return ResponseEntity.ok(emailService.receivedList(username, pageable));
 		} catch (Exception e) {
-			return "메일을 가져올 수 없습니다.";
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("메일을 가져올 수 없습니다.");
 		}
 	}
 
@@ -58,7 +60,7 @@ public class EmailApiController {
 		try {
 			return emailService.sentList(username, pageable);
 		} catch (Exception e) {
-			return "메일을 가져올 수 없습니다.";
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("메일을 가져올 수 없습니다.");
 		}
 	}
 
