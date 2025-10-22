@@ -79,7 +79,7 @@
 				</li>
 
 				<li>
-					<a class="sidenav-item-link" href="/vacation/list">
+					<a class="sidenav-item-link" href="/vacation/list?listType=personal">
 						<i class="mdi mdi-beach"></i> <span class="nav-text">휴가</span>
 					</a>
 				</li>

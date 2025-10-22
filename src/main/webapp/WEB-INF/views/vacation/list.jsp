@@ -30,9 +30,6 @@
 
         <!-- 휴가 신청 버튼 -->
         <form method="GET" action="/approval-form/1">
-          <%-- TODO 인증 붙이면 input hidden 삭제 --%>
-          <input type="hidden" name="departmentId" value="2">
-          <input type="hidden" name="username" value="jung_frontend">
           <button class="btn btn-info btn-lg btn-block mb-6">휴가 신청</button>
         </form>
 
@@ -40,11 +37,10 @@
         <div class="email-options">
           <ul class="text-center">
             <li class="d-block mb-4">
-              <%-- TODO 인증 붙이면 usernmae 파라미터 삭제 --%>
-              <a href="/vacation/list?username=jung_frontend">휴가 현황</a>
+              <a href="/vacation/list?listType=personal">휴가 현황</a>
             </li>
             <li class="d-block mb-4">
-              <a href="/vacation/list">전사 휴가 현황</a>
+              <a href="/vacation/list?listType=all">전사 휴가 현황</a>
             </li>
           </ul>
         </div>
@@ -68,11 +64,7 @@
 
 
             <form method="GET" action="/vacation/list">
-
-              <c:if test="${username ne null}">
-                <input type="hidden" name="username" value="${username}">
-              </c:if>
-
+              <input type="hidden" name="listType" value="${param.listType}">
               <div class="mr-3">
                 <div class="form-group">
                   <div class="d-flex align-items-center">

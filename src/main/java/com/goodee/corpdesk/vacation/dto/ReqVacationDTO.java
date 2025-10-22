@@ -12,4 +12,6 @@ public class ReqVacationDTO {
     private Integer vacationType;
     private String username;
 
+    private String listType;
+
 }
