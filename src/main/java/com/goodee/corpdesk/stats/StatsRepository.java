@@ -38,8 +38,8 @@ public interface StatsRepository extends JpaRepository<Employee, String> {
 	SELECT COUNT(e.hire_date) AS count
 	FROM AllMonths am
 	LEFT JOIN employee e ON DATE_FORMAT(am.month_start, '%Y-%m') = DATE_FORMAT(e.hire_date, '%Y-%m')
-	WHERE (:departmentId IS NULL OR e.department_id = :departmentId)
-AND (:positionId IS NULL OR e.position_id = :positionId)
+	AND (:departmentId IS NULL OR e.department_id = :departmentId)
+	AND (:positionId IS NULL OR e.position_id = :positionId)
 	GROUP BY YEAR(am.month_start), MONTH(am.month_start)
 	ORDER BY am.month_start
 """)
@@ -57,8 +57,8 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 	SELECT COUNT(e.last_working_day) AS count
 	FROM AllMonths am
 	LEFT JOIN employee e ON DATE_FORMAT(am.month_start, '%Y-%m') = DATE_FORMAT(e.last_working_day, '%Y-%m')
-	WHERE (:departmentId IS NULL OR e.department_id = :departmentId)
-AND (:positionId IS NULL OR e.position_id = :positionId)
+	AND (:departmentId IS NULL OR e.department_id = :departmentId)
+	AND (:positionId IS NULL OR e.position_id = :positionId)
 	GROUP BY YEAR(am.month_start), MONTH(am.month_start)
 	ORDER BY am.month_start
 """)
@@ -76,8 +76,8 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 	SELECT COUNT(e.username) AS count
 	FROM AllMonths am
 	LEFT JOIN employee e ON DATE_FORMAT(am.month_start, '%Y-%m') >= DATE_FORMAT(e.hire_date, '%Y-%m') AND (e.last_working_day IS NULL OR DATE_FORMAT(am.month_start, '%Y-%m') <= DATE_FORMAT(e.last_working_day, '%Y-%m'))
-	WHERE (:departmentId IS NULL OR e.department_id = :departmentId)
-AND (:positionId IS NULL OR e.position_id = :positionId)
+	AND (:departmentId IS NULL OR e.department_id = :departmentId)
+	AND (:positionId IS NULL OR e.position_id = :positionId)
 	GROUP BY YEAR(am.month_start), MONTH(am.month_start)
 	ORDER BY am.month_start
 """)
@@ -94,7 +94,7 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 	FROM employee e
 	JOIN sub s ON e.username = s.username
 	WHERE (:departmentId IS NULL OR e.department_id = :departmentId)
-AND (:positionId IS NULL OR e.position_id = :positionId)
+	AND (:positionId IS NULL OR e.position_id = :positionId)
 	AND e.hire_date < :end AND (e.last_working_day IS NULL OR e.last_working_day >= :start)
 	GROUP BY diff
 	HAVING diff IS NOT NULL
@@ -141,8 +141,8 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 	ON DATE_FORMAT(am.month_start, '%Y-%m') = DATE_FORMAT(a.created_at, '%Y-%m')
 	LEFT JOIN employee e
 	ON a.username = e.username
-	WHERE (:departmentId IS NULL OR e.department_id = :departmentId)
-AND (:positionId IS NULL OR e.position_id = :positionId)
+	AND (:departmentId IS NULL OR e.department_id = :departmentId)
+	AND (:positionId IS NULL OR e.position_id = :positionId)
 	GROUP BY YEAR(am.month_start), MONTH(am.month_start)
 	ORDER BY am.month_start
 """)
@@ -168,8 +168,8 @@ AND (:positionId IS NULL OR e.position_id = :positionId)
 	ON DATE_FORMAT(am.month_start, '%Y-%m') = DATE_FORMAT(a.check_in_date_time, '%Y-%m')
 	LEFT JOIN employee e
 	ON a.username = e.username
-	WHERE (:departmentId IS NULL OR e.department_id = :departmentId)
-AND (:positionId IS NULL OR e.position_id = :positionId)
+	AND (:departmentId IS NULL OR e.department_id = :departmentId)
+	AND (:positionId IS NULL OR e.position_id = :positionId)
 	GROUP BY YEAR(am.month_start), MONTH(am.month_start)
 	ORDER BY am.month_start
 """)

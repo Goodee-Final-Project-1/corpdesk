@@ -25,7 +25,7 @@
 				<sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_HR')">
 					<li>
 						<a class="sidenav-item-link" href="/admin">
-							<i class="mdi mdi-account-key"></i> <span class="nav-text">권한 부여</span>
+							<i class="mdi mdi-account-key"></i> <span class="nav-text">권한</span>
 						</a>
 					</li>
 				</sec:authorize>
@@ -131,7 +131,7 @@
 				</li>
 				<li>
 					<a class="sidenav-item-link" href="/salary">
-						<i class="mdi mdi-currency-krw"></i> <span class="nav-text">급여 관리</span>
+						<i class="mdi mdi-currency-krw"></i> <span class="nav-text">급여관리</span>
 					</a>
 				</li>
 				<li>

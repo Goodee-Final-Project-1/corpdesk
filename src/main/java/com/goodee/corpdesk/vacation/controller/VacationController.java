@@ -5,6 +5,7 @@ import com.goodee.corpdesk.vacation.dto.ReqVacationDTO;
 import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
 import com.goodee.corpdesk.vacation.service.VacationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +23,14 @@ public class VacationController {
 
     @Autowired
     private VacationService vacationService;
+
+    @Value("${cat.vacation}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
 
     @GetMapping("list")
     public String list(ReqVacationDTO reqVacationDTO, Model model) throws Exception {
