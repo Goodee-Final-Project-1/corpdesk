@@ -811,7 +811,7 @@
       // 1) 휴대전화 (기존 로직)
       if(mobileEl){
         const raw=mobileEl.value.replace(/\D/g,'');
-        const ok=/^(01[0-9])\d{7,8}$/.test(raw) || raw.length===0;
+        const ok=/^(01[0-9])\d{7,8}$/.test(raw);
         mobileEl.classList.toggle('is-invalid', !ok);
         if(!ok) invalidMsg.push('휴대전화 형식이 올바르지 않습니다. 예: 01012345678');
       }
