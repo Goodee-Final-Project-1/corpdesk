@@ -7,16 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.goodee.corpdesk.department.dto.DepartmentDetailDTO;
 import com.goodee.corpdesk.department.dto.MoveEmployeesDTO;
@@ -37,7 +32,15 @@ public class OrganizationController {
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
     private final RoleService roleService;
-    
+
+    @Value("${cat.organ}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
+
     // 조직도 페이지
     @GetMapping("/list")
     public String listPage() {

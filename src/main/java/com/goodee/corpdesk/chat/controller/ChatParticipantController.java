@@ -3,12 +3,9 @@ package com.goodee.corpdesk.chat.controller;
 import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.goodee.corpdesk.chat.service.ChatParticipantService;
 import com.goodee.corpdesk.notification.service.NotificationService;
@@ -21,6 +18,15 @@ public class ChatParticipantController {
 	ChatParticipantService chatParticipantService;
 	@Autowired
 	NotificationService notificationService;
+
+    @Value("${cat.chat}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
+
 	@PostMapping("lastMessage/{roomId}")
 	@ResponseBody
 	public void saveLastMessage(@PathVariable(value="roomId") Long roomId,Principal principal) {

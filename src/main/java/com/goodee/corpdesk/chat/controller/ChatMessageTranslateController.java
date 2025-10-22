@@ -1,10 +1,7 @@
 package com.goodee.corpdesk.chat.controller;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.deepl.api.DeepLClient;
 import com.deepl.api.TextResult;
@@ -17,6 +14,15 @@ import com.goodee.corpdesk.chat.dto.TranslateDto;
 public class ChatMessageTranslateController {
 	@Value("${api.deepl.key}")
 	private String auth;
+
+    @Value("${cat.chat}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
+
 	@PostMapping("")
 	public String translate(@RequestBody TranslateDto translateDto) throws Exception {
 		if(translateDto ==null) {

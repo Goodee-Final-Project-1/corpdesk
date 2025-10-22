@@ -1,7 +1,9 @@
 package com.goodee.corpdesk.email;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -11,6 +13,14 @@ public class EmailController {
 
 //	@Autowired
 //	EmailService emailService;
+
+    @Value("${cat.mail}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
 
 	@GetMapping("received")
 	public String received() {
