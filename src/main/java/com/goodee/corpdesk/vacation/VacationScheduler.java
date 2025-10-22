@@ -14,9 +14,10 @@ public class VacationScheduler {
     @Autowired
     private VacationService vacationService;
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 59 17 * * *")
     public void updateVacationsDaily() throws Exception {
-        vacationService.updateVacationsByHireDate(LocalDate.now());
+        // LocalDate.now()
+        vacationService.updateVacationsByHireDate(LocalDate.of(2022, 1, 1));
     }
 
 }

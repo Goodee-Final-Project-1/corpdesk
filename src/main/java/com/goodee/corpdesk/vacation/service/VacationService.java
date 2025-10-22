@@ -9,6 +9,7 @@ import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
 import com.goodee.corpdesk.vacation.repository.VacationRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class VacationService {
 
     @Autowired
@@ -32,6 +34,8 @@ public class VacationService {
     // 특정 월, 일에 해당하는 입사자들 데이터를 가져와서 vacation의 총 연차, 잔여 연차 update
     public void updateVacationsByHireDate(LocalDate currDate) throws Exception {
 
+        log.warn("start updateVacationsByHireDate");
+
         // 월, 일로 입사자들 데이터를 가져옴
         int month = currDate.getMonthValue();
         int day = currDate.getDayOfMonth();
@@ -44,6 +48,15 @@ public class VacationService {
             int newTotalVacation = vacationManager.calTotalVacation(employee.getHireDate());
 
             Vacation vacation = vacationRepository.findByUseYnAndUsername(true, employee.getUsername());
+            if(vacation == null) {
+                Vacation newVacation = new Vacation();
+                newVacation.setUsername(employee.getUsername());
+                newVacation.setTotalVacation(0);
+                newVacation.setRemainingVacation(0);
+                vacation = vacationRepository.save(newVacation);
+                log.warn("newVacation: {}", newVacation);
+                log.warn("insertedVacation: {}", vacation);
+            }
             int oldTotalVacation = vacation.getTotalVacation();
 
             int increaseAmount = newTotalVacation - oldTotalVacation;
