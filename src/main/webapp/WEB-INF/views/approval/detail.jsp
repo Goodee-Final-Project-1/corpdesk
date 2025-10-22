@@ -84,7 +84,7 @@
 
                   <c:when test="${detail.username eq userInfo.username}">
                     <c:if test="${detail.status eq 't' or detail.status eq 'T'}">
-                      <form action="/approval/${detail.approvalId}/edit" method="GET">
+                      <form action="/approval/${detail.approvalId}/edit" method="GET" class="d-inline">
                         <input type="hidden" name="approvalFormId" value="${detail.approvalFormId}">
                         <input type="hidden" name="departmentId" value="${detail.departmentId}">
                         <button class="btn btn-info mr-1 btn-action" id="btnEdit">수정</button>
@@ -116,7 +116,7 @@
               </div>
 
               <div>
-                <button type="button" id="pdf-btn">인쇄</button>
+                <button type="button" id="pdf-btn" class="btn btn-link"><i class="mdi mdi-printer"></i> 인쇄</button>
               </div>
 						</div>
 						<hr>
