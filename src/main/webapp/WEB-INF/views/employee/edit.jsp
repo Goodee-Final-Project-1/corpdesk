@@ -141,11 +141,11 @@
             </div>
             <div class="col-md-4 d-flex align-items-center">
               <p class="col-md-4 text-left">휴대전화</p>
-              <form:input path="mobilePhone" class="form-control"/>
+              <form:input path="mobilePhone" id="mobilePhone" class="form-control"/>
             </div>
             <div class="col-md-4 d-flex align-items-center">
               <p class="col-md-4 text-left">직통번호</p>
-              <form:input path="directPhone" class="form-control"/>
+              <form:input path="directPhone" id="directPhone" class="form-control"/>
             </div>
           </div>
 
@@ -153,7 +153,7 @@
           <div class="d-flex justify-content-between mb-2">
             <div class="col-md-4 d-flex align-items-center">
               <p class="col-md-4 text-left">외부이메일</p>
-              <form:input path="externalEmail" class="form-control"/>
+              <form:input path="externalEmail" id="externalEmail" class="form-control"/>
             </div>
             <div class="col-md-4 d-flex align-items-center">
               <p class="col-md-4 text-left">직위</p>
@@ -724,6 +724,128 @@
   // 기존 버튼에도 적용
   document.querySelectorAll(".updateAttendanceBtn").forEach(btn => attachUpdateEvent(btn));
 
+  
+//010-1234-5678 자동 포맷
+  function fmtMobile(v){
+    const d=(v||'').replace(/\D/g,'');
+    if(d.length<=3) return d;
+    if(d.length<=7) return d.replace(/(\d{3})(\d{1,4})/,'$1-$2');
+    return d.replace(/(\d{3})(\d{3,4})(\d{1,4}).*/,'$1-$2-$3');
+  }
+
+  const mobileEl=document.getElementById('mobilePhone');
+  if(mobileEl){
+	  mobileEl.addEventListener('input',e=>{
+		      const oldLen=e.target.value.length;
+		      const oldPos=e.target.selectionStart;
+		       e.target.value=fmtMobile(e.target.value);
+		      const newLen=e.target.value.length;
+		      const newPos=oldPos+(newLen-oldLen);
+		      try{ e.target.setSelectionRange(newPos,newPos); }catch(_){}
+		     });
+  }
+
+  // ===== 이메일/전화 유틸 =====
+  // 비어있으면 true, 값이 있으면 형식 검증
+  function isValidEmailOrBlank(v){
+    if(!v) return true;
+    // 과하지 않은 현실적인 이메일 패턴 (로컬@도메인.최상위)
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(v.trim());
+  }
+
+  // 직통번호 자동 포맷: 02, 0XX, 0XXX 지역번호 지원
+  function fmtDirect(v){
+    const d=(v||'').replace(/\D/g,'');
+    if(d.startsWith('02')){
+      if(d.length<=2) return d;
+      if(d.length<=5) return d.replace(/(02)(\d{0,3})/,'$1-$2');
+      if(d.length<=9) return d.replace(/(02)(\d{3,4})(\d{0,4}).*/,'$1-$2-$3');
+      return d.slice(0,10).replace(/(02)(\d{3,4})(\d{0,4}).*/,'$1-$2-$3');
+    }else{
+      if(d.length<=3) return d;
+      if(d.length<=7) return d.replace(/(0\d{2})(\d{0,4})/,'$1-$2');
+      return d.replace(/(0\d{2,3})(\d{3,4})(\d{0,4}).*/,'$1-$2-$3');
+    }
+  }
+
+  function isValidDirectOrBlank(v){
+    if(!v) return true;
+    const d=v.replace(/\D/g,'');
+    // 02-xxx-xxxx (9~10자리) 또는 0xx/0xxx-xxx-xxxx (10~11자리) 허용
+    const isSeoul = d.startsWith('02') && (d.length===9 || d.length===10);
+    const isArea  = /^0\d{1,2}/.test(d) && (d.length===10 || d.length===11);
+    return isSeoul || isArea;
+  }
+
+  // ===== 필드 핸들 ====
+  const emailEl = document.getElementById('externalEmail');
+  const directEl = document.getElementById('directPhone');
+
+  // 이메일: 실시간 기본 검증 (붉은 테두리 토글)
+  if(emailEl){
+    emailEl.addEventListener('input', e=>{
+      const ok = isValidEmailOrBlank(e.target.value);
+      e.target.classList.toggle('is-invalid', !ok);
+    });
+  }
+
+  // 직통번호: 자동 포맷 + 기본 검증
+  if(directEl){
+    directEl.addEventListener('input', e=>{
+      const formatted = fmtDirect(e.target.value);
+      const pos = e.target.selectionStart;
+      e.target.value = formatted;
+      try{ e.target.setSelectionRange(e.target.value.length,e.target.value.length); }catch(_){}
+      const ok = isValidDirectOrBlank(e.target.value);
+      e.target.classList.toggle('is-invalid', !ok);
+    });
+  }
+
+  // ===== 제출 전 최종 검증 (기존 휴대전화 검증에 이어서 이메일/직통 추가) =====
+  (function(){
+    const form = document.querySelector('form[action="/employee/edit"]');
+    const mobileEl = document.getElementById('mobilePhone');
+    if(!form) return;
+
+    form.addEventListener('submit', e=>{
+      let invalidMsg = [];
+
+      // 1) 휴대전화 (기존 로직)
+      if(mobileEl){
+        const raw=mobileEl.value.replace(/\D/g,'');
+        const ok=/^(01[0-9])\d{7,8}$/.test(raw);
+        mobileEl.classList.toggle('is-invalid', !ok);
+        if(!ok) invalidMsg.push('휴대전화 형식이 올바르지 않습니다. 예: 01012345678');
+      }
+
+      // 2) 외부이메일
+      if(emailEl){
+        const ok = isValidEmailOrBlank(emailEl.value);
+        emailEl.classList.toggle('is-invalid', !ok);
+        if(!ok) invalidMsg.push('외부이메일 형식이 올바르지 않습니다. 예: user@example.com');
+      }
+
+      // 3) 직통번호
+      if(directEl){
+        const ok = isValidDirectOrBlank(directEl.value);
+        directEl.classList.toggle('is-invalid', !ok);
+        if(!ok) invalidMsg.push('직통번호 형식이 올바르지 않습니다. 예: 02-123-4567, 031-123-4567');
+      }
+
+      if(invalidMsg.length>0){
+        e.preventDefault();
+        // SweetAlert2 사용 중이므로 같은 톤으로 안내
+        Swal.fire({
+          html: invalidMsg.join('<br>'),
+          icon: 'warning'
+        });
+      }
+    });
+  })();
+  
+ 
+  
 </script>
 
 </html>
