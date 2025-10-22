@@ -688,31 +688,36 @@ public class EmployeeController {
         try {
             Attendance attendance = attendanceService.getAttendanceById(dto.getAttendanceId());
 
-            if (!org.springframework.util.StringUtils.hasText(dto.getWorkStatus())) {
-                attendance.setWorkStatus("-");
-            } else {
-                attendance.setWorkStatus(dto.getWorkStatus());
+            String ws = dto.getWorkStatus();
+            if (!"출근".equals(ws) && !"퇴근".equals(ws)) {
+                throw new IllegalArgumentException("출근/퇴근만 허용됩니다.");
+            }
+            attendance.setWorkStatus(ws);
+
+            DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
+            // 신규 확장 필드 우선
+            if (dto.getCheckInDateTime() != null && !dto.getCheckInDateTime().isBlank()) {
+                attendance.setCheckInDateTime(LocalDateTime.parse(dto.getCheckInDateTime(), f));
+            }
+            if (dto.getCheckOutDateTime() != null && !dto.getCheckOutDateTime().isBlank()) {
+                attendance.setCheckOutDateTime(LocalDateTime.parse(dto.getCheckOutDateTime(), f));
             }
 
-            if (org.springframework.util.StringUtils.hasText(dto.getDateTime())) {
-                LocalDateTime dateTime = LocalDateTime.parse(dto.getDateTime(), formatterInput);
-                if ("출근".equals(attendance.getWorkStatus())) {
-                    attendance.setCheckInDateTime(dateTime);
-                } else if ("퇴근".equals(attendance.getWorkStatus())) {
-                    attendance.setCheckOutDateTime(dateTime);
-                }
+            // 하위호환: dateTime 단일 필드가 있을 경우, 상태 기준으로 매핑
+            if (dto.getDateTime() != null && !dto.getDateTime().isBlank()) {
+                LocalDateTime dt = LocalDateTime.parse(dto.getDateTime(), f);
+                if ("출근".equals(ws)) attendance.setCheckInDateTime(dt);
+                else attendance.setCheckOutDateTime(dt);
             }
 
             attendanceService.saveOrUpdateAttendance(attendance);
-
             result.put("success", true);
         } catch (Exception e) {
             e.printStackTrace();
             result.put("success", false);
             result.put("error", e.getMessage());
         }
-
         return result;
-
     }
 }
