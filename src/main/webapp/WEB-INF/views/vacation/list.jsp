@@ -127,6 +127,10 @@
                 <th>시작일</th>
                 <th>종료일</th>
                 <th>사용일수</th>
+                <c:if test="${param.listType eq 'all'}">
+                  <th>부서</th>
+                  <th>사용자</th>
+                </c:if>
               </tr>
             </thead>
             <tbody>
@@ -145,6 +149,10 @@
                   <td>${el.startDate}</td>
                   <td>${el.endDate}</td>
                   <td>${el.usedDays}</td>
+                  <c:if test="${param.listType eq 'all'}">
+                    <td>${el.department}</td>
+                    <td>${el.name} ${el.position}</td>
+                  </c:if>
                 </tr>
               </c:forEach>
             </tbody>

@@ -119,7 +119,12 @@ public class ApprovalService {
         // - 임시저장인 경우 -> 바로 return
         // - 결재요청인 경우 -> 승인 상태로 처리 후 return
         if (reqApprovalDTO.getApproverDTOList() == null || reqApprovalDTO.getApproverDTOList().isEmpty()) {
-            if(!"T".equalsIgnoreCase(reqApprovalDTO.getStatus() + "")) approval.setStatus('Y');
+            if(!"T".equalsIgnoreCase(reqApprovalDTO.getStatus() + "")) {
+                approval = approvalRepository.save(approval);
+                reqApprovalDTO.setApproveYn('Y');
+                String result = processApproval(approval.getApprovalId(), reqApprovalDTO);
+                log.warn("result: {}", result);
+            }
 
             resApprovalDTO.setApprovalId(approval.getApprovalId());
 
@@ -203,12 +208,9 @@ public class ApprovalService {
 		// 결재자 정보 중 approval_id = approvalId 이고 approver_id = approverId 인 정보 select
 		Approver result = approverRepository.findByApprovalIdAndApproverId(approvalId, approverId);
 		
-		// 수정할 결재자 정보가 없으면 이후의 로직을 수행할 필요 없으므로 바로 return
-		log.warn("1: {}", result);
-		if (result == null) return "NOT_FOUND";
-		
 		// 수정할 결재자 정보가 있으면 수정
-		result.setApproveYn(approveYn.charAt(0));
+		log.warn("1: {}", result);
+		if (result != null) result.setApproveYn(approveYn.charAt(0));
 		
 		// 결재자가 결재를 반려했다면(approveYn = n) 결재 상태의 값을 반려로 수정
 		if(approveYn.equalsIgnoreCase("N")) {
@@ -233,11 +235,14 @@ public class ApprovalService {
 			// true -> 결재 상태 수정없음(대기), 그 다음 승인 순서인 결재자 정보(만약 있다면)의 use_yn값을 true로 수정
 			
 			// 그 다음 승인 순서인 결재자 정보 조회
-			Approver nextApprover = approverRepository.findByApprovalIdAndApprovalOrder(approvalId, result.getApprovalOrder() + 1);
+            Approver nextApprover = null;
+            if(result != null) nextApprover = approverRepository.findByApprovalIdAndApprovalOrder(approvalId, result.getApprovalOrder() + 1);
 			log.warn("3: {}", nextApprover);
 			
 			// 수정할 결재자 정보가 없으면 결재 상태의 값을 승인으로&use_yn=true로 수정하고 return
 			if (nextApprover == null) {
+                log.warn("nextApprover is null");
+
 				// 결재 정보 조회
 				Optional<Approval> result2 = approvalRepository.findById(approvalId);
 				
@@ -285,6 +290,8 @@ public class ApprovalService {
                 }
 
 			} else {
+                log.warn("nextApprover is not null");
+
 				// 수정할 결재자 정보가 있으면 결재 상태의 값을 수정하지 않고 그 다음 승인 순서인 결재자 정보(만약 있다면)의 use_yn값을 true로 수정
 				nextApprover.setUseYn(true);
 				
@@ -296,9 +303,9 @@ public class ApprovalService {
 				Approval approval = result2.get();
 				
 				// 결재 요청 알림
-				notificationService.reqNotification(approval.getApprovalId(),approval.getApprovalFormId(),approval.getUsername(),
-						"approval", "새로운 결재 요청이있습니다.",nextApprover.getUsername());
-				System.err.println(nextApprover);
+                notificationService.reqNotification(approval.getApprovalId(), approval.getApprovalFormId(), approval.getUsername(),
+                    "approval", "새로운 결재 요청이있습니다.", nextApprover.getUsername());
+                System.err.println(nextApprover);
 			}
 			
 		}

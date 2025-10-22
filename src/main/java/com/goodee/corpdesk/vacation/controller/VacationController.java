@@ -4,6 +4,7 @@ import com.goodee.corpdesk.approval.service.ApprovalService;
 import com.goodee.corpdesk.vacation.dto.ReqVacationDTO;
 import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
 import com.goodee.corpdesk.vacation.service.VacationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/vacation/**")
+@Slf4j
 public class VacationController {
 
     @Autowired
@@ -69,6 +71,8 @@ public class VacationController {
 
             model.addAttribute("vacationType", reqVacationDTO.getVacationType());
         }
+
+        log.warn("details: {}", details);
 
         model.addAttribute("details", details);
 
