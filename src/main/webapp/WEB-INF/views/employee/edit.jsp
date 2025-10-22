@@ -735,11 +735,14 @@
 
   const mobileEl=document.getElementById('mobilePhone');
   if(mobileEl){
-    mobileEl.addEventListener('input',e=>{
-      const pos=e.target.selectionStart;
-      e.target.value=fmtMobile(e.target.value);
-      try{ e.target.setSelectionRange(e.target.value.length,e.target.value.length); }catch(_){}
-    });
+	  mobileEl.addEventListener('input',e=>{
+		      const oldLen=e.target.value.length;
+		      const oldPos=e.target.selectionStart;
+		       e.target.value=fmtMobile(e.target.value);
+		      const newLen=e.target.value.length;
+		      const newPos=oldPos+(newLen-oldLen);
+		      try{ e.target.setSelectionRange(newPos,newPos); }catch(_){}
+		     });
   }
 
   // ===== 이메일/전화 유틸 =====
