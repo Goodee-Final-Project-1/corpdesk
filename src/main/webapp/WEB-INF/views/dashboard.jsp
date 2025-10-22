@@ -102,25 +102,33 @@
                 <div class="card-body">
 
                   <div class="email-details-content pl-0 pr-0 pt-0">
-                    <table class="table">
+                    <c:choose>
+                      <c:when test="${approval.approvals eq null or empty approval.approvals}">
+                        <p>결재 대기 중인 문서가 없습니다.</p>
+                      </c:when>
+                      <c:otherwise>
+                        <table class="table">
 
-                      <thead>
-                      <tr>
-                        <th class="col-2">기안일</th>
-                        <th class="col-4">제목</th>
-                      </tr>
-                      </thead>
+                          <thead>
+                          <tr>
+                            <th class="col-2">기안일</th>
+                            <th class="col-4">제목</th>
+                          </tr>
+                          </thead>
 
-                      <tbody>
-                      <c:forEach items="${approval.approvals }" var="el" begin="0" end="4">
-                        <tr class="approval-row" onclick="location.href='/approval/${el.approvalId}'" style="cursor: pointer;">
-                          <td>${fn:substring(el.createdAt, 0, 10) }</td>
-                          <td>${el.formTitle }</td>
-                        </tr>
-                      </c:forEach>
-                      </tbody>
+                          <tbody>
+                          <c:forEach items="${approval.approvals }" var="el" begin="0" end="4">
+                            <tr class="approval-row" onclick="location.href='/approval/${el.approvalId}'" style="cursor: pointer;">
+                              <td>${fn:substring(el.createdAt, 0, 10) }</td>
+                              <td>${el.formTitle }</td>
+                            </tr>
+                          </c:forEach>
+                          </tbody>
 
-                    </table>
+                        </table>
+                      </c:otherwise>
+                    </c:choose>
+
                   </div>
 
                 </div>
@@ -134,14 +142,19 @@
                   <h2>공지사항</h2>
                 </div>
                 <div class="card-body">
-                  <ul class="list-unstyled mb-0">
-                    <li class="mb-2">• 연말정산 안내</li>
-                    <li class="mb-2">• 신년 워크샵 공지</li>
-                    <li class="mb-0">• 보안 교육 안내</li>
-                  </ul>
-<%--                  <div class="p-5 text-center">--%>
-<%--                    <p class="text-muted">(공지사항 목록)</p>--%>
-<%--                  </div>--%>
+                  <c:choose>
+                    <c:when test="${notices eq null or empty notices}">
+                      <p>공지사항이 없습니다.</p>
+                    </c:when>
+                    <c:otherwise>
+                      <ul class="list-unstyled mb-0">
+                        <c:forEach items="${notices}" var="el" begin="0" end="4">
+                          <li class="mb-2"><a href="/board/notice/${el.boardId}">• ${el.title}</a></li>
+                        </c:forEach>
+                      </ul>
+                    </c:otherwise>
+                  </c:choose>
+                  
                 </div>
               </div>
             </article>

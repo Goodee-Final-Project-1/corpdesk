@@ -3,6 +3,8 @@ package com.goodee.corpdesk.home;
 import com.goodee.corpdesk.approval.dto.ResApprovalDTO;
 import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
 import com.goodee.corpdesk.attendance.service.AttendanceService;
+import com.goodee.corpdesk.board.Board;
+import com.goodee.corpdesk.board.BoardService;
 import com.goodee.corpdesk.email.EmailService;
 import com.goodee.corpdesk.employee.EmployeeService;
 import com.goodee.corpdesk.employee.ResEmployeeDTO;
@@ -12,12 +14,17 @@ import com.goodee.corpdesk.vacation.service.VacationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -31,8 +38,8 @@ public class HomeController {
     private AttendanceService attendanceService;
 	@Autowired
 	private EmployeeService employeeService;
-	@Autowired
-	private EmailService emailService;
+    @Autowired
+    private BoardService boardService;
 
     @Value("${api.kakao.javascript.key}")
     private String appkey;
@@ -104,8 +111,12 @@ public class HomeController {
         ResAttendanceDTO currAttd = attendanceService.getCurrentAttendance(username);
         model.addAttribute("currAttd", currAttd);
 
-        // TODO 게시판 기능 완성되면 아래 항목도 추가 구현
         // 6. 공지사항
+        List<Board> notices = new ArrayList<>();
+        Page<Board> page = boardService.getNoticeBoards(null);
+        if (page != null) notices = page.getContent();
+
+        model.addAttribute("notices", notices);
 
         return "dashboard";
 

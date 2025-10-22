@@ -62,7 +62,7 @@ public class HomeService {
 
         ResApprovalDTO approval = new ResApprovalDTO();
 
-        List<ResApprovalDTO> reqApprovals =  approvalService.getApprovalList("request", username);
+        List<ResApprovalDTO> reqApprovals =  approvalService.getApprovalList("wait", username);
         approval.setApprovals(reqApprovals);
         approval.setApprovalCnt(reqApprovals.size());
 
