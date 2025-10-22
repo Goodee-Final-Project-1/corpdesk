@@ -481,7 +481,7 @@ public class EmployeeController {
         }
 
         employeeService.updateEmployee(employeeFromForm, profileImageFile);
-        return "redirect:/employee/list";
+        return "redirect:/employee/edit/" + employeeFromForm.getUsername();
     }
 
     // 프로필 이미지 삭제
