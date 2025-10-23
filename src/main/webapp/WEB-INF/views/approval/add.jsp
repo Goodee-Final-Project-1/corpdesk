@@ -62,8 +62,8 @@
                             data-department-name="${el.departmentName}" data-position-name="${el.positionName}">
                             <div class="col-lg-3">
                                 <img class="mr-2 img-fluid" style="border-radius: 50%;"
-                                     src="${el.oriName ne null ?
-                                                '/files/profile/' += el.oriName += '.' += el.extension
+                                     src="${el.saveName ne null ?
+                                                '/files/profile/' += el.saveName += '.' += el.extension
                                                 : '/images/default_profile.jpg'}"> <%-- TODO 프로필이미지가 정확히 어떤 경로에 저장되는지 준수님과 이야기해야 함 --%>
                             </div>
                             <a class="approval-form-name btn px-0 mr-3 text-dark">${el.departmentName } ${el.positionName } ${el.name }</a>
