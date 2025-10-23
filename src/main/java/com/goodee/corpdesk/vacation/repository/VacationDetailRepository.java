@@ -23,6 +23,8 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
         SELECT *
         FROM vd
         WHERE :date <= end_date
+        ORDER BY updated_at DESC
+        LIMIT 1
     """)
     VacationDetail findVacationDetailOnDate(@Param("username") String username, @Param("date")LocalDate date);
 
