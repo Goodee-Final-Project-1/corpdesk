@@ -36,10 +36,11 @@
               <div class="mb-3">
                 <c:choose>
                   <c:when test="${employee.saveName eq null}">
-                    <img src="/images/default_profile.jpg" class="rounded-circle" alt="프로필">
+                    <img src="/images/default_profile.jpg" class="rounded-circle p-4 w-100" alt="프로필">
+                    <img src="/images/default_profile.jpg" class="rounded-circle p-4 w-100" alt="프로필">
                   </c:when>
                   <c:otherwise>
-                    <img src="/files/employee/${employee.saveName}.${employee.extension}" class="rounded-circle" alt="프로필">
+                    <img src="/files/profile/${employee.saveName}.${employee.extension}" class="rounded-circle p-4 w-100" alt="프로필">
                   </c:otherwise>
                 </c:choose>
               </div>

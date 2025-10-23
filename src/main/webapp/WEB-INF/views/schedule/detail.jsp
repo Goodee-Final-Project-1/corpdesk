@@ -105,11 +105,11 @@
           </div>
 
           <div class="row mt-4">
-            <div class="col-12 text-right">
-              <form method="GET" action="/personal-schedule/${schedule.personalScheduleId}/edit">
+            <div class="col-12 text-right d-flex justify-content-end">
+              <form class="mr-1" method="GET" action="/personal-schedule/${schedule.personalScheduleId}/edit">
                 <button class="btn btn-primary">수정</button>
               </form>
-              <form method="POST" action="/personal-schedule/${schedule.personalScheduleId}">
+              <form class="mr-1" method="POST" action="/personal-schedule/${schedule.personalScheduleId}">
                 <input type="hidden" name="_method" value="DELETE">
                 <button class="btn btn-danger">삭제</button>
               </form>
