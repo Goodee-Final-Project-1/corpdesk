@@ -197,17 +197,23 @@ public class AttendanceService {
             return dto;
         }
 
-        // 상태 파생
+     // 상태 파생 (null-safe + 이전일 열린 세션 처리)
         String status;
-        if (latest.getCheckInDateTime() == null) {
+        LocalDateTime in  = latest.getCheckInDateTime();
+        LocalDateTime out = latest.getCheckOutDateTime();
+
+        if (in == null) {
             status = "출근전";
-        } else if (latest.getCheckOutDateTime() == null) {
-            // 열린 근무(아직 퇴근X)
-            status = latest.getCheckInDateTime().toLocalDate().isEqual(today) ? "출근" : "출근전";
+        } else if (out == null) {
+            // 열린 근무(퇴근 미처리)
+            if (in.toLocalDate().isEqual(today)) {
+                status = "출근";           // 오늘 출근했고 아직 퇴근 전
+            } else {
+                status = "퇴근미처리";     // 어제(또는 과거) 출근만 있고 퇴근 누락
+            }
         } else {
-            // 출근/퇴근 모두 채워진 근무가 최신이라면,
-            // 그 근무의 출근일이 오늘인지 여부로 '출근전/퇴근' 결정
-            status = latest.getCheckInDateTime().toLocalDate().isEqual(today) ? "퇴근" : "출근전";
+            // 출퇴근 모두 채워짐
+            status = in.toLocalDate().isEqual(today) ? "퇴근" : "출근전";
         }
 
         dto.setWorkStatus(status);
