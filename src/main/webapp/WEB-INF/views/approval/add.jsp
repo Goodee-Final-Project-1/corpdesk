@@ -61,7 +61,7 @@
                             data-username="${el.username}" data-name="${el.name}"
                             data-department-name="${el.departmentName}" data-position-name="${el.positionName}">
                             <div class="col-lg-3">
-                                <img class="mr-2 img-fluid" style="border-radius: 50%;"
+                                <img class="mr-2 img-fluid" style="border-radius: 50%; width: 40px; height: 40px; object-fit: cover;"
                                      src="${el.saveName ne null ?
                                                 '/files/profile/' += el.saveName += '.' += el.extension
                                                 : '/images/default_profile.jpg'}"> <%-- TODO 프로필이미지가 정확히 어떤 경로에 저장되는지 준수님과 이야기해야 함 --%>
