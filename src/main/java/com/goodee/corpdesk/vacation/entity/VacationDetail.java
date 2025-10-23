@@ -39,6 +39,7 @@ public class VacationDetail extends BaseEntity {
 
     public ResVacationDTO toResVacationDTO() {
         return ResVacationDTO.builder()
+            .vacationId(vacationId)
             .vacationDetailId(vacationDetailId)
             .vacationTypeId(vacationTypeId)
             .startDate(startDate)

@@ -83,11 +83,15 @@ public class ApprovalFormController {
     // 결재 폼 조회
     @GetMapping("{formId}")
     public String getApproval(@PathVariable("formId") Integer formId
-        , @RequestParam("departmentId") Integer departmentId
+        , @RequestParam(value = "departmentId", required = false) Integer departmentId
         , @AuthenticationPrincipal UserDetails userDetails
         , Model model) throws Exception {
 
         String username = userDetails.getUsername();
+
+        if(departmentId == null) {
+            departmentId = employeeService.getFulldetail(username).getDepartmentId();
+        }
 
         // 0. 폼 정보 얻어오기
         ResApprovalDTO form = approvalFormService.getApprovalForm(formId);

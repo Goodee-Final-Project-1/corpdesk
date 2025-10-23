@@ -56,11 +56,11 @@ class AdminSubordinateTest {
         // When
         for (Employee admin : admins) {
             // 1. 관리자의 하위 직급 찾기
-            List<Position> subordinatePositions = positionRepository.findByParentPositionIdAndUseYnTrue(admin.getPositionId());
+            Optional<Position> subordinatePositions = positionRepository.findByParentPositionIdAndUseYnTrue(admin.getPositionId());
             // 하위 직급이 없으면 그 다음 직급으로 설정 (테스트 데이터 기반)
             Integer subordinatePositionId = subordinatePositions.isEmpty()
                     ? admin.getPositionId() + 1
-                    : subordinatePositions.get(0).getPositionId();
+                    : subordinatePositions.get().getPositionId();
 
             for (int i = 1; i <= 3; i++) {
                 String subordinateUsername = "user" + subordinateCounter++;
@@ -84,10 +84,10 @@ class AdminSubordinateTest {
 
         // Then
         for (Employee admin : admins) {
-            List<Position> subordinatePositions = positionRepository.findByParentPositionIdAndUseYnTrue(admin.getPositionId());
+            Optional<Position> subordinatePositions = positionRepository.findByParentPositionIdAndUseYnTrue(admin.getPositionId());
             Integer subordinatePositionId = subordinatePositions.isEmpty()
                     ? admin.getPositionId() + 1
-                    : subordinatePositions.get(0).getPositionId();
+                    : subordinatePositions.get().getPositionId();
 
             List<Employee> foundSubordinates = employeeRepository.findByDepartmentIdAndPositionId(admin.getDepartmentId(), subordinatePositionId);
 
