@@ -133,7 +133,7 @@ public class EmployeeService implements UserDetailsService {
 
     // 직원 프로필 파일 조회
     public Optional<EmployeeFile> getEmployeeFileByUsername(String username) {
-        return employeeFileRepository.findByUsername(username);
+        return employeeFileRepository.findByUseYnAndUsername(true, username);
     }
 
  // 직원 등록

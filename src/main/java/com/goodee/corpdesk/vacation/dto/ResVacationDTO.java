@@ -24,4 +24,8 @@ public class ResVacationDTO {
     private LocalDate endDate;
     private Integer usedDays;
 
+    private String name;
+    private String department;
+    private String position;
+
 }

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -130,27 +132,48 @@ public class PersonalScheduleService {
 
         for(ResPersonalScheduleDTO schedule : schedules) {
 
-            if(schedule.getAddress() == null) continue;
+            if(schedule.getLatitude() != null && schedule.getLongitude() != null) {
+                continue;
+            }
 
-            // api를 호출해서 주소의 위경도를 받아옴
-            WebClient webClient = WebClient.create();
-            Mono<GeocodeBodyDTO> geocodeMono = webClient.get()
-                .uri("https://dapi.kakao.com/v2/local/search/address.json" +
-                    "?query=" + schedule.getAddress())
-                .header("Authorization", "KakaoAK " + kakaoMapKey)
-                .retrieve()
-                .bodyToMono(GeocodeBodyDTO.class);
+            if(schedule.getAddress() == null || schedule.getAddress().trim().isEmpty()) {
+                continue;
+            }
 
-            DocumentDTO geocodeInfo = geocodeMono.block().getDocuments().get(0);
+            try {
+                log.debug("Geocoding 시도 - 주소: {}", schedule.getAddress());
 
-            // schedule에 바인딩
-            schedule.setLatitude(Double.parseDouble(geocodeInfo.getY()));
-            schedule.setLongitude(Double.parseDouble(geocodeInfo.getX()));
+                // 주소를 URL 인코딩
+                String encodedAddress = URLEncoder.encode(schedule.getAddress(), StandardCharsets.UTF_8);
+                String url = "https://dapi.kakao.com/v2/local/search/address.json?query=" + encodedAddress;
 
+                log.debug("요청 URL: {}", url);
+
+                GeocodeBodyDTO geocodeBody = webClient.get()
+                    .uri(url)
+                    .header("Authorization", "KakaoAK " + kakaoMapKey)
+                    .retrieve()
+                    .bodyToMono(GeocodeBodyDTO.class)
+                    .block();
+
+                if(geocodeBody != null && geocodeBody.getDocuments() != null && !geocodeBody.getDocuments().isEmpty()) {
+                    DocumentDTO geocodeInfo = geocodeBody.getDocuments().get(0);
+                    schedule.setLatitude(Double.parseDouble(geocodeInfo.getY()));
+                    schedule.setLongitude(Double.parseDouble(geocodeInfo.getX()));
+                    log.debug("Geocoding 성공");
+                }
+
+                Thread.sleep(150);
+
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                break;
+            } catch (Exception e) {
+                log.error("Geocoding 실패 - 주소: {}, 에러: {}", schedule.getAddress(), e.getMessage());
+            }
         }
 
         return schedules;
-
     }
 
 }

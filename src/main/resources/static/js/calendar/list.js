@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	})
 
 	async function getAttendance(info) {
-		console.log(info);
 		try {
 			const response = await fetch('/api/calendar/attendance', {
 				method: 'POST',
@@ -68,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			if (!response.ok) throw new Error('수신 오류');
 			const data = await response.json();
-			console.log(data);
 
 			data.forEach(a => {
 				calendar.addEvent({
@@ -81,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				});
 			});
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 		}
 	}
 
@@ -97,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	})
 
 	async function getVacation(info) {
-		console.log(info);
 		try {
 			const response = await fetch('/api/calendar/vacation', {
 				method: 'POST',
@@ -112,20 +109,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			if (!response.ok) throw new Error('수신 오류');
 			const data = await response.json();
-			console.log(data);
 
 			data.forEach(v => {
+				let endDate = new Date(v.endDate);
+				endDate.setDate(endDate.getDate() + 1);
 				calendar.addEvent({
 					id: 'vacation' + v.vacationId,
 					title: v.vacationTypeName, // FIXME: 휴가 종류
 					start: v.startDate,
-					end: v.endDate,
+					end: endDate,
+					allDay: true,
 					groupId: 'vacation',
 					backgroundColor: '#fd5190'
 				});
 			});
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 		}
 	}
 
@@ -141,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	})
 
 	async function getEveryVacation(info) {
-		console.log(info);
 		try {
 			const response = await fetch('/api/calendar/everyVacation', {
 				method: 'POST',
@@ -156,20 +154,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			if (!response.ok) throw new Error('수신 오류');
 			const data = await response.json();
-			console.log(data);
 
 			data.forEach(v => {
+				let endDate = new Date(v.endDate);
+				endDate.setDate(endDate.getDate() + 1);
 				calendar.addEvent({
 					id: 'everyVacation' + v.vacationId,
 					title: v.username, // FIXME: 사원 이름
 					start: v.startDate,
-					end: v.endDate,
+					end: endDate,
+					allDay: true,
 					groupId: 'everyVacation',
 					backgroundColor: '#fec400'
 				});
 			});
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 		}
 	}
 
@@ -185,7 +185,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	})
 
 	async function getSchedule(info) {
-		console.log(info);
 		try {
 			const response = await fetch('/api/calendar/schedule', {
 				method: 'POST',
@@ -200,7 +199,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			if (!response.ok) throw new Error('수신 오류');
 			const data = await response.json();
-			console.log(data);
 
 			data.forEach(s => {
 				calendar.addEvent({
@@ -213,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				});
 			});
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 		}
 	}
 

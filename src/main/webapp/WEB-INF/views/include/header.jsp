@@ -124,10 +124,10 @@
 
             <c:choose>
               <c:when test="${hasProfileImg}">
-                <img src="/files/${profileImgPath}/${profileImgName}.${profileImgExt}" class="user-image rounded-circle" alt="User Image" />
+                <img src="/files/${profileImgPath}/${profileImgName}.${profileImgExt}" class="user-image rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" alt="User Image" />
               </c:when>
               <c:otherwise>
-						    <img src="/images/default_profile.jpg" class="user-image rounded-circle" alt="User Image" />
+						    <img src="/images/default_profile.jpg" class="user-image rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" alt="User Image" />
               </c:otherwise>
             </c:choose>
 						<span class="d-none d-lg-inline-block">${profileName ne null ? profileName : ''}${profilePosition ne null ? ' ' += profilePosition : ''}</span>

@@ -31,8 +31,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
             , d.department_name AS department_name, d.parent_department_id AS parent_department_id
             , p.position_name AS position_name, p.parent_position_id AS parent_position_id
         FROM e
-        JOIN department d USING (department_id)
-        JOIN `position` p USING (position_id);
+        LEFT JOIN department d USING (department_id)
+        LEFT JOIN `position` p USING (position_id);
     """)
     public ResEmployeeDTO findEmployeeWithDeptAndPosition(@Param("useYn") Boolean useYn
                                                           , @Param("username") String username);
