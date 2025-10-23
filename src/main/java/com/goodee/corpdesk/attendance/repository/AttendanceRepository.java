@@ -25,6 +25,17 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	List<Attendance> findByUsernameAndUseYn(String username, Boolean useYn);
 	// username의 가장 최근 출근시각 1건
     Optional<Attendance> findFirstByUsernameAndCheckInDateTimeIsNotNullOrderByCheckInDateTimeDesc(String username);
+    // 아직 퇴근 처리 안 된 가장 최근 레코드
+    Optional<Attendance> findTopByUsernameAndCheckOutDateTimeIsNullOrderByCheckInDateTimeDesc(String username);
+    
+    // 목록
+    List<Attendance> findByUsernameOrderByCheckInDateTimeDesc(String username);
+    
+    // 열린 근무(퇴근 미처리) 1건
+    Optional<Attendance> findTopByUsernameAndUseYnTrueAndCheckInDateTimeIsNotNullAndCheckOutDateTimeIsNullOrderByCheckInDateTimeDesc(String username);
+    
+    
+    
     @Modifying
     @Query("UPDATE Attendance a SET a.useYn = false WHERE a.attendanceId IN :ids")
     void softDeleteByIds(@Param("ids") List<Long> ids);

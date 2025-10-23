@@ -18,10 +18,10 @@ import com.goodee.corpdesk.employee.Employee;
 import com.goodee.corpdesk.employee.EmployeeRepository;
 import com.goodee.corpdesk.vacation.entity.VacationDetail;
 import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -49,36 +49,74 @@ public class AttendanceService {
      * @return 생성 혹은 수정된 Attendance entity
      */
     public Attendance saveOrUpdateAttendance(Attendance attendance) {
-    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = auth.getName();
         attendance.setModifiedBy(currentUser);
 
-        // ✅ 2-1) 퇴근 신규행일 때 마지막 출근시간 주입
-        if (attendance.getAttendanceId() == null
-                && "퇴근".equals(attendance.getWorkStatus())
-                && attendance.getCheckInDateTime() == null) {
-
-            LocalDateTime lastCheckIn = attendanceRepository
-                    .findFirstByUsernameAndCheckInDateTimeIsNotNullOrderByCheckInDateTimeDesc(attendance.getUsername())
-                    .map(Attendance::getCheckInDateTime)
-                    .orElseThrow(() -> new IllegalStateException("마지막 출근 기록이 없습니다."));
-
-            attendance.setCheckInDateTime(lastCheckIn);
-        }
-
-        // ✅ 2-2) 초 버림(분까지만 보존) — 원하면 여기에
+        // 초/나노 버림
         attendance.setCheckInDateTime(trimToMinutes(attendance.getCheckInDateTime()));
         attendance.setCheckOutDateTime(trimToMinutes(attendance.getCheckOutDateTime()));
 
-        // createdAt (insert일 때만)
-        if (attendance.getAttendanceId() == null) {
-            attendance.setCreatedAt(trimToMinutes(LocalDateTime.now()));
-        }
-        // updatedAt (항상)
-        attendance.setUpdatedAt(trimToMinutes(LocalDateTime.now()));
+        // 신규 INSERT 인지
+        boolean isInsert = (attendance.getAttendanceId() == null);
 
-        return attendanceRepository.save(attendance);
+        if (isInsert) {
+            // === [신규] 구분값 기준으로 분기 ===
+            String ws = attendance.getWorkStatus();
+
+            if ("출근".equals(ws)) {
+                // 열린 근무가 이미 있으면 막기
+                attendanceRepository
+                    .findTopByUsernameAndUseYnTrueAndCheckInDateTimeIsNotNullAndCheckOutDateTimeIsNullOrderByCheckInDateTimeDesc(attendance.getUsername())
+                    .ifPresent(a -> { throw new IllegalStateException("이미 출근 상태입니다. (퇴근 미처리)"); });
+
+                if (attendance.getCheckInDateTime() == null) {
+                    attendance.setCheckInDateTime(trimToMinutes(LocalDateTime.now()));
+                }
+                attendance.setCreatedAt(trimToMinutes(LocalDateTime.now()));
+                attendance.setUpdatedAt(attendance.getCreatedAt());
+                return attendanceRepository.save(attendance);
+            }
+
+            if ("퇴근".equals(ws)) {
+                // ✅ 신규행을 만들지 말고 열린 근무를 찾아서 퇴근시간만 채움
+                Attendance open = attendanceRepository
+                    .findTopByUsernameAndUseYnTrueAndCheckInDateTimeIsNotNullAndCheckOutDateTimeIsNullOrderByCheckInDateTimeDesc(attendance.getUsername())
+                    .orElseThrow(() -> new IllegalStateException("출근 기록이 없습니다. (열린 근무 없음)"));
+
+                LocalDateTime outTime = attendance.getCheckOutDateTime() != null
+                        ? attendance.getCheckOutDateTime()
+                        : trimToMinutes(LocalDateTime.now());
+
+                if (outTime.isBefore(open.getCheckInDateTime())) {
+                    throw new IllegalArgumentException("퇴근 시각이 출근 시각보다 이릅니다.");
+                }
+
+                open.setCheckOutDateTime(outTime);
+                open.setWorkStatus("퇴근"); // workStatus를 계속 저장한다면 유지
+                open.setModifiedBy(currentUser);
+                open.setUpdatedAt(trimToMinutes(LocalDateTime.now()));
+                return attendanceRepository.save(open);
+            }
+
+            // 그 외 상태(예: 결근) 신규저장 허용 시
+            attendance.setCreatedAt(trimToMinutes(LocalDateTime.now()));
+            attendance.setUpdatedAt(attendance.getCreatedAt());
+            return attendanceRepository.save(attendance);
+
+        } else {
+            // === [업데이트] ===
+            // checkIn / checkOut 수동 수정 등
+            if (attendance.getCheckInDateTime() != null && attendance.getCheckOutDateTime() != null
+                    && attendance.getCheckOutDateTime().isBefore(attendance.getCheckInDateTime())) {
+                throw new IllegalArgumentException("퇴근 시각이 출근 시각보다 이릅니다.");
+            }
+
+            attendance.setUpdatedAt(trimToMinutes(LocalDateTime.now()));
+            return attendanceRepository.save(attendance);
+        }
     }
+
 
     // 헬퍼
     private static LocalDateTime trimToMinutes(LocalDateTime dt) {
@@ -142,66 +180,46 @@ public class AttendanceService {
 
     // 특정 직원의 현재 상태(휴가/퇴근/출근/출근전) & 출퇴근id & 출퇴근일시 조회
     public ResAttendanceDTO getCurrentAttendance(String username) throws Exception {
+        ResAttendanceDTO dto = new ResAttendanceDTO();
 
-        ResAttendanceDTO  resAttendanceDTO = new ResAttendanceDTO();
-
-        // 0. 오늘은 공휴일이거나 휴일인가?
-        Boolean isHoliday = false;
-        // 1) 오늘이 공휴일인지 구함
-        // TODO 특일 api 사용 가능해지면 구현
-
-        // 2) 오늘이 휴일인지 구함
+        // 휴일/휴가 로직은 유지
         LocalDate today = LocalDate.now();
-        if(today.getDayOfWeek().getValue() >= 6) isHoliday = true;
-
-        // 1. 휴가
-        // !공휴일 & !휴일 & 연차사용일
+        boolean isWeekend = today.getDayOfWeek().getValue() >= 6;
         VacationDetail vacationDetail = vacationDetailRepository.findVacationDetailOnDate(username, today);
-        if(!isHoliday && vacationDetail != null) {
-            resAttendanceDTO.setWorkStatus("휴가");
-
-            return resAttendanceDTO;
+        if (!isWeekend && vacationDetail != null) {
+            dto.setWorkStatus("휴가");
+            return dto;
         }
 
-        // 0. 가장 최근의 출퇴근 내역
-        Attendance latestAttendance = attendanceRepository.findLatestAttendanceByUsername(username);
-        
-        // 가장 최근의 출퇴근 내역이 없으면 첫출근이므로 "출근전" 처리
-        if(latestAttendance == null) {
-            resAttendanceDTO.setWorkStatus("출근전");
-            
-            return resAttendanceDTO;
+        Attendance latest = attendanceRepository.findLatestAttendanceByUsername(username);
+        if (latest == null) {
+            dto.setWorkStatus("출근전");
+            return dto;
         }
 
-        LocalDate checkInDate = latestAttendance.getCheckInDateTime().toLocalDate();
-        LocalDate checkOutDate = latestAttendance.getCheckOutDateTime() == null ?
-                                    null : latestAttendance.getCheckOutDateTime().toLocalDate();
-
-        if(checkInDate != null) {
-            // 2. 출근전
-            // 가장 최근의 출퇴근 내역 조회(a)
-            // a.출근일시 != 오늘날짜 & a.퇴근일시 != null
-            if(!checkInDate.isEqual(today)) resAttendanceDTO.setWorkStatus("출근전");
-            // 3. 퇴근, 출근 -> 가장 최근의 출퇴근 내역에 있는 workStatus값 사용
-            else resAttendanceDTO.setWorkStatus(latestAttendance.getWorkStatus());
+        // 상태 파생
+        String status;
+        if (latest.getCheckInDateTime() == null) {
+            status = "출근전";
+        } else if (latest.getCheckOutDateTime() == null) {
+            // 열린 근무(아직 퇴근X)
+            status = latest.getCheckInDateTime().toLocalDate().isEqual(today) ? "출근" : "출근전";
+        } else {
+            // 출근/퇴근 모두 채워진 근무가 최신이라면,
+            // 그 근무의 출근일이 오늘인지 여부로 '출근전/퇴근' 결정
+            status = latest.getCheckInDateTime().toLocalDate().isEqual(today) ? "퇴근" : "출근전";
         }
 
-        resAttendanceDTO.setAttendanceId(latestAttendance.getAttendanceId());
-
-        resAttendanceDTO.setCheckInDateTime(latestAttendance.getCheckInDateTime());
-        resAttendanceDTO.setCheckOutDateTime(latestAttendance.getCheckOutDateTime());
-
-        resAttendanceDTO.setCheckInDate(checkInDate);
-        resAttendanceDTO.setCheckOutDate(checkOutDate);
-        resAttendanceDTO.setCheckInTime(latestAttendance.getCheckInDateTime().toLocalTime());
-        resAttendanceDTO.setCheckOutTime(latestAttendance.getCheckOutDateTime() == null ?
-                                        null : latestAttendance.getCheckOutDateTime().toLocalTime());
-
-        resAttendanceDTO.setToday(checkOutDate == null ? null : checkOutDate.isEqual(today));
-
-        resAttendanceDTO.setAttendanceId(latestAttendance.getAttendanceId());
-
-        return resAttendanceDTO;
+        dto.setWorkStatus(status);
+        dto.setAttendanceId(latest.getAttendanceId());
+        dto.setCheckInDateTime(latest.getCheckInDateTime());
+        dto.setCheckOutDateTime(latest.getCheckOutDateTime());
+        dto.setCheckInDate(latest.getCheckInDateTime() == null ? null : latest.getCheckInDateTime().toLocalDate());
+        dto.setCheckOutDate(latest.getCheckOutDateTime() == null ? null : latest.getCheckOutDateTime().toLocalDate());
+        dto.setCheckInTime(latest.getCheckInDateTime() == null ? null : latest.getCheckInDateTime().toLocalTime());
+        dto.setCheckOutTime(latest.getCheckOutDateTime() == null ? null : latest.getCheckOutDateTime().toLocalTime());
+        dto.setToday(latest.getCheckInDateTime() != null && latest.getCheckInDateTime().toLocalDate().isEqual(today));
+        return dto;
     }
 
     public List<Integer> getYearRangeByEmployee(String username) throws Exception {
@@ -255,65 +273,87 @@ public class AttendanceService {
         return attendanceRepository.findByUseYnAndUsernameAndYearMonth(username, year, month).stream().map(Attendance::toDTO).toList();
     }
 
-    public ResAttendanceDTO checkIn(String username) throws Exception {
-        // username, 출근일시, 상태, modifiedBy insert
-        Attendance newAttd = new Attendance();
-        newAttd.setUsername(username);
-        newAttd.setCheckInDateTime(LocalDateTime.now());
-        newAttd.setWorkStatus("출근");
-        newAttd.setModifiedBy(username);
+    public ResAttendanceDTO checkIn(String username) {
+        // 열린 근무가 있으면 막기
+        attendanceRepository
+            .findTopByUsernameAndUseYnTrueAndCheckInDateTimeIsNotNullAndCheckOutDateTimeIsNullOrderByCheckInDateTimeDesc(username)
+            .ifPresent(a -> { throw new IllegalStateException("이미 출근 상태입니다. (퇴근 미처리)"); });
 
-        return attendanceRepository.save(newAttd).toDTO();
+        Attendance a = new Attendance();
+        a.setUsername(username);
+        a.setCheckInDateTime(trimToMinutes(LocalDateTime.now()));
+        a.setWorkStatus("출근");
+        a.setModifiedBy(username);
+        a.setCreatedAt(a.getCheckInDateTime());
+        a.setUpdatedAt(a.getCheckInDateTime());
+
+        return attendanceRepository.save(a).toDTO();
     }
 
-    public ResAttendanceDTO checkOut(Long attendanceId, String username) throws Exception {
-        // 퇴근일시, 상태, modifiedBy update
-        Attendance attd = attendanceRepository.findById(attendanceId).get();
-
-        attd.setCheckOutDateTime(LocalDateTime.now());
-        attd.setWorkStatus("퇴근");
-        attd.setModifiedBy(username);
-
-        return attendanceRepository.save(attd).toDTO();
-    }
-
-    public void recordAbsence() throws Exception {
-
-        // 모든 직원의 데이터를 가져옴
-        List<Employee> employees = employeeRepository.findAllByUseYnTrue();
-        log.warn("employees: {}", employees);
-
-        for (Employee e : employees) {
-            // 해당 직원의 가장 최근 출퇴근 데이터 조회
-            Attendance latestAttd = attendanceRepository.findLatestAttendanceByUsername(e.getUsername());
-            log.warn("latestAttd: {}", latestAttd);
-
-            if(latestAttd != null) {
-                // 어제 < 입사일 -> 직원 등록은 되어있지만 아직 출근을 시작하지 않음
-                if(LocalDate.now().minusDays(1).isBefore(e.getHireDate())) continue;
-
-                // workStatus = '출근' -> 일하는 중이므로 그냥 넘어감
-                // checkOutDateTime == 어제 날짜 and workStatus = '퇴근' -> 어제 퇴근했다면 어제 일했으므로 그냥 넘어감
-                if ("출근".equals(latestAttd.getWorkStatus())) continue;
-                else if(latestAttd.getCheckOutDateTime().isBefore(LocalDateTime.now())) continue;
-
-                // 해당 직원의 모든 휴가 데이터 조회
-                // 하나의 휴가데이터에라도 시작일과 종료일 사이(경계 포함)에 오늘이 있다면 그냥 넘어감
-                VacationDetail vacationDetail = vacationDetailRepository.findVacationDetailOnDate(e.getUsername(), LocalDateTime.now().toLocalDate());
-
-                if (vacationDetail != null) continue;
-            }
-
-            // 위에서 continue 되지 않았다면 work_status = "결근" and username = 유저ID 데이터 insert
-            Attendance absenceData = new Attendance();
-            absenceData.setUsername(e.getUsername());
-            absenceData.setWorkStatus("결근");
-
-            attendanceRepository.save(absenceData);
-
+    public ResAttendanceDTO checkOut(Long attendanceId, String username) {
+        // attendanceId로 특정 근무를 종료하거나,
+        // 안전하게 열린 근무를 우선 찾도록 처리(둘 중 하나 선택)
+        Attendance target;
+        if (attendanceId != null) {
+            target = attendanceRepository.findById(attendanceId)
+                     .orElseThrow(() -> new IllegalArgumentException("근무 기록이 없습니다."));
+        } else {
+            target = attendanceRepository
+                     .findTopByUsernameAndUseYnTrueAndCheckInDateTimeIsNotNullAndCheckOutDateTimeIsNullOrderByCheckInDateTimeDesc(username)
+                     .orElseThrow(() -> new IllegalStateException("출근 기록이 없습니다. (열린 근무 없음)"));
         }
 
+        LocalDateTime now = trimToMinutes(LocalDateTime.now());
+        if (target.getCheckInDateTime() != null && now.isBefore(target.getCheckInDateTime())) {
+            throw new IllegalArgumentException("퇴근 시각이 출근 시각보다 이릅니다.");
+        }
+
+        target.setCheckOutDateTime(now);
+        target.setWorkStatus("퇴근");
+        target.setModifiedBy(username);
+        target.setUpdatedAt(now);
+
+        return attendanceRepository.save(target).toDTO();
     }
+
+    public void recordAbsence() {
+        LocalDate target = LocalDate.now().minusDays(1); // 어제
+
+        List<Employee> employees = employeeRepository.findAllByUseYnTrue();
+        for (Employee e : employees) {
+            // 입사 전은 건너뛰기
+            if (e.getHireDate() != null && target.isBefore(e.getHireDate())) continue;
+
+            // 어제 휴가면 건너뛰기
+            VacationDetail vd = vacationDetailRepository.findVacationDetailOnDate(e.getUsername(), target);
+            if (vd != null) continue;
+
+            // 어제 날짜에 출근 기록이 있었는지 검사
+            Attendance latest = attendanceRepository.findLatestAttendanceByUsername(e.getUsername());
+            boolean workedYesterday = false;
+            if (latest != null) {
+                if (latest.getCheckInDateTime() != null
+                        && latest.getCheckInDateTime().toLocalDate().isEqual(target)) {
+                    workedYesterday = true;
+                }
+                // 야간근무가 자정을 넘는다면, checkOutDateTime의 날짜도 고려
+                if (!workedYesterday && latest.getCheckOutDateTime() != null
+                        && latest.getCheckOutDateTime().toLocalDate().isEqual(target)) {
+                    workedYesterday = true;
+                }
+            }
+            if (workedYesterday) continue;
+
+            // 결근 레코드 생성 (workStatus만 기록하는 정책 유지 시)
+            Attendance absence = new Attendance();
+            absence.setUsername(e.getUsername());
+            absence.setWorkStatus("결근");
+            absence.setCreatedAt(trimToMinutes(LocalDateTime.now()));
+            absence.setUpdatedAt(absence.getCreatedAt());
+            attendanceRepository.save(absence);
+        }
+    }
+
 
 }
 
