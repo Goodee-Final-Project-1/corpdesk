@@ -73,10 +73,11 @@ public interface VacationDetailRepository extends JpaRepository<VacationDetail, 
 		vd.vacationTypeId,
 		vd.startDate,
 		vd.endDate,
-		v.username
+		e.name
 	)
 	FROM VacationDetail vd
 	JOIN Vacation v ON vd.vacationId = v.vacationId
+	JOIN Employee e ON v.username = e.username
 	WHERE vd.useYn = true
 	AND (
 		vd.startDate <= :end
