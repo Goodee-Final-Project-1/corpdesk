@@ -52,7 +52,6 @@
 <c:import url="/WEB-INF/views/include/page_wrapper_end.jsp"/>
 
 <script src="/js/calendar/list.js"></script>
-<script src="/js/calendar/add.js"></script>
 
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 </html>

@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -80,6 +81,14 @@ public class EmployeeController {
     
     private final DateTimeFormatter formatterInput = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
     private final DateTimeFormatter formatterOutput = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    @Value("${cat.employee}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
 
     public EmployeeController(EmployeeService employeeService,
             AttendanceService attendanceService,
@@ -481,7 +490,7 @@ public class EmployeeController {
         }
 
         employeeService.updateEmployee(employeeFromForm, profileImageFile);
-        return "redirect:/employee/list";
+        return "redirect:/employee/edit/" + employeeFromForm.getUsername();
     }
 
     // 프로필 이미지 삭제
@@ -688,31 +697,36 @@ public class EmployeeController {
         try {
             Attendance attendance = attendanceService.getAttendanceById(dto.getAttendanceId());
 
-            if (!org.springframework.util.StringUtils.hasText(dto.getWorkStatus())) {
-                attendance.setWorkStatus("-");
-            } else {
-                attendance.setWorkStatus(dto.getWorkStatus());
+            String ws = dto.getWorkStatus();
+            if (!"출근".equals(ws) && !"퇴근".equals(ws)) {
+                throw new IllegalArgumentException("출근/퇴근만 허용됩니다.");
+            }
+            attendance.setWorkStatus(ws);
+
+            DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
+            // 신규 확장 필드 우선
+            if (dto.getCheckInDateTime() != null && !dto.getCheckInDateTime().isBlank()) {
+                attendance.setCheckInDateTime(LocalDateTime.parse(dto.getCheckInDateTime(), f));
+            }
+            if (dto.getCheckOutDateTime() != null && !dto.getCheckOutDateTime().isBlank()) {
+                attendance.setCheckOutDateTime(LocalDateTime.parse(dto.getCheckOutDateTime(), f));
             }
 
-            if (org.springframework.util.StringUtils.hasText(dto.getDateTime())) {
-                LocalDateTime dateTime = LocalDateTime.parse(dto.getDateTime(), formatterInput);
-                if ("출근".equals(attendance.getWorkStatus())) {
-                    attendance.setCheckInDateTime(dateTime);
-                } else if ("퇴근".equals(attendance.getWorkStatus())) {
-                    attendance.setCheckOutDateTime(dateTime);
-                }
+            // 하위호환: dateTime 단일 필드가 있을 경우, 상태 기준으로 매핑
+            if (dto.getDateTime() != null && !dto.getDateTime().isBlank()) {
+                LocalDateTime dt = LocalDateTime.parse(dto.getDateTime(), f);
+                if ("출근".equals(ws)) attendance.setCheckInDateTime(dt);
+                else attendance.setCheckOutDateTime(dt);
             }
 
             attendanceService.saveOrUpdateAttendance(attendance);
-
             result.put("success", true);
         } catch (Exception e) {
             e.printStackTrace();
             result.put("success", false);
             result.put("error", e.getMessage());
         }
-
         return result;
-
     }
 }

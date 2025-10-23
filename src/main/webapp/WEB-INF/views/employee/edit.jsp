@@ -141,11 +141,11 @@
             </div>
             <div class="col-md-4 d-flex align-items-center">
               <p class="col-md-4 text-left">휴대전화</p>
-              <form:input path="mobilePhone" class="form-control"/>
+              <form:input path="mobilePhone" id="mobilePhone" class="form-control"/>
             </div>
             <div class="col-md-4 d-flex align-items-center">
               <p class="col-md-4 text-left">직통번호</p>
-              <form:input path="directPhone" class="form-control"/>
+              <form:input path="directPhone" id="directPhone" class="form-control"/>
             </div>
           </div>
 
@@ -153,7 +153,7 @@
           <div class="d-flex justify-content-between mb-2">
             <div class="col-md-4 d-flex align-items-center">
               <p class="col-md-4 text-left">외부이메일</p>
-              <form:input path="externalEmail" class="form-control"/>
+              <form:input path="externalEmail" id="externalEmail" class="form-control"/>
             </div>
             <div class="col-md-4 d-flex align-items-center">
               <p class="col-md-4 text-left">직위</p>
@@ -252,8 +252,6 @@
         <select id="newWorkStatus" class="form-control mr-4" style="width:150px; display:inline-block;">
           <option value="출근">출근</option>
           <option value="퇴근">퇴근</option>
-          <option value="출근전">출근전</option>
-          <option value="휴가">휴가</option>
         </select>
 
         <label class="mr-2">일시</label>
@@ -271,45 +269,61 @@
         <input type="hidden" name="username" value="${employee.username}"/>
         <table class="table table-hover">
           <thead>
-          <tr>
-            <th><input type="checkbox" id="checkAll"/></th>
-            <th>구분</th>
-            <th>일시</th>
-            <th>수정</th>
-          </tr>
-          </thead>
+			  <tr>
+			    <th><input type="checkbox" id="checkAll"/></th>
+			    <th>구분</th>
+			    <th>출근일시</th>
+			    <th>퇴근일시</th>
+			    <th>생성일시</th>
+			    <th>수정일시</th>
+			    <th>수정</th>
+			  </tr>
+		</thead>
           <tbody>
-          <c:forEach var="att" items="${attendanceList}">
-            <tr data-attendance-id="${att.attendanceId}">
-              <td><input type="checkbox" name="attendanceIds" value="${att.attendanceId}"/></td>
-              <td class="workStatusCell" data-status="${att.workStatus != null ? att.workStatus : '-'}">
-			            <span class="badge badge-primary">
-                      ${att.workStatus != null ? att.workStatus : '-'}
-                  </span>
-              </td>
-              <td class="dateTimeCell"
-                  data-checkin="${att.checkInDateTimeForInput != null ? att.checkInDateTimeForInput : ''}"
-                  data-checkout="${att.checkOutDateTimeForInput != null ? att.checkOutDateTimeForInput : ''}">
-
-                <c:choose>
-                  <c:when test="${att.workStatus == '출근' and att.checkInDateTimeForInput != null}">
-                    ${att.checkInDateTimeForInput.replace("T"," ")}
-                  </c:when>
-                  <c:when test="${att.workStatus == '퇴근' and att.checkOutDateTimeForInput != null}">
-                    ${att.checkOutDateTimeForInput.replace("T"," ")}
-                  </c:when>
-                  <c:otherwise>
-                    -
-                  </c:otherwise>
-                </c:choose>
-              </td>
-
-              <td>
-                <button type="button" class="btn btn-warning updateAttendanceBtn">수정</button>
-              </td>
-            </tr>
-          </c:forEach>
-          </tbody>
+			<c:forEach var="att" items="${attendanceList}">
+			  <tr data-attendance-id="${att.attendanceId}">
+			    <td><input type="checkbox" name="attendanceIds" value="${att.attendanceId}"/></td>
+			
+			    <td class="workStatusCell" data-status="${att.workStatus != null ? att.workStatus : '-'}">
+			      <span class="badge badge-primary">
+			        ${att.workStatus != null ? att.workStatus : '-'}
+			      </span>
+			    </td>
+			
+			    <td class="checkinCell"
+			        data-checkin="${att.checkInDateTimeForInput != null ? att.checkInDateTimeForInput : ''}">
+			      <c:choose>
+			        <c:when test="${att.checkInDateTimeForInput != null}">
+			          ${att.checkInDateTimeForInput.replace("T"," ")}
+			        </c:when>
+			        <c:otherwise>-</c:otherwise>
+			      </c:choose>
+			    </td>
+			
+			    <td class="checkoutCell"
+			        data-checkout="${att.checkOutDateTimeForInput != null ? att.checkOutDateTimeForInput : ''}">
+			      <c:choose>
+			        <c:when test="${att.checkOutDateTimeForInput != null}">
+			          ${att.checkOutDateTimeForInput.replace("T"," ")}
+			        </c:when>
+			        <c:otherwise>-</c:otherwise>
+			      </c:choose>
+			    </td>
+			
+			    <td class="createdAtCell">
+				  ${att.createdAtForView}
+				</td>
+				
+				<td class="updatedAtCell">
+				  ${att.updatedAtForView}
+				</td>
+			
+			    <td>
+			      <button type="button" class="btn btn-warning updateAttendanceBtn">수정</button>
+			    </td>
+			  </tr>
+			</c:forEach>
+			</tbody>
         </table>
       </form>
     </div>
@@ -327,6 +341,7 @@
 <c:import url="/WEB-INF/views/include/body_wrapper_end.jsp"/>
 
 <script>
+
   document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- 탭 처리 ----------------
@@ -625,88 +640,114 @@
 
   //---------------- 출퇴근 수정 이벤트 함수 ----------------
   function attachUpdateEvent(button) {
-    button.addEventListener("click", function () {
-      const row = this.closest("tr");
-      const workStatusCell = row.querySelector(".workStatusCell");
-      const dateTimeCell = row.querySelector(".dateTimeCell");
-      const username = document.getElementById("username").value;
+  button.addEventListener("click", function () {
+    const row = this.closest("tr");
+    const workStatusCell = row.querySelector(".workStatusCell");
+    const checkinCell = row.querySelector(".checkinCell");
+    const checkoutCell = row.querySelector(".checkoutCell");
+    const username = document.getElementById("username").value;
 
-      if (this.textContent.trim() == "수정") {
-        let currentStatus = workStatusCell.dataset.status?.trim() || workStatusCell.innerText.trim() || "";
+    if (this.textContent.trim() == "수정") {
+      const currentStatus = (workStatusCell.dataset.status || "").trim();
 
-        let dateTimeValue = "";
-        if (currentStatus == "출근") dateTimeValue = dateTimeCell.dataset.checkin || '';
-        else if (currentStatus == "퇴근") dateTimeValue = dateTimeCell.dataset.checkout || '';
+      // 현재 값들
+      let checkinVal  = checkinCell.dataset.checkin  || '';
+      let checkoutVal = checkoutCell.dataset.checkout || '';
 
-        if (dateTimeValue) dateTimeValue = dateTimeValue.replace(" ", "T").slice(0, 16);
+      if (checkinVal)  checkinVal  = checkinVal.replace(" ", "T").slice(0, 16);
+      if (checkoutVal) checkoutVal = checkoutVal.replace(" ", "T").slice(0, 16);
 
-        // select 생성
-        workStatusCell.innerHTML = `
-                <select class="form-control workStatusInput">
-                    <option value="출근" ${currentStatus == "출근" ? "selected" : ""}>출근</option>
-                    <option value="퇴근" ${currentStatus == "퇴근" ? "selected" : ""}>퇴근</option>
-                    <option value="출근전" ${currentStatus == "출근전" ? "selected" : ""}>출근전</option>
-                    <option value="휴가" ${currentStatus == "휴가" ? "selected" : ""}>휴가</option>
-                </select>`;
+      // 상태 select + 입력 필드 구성
+      workStatusCell.innerHTML = `
+        <select class="form-control workStatusInput">
+          <option value="출근" ${currentStatus == "출근" ? "selected" : ""}>출근</option>
+          <option value="퇴근" ${currentStatus == "퇴근" ? "selected" : ""}>퇴근</option>
+        </select>`;
 
-        dateTimeCell.innerHTML = `<input type="datetime-local" class="form-control dateTimeInput" value="${dateTimeValue}"/>`;
+      // 출근/퇴근 각각의 입력 칸
+      checkinCell.innerHTML  = `<input type="datetime-local" class="form-control checkinInput" value="${checkinVal}">`;
+      checkoutCell.innerHTML = `<input type="datetime-local" class="form-control checkoutInput" value="${checkoutVal}" ${currentStatus=='퇴근'?'':'disabled'}>`;
 
-        this.textContent = "완료";
-        this.classList.remove("btn-warning");
-        this.classList.add("btn-success");
+      // 상태 변경 시, 퇴근이면 checkout 활성화 / 출근이면 checkout 비활성화
+      workStatusCell.querySelector('.workStatusInput').addEventListener('change', (e) => {
+        const v = e.target.value;
+        const co = row.querySelector('.checkoutInput');
+        if (v == '퇴근') co.removeAttribute('disabled');
+        else { co.value = ''; co.setAttribute('disabled', 'disabled'); }
+      });
 
-      } else {
-        const selectEl = row.querySelector(".workStatusInput");
-        const newStatus = selectEl ? selectEl.value.trim() : "";
-        const newDateTime = row.querySelector(".dateTimeInput")?.value || '';
-        const attendanceId = row.dataset.attendanceId;
+      this.textContent = "완료";
+      this.classList.remove("btn-warning");
+      this.classList.add("btn-success");
 
-        fetch(`/employee/${username}/attendance/edit`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            attendanceId: attendanceId,
-            workStatus: newStatus,
-            dateTime: newDateTime
-          })
-        })
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) {
-                // 완료 후 span 표시
-                workStatusCell.innerHTML = '';
-                const span = document.createElement('span');
-                span.className = 'badge badge-primary';
-                span.textContent = newStatus;
-                workStatusCell.appendChild(span);
-                workStatusCell.dataset.status = newStatus;
+    } else {
+      // 완료 클릭 → 현재 선택 상태에 따라 '하나의 일시'만 서버로 보냄 (기존 API)
+      const newStatus = row.querySelector(".workStatusInput").value.trim();
+      const newCheckIn  = row.querySelector(".checkinInput").value || '';
+      const newCheckOut = row.querySelector(".checkoutInput")?.value || '';
+      const attendanceId = row.dataset.attendanceId;
 
-                dateTimeCell.textContent = newDateTime.replace("T", " ");
-                if (newStatus == "출근") dateTimeCell.dataset.checkin = newDateTime;
-                else if (newStatus == "퇴근") dateTimeCell.dataset.checkout = newDateTime;
+      // 서버 계약: dateTime 하나만 보냄
+      let dateTimeToSend = '';
+      if (newStatus == '출근') dateTimeToSend = newCheckIn;
+      else if (newStatus == '퇴근') dateTimeToSend = newCheckOut;
 
-                this.textContent = "수정";
-                this.classList.remove("btn-success");
-                this.classList.add("btn-warning");
-              } else {
-                Swal.fire({
-                  text: "수정에 실패했습니다.",
-                  icon: "error"
-                });
-              }
-            })
-            .catch(err => {
-              console.error(err);
-
-              Swal.fire({
-                text: "수정 중 오류가 발생했습니다.",
-                icon: "error"
-              });
-
-            });
+      if (!dateTimeToSend) {
+        Swal.fire({ text: "일시를 입력해주세요.", icon: "warning" });
+        return;
       }
-    });
-  }
+
+      fetch(`/employee/${username}/attendance/edit`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          attendanceId: attendanceId,
+          workStatus: newStatus,
+          dateTime: dateTimeToSend
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // 화면 반영
+          workStatusCell.innerHTML = '';
+          const span = document.createElement('span');
+          span.className = 'badge badge-primary';
+          span.textContent = newStatus;
+          workStatusCell.appendChild(span);
+          workStatusCell.dataset.status = newStatus;
+
+          // 셀 텍스트 갱신
+          const fmt = (s) => s ? s.replace("T"," ") : '-';
+          const inTxt  = newStatus == '출근' ? fmt(newCheckIn)  : fmt(checkinCell.dataset.checkin);
+          const outTxt = newStatus == '퇴근' ? fmt(newCheckOut) : fmt(checkoutCell.dataset.checkout);
+
+          checkinCell.textContent  = inTxt;
+          checkoutCell.textContent = outTxt;
+
+          // data-*도 갱신
+          if (newStatus == '출근') {
+            checkinCell.dataset.checkin = newCheckIn;
+          } else if (newStatus == '퇴근') {
+            checkoutCell.dataset.checkout = newCheckOut;
+          }
+
+          // 버튼 복구
+          this.textContent = "수정";
+          this.classList.remove("btn-success");
+          this.classList.add("btn-warning");
+        } else {
+          Swal.fire({ text: "수정에 실패했습니다.", icon: "error" });
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        Swal.fire({ text: "수정 중 오류가 발생했습니다.", icon: "error" });
+      });
+    }
+  });
+}
+
 
   document.addEventListener("DOMContentLoaded", () => {
 	  const englishInput = document.querySelector("input[name='englishName']");
@@ -724,6 +765,128 @@
   // 기존 버튼에도 적용
   document.querySelectorAll(".updateAttendanceBtn").forEach(btn => attachUpdateEvent(btn));
 
+  
+//010-1234-5678 자동 포맷
+  function fmtMobile(v){
+    const d=(v||'').replace(/\D/g,'');
+    if(d.length<=3) return d;
+    if(d.length<=7) return d.replace(/(\d{3})(\d{1,4})/,'$1-$2');
+    return d.replace(/(\d{3})(\d{3,4})(\d{1,4}).*/,'$1-$2-$3');
+  }
+
+  const mobileEl=document.getElementById('mobilePhone');
+  if(mobileEl){
+	  mobileEl.addEventListener('input',e=>{
+		      const oldLen=e.target.value.length;
+		      const oldPos=e.target.selectionStart;
+		       e.target.value=fmtMobile(e.target.value);
+		      const newLen=e.target.value.length;
+		      const newPos=oldPos+(newLen-oldLen);
+		      try{ e.target.setSelectionRange(newPos,newPos); }catch(_){}
+		     });
+  }
+
+  // ===== 이메일/전화 유틸 =====
+  // 비어있으면 true, 값이 있으면 형식 검증
+  function isValidEmailOrBlank(v){
+    if(!v) return true;
+    // 과하지 않은 현실적인 이메일 패턴 (로컬@도메인.최상위)
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(v.trim());
+  }
+
+  // 직통번호 자동 포맷: 02, 0XX, 0XXX 지역번호 지원
+  function fmtDirect(v){
+    const d=(v||'').replace(/\D/g,'');
+    if(d.startsWith('02')){
+      if(d.length<=2) return d;
+      if(d.length<=5) return d.replace(/(02)(\d{0,3})/,'$1-$2');
+      if(d.length<=9) return d.replace(/(02)(\d{3,4})(\d{0,4}).*/,'$1-$2-$3');
+      return d.slice(0,10).replace(/(02)(\d{3,4})(\d{0,4}).*/,'$1-$2-$3');
+    }else{
+      if(d.length<=3) return d;
+      if(d.length<=7) return d.replace(/(0\d{2})(\d{0,4})/,'$1-$2');
+      return d.replace(/(0\d{2,3})(\d{3,4})(\d{0,4}).*/,'$1-$2-$3');
+    }
+  }
+
+  function isValidDirectOrBlank(v){
+    if(!v) return true;
+    const d=v.replace(/\D/g,'');
+    // 02-xxx-xxxx (9~10자리) 또는 0xx/0xxx-xxx-xxxx (10~11자리) 허용
+    const isSeoul = d.startsWith('02') && (d.length===9 || d.length===10);
+    const isArea  = /^0\d{1,2}/.test(d) && (d.length===10 || d.length===11);
+    return isSeoul || isArea;
+  }
+
+  // ===== 필드 핸들 ====
+  const emailEl = document.getElementById('externalEmail');
+  const directEl = document.getElementById('directPhone');
+
+  // 이메일: 실시간 기본 검증 (붉은 테두리 토글)
+  if(emailEl){
+    emailEl.addEventListener('input', e=>{
+      const ok = isValidEmailOrBlank(e.target.value);
+      e.target.classList.toggle('is-invalid', !ok);
+    });
+  }
+
+  // 직통번호: 자동 포맷 + 기본 검증
+  if(directEl){
+    directEl.addEventListener('input', e=>{
+      const formatted = fmtDirect(e.target.value);
+      const pos = e.target.selectionStart;
+      e.target.value = formatted;
+      try{ e.target.setSelectionRange(e.target.value.length,e.target.value.length); }catch(_){}
+      const ok = isValidDirectOrBlank(e.target.value);
+      e.target.classList.toggle('is-invalid', !ok);
+    });
+  }
+
+  // ===== 제출 전 최종 검증 (기존 휴대전화 검증에 이어서 이메일/직통 추가) =====
+  (function(){
+    const form = document.querySelector('form[action="/employee/edit"]');
+    const mobileEl = document.getElementById('mobilePhone');
+    if(!form) return;
+
+    form.addEventListener('submit', e=>{
+      let invalidMsg = [];
+
+      // 1) 휴대전화 (기존 로직)
+      if(mobileEl){
+        const raw=mobileEl.value.replace(/\D/g,'');
+        const ok=/^(01[0-9])\d{7,8}$/.test(raw);
+        mobileEl.classList.toggle('is-invalid', !ok);
+        if(!ok) invalidMsg.push('휴대전화 형식이 올바르지 않습니다. 예: 01012345678');
+      }
+
+      // 2) 외부이메일
+      if(emailEl){
+        const ok = isValidEmailOrBlank(emailEl.value);
+        emailEl.classList.toggle('is-invalid', !ok);
+        if(!ok) invalidMsg.push('외부이메일 형식이 올바르지 않습니다. 예: user@example.com');
+      }
+
+      // 3) 직통번호
+      if(directEl){
+        const ok = isValidDirectOrBlank(directEl.value);
+        directEl.classList.toggle('is-invalid', !ok);
+        if(!ok) invalidMsg.push('직통번호 형식이 올바르지 않습니다. 예: 02-123-4567, 031-123-4567');
+      }
+
+      if(invalidMsg.length>0){
+        e.preventDefault();
+        // SweetAlert2 사용 중이므로 같은 톤으로 안내
+        Swal.fire({
+          html: invalidMsg.join('<br>'),
+          icon: 'warning'
+        });
+      }
+    });
+  })();
+  
+ 
+  
 </script>
 
 </html>

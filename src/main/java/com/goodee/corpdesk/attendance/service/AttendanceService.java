@@ -1,39 +1,37 @@
 package com.goodee.corpdesk.attendance.service;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.goodee.corpdesk.approval.dto.ReqApprovalDTO;
-import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
-import com.goodee.corpdesk.attendance.entity.Attendance;
-import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
-import com.goodee.corpdesk.vacation.entity.VacationDetail;
-import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
 import org.springframework.beans.factory.annotation.Value;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
+import com.goodee.corpdesk.attendance.DTO.ResAttendanceDTO;
+import com.goodee.corpdesk.attendance.entity.Attendance;
+import com.goodee.corpdesk.attendance.repository.AttendanceRepository;
+import com.goodee.corpdesk.employee.Employee;
+import com.goodee.corpdesk.employee.EmployeeRepository;
+import com.goodee.corpdesk.vacation.entity.VacationDetail;
+import com.goodee.corpdesk.vacation.repository.VacationDetailRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final VacationDetailRepository vacationDetailRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Value("${attendance.work-hour.start}")
     private String workStartHour;
@@ -51,22 +49,40 @@ public class AttendanceService {
      * @return 생성 혹은 수정된 Attendance entity
      */
     public Attendance saveOrUpdateAttendance(Attendance attendance) {
-        // 로그인 사용자 가져오기
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = auth.getName();
-
-        // modifiedBy 세팅
         attendance.setModifiedBy(currentUser);
 
-        // createdAt 세팅 (insert인 경우만)
-        if (attendance.getAttendanceId() == null) {
-            attendance.setCreatedAt(LocalDateTime.now());
+        // ✅ 2-1) 퇴근 신규행일 때 마지막 출근시간 주입
+        if (attendance.getAttendanceId() == null
+                && "퇴근".equals(attendance.getWorkStatus())
+                && attendance.getCheckInDateTime() == null) {
+
+            LocalDateTime lastCheckIn = attendanceRepository
+                    .findFirstByUsernameAndCheckInDateTimeIsNotNullOrderByCheckInDateTimeDesc(attendance.getUsername())
+                    .map(Attendance::getCheckInDateTime)
+                    .orElseThrow(() -> new IllegalStateException("마지막 출근 기록이 없습니다."));
+
+            attendance.setCheckInDateTime(lastCheckIn);
         }
 
-        // updatedAt 항상 세팅
-        attendance.setUpdatedAt(LocalDateTime.now());
+        // ✅ 2-2) 초 버림(분까지만 보존) — 원하면 여기에
+        attendance.setCheckInDateTime(trimToMinutes(attendance.getCheckInDateTime()));
+        attendance.setCheckOutDateTime(trimToMinutes(attendance.getCheckOutDateTime()));
+
+        // createdAt (insert일 때만)
+        if (attendance.getAttendanceId() == null) {
+            attendance.setCreatedAt(trimToMinutes(LocalDateTime.now()));
+        }
+        // updatedAt (항상)
+        attendance.setUpdatedAt(trimToMinutes(LocalDateTime.now()));
 
         return attendanceRepository.save(attendance);
+    }
+
+    // 헬퍼
+    private static LocalDateTime trimToMinutes(LocalDateTime dt) {
+        return dt == null ? null : dt.withSecond(0).withNano(0);
     }
 
     /**
@@ -259,6 +275,44 @@ public class AttendanceService {
         attd.setModifiedBy(username);
 
         return attendanceRepository.save(attd).toDTO();
+    }
+
+    public void recordAbsence() throws Exception {
+
+        // 모든 직원의 데이터를 가져옴
+        List<Employee> employees = employeeRepository.findAllByUseYnTrue();
+        log.warn("employees: {}", employees);
+
+        for (Employee e : employees) {
+            // 해당 직원의 가장 최근 출퇴근 데이터 조회
+            Attendance latestAttd = attendanceRepository.findLatestAttendanceByUsername(e.getUsername());
+            log.warn("latestAttd: {}", latestAttd);
+
+            if(latestAttd != null) {
+                // 어제 < 입사일 -> 직원 등록은 되어있지만 아직 출근을 시작하지 않음
+                if(LocalDate.now().minusDays(1).isBefore(e.getHireDate())) continue;
+
+                // workStatus = '출근' -> 일하는 중이므로 그냥 넘어감
+                // checkOutDateTime == 어제 날짜 and workStatus = '퇴근' -> 어제 퇴근했다면 어제 일했으므로 그냥 넘어감
+                if ("출근".equals(latestAttd.getWorkStatus())) continue;
+                else if(latestAttd.getCheckOutDateTime().isBefore(LocalDateTime.now())) continue;
+
+                // 해당 직원의 모든 휴가 데이터 조회
+                // 하나의 휴가데이터에라도 시작일과 종료일 사이(경계 포함)에 오늘이 있다면 그냥 넘어감
+                VacationDetail vacationDetail = vacationDetailRepository.findVacationDetailOnDate(e.getUsername(), LocalDateTime.now().toLocalDate());
+
+                if (vacationDetail != null) continue;
+            }
+
+            // 위에서 continue 되지 않았다면 work_status = "결근" and username = 유저ID 데이터 insert
+            Attendance absenceData = new Attendance();
+            absenceData.setUsername(e.getUsername());
+            absenceData.setWorkStatus("결근");
+
+            attendanceRepository.save(absenceData);
+
+        }
+
     }
 
 }

@@ -6,6 +6,7 @@ import com.goodee.corpdesk.vacation.dto.ResVacationDTO;
 import com.goodee.corpdesk.vacation.service.VacationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +27,14 @@ public class VacationController {
 
     @Autowired
     private VacationService vacationService;
+
+    @Value("${cat.vacation}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
 
     @GetMapping("list")
     public String list(ReqVacationDTO reqVacationDTO,

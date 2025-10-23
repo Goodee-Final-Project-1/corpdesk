@@ -7,14 +7,12 @@ import java.util.Map;
 import com.goodee.corpdesk.employee.EmployeeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.goodee.corpdesk.chat.dto.ChatSessionTracker;
 import com.goodee.corpdesk.chat.dto.FocusMessage;
 import com.goodee.corpdesk.chat.entity.ChatMessage;
@@ -34,7 +32,14 @@ public class ChatMessageController {
 	private ChatMessageService chatMessageService;
 	@Autowired
 	private ChatSessionTracker chatSessionTracker;
-	
+
+    @Value("${cat.chat}")
+    private String cat;
+
+    @ModelAttribute("cat")
+    public String getCat() {
+        return cat;
+    }
 
   
   
